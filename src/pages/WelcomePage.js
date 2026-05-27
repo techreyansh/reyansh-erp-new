@@ -33,6 +33,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionContext";
 import ScrollReveal from "../components/common/ScrollReveal";
+import LoadingScreen from "../components/common/LoadingScreen";
+import AccessDenied from "../components/auth/AccessDenied";
 
 const MotionBox = motion(Box);
 
@@ -54,14 +56,13 @@ function getGreeting(date) {
   return "Good Evening";
 }
 
-function getRoleBucket(role, roleCode) {
-  const normalized = `${role || ""} ${roleCode || ""}`.toUpperCase();
-  if (normalized.includes("CEO") || normalized.includes("SUPER_ADMIN")) return "ceo";
+function getAccessBucket(permissions) {
+  if (permissions.hasFullAccess) return "full";
   if (
-    normalized.includes("MANAGER") ||
-    normalized.includes("HOD") ||
-    normalized.includes("DIRECTOR") ||
-    normalized.includes("COORDINATOR")
+    permissions.canCreate("tasks") ||
+    permissions.canEdit("tasks") ||
+    permissions.canCreate("employees") ||
+    permissions.canEdit("employees")
   ) {
     return "manager";
   }
@@ -102,6 +103,48 @@ const allActions = [
     audience: ["ceo", "manager"],
   },
   {
+    key: "employees",
+    title: "Employee Management",
+    description: "View workforce records, profiles, and department details.",
+    path: "/employee-dashboard",
+    icon: HomeRepairServiceOutlined,
+    audience: ["ceo", "manager"],
+  },
+  {
+    key: "employees",
+    title: "Access Management",
+    description: "Assign email access, roles, and module permissions.",
+    path: "/access-management",
+    icon: NotificationsActiveOutlined,
+    audience: ["ceo", "manager"],
+  },
+  {
+    key: "tasks",
+    title: "Task Scheduler",
+    description: "Assign tasks by department and employee with deadlines.",
+    path: "/task-scheduler",
+    icon: AssignmentTurnedInOutlined,
+    requireCreate: true,
+    audience: ["ceo", "manager"],
+  },
+  {
+    key: "tasks",
+    title: "Team Tasks",
+    description: "View, filter, edit, and reassign all team tasks.",
+    path: "/team-tasks",
+    icon: AssignmentTurnedInOutlined,
+    requireEdit: true,
+    audience: ["ceo", "manager"],
+  },
+  {
+    key: "tasks",
+    title: "My Tasks",
+    description: "Your assigned tasks — update status when complete.",
+    path: "/my-tasks",
+    icon: ChecklistOutlined,
+    audience: ["ceo", "manager", "employee"],
+  },
+  {
     key: "tasks",
     title: "Task Checklist",
     description: "Today’s assigned tasks, proof submission and status.",
@@ -119,8 +162,8 @@ const allActions = [
   },
 ];
 
-function kpisForRole(bucket) {
-  if (bucket === "ceo") {
+function kpisForAccess(bucket) {
+  if (bucket === "full") {
     return [
       { label: "Tasks pending", value: "18", hint: "Across teams", icon: AssignmentTurnedInOutlined },
       { label: "Production status", value: "82%", hint: "Plans on track", icon: FactoryOutlined },
@@ -162,23 +205,33 @@ function WelcomePage() {
     };
   }, []);
 
-  const roleBucket = getRoleBucket(role || user?.role, user?.roleCode);
+  const accessBucket = getAccessBucket(permissions);
   const displayName = getDisplayName(user);
   const roleLabel = permissions.role?.role_name || role || user?.roleCode || "Employee";
-  const actions = allActions.filter(
-    (action) => permissions.isCEO || permissions.canView(action.key)
-  );
-  const kpis = useMemo(() => kpisForRole(roleBucket), [roleBucket]);
+  const actions = allActions.filter((action) => {
+    if (action.requireCreate) return permissions.canCreate?.(action.key);
+    if (action.requireEdit) return permissions.canEdit?.(action.key);
+    return permissions.canView?.(action.key);
+  });
+  const kpis = useMemo(() => kpisForAccess(accessBucket), [accessBucket]);
+
+  if (permissions.loading) {
+    return <LoadingScreen message="Loading dashboard…" />;
+  }
+
+  if (!permissions.authorized || !permissions.employee) {
+    return <AccessDenied />;
+  }
 
   const activities =
-    roleBucket === "employee"
+    accessBucket === "employee"
       ? ["Proof pending for one task", "Checklist generated for today", "Last submission is awaiting review"]
       : ["Production plan updated", "Task approval queue refreshed", "CRM follow-up due today"];
 
   const alerts =
-    roleBucket === "ceo"
+    accessBucket === "full"
       ? ["4 operational alerts require review", "2 approvals are pending from teams"]
-      : roleBucket === "manager"
+      : accessBucket === "manager"
         ? ["5 approvals pending for your department", "1 overdue follow-up needs attention"]
         : ["3 tasks pending today", "Submit proof before the due time"];
 
@@ -370,7 +423,7 @@ function WelcomePage() {
                 </Typography>
                 <Stack spacing={1}>
                   {alerts.map((alert) => (
-                    <Alert key={alert} severity={roleBucket === "employee" ? "info" : "warning"} variant="outlined">
+                    <Alert key={alert} severity={accessBucket === "employee" ? "info" : "warning"} variant="outlined">
                       {alert}
                     </Alert>
                   ))}

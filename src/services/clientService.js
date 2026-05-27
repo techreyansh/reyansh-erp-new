@@ -1,6 +1,5 @@
 import * as db from '../lib/db';
 import config from '../config/config';
-import { supabase } from '../lib/supabaseClient';
 import { parseJsonArray } from '../utils/parseJsonField';
 import { sheetInt, sheetFloat } from '../utils/sheetNumbers';
 
@@ -63,6 +62,16 @@ function parseClientRow(row, header) {
   obj.clientCode = obj.ClientCode;
   obj.address = obj.Address;
   return obj;
+}
+
+function getClientKey(client) {
+  return {
+    keyColumn: client?.id ? 'id' : 'ClientCode',
+    keyValue:
+      client?.id ||
+      client?.ClientCode ||
+      client?.clientCode,
+  };
 }
 
 export async function checkClientCodeExists(clientCode) {
@@ -199,7 +208,8 @@ export async function updateClient(client, originalClientCode = null) {
       }
     }
     
-    if (!client.id) throw new Error('Client not found');
+    const { keyColumn, keyValue } = getClientKey(client);
+    if (!keyValue) throw new Error('Client not found');
     
     const row = {
       // Basic Information
@@ -242,8 +252,8 @@ export async function updateClient(client, originalClientCode = null) {
       TotalValue: sheetFloat(client.totalValue, 0)
     };
     
-    console.log("[updateClient] Updating client", { id: client.id, rowKeys: Object.keys(row) });
-    await db.updateTableRowById(CLIENTS_TABLE, client.id, row);
+    console.log("[updateClient] Updating client", { keyColumn, keyValue, rowKeys: Object.keys(row) });
+    await db.updateTableRowByKey(CLIENTS_TABLE, keyColumn, keyValue, row);
     console.log("[updateClient] ✅ SUCCESS: Client updated", { clientCode: client.clientCode });
   } catch (error) {
     console.error("[updateClient] ❌ ERROR:", error.message, error);
@@ -251,22 +261,34 @@ export async function updateClient(client, originalClientCode = null) {
   }
 }
 
-export async function deleteClient(clientId) {
-  console.log("[deleteClient] Starting delete operation", { clientId });
+export async function deleteClient(clientOrId) {
+  console.log("[deleteClient] Starting delete operation", { clientOrId });
   
   try {
     const clients = await db.getTableRows(CLIENTS_TABLE);
-    console.log('Delete requested id:', clientId);
+    const requestedId =
+      typeof clientOrId === 'object' && clientOrId !== null
+        ? clientOrId.id
+        : clientOrId;
+    console.log('Delete client:', clientOrId);
+    console.log('Delete id:', requestedId);
     console.log('Actual row ids:', clients.map(c => c.id));
-    
-    const { error } = await supabase
-      .from('clients2')
-      .delete()
-      .eq('id', clientId);
+    console.log('Actual row structure:', clients[0]);
 
-    if (error) throw error;
+    const target = clients.find((client) =>
+      client.id === requestedId ||
+      client.ClientCode === requestedId ||
+      client.clientCode === requestedId ||
+      (typeof clientOrId === 'object' &&
+        clientOrId !== null &&
+        client.ClientCode === (clientOrId.ClientCode || clientOrId.clientCode))
+    );
 
-    console.log("[deleteClient] ✅ SUCCESS: Client deleted", { clientId });
+    const { keyColumn, keyValue } = getClientKey(target || clientOrId || {});
+    if (!keyValue) throw new Error('Client not found');
+
+    await db.deleteTableRowByKey(CLIENTS_TABLE, keyColumn, keyValue);
+    console.log("[deleteClient] ✅ SUCCESS: Client deleted", { keyColumn, keyValue });
   } catch (error) {
     console.error("[deleteClient] ❌ ERROR:", error.message, error);
     throw error;

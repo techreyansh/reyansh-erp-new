@@ -518,10 +518,12 @@ const ClientManager = () => {
       setLoading(false);
     }
   };
-  const handleDelete = async (clientId) => {
+  const handleDelete = async (client) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        await deleteClient(clientId);
+        console.log('Delete client:', client);
+        console.log('Delete id:', client?.id);
+        await deleteClient(client);
         // Refresh data to get updated list
         const data = await getAllClients();
         setClients(data);
@@ -1355,7 +1357,7 @@ const ClientManager = () => {
                               </Tooltip>
                               <Tooltip title="Delete Client">
                         <IconButton 
-                          onClick={() => handleDelete(client.id)}
+                          onClick={() => handleDelete(client)}
                           sx={{ 
                                     color: '#dc3545',
                                     '&:hover': { 
@@ -1560,7 +1562,7 @@ const ClientManager = () => {
                                 <Button
                                   size="small"
                                   startIcon={<Delete />}
-                                  onClick={() => handleDelete(client.id)}
+                                  onClick={() => handleDelete(client)}
                                   sx={{
                                     background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                     color: 'white',

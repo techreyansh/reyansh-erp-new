@@ -42,6 +42,24 @@ const EmployeeDetailView = ({ open, onClose, employee, onEdit }) => {
 
   if (!employee) return null;
 
+  const normalizedEmployee = {
+    ...employee,
+    EmployeeCode: employee.EmployeeCode || employee.id || employee.employee_id || '',
+    EmployeeName: employee.EmployeeName || employee.full_name || employee.name || 'Unknown Employee',
+    Email: employee.Email || employee.email || '',
+    Phone: employee.Phone || employee.phone || '',
+    Department: employee.Department || employee.department || '',
+    Designation:
+      employee.Designation ||
+      employee.designation ||
+      employee.role_name ||
+      employee.roles?.role_name ||
+      employee.roles?.name ||
+      '',
+    Status: employee.Status || (employee.is_active === false ? 'Inactive' : 'Active'),
+    EmployeeType: employee.EmployeeType || employee.employee_type || 'Full-time',
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'Not provided';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -65,21 +83,21 @@ const EmployeeDetailView = ({ open, onClose, employee, onEdit }) => {
   };
 
   const personalInfo = [
-    { label: 'Employee Code', value: employee.EmployeeCode, icon: <BadgeIcon /> },
-    { label: 'Full Name', value: employee.EmployeeName, icon: <PersonIcon /> },
-    { label: 'Email', value: employee.Email, icon: <EmailIcon /> },
-    { label: 'Phone', value: employee.Phone, icon: <PhoneIcon /> },
-    { label: 'Date of Birth', value: formatDate(employee.DateOfBirth), icon: <CalendarIcon /> },
-    { label: 'Address', value: employee.Address, icon: <LocationIcon /> }
+    { label: 'Employee Code', value: normalizedEmployee.EmployeeCode, icon: <BadgeIcon /> },
+    { label: 'Full Name', value: normalizedEmployee.EmployeeName, icon: <PersonIcon /> },
+    { label: 'Email', value: normalizedEmployee.Email, icon: <EmailIcon /> },
+    { label: 'Phone', value: normalizedEmployee.Phone, icon: <PhoneIcon /> },
+    { label: 'Date of Birth', value: formatDate(employee.DateOfBirth || employee.date_of_birth), icon: <CalendarIcon /> },
+    { label: 'Address', value: employee.Address || employee.address, icon: <LocationIcon /> }
   ];
 
   const employmentInfo = [
-    { label: 'Department', value: employee.Department, icon: <WorkIcon /> },
-    { label: 'Designation', value: employee.Designation, icon: <WorkIcon /> },
-    { label: 'Employee Type', value: employee.EmployeeType, icon: <BadgeIcon /> },
-    { label: 'Joining Date', value: formatDate(employee.JoiningDate), icon: <CalendarIcon /> },
-    { label: 'Reporting Manager', value: employee.ReportingManager, icon: <PersonIcon /> },
-    { label: 'Salary Grade', value: employee.SalaryGrade, icon: <WorkIcon /> }
+    { label: 'Department', value: normalizedEmployee.Department, icon: <WorkIcon /> },
+    { label: 'Designation', value: normalizedEmployee.Designation, icon: <WorkIcon /> },
+    { label: 'Employee Type', value: normalizedEmployee.EmployeeType, icon: <BadgeIcon /> },
+    { label: 'Joining Date', value: formatDate(employee.JoiningDate || employee.joining_date), icon: <CalendarIcon /> },
+    { label: 'Reporting Manager', value: employee.ReportingManager || employee.reporting_manager, icon: <PersonIcon /> },
+    { label: 'Salary Grade', value: employee.SalaryGrade || employee.salary_grade, icon: <WorkIcon /> }
   ];
 
   const educationInfo = [
@@ -118,23 +136,23 @@ const EmployeeDetailView = ({ open, onClose, employee, onEdit }) => {
                 fontWeight: 600
               }}
             >
-              {employee.EmployeeName?.charAt(0) || 'E'}
+              {normalizedEmployee.EmployeeName?.charAt(0) || 'E'}
             </Avatar>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                {employee.EmployeeName || 'Unknown Employee'}
+                {normalizedEmployee.EmployeeName || 'Unknown Employee'}
               </Typography>
               <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                {employee.Designation}
+                {normalizedEmployee.Designation || 'No Designation'}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Chip
-                  label={employee.Status || 'Active'}
-                  color={getStatusColor(employee.Status)}
+                  label={normalizedEmployee.Status || 'Active'}
+                  color={getStatusColor(normalizedEmployee.Status)}
                   size="small"
                 />
                 <Chip
-                  label={employee.EmployeeType || 'Full-time'}
+                  label={normalizedEmployee.EmployeeType || 'Full-time'}
                   variant="outlined"
                   size="small"
                 />

@@ -69,7 +69,9 @@ import {
   AdminPanelSettings as AdminPanelIcon
 } from '@mui/icons-material';
 import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingScreen from '../common/LoadingScreen';
 import ErrorMessage from '../common/ErrorMessage';
+import AccessDenied from '../auth/AccessDenied';
 import employeeService from '../../services/employeeService';
 import EmployeeCard from './EmployeeCard';
 import EmployeeForm from './EmployeeForm';
@@ -81,7 +83,7 @@ import PerformanceTab from './PerformanceTab';
 import EnhancedAttendanceTab from './EnhancedAttendanceTab';
 import NotificationsTab from './NotificationsTab';
 import { useAuth } from '../../context/AuthContext';
-import { checkIsSuperAdmin } from '../../services/adminAccessService';
+import { usePermissions } from '../../context/PermissionContext';
 import AdminAccessControlSection from './AdminAccessControlSection';
 
 // Animation components (using regular MUI components for now)
@@ -111,28 +113,20 @@ function TabPanel({ children, value, index, ...other }) {
 
 const AdvancedEmployeeDashboard = () => {
   const theme = useTheme();
-  const { user } = useAuth();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const ok = await checkIsSuperAdmin();
-        if (!cancelled) setIsSuperAdmin(!!ok);
-      } catch {
-        if (!cancelled) setIsSuperAdmin(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id]);
-
-  const isCEO =
-    (user?.role || '').toUpperCase() === 'CEO' ||
-    (user?.role || '').toUpperCase() === 'DIRECTOR' ||
-    isSuperAdmin;
+  const { user, authLoading } = useAuth();
+  const {
+    canCreate,
+    canEdit,
+    canDelete,
+    loading: permissionsLoading,
+    employee: rbacEmployee,
+    authorized,
+    modules = [],
+    role,
+  } = usePermissions();
+  const canManageEmployeeRecords = canCreate('employees') || canEdit('employees') || canDelete('employees');
+  const canManageAccess = canEdit('employees');
+  const visibleModules = (modules || []).filter((module) => module?.can_view);
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -179,7 +173,7 @@ const AdvancedEmployeeDashboard = () => {
       const employeesData = await employeeService.getAllEmployees(forceRefresh);
       setEmployees(employeesData);
       
-      if (!isCEO) {
+      if (!canManageEmployeeRecords) {
         // Restrict non-CEO users to their own profile
         // Try multiple matching strategies to support both mock and real logins
         const currentEmail = (user?.email || '').toLowerCase().trim();
@@ -268,7 +262,7 @@ const AdvancedEmployeeDashboard = () => {
 
   const filterAndSearchEmployees = () => {
     // For non-CEO users, only show their own profile - don't apply other filters
-    if (!isCEO) {
+    if (!canManageEmployeeRecords) {
       const currentEmail = (user?.email || '').toLowerCase().trim();
       const currentRole = (user?.role || '').toLowerCase().trim();
       
@@ -393,13 +387,13 @@ const AdvancedEmployeeDashboard = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!isCEO) return; // only CEO can add
+    if (!canManageEmployeeRecords) return;
     setEditingEmployee(null);
     setEmployeeFormOpen(true);
   };
 
   const handleEditEmployee = (employee) => {
-    if (!isCEO) return; // only CEO can edit
+    if (!canManageEmployeeRecords) return;
     setEditingEmployee(employee);
     setEmployeeFormOpen(true);
   };
@@ -413,11 +407,11 @@ const AdvancedEmployeeDashboard = () => {
     try {
       if (editingEmployee) {
         // Update existing employee
-        if (!isCEO) throw new Error('Only CEO can update employee profiles');
+        if (!canManageEmployeeRecords) throw new Error('You do not have permission to update employee profiles');
         await employeeService.updateEmployee(editingEmployee.EmployeeCode, employeeData);
       } else {
         // Create new employee
-        if (!isCEO) throw new Error('Only CEO can create employees');
+        if (!canManageEmployeeRecords) throw new Error('You do not have permission to create employees');
         await employeeService.createEmployee(employeeData);
       }
       
@@ -430,7 +424,7 @@ const AdvancedEmployeeDashboard = () => {
   };
 
   const handleDeleteEmployee = async (employee) => {
-    if (!isCEO) return; // only CEO can delete
+    if (!canManageEmployeeRecords) return;
     if (!employee) return;
     const code = employee?.EmployeeCode;
     const name = employee?.EmployeeName || code;
@@ -481,6 +475,14 @@ const AdvancedEmployeeDashboard = () => {
   const containerVariants = {};
   const itemVariants = {};
 
+  if (authLoading || permissionsLoading) {
+    return <LoadingScreen message="Loading employee dashboard…" />;
+  }
+
+  if (!authorized || !rbacEmployee) {
+    return <AccessDenied />;
+  }
+
   if (loading && employees.length === 0) {
     return (
       <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -521,12 +523,12 @@ const AdvancedEmployeeDashboard = () => {
           <Grid container spacing={0} alignItems="center" justifyContent="space-between">
             <Grid item xs={12} md={8}>
               <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-                {isCEO ? 'Employee Dashboard' : 'My Dashboard'}
+                {canManageEmployeeRecords ? 'Employee Dashboard' : 'My Dashboard'}
               </Typography>
               <Typography variant="h6" sx={{ opacity: 0.9, mb: 2 }}>
-                {isCEO ? 'Manage your workforce with advanced tools and insights' : 'View your profile, tasks, and performance'}
+                {canManageEmployeeRecords ? 'Manage your workforce with advanced tools and insights' : 'View your profile, tasks, and performance'}
               </Typography>
-              {isCEO && (
+              {canManageEmployeeRecords && (
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Chip
                     icon={<GroupIcon />}
@@ -540,22 +542,34 @@ const AdvancedEmployeeDashboard = () => {
                   />
                 </Box>
               )}
-              {!isCEO && selectedEmployee && (
+              {!canManageEmployeeRecords && selectedEmployee && (
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Chip
                     icon={<WorkIcon />}
-                    label={selectedEmployee.Department || 'N/A'}
+                    label={selectedEmployee?.Department || rbacEmployee?.department || 'N/A'}
                     sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}
                   />
                   <Chip
                     icon={<PersonIcon />}
-                    label={selectedEmployee.Designation || 'N/A'}
+                    label={selectedEmployee?.Designation || role?.role_name || 'N/A'}
                     sx={{ bgcolor: alpha(theme.palette.secondary.main, 0.1), color: 'secondary.main' }}
                   />
                 </Box>
               )}
+              {visibleModules.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                  {visibleModules.map((module) => (
+                    <Chip
+                      key={module.module_key || module.module_id}
+                      size="small"
+                      variant="outlined"
+                      label={module.module_name || module.module_key}
+                    />
+                  ))}
+                </Box>
+              )}
             </Grid>
-            {isCEO && (
+            {canManageEmployeeRecords && (
               <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' }, display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
                 <Button
                   variant="contained"
@@ -590,8 +604,8 @@ const AdvancedEmployeeDashboard = () => {
         </Fade>
       )}
 
-      {/* Controls Section - Only show for CEO */}
-      {isCEO && (
+      {/* Controls Section - only show for users with employee-management permission */}
+      {canManageEmployeeRecords && (
         <Card sx={{ mb: 3, p: 2 }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
@@ -722,8 +736,8 @@ const AdvancedEmployeeDashboard = () => {
         </MenuItem>
       </Menu>
 
-      {/* Employee Grid/List - Only show for CEO */}
-      {isCEO && (
+      {/* Employee Grid/List - only show for users with employee-management permission */}
+      {canManageEmployeeRecords && (
         <>
           <Grid container spacing={2}>
             {paginatedEmployees.map((employee, index) => (
@@ -740,9 +754,9 @@ const AdvancedEmployeeDashboard = () => {
                   <EmployeeCard
                     employee={employee}
                     onSelect={() => handleEmployeeSelect(employee)}
-                    onEdit={isCEO ? (() => handleEditEmployee(employee)) : undefined}
+                    onEdit={canManageEmployeeRecords ? (() => handleEditEmployee(employee)) : undefined}
                     onView={() => handleViewEmployee(employee)}
-                    onDelete={isCEO ? (() => handleDeleteEmployee(employee)) : undefined}
+                    onDelete={canManageEmployeeRecords ? (() => handleDeleteEmployee(employee)) : undefined}
                   />
                 </Box>
               </Grid>
@@ -936,7 +950,7 @@ const AdvancedEmployeeDashboard = () => {
                   label="Notifications"
                   sx={{ gap: 1 }}
                 />
-                {isSuperAdmin && (
+                {canManageAccess && (
                   <Tab icon={<AdminPanelIcon />} label="Admin Access" sx={{ gap: 1 }} />
                 )}
               </Tabs>
@@ -975,33 +989,33 @@ const AdvancedEmployeeDashboard = () => {
 
                 <TabPanel value={activeTab} index={2}>
                   <EnhancedTasksTab
-                    employeeCode={selectedEmployee.EmployeeCode}
+                    employeeCode={selectedEmployee?.EmployeeCode}
                     onTaskUpdate={() => loadEmployeeData(selectedEmployee)}
                   />
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={3}>
                   <PerformanceTab
-                    employeeCode={selectedEmployee.EmployeeCode}
+                    employeeCode={selectedEmployee?.EmployeeCode}
                     performance={employeeProfile?.performance || []}
                   />
                 </TabPanel>
 
                                  <TabPanel value={activeTab} index={4}>
                    <EnhancedAttendanceTab
-                     employeeCode={selectedEmployee.EmployeeCode}
+                     employeeCode={selectedEmployee?.EmployeeCode}
                      onUpdate={() => loadEmployeeData(selectedEmployee)}
                    />
                  </TabPanel>
 
                 <TabPanel value={activeTab} index={5}>
                   <NotificationsTab
-                    employeeCode={selectedEmployee.EmployeeCode}
+                    employeeCode={selectedEmployee?.EmployeeCode}
                     notifications={dashboardSummary?.notifications?.recent || []}
                     onNotificationRead={() => loadEmployeeData(selectedEmployee)}
                   />
                 </TabPanel>
-                {isSuperAdmin && (
+                {canManageAccess && (
                   <TabPanel value={activeTab} index={6}>
                     <AdminAccessControlSection userEmail={user?.email} />
                   </TabPanel>
@@ -1028,7 +1042,7 @@ const AdvancedEmployeeDashboard = () => {
       />
 
       {/* Floating Action Button */}
-      {isCEO && (
+      {canManageEmployeeRecords && (
         <Zoom in={!selectedEmployee} timeout={300}>
           <Fab
             color="primary"

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
+  Button,
   Container,
   Typography,
   Paper,
@@ -8,6 +10,7 @@ import {
   Chip,
   alpha,
   useTheme,
+  Stack,
 } from '@mui/material';
 import {
   Factory,
@@ -17,7 +20,12 @@ import {
   People,
   Warning,
   Security,
+  Assignment,
+  AdminPanelSettings,
 } from '@mui/icons-material';
+import { usePermissions } from '../../context/PermissionContext';
+import LoadingScreen from '../common/LoadingScreen';
+import AccessDenied from '../auth/AccessDenied';
 
 const MODULES = [
   {
@@ -112,6 +120,15 @@ const ModuleCard = ({ title, description, icon: Icon, index }) => {
 
 const CEOExecutiveDashboard = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const {
+    loading: permissionsLoading,
+    employee,
+    authorized,
+    canManageEmployees,
+    canManageTasks,
+    hasFullAccess,
+  } = usePermissions();
   const [heroMounted, setHeroMounted] = useState(false);
   const [progressMounted, setProgressMounted] = useState(false);
 
@@ -123,6 +140,41 @@ const CEOExecutiveDashboard = () => {
     const t = setTimeout(() => setProgressMounted(true), 400);
     return () => clearTimeout(t);
   }, []);
+
+  if (permissionsLoading) {
+    return <LoadingScreen message="Loading executive dashboard…" fullScreen />;
+  }
+
+  if (!authorized || !employee) {
+    return <AccessDenied />;
+  }
+
+  const managementLinks = [
+    canManageEmployees && {
+      title: 'Employee Management',
+      description: 'View, add, edit and deactivate employee records.',
+      path: '/employee-dashboard',
+      icon: People,
+    },
+    canManageEmployees && {
+      title: 'Access Management',
+      description: 'Assign email access and module permissions.',
+      path: '/access-management',
+      icon: AdminPanelSettings,
+    },
+    canManageTasks && {
+      title: 'Task Scheduler',
+      description: 'Create tasks, assign by department and employee.',
+      path: '/task-scheduler',
+      icon: Assignment,
+    },
+    canManageTasks && {
+      title: 'Team Tasks',
+      description: 'View all tasks, filter, edit, and reassign.',
+      path: '/team-tasks',
+      icon: Assignment,
+    },
+  ].filter(Boolean);
 
   return (
     <Box
@@ -241,6 +293,74 @@ const CEOExecutiveDashboard = () => {
             In the meantime, use the navigation menu to access operational modules.
           </Typography>
         </Paper>
+
+        {managementLinks.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="overline"
+              sx={{
+                display: 'block',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
+              {hasFullAccess ? 'CEO Management' : 'Management Tools'}
+            </Typography>
+            <Grid container spacing={2}>
+              {managementLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={link.path}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2.5,
+                        height: '100%',
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        cursor: 'pointer',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                        '&:hover': {
+                          borderColor: alpha(theme.palette.primary.main, 0.35),
+                          boxShadow: `0 8px 20px -10px ${alpha(theme.palette.primary.main, 0.35)}`,
+                        },
+                      }}
+                      onClick={() => navigate(link.path)}
+                    >
+                      <Stack spacing={1.5}>
+                        <Box
+                          sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 1.5,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          }}
+                        >
+                          <Icon sx={{ fontSize: 24, color: 'primary.main' }} />
+                        </Box>
+                        <Typography variant="subtitle1" fontWeight={700}>
+                          {link.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {link.description}
+                        </Typography>
+                        <Button size="small" variant="outlined" onClick={() => navigate(link.path)}>
+                          Open
+                        </Button>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
+        )}
 
         {/* Control panel preview grid */}
         <Typography

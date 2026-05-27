@@ -186,6 +186,33 @@ function isPostgrestMissingTableError(error) {
   );
 }
 
+function getFlatTableKeyColumn(tableName, row = {}) {
+  if (row.id != null) return 'id';
+  if (row.ClientCode != null) return 'ClientCode';
+  if (row.UniqueId != null) return 'UniqueId';
+  if (row.POId != null) return 'POId';
+  if (row.EmployeeCode != null) return 'EmployeeCode';
+  if (row.ProductCode != null) return 'ProductCode';
+  return 'id';
+}
+
+function getFlatTableKeyValue(row = {}, keyColumn) {
+  if (!keyColumn) return undefined;
+  return row[keyColumn];
+}
+
+function withInternalRowKey(row, tableName) {
+  if (!row || typeof row !== 'object') return row;
+  const keyColumn = getFlatTableKeyColumn(tableName, row);
+  const keyValue = getFlatTableKeyValue(row, keyColumn);
+  return {
+    ...row,
+    __keyColumn: keyColumn,
+    __rowKey: keyValue,
+    id: row.id ?? keyValue,
+  };
+}
+
 const SEND_QUOTATION_PHYSICAL = ['send_quotation', 'send_quotation_data'];
 
 /**
@@ -306,6 +333,17 @@ export async function getTableRows(tableName) {
     timestamp: new Date().toISOString(),
   });
 
+  if (name === 'clients2') {
+    const { data: directRows, error: directErr } = await supabase.from(name).select('*');
+    console.log('Actual row structure:', (directRows || [])[0]);
+    if (directErr) {
+      console.error(`Error getTableRows(${name}) [clients2 direct]:`, directErr);
+      throw directErr;
+    }
+    console.log(`[getTableRows SUCCESS] Table: ${name} [clients2 direct schema], rows: ${(directRows || []).length}`);
+    return (directRows || []).map((row) => withInternalRowKey(row, name));
+  }
+
   const { data: rows, error } = await supabase
     .from(name)
     .select('id, created_at, sort_order, record')
@@ -367,7 +405,8 @@ export async function getTableRows(tableName) {
             const { data: fallbackRows, error: fallbackError } = await supabase.from(fallbackName).select('*');
             if (!fallbackError) {
               console.log(`[getTableRows SUCCESS] Used fallback table (direct): ${fallbackName} (requested: ${name}), rows: ${(fallbackRows || []).length}`);
-              return fallbackRows || [];
+              console.log('Actual row structure:', (fallbackRows || [])[0]);
+              return (fallbackRows || []).map((row) => withInternalRowKey(row, fallbackName));
             }
           } catch (err) {
             console.log(`[getTableRows (direct)] Fallback ${fallbackName} failed:`, err?.message);
@@ -381,11 +420,13 @@ export async function getTableRows(tableName) {
     }
     debugGetTableRows('fallback success', { resolvedName: name, rowCount: (directRows || []).length });
     console.log(`[getTableRows SUCCESS] Table: ${name} [direct schema], rows: ${(directRows || []).length}`);
-    return directRows || [];
+    console.log('Actual row structure:', (directRows || [])[0]);
+    return (directRows || []).map((row) => withInternalRowKey(row, name));
   }
 
   debugGetTableRows('success', { resolvedName: name, rowCount: (rows || []).length });
   console.log(`[getTableRows SUCCESS] Table: ${name}, rows: ${(rows || []).length}`);
+  console.log('Actual row structure:', (rows || [])[0]);
   return (rows || []).map((r) => ({
     id: r.id,
     ...(r.record || {}),
@@ -404,6 +445,20 @@ export async function insertTableRow(tableName, row) {
     typeof row === 'object' && row !== null && !Array.isArray(row) ? { ...row } : {};
 
   console.log(`[DB INSERT] Starting insert into ${name}`, { tableName, rowKeys: Object.keys(safeRow), rowSize: JSON.stringify(safeRow).length });
+
+  if (name === 'clients2') {
+    delete safeRow.id;
+    delete safeRow.__keyColumn;
+    delete safeRow.__rowKey;
+    const { error: directErr } = await supabase.from(name).insert(safeRow);
+    console.log('Fetch response:', { source: 'clients2 direct insert', data: safeRow, error: directErr });
+    if (directErr) {
+      console.error(`[DB INSERT] ❌ clients2 direct insert failed:`, directErr.code, directErr.message);
+      throw directErr;
+    }
+    console.log(`[DB INSERT] ✅ SUCCESS via clients2 direct insert`);
+    return {};
+  }
 
   let nextOrder = 0;
   const { data: maxRow, error: maxErr } = await supabase
@@ -553,7 +608,11 @@ export async function updateTableRowById(tableName, id, row) {
   }
   
   console.warn(`[DB UPDATE] Initial update failed:`, error.code, error.message);
-  if (!isLegacyJsonSchemaError(error)) {
+  const shouldUseDirectUpdate =
+    isLegacyJsonSchemaError(error) ||
+    (String(error?.message || '').includes(`${name}.id`) && String(error?.message || '').includes('does not exist'));
+
+  if (!shouldUseDirectUpdate) {
     // Try fallback on update error
     if (isPostgrestMissingTableError(error)) {
       console.warn(`[DB UPDATE] Table ${name} not found, trying fallbacks...`);
@@ -584,10 +643,16 @@ export async function updateTableRowById(tableName, id, row) {
 
   console.log(`[DB UPDATE] Attempting direct column update for ${name}...`);
   const directPayload = row && typeof row === 'object' ? row : {};
+  delete directPayload.__keyColumn;
+  delete directPayload.__rowKey;
+  delete directPayload.id;
+  const keyColumn = id && row?.__keyColumn ? row.__keyColumn : 'id';
+  const keyValue = id ?? row?.__rowKey;
+  if (!keyValue) throw new Error(`Missing row key for update in ${name}`);
   const { error: directErr } = await supabase
     .from(name)
     .update(directPayload)
-    .eq('id', id);
+    .eq(keyColumn, keyValue);
 
   if (directErr) {
     console.warn(`[DB UPDATE] Direct update failed:`, directErr.code, directErr.message);
@@ -616,6 +681,32 @@ export async function updateTableRowById(tableName, id, row) {
     throw directErr;
   }
   console.log(`[DB UPDATE] ✅ SUCCESS: Updated via direct columns id=${id} in ${name}`);
+}
+
+export async function updateTableRowByKey(tableName, keyColumn, keyValue, row) {
+  const name = getTableName(tableName);
+  const directPayload = row && typeof row === 'object' ? { ...row } : {};
+  delete directPayload.id;
+  delete directPayload.__keyColumn;
+  delete directPayload.__rowKey;
+
+  console.log(`[DB UPDATE] Starting schema-safe update in ${name}`, {
+    tableName,
+    keyColumn,
+    keyValue,
+    rowKeys: Object.keys(directPayload),
+  });
+
+  const { error } = await supabase
+    .from(name)
+    .update(directPayload)
+    .eq(keyColumn, keyValue);
+
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  console.log(`[DB UPDATE] ✅ SUCCESS: Updated ${keyColumn}=${keyValue} in ${name}`);
 }
 
 /**
@@ -659,6 +750,22 @@ export async function deleteTableRowById(tableName, id) {
     console.error(`[DB DELETE] ❌ Fatal: deleteTableRowById(${name}, ${id}):`, error.code, error.message);
     throw error;
   }
+}
+
+export async function deleteTableRowByKey(tableName, keyColumn, keyValue) {
+  const name = getTableName(tableName);
+  console.log(`[DB DELETE] Starting schema-safe delete in ${name}`, { tableName, keyColumn, keyValue });
+
+  const { error } = await supabase
+    .from(name)
+    .delete()
+    .eq(keyColumn, keyValue);
+
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  console.log(`[DB DELETE] ✅ SUCCESS: Deleted ${keyColumn}=${keyValue} from ${name}`);
 }
 
 /**

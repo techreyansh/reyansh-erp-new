@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -26,6 +26,7 @@ import {
   TextField,
   InputAdornment,
   Paper,
+  Skeleton,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -70,7 +71,6 @@ import { usePermissions } from "../../context/PermissionContext";
 import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
-import HeaderTasks from "./HeaderTasks";
 
 const Header = () => {
   const theme = useTheme();
@@ -141,11 +141,7 @@ const Header = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const isCEO =
-    permissions.isCEO ||
-    (userRole || "").toUpperCase() === "CEO" ||
-    (user?.roleCode || "").toUpperCase() === "CEO" ||
-    (user?.roleCode || "").toUpperCase() === "SUPER_ADMIN";
+  const canManageEmployees = permissions.canManageEmployees;
 
   /** Roles that can open CRM / PPC module menus (aligns with operational teams). */
   const crmModuleRoles = [
@@ -219,10 +215,31 @@ const Header = () => {
           roles: ["CEO"],
         },
         {
-          label: "Access Management",
+          label: "Employee Access Management",
           path: "/access-management",
           icon: <SecurityIcon />,
-          roles: ["CEO", "Admin"],
+          moduleKey: "employees",
+          requireEdit: true,
+        },
+        {
+          label: "Task Scheduler",
+          path: "/task-scheduler",
+          icon: <Assignment />,
+          moduleKey: "tasks",
+          requireCreate: true,
+        },
+        {
+          label: "Team Tasks",
+          path: "/team-tasks",
+          icon: <Assignment />,
+          moduleKey: "tasks",
+          requireEdit: true,
+        },
+        {
+          label: "My Tasks",
+          path: "/my-tasks",
+          icon: <Assignment />,
+          moduleKey: "tasks",
         },
         {
           label: "Main Dashboard",
@@ -322,10 +339,24 @@ const Header = () => {
           roles: ["all"],
         },
         {
-          label: "Task Dashboard",
-          path: "/tasks",
+          label: "Task Scheduler",
+          path: "/task-scheduler",
           icon: <Assignment />,
-          roles: ["all"],
+          moduleKey: "tasks",
+          requireCreate: true,
+        },
+        {
+          label: "Team Tasks",
+          path: "/team-tasks",
+          icon: <Assignment />,
+          moduleKey: "tasks",
+          requireEdit: true,
+        },
+        {
+          label: "My Tasks",
+          path: "/my-tasks",
+          icon: <Assignment />,
+          moduleKey: "tasks",
         },
         {
           label: "Task Compliance Admin",
@@ -491,12 +522,16 @@ const Header = () => {
 
   const canOpenMenuItem = (item) => {
     if (!user) return false;
-    if (isCEO) return true;
+    if (permissions?.loading) return false;
     const moduleKey = item.moduleKey || getModuleKeyForPath(item.path);
-    return moduleKey ? permissions.canView(moduleKey) : true;
+    if (!moduleKey) return true;
+    if (item.requireCreate) return permissions.canCreate(moduleKey);
+    if (item.requireEdit) return permissions.canEdit(moduleKey);
+    if (item.requireDelete) return permissions.canDelete(moduleKey);
+    return permissions.canView(moduleKey);
   };
 
-  const filteredMenuGroups = user
+  const filteredMenuGroups = user && !permissions?.loading
     ? menuGroups
         .map((group) => ({
           ...group,
@@ -505,10 +540,7 @@ const Header = () => {
         .filter((group) => group.items.length > 0)
     : [];
 
-  // For CEO, show ALL menu groups and ALL items without filtering
-  const finalMenuGroups = isCEO 
-    ? menuGroups 
-    : filteredMenuGroups;
+  const finalMenuGroups = filteredMenuGroups;
 
   // Flatten all menu items for searching
   const allMenuItems = finalMenuGroups.flatMap((group) =>
@@ -635,7 +667,14 @@ const Header = () => {
           </Box>
 
           {/* Desktop Navigation */}
-          {!isCompactNav && user && (
+          {!isCompactNav && user && permissions?.loading && (
+            <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center", gap: 1.5, px: 2 }}>
+              {[1, 2, 3, 4].map((n) => (
+                <Skeleton key={n} variant="rounded" width={96} height={36} animation="wave" />
+              ))}
+            </Box>
+          )}
+          {!isCompactNav && user && !permissions?.loading && (
             <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
               {finalMenuGroups.map((group) => (
                 <Box key={group.key} sx={{ position: "relative" }}>
@@ -760,9 +799,6 @@ const Header = () => {
               </IconButton>
             </Tooltip>
 
-            {/* Task Notifications */}
-            {user && <HeaderTasks />}
-
             {user && (
               <Tooltip title={`Switch to ${mode === "dark" ? "light" : "dark"} mode`} placement="bottom">
                 <IconButton
@@ -884,21 +920,8 @@ const Header = () => {
                       <EmployeeIcon sx={{ fontSize: 20 }} />
                     </ListItemIcon>
                     <ListItemText 
-                      primary={isCEO || userRole === 'HR Manager' ? 'Employee Dashboard' : 'My Dashboard'} 
+                      primary={canManageEmployees ? 'Employee Dashboard' : 'My Dashboard'}
                     />
-                  </MenuItem>
-
-                  <MenuItem
-                    onClick={() => {
-                      handleProfileMenuClose();
-                      navigate('/task-checklist');
-                    }}
-                    sx={{ py: 1.5 }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      <Assignment sx={{ fontSize: 20 }} />
-                    </ListItemIcon>
-                    <ListItemText primary="My Tasks" />
                   </MenuItem>
                   
                   <MenuItem 

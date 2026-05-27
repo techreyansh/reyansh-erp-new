@@ -32,13 +32,13 @@ import {
   AdminPanelSettings as AdminIcon,
   Security as SecurityIcon
 } from "@mui/icons-material";
-import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../context/PermissionContext";
 import { useNavigate } from "react-router-dom";
 
 const MoldingMainNavigation = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { role: userRole } = useAuth();
+  const { canView } = usePermissions();
   const navigate = useNavigate();
 
   // Enhanced module configuration with navigation
@@ -85,8 +85,7 @@ const MoldingMainNavigation = () => {
     navigate(route);
   };
 
-  // Role-based access control
-  const hasAccess = userRole === "Store Manager" || userRole === "CEO" || userRole === "Production Manager";
+  const hasAccess = canView('production');
 
   if (!hasAccess) {
     return (

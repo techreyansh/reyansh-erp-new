@@ -32,11 +32,13 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { usePermissions } from '../../context/PermissionContext';
 import employeeService from '../../services/employeeService';
 
 const ProfileView = ({ onDownloadCV }) => {
   const theme = useTheme();
   const { user } = useAuth();
+  const { employee, role } = usePermissions();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -109,11 +111,11 @@ const ProfileView = ({ onDownloadCV }) => {
         console.warn('No employee found, creating mock profile for:', user);
         profileData = {
           EmployeeCode: user.email?.split('@')[0] || 'UNKNOWN',
-          EmployeeName: user.name || 'Unknown Employee',
+          EmployeeName: employee?.full_name || user.name || 'Unknown Employee',
           Email: user.email || '',
-          Phone: '',
-          Department: '',
-          Designation: user.role || '',
+          Phone: employee?.phone || '',
+          Department: employee?.department || '',
+          Designation: role?.role_name || role?.name || user.role || '',
           Status: 'Active',
           EmployeeType: 'Full-time',
           JoiningDate: '',
@@ -141,6 +143,17 @@ const ProfileView = ({ onDownloadCV }) => {
             attendanceRate: 0,
             performanceScore: 0
           }
+        };
+      }
+
+      if (employee) {
+        profileData = {
+          ...profileData,
+          EmployeeName: employee.full_name || profileData.EmployeeName,
+          Email: employee.email || profileData.Email,
+          Phone: employee.phone || profileData.Phone,
+          Department: employee.department || profileData.Department,
+          Designation: role?.role_name || role?.name || profileData.Designation,
         };
       }
       

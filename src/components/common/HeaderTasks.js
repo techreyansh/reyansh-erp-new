@@ -57,6 +57,7 @@ import {
   Dashboard
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { listMyTasks, isTaskOverdue } from '../../services/taskService';
 import flowService from '../../services/flowService';
 import purchaseFlowService from '../../services/purchaseFlowService';
 import salesFlowService from '../../services/salesFlowService';
@@ -72,6 +73,7 @@ const HeaderTasks = () => {
   const [tasksOpen, setTasksOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState({
+    assigned: [],
     po: [],
     purchase: [],
     sales: [],
@@ -82,6 +84,14 @@ const HeaderTasks = () => {
   const [todaysTasks, setTodaysTasks] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (user?.email) {
+      listMyTasks(user.email)
+        .then((rows) => setTasks((prev) => ({ ...prev, assigned: rows || [] })))
+        .catch((err) => console.error('[HeaderTasks] assigned tasks load failed:', err));
+    }
+  }, [user?.email]);
 
   useEffect(() => {
     if (user && tasksOpen) {
@@ -97,7 +107,9 @@ const HeaderTasks = () => {
     setError(null);
 
     try {
-      const promises = [];
+      const promises = [
+        listMyTasks(user.email).catch(() => []),
+      ];
 
       // Fetch PO tasks
       if (['CEO', 'Process Coordinator', 'Customer Relations Manager'].includes(userRole)) {
@@ -156,14 +168,29 @@ const HeaderTasks = () => {
         promises.push(Promise.resolve([]));
       }
 
-      const [po, purchase, sales, cable, inventory, dashboard] = await Promise.all(promises);
-      setTasks({ po, purchase, sales, cable, inventory, dashboard });
+      const [assigned, po, purchase, sales, cable, inventory, dashboard] = await Promise.all(promises);
+      setTasks({ assigned, po, purchase, sales, cable, inventory, dashboard });
       
-             // Combine all tasks for today's checklist
-       const allTasks = [...po, ...purchase, ...sales, ...cable, ...inventory, ...dashboard];
+             // Combine assigned RBAC tasks + legacy workflow tasks for today's checklist
+       const pendingAssigned = (assigned || []).filter(
+         (task) => task.task_status !== 'completed'
+       );
+       const allTasks = [...pendingAssigned, ...po, ...purchase, ...sales, ...cable, ...inventory, ...dashboard];
        const today = new Date().toDateString();
        
        const todayTasks = allTasks.filter(task => {
+         // RBAC assigned tasks: show if due today, overdue, or still open
+         if (task.title && task.task_status) {
+           if (task.due_date) {
+             const due = new Date(task.due_date);
+             const todayDate = new Date();
+             todayDate.setHours(0, 0, 0, 0);
+             due.setHours(0, 0, 0, 0);
+             if (due <= todayDate && task.task_status !== 'completed') return true;
+           }
+           return task.task_status === 'pending' || task.task_status === 'in_progress';
+         }
+
          // Check if task is due today based on calculated due date (CreatedAt + TAT)
          const calculatedDueDate = calculateDueDate(task);
          if (calculatedDueDate) {
@@ -248,6 +275,23 @@ const HeaderTasks = () => {
   };
 
   const getDueDateChip = (task) => {
+    if (task.due_date && task.title) {
+      const due = new Date(task.due_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      due.setHours(0, 0, 0, 0);
+      if (isTaskOverdue(task)) {
+        return (
+          <Chip label="Overdue" size="small" color="error" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+        );
+      }
+      if (due.toDateString() === today.toDateString()) {
+        return (
+          <Chip label="Due Today" size="small" color="warning" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+        );
+      }
+    }
+
     const dueDate = calculateDueDate(task);
     if (!dueDate) return null;
     
@@ -295,7 +339,8 @@ const HeaderTasks = () => {
   };
 
   const getTaskCount = () => {
-    return tasks.po.length + tasks.purchase.length + tasks.sales.length + tasks.cable.length + tasks.inventory.length + tasks.dashboard.length;
+    const assignedPending = (tasks.assigned || []).filter((t) => t.task_status !== 'completed').length;
+    return assignedPending + tasks.po.length + tasks.purchase.length + tasks.sales.length + tasks.cable.length + tasks.inventory.length + tasks.dashboard.length;
   };
 
   const getTodaysTaskCount = () => {
@@ -326,6 +371,9 @@ const HeaderTasks = () => {
         break;
       case 'dashboard':
         path = `/dashboard?poId=${task.POId}`;
+        break;
+      case 'assigned':
+        path = '/my-tasks';
         break;
       default:
         path = '/';
@@ -475,6 +523,8 @@ const HeaderTasks = () => {
 
   const getTaskDisplayName = (task, flowType) => {
     switch (flowType) {
+      case 'assigned':
+        return task.title || 'Assigned Task';
       case 'po':
         return `PO: ${task.POId || 'Unknown'}`;
       case 'purchase':
@@ -496,6 +546,11 @@ const HeaderTasks = () => {
     let description = '';
     
     switch (flowType) {
+      case 'assigned':
+        description = `${task.task_status || 'pending'} • ${task.priority || 'medium'} priority`;
+        if (task.due_date) description += ` • Due: ${task.due_date}`;
+        if (isTaskOverdue(task)) description += ' • Overdue';
+        return description;
       case 'po':
         description = task.Status || 'PO Task';
         break;
@@ -563,6 +618,9 @@ const HeaderTasks = () => {
   };
 
   const getTaskFlowType = (task) => {
+    if (task.title && task.task_status) {
+      return 'assigned';
+    }
     // Check for sales tasks first (they have LogId and Action fields)
     if (task.LogId && (task.Action || task.Role === 'Sales Executive')) {
       return 'sales';
@@ -588,6 +646,7 @@ const HeaderTasks = () => {
 
   const tabLabels = [
     { label: 'Today', count: getTodaysTaskCount(), icon: <Today /> },
+    { label: 'My Tasks', count: (tasks.assigned || []).filter((t) => t.task_status !== 'completed').length, icon: <Person /> },
     { label: 'PO Tasks', count: tasks.po.length, icon: <Assignment /> },
     { label: 'Purchase', count: tasks.purchase.length, icon: <Business /> },
     { label: 'Sales', count: tasks.sales.length, icon: <Description /> },
@@ -700,6 +759,17 @@ const HeaderTasks = () => {
           
           {activeTab === 1 && (
             <Box>
+              <Box sx={{ p: 2, bgcolor: 'primary.50', borderBottom: 1, borderColor: 'divider' }}>
+                <Typography variant="subtitle2" color="primary.main">
+                  Assigned Tasks ({(tasks.assigned || []).filter((t) => t.task_status !== 'completed').length} open)
+                </Typography>
+              </Box>
+              {renderTaskList(tasks.assigned || [], 'assigned', 'Assigned Tasks')}
+            </Box>
+          )}
+
+          {activeTab === 2 && (
+            <Box>
               <Box sx={{ p: 2, bgcolor: 'info.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="info.main">
                   PO Tasks ({tasks.po.length} pending)
@@ -709,7 +779,7 @@ const HeaderTasks = () => {
             </Box>
           )}
           
-          {activeTab === 2 && (
+          {activeTab === 3 && (
             <Box>
               <Box sx={{ p: 2, bgcolor: 'warning.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="warning.main">
@@ -720,7 +790,7 @@ const HeaderTasks = () => {
             </Box>
           )}
           
-          {activeTab === 3 && (
+          {activeTab === 4 && (
             <Box>
               <Box sx={{ p: 2, bgcolor: 'success.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="success.main">
@@ -731,7 +801,7 @@ const HeaderTasks = () => {
             </Box>
           )}
           
-          {activeTab === 4 && (
+          {activeTab === 5 && (
             <Box>
               <Box sx={{ p: 2, bgcolor: 'secondary.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="secondary.main">
@@ -742,7 +812,7 @@ const HeaderTasks = () => {
             </Box>
           )}
           
-          {activeTab === 5 && (
+          {activeTab === 6 && (
             <Box>
               <Box sx={{ p: 2, bgcolor: 'error.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="error.main">
@@ -753,7 +823,7 @@ const HeaderTasks = () => {
             </Box>
           )}
           
-          {activeTab === 6 && (
+          {activeTab === 7 && (
             <Box>
               <Box sx={{ p: 2, bgcolor: 'primary.50', borderBottom: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" color="primary.main">
@@ -765,10 +835,13 @@ const HeaderTasks = () => {
           )}
         </Box>
 
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
+        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'grey.50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="caption" color="textSecondary">
             Click on any task to navigate to the corresponding flow
           </Typography>
+          <Button size="small" onClick={() => { navigate('/my-tasks'); handleClose(); }}>
+            View My Tasks
+          </Button>
         </Box>
       </Menu>
     </>
