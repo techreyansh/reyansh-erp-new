@@ -22,6 +22,8 @@ import {
   Typography,
 } from '@mui/material';
 import { usePermissions } from '../../context/PermissionContext';
+import LoadingScreen from '../common/LoadingScreen';
+import AccessDenied from '../auth/AccessDenied';
 import { listEmployees } from '../../services/rbacService';
 import { createTask, deleteTask, listTasks, updateMyTaskStatus, updateTask } from '../../services/taskService';
 
@@ -46,7 +48,14 @@ function statusColor(status) {
 }
 
 function TaskDashboard() {
-  const { employee, isAdmin, canCreate, canEdit } = usePermissions();
+  const {
+    employee,
+    canCreate,
+    canEdit,
+    canDelete,
+    loading: permissionsLoading,
+    authorized,
+  } = usePermissions();
   const [tasks, setTasks] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [form, setForm] = useState(emptyTask);
@@ -54,7 +63,7 @@ function TaskDashboard() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const canManageTasks = isAdmin || canCreate('tasks') || canEdit('tasks');
+  const canManageTasks = canCreate('tasks') || canEdit('tasks') || canDelete('tasks');
 
   const loadData = async () => {
     setLoading(true);
@@ -93,11 +102,12 @@ function TaskDashboard() {
         }
         await Promise.all(
           departmentEmployees.map((row) =>
-            createTask({ ...form, assigned_to: row.id }, employee?.id)
+            createTask({ ...form, assigned_to: row.id }, employee?.id, row)
           )
         );
       } else {
-        await createTask(form, employee?.id);
+        const assignee = employees.find((row) => row.id === form.assigned_to) || null;
+        await createTask(form, employee?.id, assignee);
       }
       setForm(emptyTask);
       await loadData();
@@ -114,7 +124,7 @@ function TaskDashboard() {
       if (canManageTasks) {
         await updateTask(task.id, { task_status: nextStatus });
       } else {
-        await updateMyTaskStatus(task.id, nextStatus);
+        await updateMyTaskStatus(task.id, nextStatus, employee?.email);
       }
       await loadData();
     } catch (err) {
@@ -131,6 +141,18 @@ function TaskDashboard() {
       setError(err.message || 'Failed to delete task.');
     }
   };
+
+  if (permissionsLoading) {
+    return <LoadingScreen message="Loading task dashboard…" />;
+  }
+
+  if (!authorized || !employee) {
+    return <AccessDenied />;
+  }
+
+  if (loading) {
+    return <LoadingScreen message="Loading tasks…" />;
+  }
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
