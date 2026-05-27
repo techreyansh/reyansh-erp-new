@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { useAuth } from "./context/AuthContext";
 import { useUser } from "./context/UserContext";
 import FullScreenLogoLoader from "./components/common/FullScreenLogoLoader";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 import {
   Box,
   CssBaseline,
@@ -18,7 +19,7 @@ import { buildAppTheme } from "./theme/buildAppTheme";
 import { ThemeModeProvider, useThemeMode } from "./context/ThemeModeContext";
 import { setGlobalErrorNotifier } from "./lib/supabaseErrorHandler";
 import { AuthProvider } from "./context/AuthContext";
-import { PermissionProvider } from "./context/PermissionContext";
+import { PermissionProvider, usePermissions } from "./context/PermissionContext";
 import { UserProvider } from "./context/UserContext";
 import { StepStatusProvider } from './context/StepStatusContext';
 
@@ -116,7 +117,9 @@ const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
-const TaskDashboard = lazy(() => import("./components/tasks/TaskDashboard"));
+const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
+const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
+const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
@@ -139,10 +142,11 @@ function RouteSuspenseFallback() {
 function AppContent() {
   const { authLoading } = useAuth();
   const { loading: userLoading } = useUser();
+  const { loading: permissionsLoading } = usePermissions();
   const location = useLocation();
   const isPublicEntry =
     location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied";
-  if (!isPublicEntry && (authLoading || userLoading)) {
+  if (!isPublicEntry && (authLoading || userLoading || permissionsLoading)) {
     return <FullScreenLogoLoader />;
   }
   return (
@@ -162,6 +166,7 @@ function AppContent() {
           className="motion-page-enter"
           sx={{ width: "100%", minHeight: 0 }}
         >
+          <ErrorBoundary title="Page failed to load">
           <Suspense fallback={<RouteSuspenseFallback />}>
           <Routes>
                   <Route path="/login" element={<Login />} />
@@ -254,12 +259,22 @@ function AppContent() {
                   
                   <Route path="/my-tasks" element={
                     <ProtectedRouteGate>
-                      <TaskDashboard />
+                      <MyTasksView />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/task-scheduler" element={
+                    <ProtectedRouteGate>
+                      <TaskScheduler />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/team-tasks" element={
+                    <ProtectedRouteGate>
+                      <TeamTasksDashboard />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/tasks" element={
                     <ProtectedRouteGate>
-                      <TaskDashboard />
+                      <Navigate to="/team-tasks" replace />
                     </ProtectedRouteGate>
                   } />
 
@@ -711,6 +726,7 @@ function AppContent() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
           </Suspense>
+          </ErrorBoundary>
         </Box>
       </Box>
               <Box
