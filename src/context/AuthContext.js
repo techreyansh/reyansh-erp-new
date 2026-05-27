@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
       if (session?.user) break;
       await new Promise((r) => setTimeout(r, 80));
     }
-    console.log('SESSION (sync):', session);
+    if (process.env.NODE_ENV === 'development') console.log('SESSION (sync):', session);
     if (session?.user) {
       setUser(mapSessionToUser(session.user));
       void enrichRole(session.user.id);
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     let mounted = true;
 
     const applySession = (session) => {
-      console.log('SESSION:', session);
+      if (process.env.NODE_ENV === 'development') console.log('SESSION:', session);
       const u = session?.user ? mapSessionToUser(session.user) : null;
       setUser(u);
       if (u?.id) {
@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }) => {
           if (session?.user) break;
           await new Promise((r) => setTimeout(r, 100));
         }
-        console.log('SESSION:', session);
+        if (process.env.NODE_ENV === 'development') console.log('SESSION:', session);
         if (!mounted) return;
         if (session) {
           applySession(session);
@@ -167,8 +167,10 @@ export const AuthProvider = ({ children }) => {
     })();
 
     const { data: listenerData } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('AUTH EVENT:', event, session);
-      console.log('SESSION:', session);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('AUTH EVENT:', event, session);
+        console.log('SESSION:', session);
+      }
       if (!mounted) return;
       if (event === 'TOKEN_REFRESHED') return;
       if (event === 'INITIAL_SESSION') {
