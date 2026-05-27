@@ -45,6 +45,10 @@ export function PermissionProvider({ children }) {
       const { data, error: rpcError } = await supabase.rpc('get_my_rbac_access');
       if (rpcError) throw rpcError;
       const normalized = normalizeAccess(data);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Current user:', user);
+        console.log('Permissions:', normalized);
+      }
       setAccess(normalized);
       return normalized;
     } catch (err) {
@@ -61,9 +65,7 @@ export function PermissionProvider({ children }) {
     if (authLoading) return undefined;
     let cancelled = false;
     (async () => {
-      const next = await refreshAccess();
-      if (cancelled) return;
-      setAccess(next);
+      await refreshAccess();
     })();
     return () => {
       cancelled = true;
@@ -78,20 +80,56 @@ export function PermissionProvider({ children }) {
     return map;
   }, [access.modules]);
 
-  const roleCode = String(access.role?.code || access.role?.role_name || '').toUpperCase();
-  const isCEO = roleCode === 'CEO' || roleCode === 'SUPER_ADMIN';
-  const isAdmin = isCEO || roleCode === 'ADMIN';
-
   const can = useCallback(
     (moduleKey, action = 'view') => {
       if (!moduleKey) return access.authorized;
-      if (isCEO) return true;
       const permission = permissionByModule.get(normalizeModuleKey(moduleKey));
       if (!permission) return false;
       const field = `can_${String(action || 'view').toLowerCase()}`;
       return Boolean(permission[field]);
     },
-    [access.authorized, isCEO, permissionByModule]
+    [access.authorized, permissionByModule]
+  );
+
+  const hasFullAccess = useMemo(
+    () =>
+      access.authorized &&
+      access.modules.length > 0 &&
+      access.modules.every(
+        (module) =>
+          module.can_view === true &&
+          module.can_create === true &&
+          module.can_edit === true &&
+          module.can_delete === true
+      ),
+    [access.authorized, access.modules]
+  );
+
+  const canManageEmployees =
+    can('employees', 'create') || can('employees', 'edit') || can('employees', 'delete');
+  const canManageTasks =
+    can('tasks', 'create') || can('tasks', 'edit') || can('tasks', 'delete');
+
+  const roleCode = String(access.role?.code || access.role?.role_name || '').toUpperCase();
+
+  const canView = useCallback((moduleKey) => can(moduleKey, 'view'), [can]);
+  const canCreate = useCallback((moduleKey) => can(moduleKey, 'create'), [can]);
+  const canEdit = useCallback((moduleKey) => can(moduleKey, 'edit'), [can]);
+  const canDelete = useCallback((moduleKey) => can(moduleKey, 'delete'), [can]);
+
+  const getPermission = useCallback(
+    (moduleKey) => permissionByModule.get(normalizeModuleKey(moduleKey)) || null,
+    [permissionByModule]
+  );
+
+  const allowedModules = useMemo(
+    () => access.modules.filter((module) => module.can_view === true),
+    [access.modules]
+  );
+
+  const allowedModuleKeys = useMemo(
+    () => allowedModules.map((module) => normalizeModuleKey(module.module_key)),
+    [allowedModules]
   );
 
   const value = useMemo(
@@ -99,18 +137,40 @@ export function PermissionProvider({ children }) {
       ...access,
       loading,
       error,
-      isCEO,
-      isAdmin,
+      hasFullAccess,
+      canManageEmployees,
+      canManageTasks,
       roleCode,
       permissionByModule,
+      allowedModules,
+      allowedModuleKeys,
       refreshAccess,
       can,
-      canView: (moduleKey) => can(moduleKey, 'view'),
-      canCreate: (moduleKey) => can(moduleKey, 'create'),
-      canEdit: (moduleKey) => can(moduleKey, 'edit'),
-      canDelete: (moduleKey) => can(moduleKey, 'delete'),
+      canView,
+      canCreate,
+      canEdit,
+      canDelete,
+      getPermission,
     }),
-    [access, can, error, isAdmin, isCEO, loading, permissionByModule, refreshAccess, roleCode]
+    [
+      access,
+      can,
+      canCreate,
+      canDelete,
+      canEdit,
+      canManageEmployees,
+      canManageTasks,
+      canView,
+      allowedModuleKeys,
+      allowedModules,
+      error,
+      getPermission,
+      hasFullAccess,
+      loading,
+      permissionByModule,
+      refreshAccess,
+      roleCode,
+    ]
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;

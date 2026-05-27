@@ -1,5 +1,9 @@
 import { supabase } from '../lib/supabaseClient';
 
+const devLog = (...args) => {
+  if (process.env.NODE_ENV === 'development') console.log(...args);
+};
+
 const EMPLOYEE_SELECT = `
   id,
   email,
@@ -41,8 +45,56 @@ export async function listEmployees() {
     .from('employees')
     .select(EMPLOYEE_SELECT)
     .order('full_name', { ascending: true });
-  if (error) throw error;
+  devLog('Fetch response:', { source: 'employees', data, error });
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
   return data || [];
+}
+
+/** Active employees in a department (for task assignment). */
+export async function listEmployeesByDepartment(department) {
+  let query = supabase
+    .from('employees')
+    .select(EMPLOYEE_SELECT)
+    .eq('is_active', true)
+    .order('full_name', { ascending: true });
+
+  if (department) {
+    query = query.eq('department', department);
+  }
+
+  const { data, error } = await query;
+  devLog('Fetch response:', { source: 'employees by department', department, data, error });
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  return data || [];
+}
+
+/** Persist module access matrix for one employee (allowed_modules source). */
+export async function saveEmployeeModuleAccess(employeeId, modulePermissions) {
+  if (!employeeId) throw new Error('Employee is required.');
+  const rows = (modulePermissions || []).map((row) => ({
+    employee_id: employeeId,
+    module_id: row.module_id,
+    can_view: Boolean(row.can_view),
+    can_create: Boolean(row.can_create),
+    can_edit: Boolean(row.can_edit),
+    can_delete: Boolean(row.can_delete),
+  }));
+
+  if (!rows.length) {
+    await revokeEmployeeAccess(employeeId);
+    return;
+  }
+
+  const { error } = await supabase
+    .from('employee_permissions')
+    .upsert(rows, { onConflict: 'employee_id,module_id' });
+  if (error) throw error;
 }
 
 export async function saveEmployee(employee) {
@@ -64,7 +116,11 @@ export async function saveEmployee(employee) {
       .eq('id', employee.id)
       .select(EMPLOYEE_SELECT)
       .single();
-    if (error) throw error;
+    devLog('Fetch response:', { source: 'update employee', data, error });
+    if (error) {
+      console.error('CRUD error:', error);
+      throw error;
+    }
     return data;
   }
 
@@ -73,7 +129,11 @@ export async function saveEmployee(employee) {
     .insert(payload)
     .select(EMPLOYEE_SELECT)
     .single();
-  if (error) throw error;
+  devLog('Fetch response:', { source: 'insert employee', data, error });
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
   return data;
 }
 
@@ -82,7 +142,11 @@ export async function setEmployeeActive(employeeId, isActive) {
     .from('employees')
     .update({ is_active: isActive })
     .eq('id', employeeId);
-  if (error) throw error;
+  devLog('Fetch response:', { source: 'toggle employee active', data: { id: employeeId, isActive }, error });
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
 }
 
 export async function listEmployeePermissionOverrides(employeeId) {
@@ -104,6 +168,27 @@ export async function listEmployeePermissionOverrides(employeeId) {
       )
     `)
     .eq('employee_id', employeeId);
+  if (error) throw error;
+  return data || [];
+}
+
+export async function listAllEmployeePermissions() {
+  const { data, error } = await supabase
+    .from('employee_permissions')
+    .select(`
+      id,
+      employee_id,
+      module_id,
+      can_view,
+      can_create,
+      can_edit,
+      can_delete,
+      modules:module_id (
+        id,
+        module_key,
+        module_name
+      )
+    `);
   if (error) throw error;
   return data || [];
 }
@@ -132,29 +217,28 @@ export async function deleteEmployeePermissionOverride(permissionId) {
   if (error) throw error;
 }
 
-export async function listRoleModulePermissions() {
-  const { data, error } = await supabase
-    .from('role_module_permissions')
-    .select(`
-      id,
-      role_id,
-      module_id,
-      can_view,
-      can_create,
-      can_edit,
-      can_delete,
-      roles:role_id (
-        id,
-        role_name,
-        name,
-        code
-      ),
-      modules:module_id (
-        id,
-        module_key,
-        module_name
-      )
-    `);
+export async function grantEmployeeFullAccess(employeeId, modules) {
+  if (!employeeId) throw new Error('Employee is required.');
+  const payload = modules.map((module) => ({
+    employee_id: employeeId,
+    module_id: module.id,
+    can_view: true,
+    can_create: true,
+    can_edit: true,
+    can_delete: true,
+  }));
+  const { error } = await supabase
+    .from('employee_permissions')
+    .upsert(payload, { onConflict: 'employee_id,module_id' });
   if (error) throw error;
-  return data || [];
 }
+
+export async function revokeEmployeeAccess(employeeId) {
+  if (!employeeId) throw new Error('Employee is required.');
+  const { error } = await supabase
+    .from('employee_permissions')
+    .delete()
+    .eq('employee_id', employeeId);
+  if (error) throw error;
+}
+

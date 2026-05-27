@@ -6,9 +6,8 @@ import { usePermissions } from '../../context/PermissionContext';
 import ceoDashboardAccessLog from '../../services/ceoDashboardAccessLog';
 
 /**
- * Route guard: Renders children ONLY for CEO role.
- * Non-CEO users get "Access Denied – Insufficient Privileges" (no redirect, no leak of route purpose).
- * All access attempts are logged. Backend must validate CEO role server-side when APIs exist.
+ * Compatibility guard for the executive area. Access is permission-based:
+ * users need the employees module, not a CEO role/title.
  */
 const CEOOnlyRoute = ({ children }) => {
   const { user, role, loading: authLoading } = useAuth();
@@ -18,7 +17,7 @@ const CEOOnlyRoute = ({ children }) => {
 
   useEffect(() => {
     if (authLoading || permissions.loading || !user) return;
-    const granted = permissions.isCEO || role === 'CEO';
+    const granted = permissions.canEdit('employees');
     if (!logged.current) {
       ceoDashboardAccessLog.logAccessAttempt({
         granted,
@@ -27,7 +26,7 @@ const CEOOnlyRoute = ({ children }) => {
       });
       logged.current = true;
     }
-  }, [authLoading, permissions.isCEO, permissions.loading, permissions.role, role, user]);
+  }, [authLoading, permissions, role, user]);
 
   if (authLoading || permissions.loading) {
     return (
@@ -45,7 +44,7 @@ const CEOOnlyRoute = ({ children }) => {
     return <Navigate to="/access-denied" state={{ from: location }} replace />;
   }
 
-  if (!permissions.isCEO && role !== 'CEO') {
+  if (!permissions.canEdit('employees')) {
     return <Navigate to="/access-denied" state={{ from: location, reason: 'unauthorized_route' }} replace />;
   }
 

@@ -27,7 +27,8 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path === '/costing', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow'), moduleKey: MODULE_KEYS.INVENTORY },
-  { test: (path) => path === '/my-tasks' || path === '/tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
+  { test: (path) => path === '/task-scheduler' || path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS },
+  { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
 ];
 
@@ -40,4 +41,19 @@ export function getModuleKeyForPath(pathname = '') {
 
 export function normalizeModuleKey(value) {
   return String(value || '').trim().toLowerCase();
+}
+
+/** Routes that require more than view permission. */
+const ROUTE_ACTION_RULES = [
+  { test: (path) => path === '/task-scheduler', moduleKey: MODULE_KEYS.TASKS, action: 'create' },
+  { test: (path) => path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
+  { test: (path) => path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
+];
+
+export function getRequiredActionForPath(pathname = '') {
+  const cleanPath = pathname || '/';
+  const match = ROUTE_ACTION_RULES.find((rule) => rule.test(cleanPath));
+  return match || null;
 }

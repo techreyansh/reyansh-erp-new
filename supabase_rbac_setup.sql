@@ -97,6 +97,7 @@ INSERT INTO public.roles (role_name, name, code, description, is_system_role)
 VALUES
   ('CEO', 'CEO', 'CEO', 'Full ERP ownership and unrestricted access.', true),
   ('Admin', 'Admin', 'ADMIN', 'Administrative access for employees and tasks.', true),
+  ('Intern', 'Intern', 'INTERN', 'Intern designation. Access is assigned separately through employee permissions.', true),
   ('Sales', 'Sales', 'SALES', 'Sales workflow, CRM, leads, orders, and tasks.', true),
   ('CRM', 'CRM', 'CRM', 'Customer relationship management and lead operations.', true),
   ('Production', 'Production', 'PRODUCTION', 'Production planning and execution.', true),
@@ -175,7 +176,8 @@ ON CONFLICT (module_key) DO UPDATE SET
   icon = EXCLUDED.icon;
 
 -- -----------------------------------------------------------------------------
--- Role permissions
+-- Role permission templates.
+-- Runtime access is resolved from employee_permissions only; roles remain designation metadata.
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.role_module_permissions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -253,6 +255,22 @@ WHERE cfg.key = 'ceo_email'
 ON CONFLICT (email) DO UPDATE SET
   role_id = EXCLUDED.role_id,
   is_active = true;
+
+INSERT INTO public.employee_permissions (
+  employee_id, module_id, can_view, can_create, can_edit, can_delete
+)
+SELECT e.id, m.id, true, true, true, true
+FROM public.employees e
+CROSS JOIN public.modules m
+JOIN public.rbac_bootstrap_config cfg
+  ON cfg.key = 'ceo_email'
+WHERE e.email = lower(trim(cfg.value))
+  AND cfg.value <> 'REPLACE_WITH_CEO_EMAIL@example.com'
+ON CONFLICT (employee_id, module_id) DO UPDATE SET
+  can_view = true,
+  can_create = true,
+  can_edit = true,
+  can_delete = true;
 
 -- -----------------------------------------------------------------------------
 -- Permission seed helper
@@ -347,7 +365,16 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE(public.rbac_current_employee_role_code() IN ('CEO', 'SUPER_ADMIN'), false);
+  SELECT COALESCE(EXISTS (
+    SELECT 1
+    FROM public.employees e
+    JOIN public.employee_permissions ep ON ep.employee_id = e.id
+    JOIN public.modules m ON m.id = ep.module_id
+    WHERE e.email = public.rbac_current_email()
+      AND e.is_active = true
+      AND m.module_key = 'employees'
+      AND ep.can_delete = true
+  ), false);
 $$;
 
 CREATE OR REPLACE FUNCTION public.rbac_current_employee_is_admin()
@@ -357,7 +384,18 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE(public.rbac_current_employee_role_code() IN ('CEO', 'SUPER_ADMIN', 'ADMIN'), false);
+  SELECT COALESCE(EXISTS (
+    SELECT 1
+    FROM public.employees e
+    JOIN public.employee_permissions ep ON ep.employee_id = e.id
+    JOIN public.modules m ON m.id = ep.module_id
+    WHERE e.email = public.rbac_current_email()
+      AND e.is_active = true
+      AND (
+        (m.module_key = 'employees' AND (ep.can_create OR ep.can_edit OR ep.can_delete))
+        OR (m.module_key = 'tasks' AND (ep.can_create OR ep.can_edit OR ep.can_delete))
+      )
+  ), false);
 $$;
 
 CREATE OR REPLACE FUNCTION public.rbac_employee_can(p_module_key text, p_action text DEFAULT 'view')
@@ -368,7 +406,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   WITH me AS (
-    SELECT e.id AS employee_id, e.role_id
+    SELECT e.id AS employee_id
     FROM public.employees e
     WHERE e.email = public.rbac_current_email()
       AND e.is_active = true
@@ -377,14 +415,12 @@ AS $$
   resolved AS (
     SELECT
       m.module_key,
-      COALESCE(ep.can_view, rmp.can_view, false) AS can_view,
-      COALESCE(ep.can_create, rmp.can_create, false) AS can_create,
-      COALESCE(ep.can_edit, rmp.can_edit, false) AS can_edit,
-      COALESCE(ep.can_delete, rmp.can_delete, false) AS can_delete
+      COALESCE(ep.can_view, false) AS can_view,
+      COALESCE(ep.can_create, false) AS can_create,
+      COALESCE(ep.can_edit, false) AS can_edit,
+      COALESCE(ep.can_delete, false) AS can_delete
     FROM me
     JOIN public.modules m ON m.module_key = p_module_key
-    LEFT JOIN public.role_module_permissions rmp
-      ON rmp.role_id = me.role_id AND rmp.module_id = m.id
     LEFT JOIN public.employee_permissions ep
       ON ep.employee_id = me.employee_id AND ep.module_id = m.id
   )
@@ -428,14 +464,12 @@ AS $$
       m.module_name,
       m.route_path,
       m.icon,
-      COALESCE(ep.can_view, rmp.can_view, false) AS can_view,
-      COALESCE(ep.can_create, rmp.can_create, false) AS can_create,
-      COALESCE(ep.can_edit, rmp.can_edit, false) AS can_edit,
-      COALESCE(ep.can_delete, rmp.can_delete, false) AS can_delete
+      COALESCE(ep.can_view, false) AS can_view,
+      COALESCE(ep.can_create, false) AS can_create,
+      COALESCE(ep.can_edit, false) AS can_edit,
+      COALESCE(ep.can_delete, false) AS can_delete
     FROM me
     CROSS JOIN public.modules m
-    LEFT JOIN public.role_module_permissions rmp
-      ON rmp.role_id = me.role_id AND rmp.module_id = m.id
     LEFT JOIN public.employee_permissions ep
       ON ep.employee_id = me.id AND ep.module_id = m.id
   )
@@ -514,55 +548,45 @@ CREATE POLICY "rbac_roles_select_authenticated"
 DROP POLICY IF EXISTS "rbac_roles_ceo_manage" ON public.roles;
 CREATE POLICY "rbac_roles_ceo_manage"
   ON public.roles FOR ALL TO authenticated
-  USING (public.rbac_current_employee_is_ceo())
-  WITH CHECK (public.rbac_current_employee_is_ceo());
+  USING (public.rbac_employee_can('employees', 'edit'))
+  WITH CHECK (public.rbac_employee_can('employees', 'edit'));
 
 DROP POLICY IF EXISTS "rbac_employees_select_self_or_admin" ON public.employees;
 CREATE POLICY "rbac_employees_select_self_or_admin"
   ON public.employees FOR SELECT TO authenticated
   USING (
     email = public.rbac_current_email()
-    OR public.rbac_current_employee_is_admin()
+    OR public.rbac_employee_can('employees', 'view')
   );
 
 DROP POLICY IF EXISTS "rbac_employees_admin_insert" ON public.employees;
 CREATE POLICY "rbac_employees_admin_insert"
   ON public.employees FOR INSERT TO authenticated
   WITH CHECK (
-    public.rbac_current_employee_is_admin()
-    AND (
-      public.rbac_current_employee_is_ceo()
-      OR role_id IS NULL
-      OR role_id NOT IN (SELECT id FROM public.roles WHERE code IN ('CEO', 'SUPER_ADMIN'))
-    )
+    public.rbac_employee_can('employees', 'create')
   );
 
 DROP POLICY IF EXISTS "rbac_employees_admin_update" ON public.employees;
 CREATE POLICY "rbac_employees_admin_update"
   ON public.employees FOR UPDATE TO authenticated
-  USING (public.rbac_current_employee_is_admin())
+  USING (public.rbac_employee_can('employees', 'edit'))
   WITH CHECK (
-    public.rbac_current_employee_is_admin()
-    AND (
-      public.rbac_current_employee_is_ceo()
-      OR role_id IS NULL
-      OR role_id NOT IN (SELECT id FROM public.roles WHERE code IN ('CEO', 'SUPER_ADMIN'))
-    )
+    public.rbac_employee_can('employees', 'edit')
   );
 
 DROP POLICY IF EXISTS "rbac_modules_select_allowed" ON public.modules;
 CREATE POLICY "rbac_modules_select_allowed"
   ON public.modules FOR SELECT TO authenticated
   USING (
-    public.rbac_current_employee_is_admin()
+    public.rbac_employee_can('employees', 'edit')
     OR public.rbac_employee_can(module_key, 'view')
   );
 
 DROP POLICY IF EXISTS "rbac_modules_ceo_manage" ON public.modules;
 CREATE POLICY "rbac_modules_ceo_manage"
   ON public.modules FOR ALL TO authenticated
-  USING (public.rbac_current_employee_is_ceo())
-  WITH CHECK (public.rbac_current_employee_is_ceo());
+  USING (public.rbac_employee_can('employees', 'delete'))
+  WITH CHECK (public.rbac_employee_can('employees', 'delete'));
 
 DROP POLICY IF EXISTS "rbac_role_permissions_select" ON public.role_module_permissions;
 CREATE POLICY "rbac_role_permissions_select"
@@ -579,15 +603,15 @@ DROP POLICY IF EXISTS "rbac_employee_permissions_select" ON public.employee_perm
 CREATE POLICY "rbac_employee_permissions_select"
   ON public.employee_permissions FOR SELECT TO authenticated
   USING (
-    public.rbac_current_employee_is_admin()
+    public.rbac_employee_can('employees', 'edit')
     OR employee_id = public.rbac_current_employee_id()
   );
 
 DROP POLICY IF EXISTS "rbac_employee_permissions_ceo_manage" ON public.employee_permissions;
 CREATE POLICY "rbac_employee_permissions_ceo_manage"
   ON public.employee_permissions FOR ALL TO authenticated
-  USING (public.rbac_current_employee_is_ceo())
-  WITH CHECK (public.rbac_current_employee_is_ceo());
+  USING (public.rbac_employee_can('employees', 'edit'))
+  WITH CHECK (public.rbac_employee_can('employees', 'edit'));
 
 DROP POLICY IF EXISTS "rbac_tasks_select_own_or_admin" ON public.tasks;
 CREATE POLICY "rbac_tasks_select_own_or_admin"
@@ -595,22 +619,22 @@ CREATE POLICY "rbac_tasks_select_own_or_admin"
   USING (
     assigned_to = public.rbac_current_employee_id()
     OR assigned_by = public.rbac_current_employee_id()
-    OR public.rbac_current_employee_is_admin()
+    OR public.rbac_employee_can('tasks', 'view')
   );
 
 DROP POLICY IF EXISTS "rbac_tasks_admin_insert" ON public.tasks;
 CREATE POLICY "rbac_tasks_admin_insert"
   ON public.tasks FOR INSERT TO authenticated
   WITH CHECK (
-    public.rbac_current_employee_is_admin()
+    public.rbac_employee_can('tasks', 'create')
     AND assigned_by = public.rbac_current_employee_id()
   );
 
 DROP POLICY IF EXISTS "rbac_tasks_admin_update" ON public.tasks;
 CREATE POLICY "rbac_tasks_admin_update"
   ON public.tasks FOR UPDATE TO authenticated
-  USING (public.rbac_current_employee_is_admin())
-  WITH CHECK (public.rbac_current_employee_is_admin());
+  USING (public.rbac_employee_can('tasks', 'edit'))
+  WITH CHECK (public.rbac_employee_can('tasks', 'edit'));
 
 DROP POLICY IF EXISTS "rbac_tasks_employee_status_update" ON public.tasks;
 CREATE POLICY "rbac_tasks_employee_status_update"
@@ -621,7 +645,7 @@ CREATE POLICY "rbac_tasks_employee_status_update"
 DROP POLICY IF EXISTS "rbac_tasks_admin_delete" ON public.tasks;
 CREATE POLICY "rbac_tasks_admin_delete"
   ON public.tasks FOR DELETE TO authenticated
-  USING (public.rbac_current_employee_is_admin());
+  USING (public.rbac_employee_can('tasks', 'delete'));
 
 -- Keep anonymous users out explicitly.
 REVOKE ALL ON public.roles FROM anon;

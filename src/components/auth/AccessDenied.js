@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Alert, Box, Button, Card, CardContent, Container, Stack, Typography } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
@@ -12,7 +13,15 @@ const reasonText = {
 
 function AccessDenied() {
   const { signOut, user } = useAuth();
-  const { reason } = usePermissions();
+  const { reason, refreshAccess, loading } = usePermissions();
+  const location = useLocation();
+  const routeReason = location.state?.reason;
+  const activeReason = routeReason || reason;
+
+  const handleRetry = async () => {
+    await refreshAccess();
+    window.location.href = '/home';
+  };
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -29,13 +38,20 @@ function AccessDenied() {
             </Box>
 
             <Alert severity="warning" sx={{ width: '100%', textAlign: 'left' }}>
-              {reasonText[reason] || 'Your account does not have access to this ERP area.'}
+              {reasonText[activeReason] || 'Your account does not have access to this ERP area.'}
               {user?.email ? ` Signed in as ${user.email}.` : ''}
             </Alert>
 
-            <Button variant="contained" color="primary" onClick={() => void signOut()}>
-              Logout
-            </Button>
+            <Stack direction="row" spacing={1}>
+              {activeReason === 'rbac_load_failed' && (
+                <Button variant="outlined" onClick={() => void handleRetry()} disabled={loading}>
+                  {loading ? 'Retrying…' : 'Retry access check'}
+                </Button>
+              )}
+              <Button variant="contained" color="primary" onClick={() => void signOut()}>
+                Logout
+              </Button>
+            </Stack>
           </Stack>
         </CardContent>
       </Card>
