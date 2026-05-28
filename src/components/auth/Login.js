@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
+import { getGoogleSignInWithOAuthOptions } from "../../lib/oauthCallbackParams";
 
 const Login = () => {
   const theme = useTheme();
@@ -69,22 +70,9 @@ const Login = () => {
     clearAuthSurfaceErrors();
     setOauthStarting(true);
     try {
-      const isLocal =
-        window.location.hostname === 'localhost';
-
-      const redirectUrl = isLocal
-        ? window.location.origin
-        : 'https://erp-final-with-all-the-changes.vercel.app';
-
       const { error: oauthErr } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
+        options: getGoogleSignInWithOAuthOptions(),
       });
 
       if (oauthErr) throw oauthErr;

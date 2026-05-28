@@ -307,7 +307,7 @@ Object.freeze(configCopy.purchaseFlow.documentTypes);
 Object.freeze(configCopy.externalLinks);
 
 // Environment-based configuration
-const PRODUCTION_APP_URL = 'https://erp-final-with-all-the-changes.vercel.app';
+const PRODUCTION_APP_URL = 'https://erp-final-update-guje.vercel.app';
 
 // OAuth configuration based on environment
 export const oauthSettings = {

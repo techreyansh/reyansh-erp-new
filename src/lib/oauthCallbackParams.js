@@ -8,16 +8,10 @@
  */
 export function getOAuthRedirectUrl() {
   if (typeof window === 'undefined') {
-    return 'https://erp-final-with-all-the-changes.vercel.app';
+    return 'https://erp-final-update-guje.vercel.app';
   }
-  const isLocal =
-    window.location.hostname === 'localhost';
-
-  const redirectUrl = isLocal
-    ? window.location.origin
-    : 'https://erp-final-with-all-the-changes.vercel.app';
-
-  return redirectUrl;
+  // Keep PKCE verifier + callback on the same origin currently serving the app.
+  return window.location.origin;
 }
 
 /** e.g. https://xxxx.supabase.co — for Google "Authorized JavaScript origins" */

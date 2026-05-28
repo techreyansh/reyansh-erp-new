@@ -7,20 +7,13 @@ const oauthConfig = {
   ],
   // Get the current origin for OAuth redirect
   getRedirectUri: () => {
-    const isLocal =
-      window.location.hostname === 'localhost';
-
-    const redirectUrl = isLocal
-      ? window.location.origin
-      : 'https://erp-final-with-all-the-changes.vercel.app';
-
-    return redirectUrl;
+    return window.location.origin;
   },
   // Get allowed origins for CORS
   getAllowedOrigins: () => {
     return [
       'http://localhost:3000',
-      'https://erp-final-with-all-the-changes.vercel.app'
+      'https://erp-final-update-guje.vercel.app'
     ];
   }
 };
