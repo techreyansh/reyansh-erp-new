@@ -32,12 +32,14 @@ import {
   AdminPanelSettings as AdminIcon,
   Security as SecurityIcon
 } from "@mui/icons-material";
+import { useAuth } from "../../context/AuthContext";
 import { usePermissions } from "../../context/PermissionContext";
 import { useNavigate } from "react-router-dom";
 
 const MoldingMainNavigation = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { role: userRole } = useAuth();
   const { canView } = usePermissions();
   const navigate = useNavigate();
 
