@@ -31,8 +31,8 @@ export const TABLE_NAMES = {
   // Vendors & stock — mapping to correct _data suffixed tables
   Vendor: 'vendors_data',
   vendors: 'vendors_data',
-  Stock: 'stock_data',
-  stock: 'stock_data',
+  Stock: 'stock',
+  stock: 'stock',
   'Material Inward': 'material_inward_data',
   'Material Issue': 'material_issue_data',
   BOM: 'company_bom_data',

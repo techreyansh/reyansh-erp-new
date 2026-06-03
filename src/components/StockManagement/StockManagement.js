@@ -47,6 +47,7 @@ import {
 } from "@mui/material";
 import sheetService from "../../services/sheetService";
 import vendorService from "../../services/vendorService";
+import { updateTableRowById, deleteTableRowById } from "../../lib/db";
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
@@ -293,54 +294,8 @@ const StockManagement = () => {
     fetchDynamicOptions();
   }, []);
 
-  // Ensure vendorDetails column exists in the Stock sheet
-  const ensureVendorDetailsColumn = async () => {
-    try {
-      const headers = await sheetService.getSheetHeaders("Stock");
-      if (!headers.includes("vendorDetails")) {
-        // Create a new sheet with proper headers including vendorDetails
-        const properHeaders = [
-          "itemCode", "itemName", "category", "currentStock", "minLevel", "maxLevel", 
-          "reorderPoint", "unit", "location", "make", "vendorDetails", "lastUpdated"
-        ];
-        
-        // Check if Stock sheet exists
-        const sheetExists = await sheetService.doesSheetExist("Stock");
-        
-        if (!sheetExists) {
-          await sheetService.createSheetWithHeaders("Stock", properHeaders);
-        } else {
-          // Get current data
-          const currentData = await sheetService.getSheetData("Stock");
-          
-          // Update the header row to include vendorDetails
-          const headerRow = {};
-          properHeaders.forEach(header => {
-            headerRow[header] = header;
-          });
-          
-          await sheetService.updateRow("Stock", 1, headerRow);
-          
-          // Update existing rows to include empty vendorDetails
-          for (let i = 0; i < currentData.length; i++) {
-            const rowData = {
-              ...currentData[i],
-              vendorDetails: currentData[i].vendorDetails || {
-                vendorCode: "",
-                vendorName: "",
-                vendorContact: "",
-                vendorEmail: ""
-              }
-            };
-            await sheetService.updateRow("Stock", i + 2, rowData);
-          }
-        }
-      } else {
-      }
-    } catch (error) {
-      console.error("Error ensuring vendorDetails column:", error);
-    }
-  };
+  // vendorDetails is stored inside the jsonb record; no legacy sheet header migration needed.
+  const ensureVendorDetailsColumn = async () => {};
 
   // Fetch vendors for dropdown
   const fetchVendors = async () => {
@@ -535,6 +490,40 @@ const StockManagement = () => {
     }
   };
 
+  const normalizeVendorDetailsForSave = (vendorDetailsData) => {
+    const parsed = parseVendorDetails(vendorDetailsData);
+    return parsed.map((vendor) => ({
+      vendorCode: vendor.vendorCode || "",
+      vendorName: vendor.vendorName || "",
+      vendorContact: vendor.vendorContact || "",
+      vendorEmail: vendor.vendorEmail || "",
+    }));
+  };
+
+  const buildStockRecordPayload = (itemCodeToUse, autoStatus) => {
+    const currentStockValue = formData.currentStock ? parseFloat(formData.currentStock).toString() : "0";
+    const minLevelValue = formData.minLevel ? parseFloat(formData.minLevel).toString() : "";
+    const maxLevelValue = formData.maxLevel ? parseFloat(formData.maxLevel).toString() : "";
+    const reorderPointValue = formData.reorderPoint ? parseFloat(formData.reorderPoint).toString() : "";
+
+    return {
+      itemCode: itemCodeToUse,
+      itemName: formData.itemName.trim(),
+      category: formData.category ? formData.category.trim() : "",
+      currentStock: currentStockValue,
+      minLevel: minLevelValue,
+      maxLevel: maxLevelValue,
+      reorderPoint: reorderPointValue,
+      unit: formData.unit ? formData.unit.trim() : "",
+      location: formData.location ? formData.location.trim() : "",
+      make: formData.make ? formData.make.trim() : "",
+      vendorDetails: normalizeVendorDetailsForSave(formData.vendorDetails),
+      status: autoStatus,
+      lastUpdated: new Date().toISOString().split("T")[0],
+      "item specifications": formData["item specifications"] || "",
+    };
+  };
+
   // Validation function
   const validateForm = () => {
     const errors = [];
@@ -542,6 +531,10 @@ const StockManagement = () => {
     // Required field validations
     if (!formData.itemName || formData.itemName.trim() === "") {
       errors.push("Item Name is required");
+    }
+
+    if (!selectedItem && (!formData.category || formData.category.trim() === "")) {
+      errors.push("Category is required");
     }
     
     // Numeric validations
@@ -614,33 +607,14 @@ const StockManagement = () => {
         return;
       }
       
-      // Sanitize and prepare data
       const currentStockValue = formData.currentStock ? parseFloat(formData.currentStock).toString() : "0";
       const minLevelValue = formData.minLevel ? parseFloat(formData.minLevel).toString() : "";
       const maxLevelValue = formData.maxLevel ? parseFloat(formData.maxLevel).toString() : "";
       const reorderPointValue = formData.reorderPoint ? parseFloat(formData.reorderPoint).toString() : "";
-      
-      // Auto-calculate status based on stock levels
       const autoStatus = calculateStatus(currentStockValue, minLevelValue, maxLevelValue, reorderPointValue);
-      
-      const dataToSave = {
-        ...formData,
-        itemCode: itemCodeToUse,
-        itemName: formData.itemName.trim(),
-        category: formData.category ? formData.category.trim() : "",
-        currentStock: currentStockValue,
-        minLevel: minLevelValue,
-        maxLevel: maxLevelValue,
-        reorderPoint: reorderPointValue,
-        unit: formData.unit ? formData.unit.trim() : "",
-        location: formData.location ? formData.location.trim() : "",
-        make: formData.make ? formData.make.trim() : "",
-        vendorDetails: formData.vendorDetails, // Pass object directly, sheetService will handle JSON serialization
-        status: autoStatus, // Auto-calculated status based on stock levels
-        lastUpdated: new Date().toISOString().split("T")[0],
-      };
+      const dataToSave = buildStockRecordPayload(itemCodeToUse, autoStatus);
+
       if (selectedItem) {
-        // Update existing row
         const updateIndex = stockItems.findIndex(
           (item) => item.itemCode === selectedItem.itemCode
         );
@@ -651,7 +625,7 @@ const StockManagement = () => {
           return;
         }
         
-        await handleUpdate(updateIndex, dataToSave);
+        await handleUpdate(updateIndex, dataToSave, stockItems[updateIndex]);
         setOpenDialog(false);
         showSnackbar("Stock item updated successfully");
       } else {
@@ -671,16 +645,24 @@ const StockManagement = () => {
     }
   };
 
-  const handleUpdate = async (rowIndex, newData) => {
+  const handleUpdate = async (rowIndex, newData, row = null) => {
     try {
-      await sheetService.updateRow("Stock", rowIndex + 2, {
+      const targetRow = row || stockItems[rowIndex];
+      const payload = {
         ...newData,
         lastUpdated: new Date().toISOString().split("T")[0],
-      });
+      };
+
+      if (targetRow?.id) {
+        await updateTableRowById("Stock", targetRow.id, payload);
+      } else {
+        await sheetService.updateRow("Stock", rowIndex + 2, payload);
+      }
       showSnackbar("Stock item updated successfully");
       fetchStockItems();
     } catch (error) {
-      showSnackbar("Error updating stock item", "error");
+      console.error("Error updating stock item:", error);
+      showSnackbar(error?.message || "Error updating stock item", "error");
     }
   };
 
@@ -695,12 +677,18 @@ const StockManagement = () => {
         (stockItem) => stockItem.itemCode === item.itemCode
       );
       if (rowIndex !== -1) {
-      await sheetService.deleteRow("Stock", rowIndex + 2);
-      showSnackbar("Stock item deleted successfully");
-      fetchStockItems();
+        const targetRow = stockItems[rowIndex];
+        if (targetRow?.id) {
+          await deleteTableRowById("Stock", targetRow.id);
+        } else {
+          await sheetService.deleteRow("Stock", rowIndex + 2);
+        }
+        showSnackbar("Stock item deleted successfully");
+        fetchStockItems();
       }
     } catch (error) {
-      showSnackbar("Error deleting stock item", "error");
+      console.error("Error deleting stock item:", error);
+      showSnackbar(error?.message || "Error deleting stock item", "error");
     } finally {
       setLoading(false);
     }
