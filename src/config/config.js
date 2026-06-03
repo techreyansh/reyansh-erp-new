@@ -1,3 +1,5 @@
+import { appEnv, getConfiguredProductionUrl, getAllowedAppOrigins, isLocalDev } from './env';
+
 const config = {
   // Forced false: `db.getTableRows` and related helpers always call Supabase (never skip API).
   // `REACT_APP_USE_LOCAL_STORAGE` is not applied here — do not re-enable via env without fixing db.js.
@@ -289,7 +291,7 @@ const config = {
 
   // External links
   externalLinks: {
-    whatsapp: process.env.REACT_APP_WHATSAPP_LINK || "https://wa.me/", // WhatsApp link from environment variable
+    whatsapp: appEnv.whatsappLink,
   },
 };
 
@@ -307,28 +309,23 @@ Object.freeze(configCopy.purchaseFlow.documentTypes);
 Object.freeze(configCopy.externalLinks);
 
 // Environment-based configuration
-const PRODUCTION_APP_URL = 'https://erp-final-update-guje.vercel.app';
+const PRODUCTION_APP_URL = getConfiguredProductionUrl();
 
 // OAuth configuration based on environment
 export const oauthSettings = {
-  // For localhost development
   localhost: {
-    redirectUri: 'http://localhost:3000',
-    allowedOrigins: ['http://localhost:3000', 'http://localhost:3001']
+    redirectUri: appEnv.localDevOrigin,
+    allowedOrigins: getAllowedAppOrigins(),
   },
-  // For Vercel production
   vercel: {
     redirectUri: PRODUCTION_APP_URL,
-    allowedOrigins: []
-  }
+    allowedOrigins: appEnv.appUrl ? [appEnv.appUrl] : [],
+  },
 };
 
 // Get current environment settings
 export const getCurrentOAuthSettings = () => {
-  const isLocal =
-    typeof window !== 'undefined' && window.location.hostname === 'localhost';
-
-  return isLocal ? oauthSettings.localhost : oauthSettings.vercel;
+  return isLocalDev() ? oauthSettings.localhost : oauthSettings.vercel;
 };
 
 export default configCopy;

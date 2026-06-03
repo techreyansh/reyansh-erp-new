@@ -1,6 +1,7 @@
 /**
  * Supabase may return OAuth errors in the query string, the hash, or both (e.g. ...#error=...&sb=).
  */
+import { appEnv, getConfiguredProductionUrl, getRuntimeOrigin } from '../config/env';
 
 /**
  * After Google sign-in, Supabase sends the user here (app root). Must be in Supabase Redirect URLs.
@@ -8,15 +9,14 @@
  */
 export function getOAuthRedirectUrl() {
   if (typeof window === 'undefined') {
-    return 'https://erp-final-update-guje.vercel.app';
+    return getConfiguredProductionUrl();
   }
-  // Keep PKCE verifier + callback on the same origin currently serving the app.
-  return window.location.origin;
+  return getRuntimeOrigin();
 }
 
 /** e.g. https://xxxx.supabase.co — for Google "Authorized JavaScript origins" */
 export function getSupabaseProjectOrigin() {
-  const raw = process.env.REACT_APP_SUPABASE_URL?.trim();
+  const raw = appEnv.supabaseUrl;
   if (!raw) return null;
   try {
     return new URL(raw.startsWith('http') ? raw : `https://${raw}`).origin;
@@ -37,7 +37,7 @@ export function getGoogleSignInWithOAuthOptions() {
 }
 
 export function getSupabaseGoogleRedirectCallbackUrl() {
-  const raw = process.env.REACT_APP_SUPABASE_URL?.trim();
+  const raw = appEnv.supabaseUrl;
   if (!raw) return 'https://<your-project-ref>.supabase.co/auth/v1/callback';
   try {
     const u = new URL(raw.startsWith('http') ? raw : `https://${raw}`);

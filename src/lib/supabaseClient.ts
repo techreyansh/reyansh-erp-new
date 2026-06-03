@@ -1,10 +1,12 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../types/supabase';
 
+import { appEnv } from '../config/env';
+
 const isDev = process.env.NODE_ENV === 'development';
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL?.trim() || '';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY?.trim() || '';
+const supabaseUrl = appEnv.supabaseUrl;
+const supabaseKey = appEnv.supabaseAnonKey;
 
 if (isDev) {
   console.log('SUPABASE URL (REACT_APP):', process.env.REACT_APP_SUPABASE_URL ?? '(undefined)');

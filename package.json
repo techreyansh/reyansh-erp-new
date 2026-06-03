@@ -2,6 +2,10 @@
   "name": "reyansh",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0 <=22.x",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
@@ -44,7 +48,8 @@
     "start": "react-scripts start",
     "build": "cross-env CI=false react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:ci": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
