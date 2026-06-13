@@ -5,6 +5,8 @@ import ModuleTablePage from "../../components/common/ModuleTablePage";
 import DealsKanban from "../../components/crm/DealsKanban";
 import CRMEnterprisePanels from "../../components/crm/CRMEnterprisePanels";
 import CRMDashboard from "../../components/crm/CRMDashboard";
+import CRMFlowStrip from "../../components/crm/CRMFlowStrip";
+import CRMGuide from "../../components/crm/CRMGuide";
 import { crmMock, crmPpcLookups } from "../../data/mock/crmPpcData";
 import { useEnterpriseERPStore } from "../../hooks/useEnterpriseERPStore";
 import crmPpcBackendService from "../../services/crmPpcBackendService";
@@ -203,11 +205,17 @@ const CRMModulePage = () => {
     },
   }), [crm, followUps]);
 
+  // CRM onboarding / playbook
+  if (section === "guide") {
+    return <CRMGuide />;
+  }
+
   // CRM dashboard (overview)
   if (section === "dashboard") {
     return (
       <Container maxWidth="xl">
         <Box sx={{ py: 1 }}>
+          <CRMFlowStrip current={section} />
           <CRMDashboard data={crm} loading={loading} />
         </Box>
       </Container>
@@ -218,6 +226,7 @@ const CRMModulePage = () => {
     return (
       <Container maxWidth="xl">
         <Box sx={{ py: 1 }}>
+          <CRMFlowStrip current={section} />
           <DealsKanban deals={deals} />
         </Box>
       </Container>
@@ -230,6 +239,7 @@ const CRMModulePage = () => {
     return (
       <Container maxWidth="xl">
         <Box sx={{ py: 1 }}>
+          <CRMFlowStrip current={section} />
           <CRMEnterprisePanels
             section={section}
             leads={crm?.leads || []}
@@ -254,6 +264,7 @@ const CRMModulePage = () => {
   return (
     <Container maxWidth="xl">
       <Box sx={{ py: 1 }}>
+        <CRMFlowStrip current={section} />
         <ModuleTablePage
           {...selectedConfig}
           loading={loading}

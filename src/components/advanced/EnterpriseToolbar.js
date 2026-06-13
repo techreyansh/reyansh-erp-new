@@ -1,7 +1,12 @@
 import React from "react";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
-import { Download, FilterList, Save } from "@mui/icons-material";
+import { Button, FormControl, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, TextField } from "@mui/material";
+import { Download, FilterList, Save, Search } from "@mui/icons-material";
 
+/**
+ * Shared controls bar for the CRM/PPC enterprise panels.
+ * One clean outlined card: search + role on the left, view-save + filters +
+ * export on the right, wrapping gracefully on small screens.
+ */
 const EnterpriseToolbar = ({
   search,
   setSearch,
@@ -11,13 +16,31 @@ const EnterpriseToolbar = ({
   viewName,
   setViewName,
   onSaveView,
-  children
+  children,
 }) => (
-  <Stack spacing={1.5}>
-    <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} justifyContent="space-between">
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-        <TextField size="small" label="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <FormControl size="small" sx={{ minWidth: 180 }}>
+  <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 1.5, md: 2 } }}>
+    <Stack
+      direction={{ xs: "column", lg: "row" }}
+      spacing={1.5}
+      alignItems={{ lg: "center" }}
+      justifyContent="space-between"
+    >
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ flex: 1, minWidth: 0 }}>
+        <TextField
+          size="small"
+          placeholder="Search…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ minWidth: { sm: 220 }, flex: { sm: 1 }, maxWidth: 320 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ fontSize: 18, color: "text.disabled" }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>Role</InputLabel>
           <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
             <MenuItem value="Admin">Admin</MenuItem>
@@ -26,24 +49,28 @@ const EnterpriseToolbar = ({
           </Select>
         </FormControl>
       </Stack>
-      <Stack direction="row" spacing={1}>
-        <Button startIcon={<FilterList />} variant="outlined">Advanced Filters</Button>
-        <Button startIcon={<Download />} variant="outlined" onClick={onExport}>Export CSV</Button>
+
+      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <TextField
+          size="small"
+          placeholder="Name this view"
+          value={viewName}
+          onChange={(e) => setViewName(e.target.value)}
+          sx={{ width: { xs: "100%", sm: 180 } }}
+        />
+        <Button size="small" startIcon={<Save sx={{ fontSize: 18 }} />} onClick={onSaveView} sx={{ textTransform: "none" }}>
+          Save view
+        </Button>
+        <Button size="small" startIcon={<FilterList sx={{ fontSize: 18 }} />} variant="outlined" sx={{ textTransform: "none" }}>
+          Filters
+        </Button>
+        <Button size="small" startIcon={<Download sx={{ fontSize: 18 }} />} variant="outlined" onClick={onExport} sx={{ textTransform: "none" }}>
+          Export CSV
+        </Button>
       </Stack>
     </Stack>
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-      <TextField
-        size="small"
-        label="Saved view name"
-        value={viewName}
-        onChange={(e) => setViewName(e.target.value)}
-        sx={{ maxWidth: 260 }}
-      />
-      <Button startIcon={<Save />} variant="outlined" onClick={onSaveView}>Save View</Button>
-      <Box sx={{ flex: 1 }} />
-      {children}
-    </Stack>
-  </Stack>
+    {children}
+  </Paper>
 );
 
 export default EnterpriseToolbar;

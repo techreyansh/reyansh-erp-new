@@ -448,6 +448,7 @@ const Header = () => {
       label: "CRM",
       icon: <CRMIcon />,
       items: [
+        { subheader: "Get started", label: "CRM Guide", path: "/crm/guide", icon: <HelpIcon />, roles: crmModuleRoles },
         { subheader: "Pipeline", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
         { subheader: "Pipeline", label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
         { subheader: "Pipeline", label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
