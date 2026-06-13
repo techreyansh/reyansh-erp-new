@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -182,6 +182,20 @@ const Costing = () => {
   const handleSettingsChange = (field, value) => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
+
+  // Live cost breakdown — recomputes as the user types in the entry form.
+  const liveCost = useMemo(() => {
+    try {
+      return costingService.calculateValues({
+        ...formData,
+        copperRate: settings.copperRate,
+        pvcRate: settings.pvcRate,
+        labourOnWire: settings.labourOnWire,
+      });
+    } catch (e) {
+      return null;
+    }
+  }, [formData, settings]);
 
   const handleSubmit = async () => {
     try {
@@ -551,6 +565,48 @@ const Costing = () => {
         </DialogTitle>
         
         <DialogContent sx={{ p: 4, backgroundColor: '#fafafa' }}>
+          {/* Live cost breakdown — updates as you fill the form */}
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3, p: 2, borderRadius: 2.5, position: 'sticky', top: 0, zIndex: 2,
+              border: '1px solid', borderColor: 'divider',
+              background: (t) => `linear-gradient(135deg, ${alpha(t.palette.primary.main, 0.1)} 0%, ${alpha(t.palette.primary.main, 0.03)} 100%)`,
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, letterSpacing: '0.02em' }}>
+                ⚡ Live Cost Breakdown
+              </Typography>
+              <Chip
+                label={`Cord Cost  ₹${(liveCost?.cordCost || 0).toFixed(2)}`}
+                color="primary"
+                sx={{ fontWeight: 800, fontSize: '0.85rem', height: 30 }}
+              />
+            </Stack>
+            <Grid container spacing={1.25}>
+              {[
+                { label: 'Final Copper', value: `${(liveCost?.finalCopper || 0).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'Final PVC', value: `${((liveCost?.finalPVCRound || 0) + (liveCost?.finalPVCFlat || 0)).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'RMC', value: `₹${(liveCost?.rmc || 0).toFixed(2)}`, unit: '/100m' },
+                { label: 'Wire / metre', value: `₹${(liveCost?.costOfWirePerMtr || 0).toFixed(2)}`, unit: 'per m' },
+                { label: 'Wire Cost', value: `₹${(liveCost?.wireCost || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
+                { label: 'Plug + Terminal', value: `₹${((parseFloat(formData.plugCost) || 0) + (parseFloat(formData.terminalAccCost) || 0)).toFixed(2)}`, unit: 'add-ons' },
+              ].map((m) => (
+                <Grid item xs={6} sm={4} md={2} key={m.label}>
+                  <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', height: '100%' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.62rem', display: 'block' }}>
+                      {m.label}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, lineHeight: 1.2 }}>{m.value}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.6rem' }}>{m.unit}</Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+
           <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
             <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               📋 Basic Information

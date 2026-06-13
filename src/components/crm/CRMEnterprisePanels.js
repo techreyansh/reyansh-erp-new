@@ -219,27 +219,33 @@ const CRMEnterprisePanels = ({
                 "&::before": { content: '""', position: "absolute", left: 7, top: 6, bottom: 6, width: "2px", bgcolor: "divider" },
               }}
             >
-              {filteredTimeline.map((event) => (
-                <Box key={event.id} sx={{ position: "relative", pb: 2.5, "&:last-child": { pb: 0 } }}>
-                  <Box
-                    sx={{
-                      position: "absolute", left: -22, top: 4, width: 12, height: 12, borderRadius: "50%",
-                      bgcolor: "primary.main", border: "2px solid", borderColor: "background.paper",
-                    }}
-                  />
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{event.action}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(event.timestamp).toLocaleString()} • {event.user}
-                      </Typography>
-                    </Box>
-                    {event.type && (
-                      <Chip size="small" label={event.type} variant="outlined" sx={{ fontWeight: 600, flexShrink: 0 }} />
-                    )}
-                  </Stack>
-                </Box>
-              ))}
+              {filteredTimeline.map((event) => {
+                const tc = { Call: "#1E7DBE", Meeting: "#45ADE6", Status: "#D97706", Email: "#7C3AED", Note: "#81898F", Order: "#059669" }[event.type] || "#81898F";
+                return (
+                  <Box key={event.id} sx={{ position: "relative", pb: 2 }}>
+                    <Box
+                      sx={{
+                        position: "absolute", left: -22, top: 8, width: 12, height: 12, borderRadius: "50%",
+                        bgcolor: tc, border: "2px solid", borderColor: "background.paper",
+                      }}
+                    />
+                    <Stack
+                      direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}
+                      sx={{ p: 1.25, borderRadius: 1.5, transition: "background-color 0.15s ease", "&:hover": { bgcolor: "action.hover" } }}
+                    >
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{event.action}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(event.timestamp).toLocaleString()} • {event.user}
+                        </Typography>
+                      </Box>
+                      {event.type && (
+                        <Chip size="small" label={event.type} variant="outlined" sx={{ fontWeight: 700, flexShrink: 0, color: tc, borderColor: tc }} />
+                      )}
+                    </Stack>
+                  </Box>
+                );
+              })}
             </Box>
           )}
         </Paper>
