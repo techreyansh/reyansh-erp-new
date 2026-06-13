@@ -878,7 +878,7 @@ const VendorManagement = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {vendors.length}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -901,7 +901,7 @@ const VendorManagement = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                             {vendors.filter(v => v.status === 'Active').length}
                           </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -924,7 +924,7 @@ const VendorManagement = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {filteredVendors.length}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -947,7 +947,7 @@ const VendorManagement = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                             {vendors.reduce((sum, v) => sum + (v.totalOrders || 0), 0)}
                           </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -1011,7 +1011,7 @@ const VendorManagement = () => {
               <Typography 
                   variant="body1" 
                 sx={{ 
-                    color: '#6c757d',
+                    color: 'text.secondary',
                     fontWeight: 500
                 }}
               >
@@ -1047,10 +1047,10 @@ const VendorManagement = () => {
                 onClick={fetchVendors}
                 disabled={loading}
                 sx={{
-                    borderColor: '#fb923c',
-                    color: '#fb923c',
+                    borderColor: 'primary.main',
+                    color: 'primary.main',
                     '&:hover': { 
-                      borderColor: '#f97316',
+                      borderColor: 'primary.dark',
                       backgroundColor: 'rgba(251, 146, 60, 0.1)',
                       transform: 'translateY(-2px)'
                     },
@@ -1100,7 +1100,7 @@ const VendorManagement = () => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                          <Search sx={{ color: '#fb923c' }} />
+                          <Search sx={{ color: 'primary.main' }} />
                             </InputAdornment>
                           ),
                         }}
@@ -1109,8 +1109,8 @@ const VendorManagement = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#fb923c' },
-                        '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                        '&:hover fieldset': { borderColor: 'primary.main' },
+                        '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                       />
@@ -1125,8 +1125,8 @@ const VendorManagement = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#fb923c' },
-                        '&.Mui-focused fieldset': { borderColor: '#fb923c' },
+                        '&:hover fieldset': { borderColor: 'primary.main' },
+                        '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                         '& .MuiSelect-select': {
                           minWidth: '200px', // Minimum width for complete status display
                           fontSize: '0.875rem', // Slightly smaller font to fit more text
@@ -1153,8 +1153,8 @@ const VendorManagement = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#fb923c' },
-                        '&.Mui-focused fieldset': { borderColor: '#fb923c' },
+                        '&:hover fieldset': { borderColor: 'primary.main' },
+                        '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                         '& .MuiSelect-select': {
                           minWidth: '200px', // Minimum width for complete category display
                           fontSize: '0.875rem', // Slightly smaller font to fit more text
@@ -1182,8 +1182,8 @@ const VendorManagement = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#fb923c' },
-                        '&.Mui-focused fieldset': { borderColor: '#fb923c' },
+                        '&:hover fieldset': { borderColor: 'primary.main' },
+                        '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                         '& .MuiSelect-select': {
                           minWidth: '200px', // Minimum width for complete sort option display
                           fontSize: '0.875rem', // Slightly smaller font to fit more text
@@ -1211,8 +1211,9 @@ const VendorManagement = () => {
                 mb: 3,
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                border: '1px solid #f44336',
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                border: 1,
+                borderColor: 'error.main',
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
             >
               {error}
@@ -1244,7 +1245,7 @@ const VendorManagement = () => {
                   >
                     <Business sx={{ color: 'white', fontSize: 30 }} />
             </Box>
-                  <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     Loading vendors...
                   </Typography>
                 </Box>
@@ -1325,12 +1326,12 @@ const VendorManagement = () => {
                                 mb: 2
                               }}
                             >
-                              <Business sx={{ color: '#6c757d', fontSize: 40 }} />
+                              <Business sx={{ color: 'text.secondary', fontSize: 40 }} />
                             </Box>
-                            <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 600, mb: 1 }}>
+                            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 600, mb: 1 }}>
                                 No vendors found
                               </Typography>
-                            <Typography variant="body2" sx={{ color: '#adb5bd' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                 {searchTerm ? 'Try adjusting your search criteria' : 'Add your first vendor to get started'}
                               </Typography>
                             </Box>
@@ -1347,7 +1348,7 @@ const VendorManagement = () => {
                               boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                               transition: 'all 0.3s ease',
                               '& .MuiTableCell-root': {
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 600
                               }
                       },
@@ -1361,14 +1362,14 @@ const VendorManagement = () => {
                             transition: 'all 0.3s ease'
                           }}
                         >
-                          <TableCell sx={{ fontWeight: 600, color: '#2c3e50' }}>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Business sx={{ color: '#fb923c', fontSize: 20 }} />
+                              <Business sx={{ color: 'primary.main', fontSize: 20 }} />
                                 <Box>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                     {vendor.vendorName || 'Unnamed Vendor'}
                                   </Typography>
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                                     {vendor.industry || 'No industry'}
                                   </Typography>
                                 </Box>
@@ -1386,13 +1387,13 @@ const VendorManagement = () => {
                         }}
                       />
                             </TableCell>
-                          <TableCell sx={{ color: '#2c3e50', minWidth: 140, maxWidth: 180 }}>
+                          <TableCell sx={{ color: 'text.primary', minWidth: 140, maxWidth: 180 }}>
                             <Box>
                               <Typography 
                                 variant="body2" 
                                 sx={{ 
                                   fontWeight: 600, 
-                                  color: '#2c3e50',
+                                  color: 'text.primary',
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis'
@@ -1402,20 +1403,20 @@ const VendorManagement = () => {
                                 {vendor.businessType || 'N/A'}
                               </Typography>
                               {vendor.gstin && (
-                                <Typography variant="caption" sx={{ color: '#059669', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 500 }}>
                                   GST: {vendor.gstin}
                               </Typography>
                               )}
                             </Box>
                             </TableCell>
-                            <TableCell sx={{ color: '#2c3e50', minWidth: 140, maxWidth: 160 }}>
+                            <TableCell sx={{ color: 'text.primary', minWidth: 140, maxWidth: 160 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <Category sx={{ fontSize: 16, color: '#fb923c', flexShrink: 0 }} />
+                                <Category sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
                                 <Typography 
                                   variant="body2" 
                                   sx={{ 
                                     fontWeight: 600, 
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     whiteSpace: 'nowrap',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
@@ -1427,21 +1428,21 @@ const VendorManagement = () => {
                                 </Typography>
                               </Box>
                             </TableCell>
-                          <TableCell sx={{ color: '#2c3e50' }}>
+                          <TableCell sx={{ color: 'text.primary' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <LocationOn sx={{ fontSize: 16, color: '#fb923c' }} />
+                              <LocationOn sx={{ fontSize: 16, color: 'primary.main' }} />
                               <Box>
                       <Typography 
                         variant="body2" 
                         sx={{ 
                                     fontWeight: 600,
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     lineHeight: 1.4
                         }}
                       >
                                   {vendor.city || 'N/A'}, {vendor.state || 'N/A'}
                               </Typography>
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                                   {vendor.pincode || ''}
                               </Typography>
                               </Box>
@@ -1451,22 +1452,22 @@ const VendorManagement = () => {
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                               {vendor.contacts?.slice(0, 2).map((c, i) => (
                           <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <Person fontSize="small" sx={{ color: '#fb923c' }} />
-                                  <Typography variant="body2" sx={{ color: '#2c3e50', fontWeight: 600 }}>
+                                  <Person fontSize="small" sx={{ color: 'primary.main' }} />
+                                  <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
                               {c.name || 'No name'}
                               </Typography>
                                   {c.isPrimary && (
-                                    <Star sx={{ fontSize: 12, color: '#ffc107' }} />
+                                    <Star sx={{ fontSize: 12, color: 'warning.main' }} />
                                   )}
                           </Box>
                         ))}
                               {vendor.contacts?.length > 2 && (
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                                   +{vendor.contacts.length - 2} more
                               </Typography>
                               )}
                               {(!vendor.contacts || vendor.contacts.length === 0) && (
-                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   No contacts
                               </Typography>
                               )}
@@ -1478,16 +1479,16 @@ const VendorManagement = () => {
                                 label={vendor.status || 'Active'}
                                 size="small"
                             sx={{
-                                  backgroundColor: vendor.status === 'Active' ? '#d4edda' : 
-                                                  vendor.status === 'Inactive' ? '#f8d7da' : '#fff3cd',
-                                  color: vendor.status === 'Active' ? '#155724' : 
-                                        vendor.status === 'Inactive' ? '#721c24' : '#856404',
+                                  backgroundColor: vendor.status === 'Active' ? 'success.light' :
+                                                  vendor.status === 'Inactive' ? 'error.light' : 'warning.light',
+                                  color: vendor.status === 'Active' ? 'success.dark' :
+                                        vendor.status === 'Inactive' ? 'error.dark' : 'warning.dark',
                                   fontWeight: 600,
                               fontSize: '0.7rem'
                             }}
                           />
                               {vendor.totalOrders > 0 && (
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                                   {vendor.totalOrders} orders
                                 </Typography>
                               )}
@@ -1501,13 +1502,13 @@ const VendorManagement = () => {
                                     key={i}
                                     sx={{
                                       fontSize: 16,
-                                      color: i < (vendor.rating || 0) ? '#ffc107' : '#e9ecef'
+                                      color: i < (vendor.rating || 0) ? 'warning.main' : 'divider'
                                     }}
                                   />
                                 ))}
                               </Box>
                               {vendor.totalValue > 0 && (
-                                <Typography variant="caption" sx={{ color: '#28a745', fontWeight: 600 }}>
+                                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
                                   ₹{vendor.totalValue.toLocaleString()}
                                 </Typography>
                               )}
@@ -1519,7 +1520,7 @@ const VendorManagement = () => {
                                   <IconButton 
                                     onClick={() => handleOpenDialog(vendor, idx)}
                           sx={{ 
-                                    color: '#fb923c',
+                                    color: 'primary.main',
                                     '&:hover': { 
                                       backgroundColor: 'rgba(251, 146, 60, 0.1)',
                                       transform: 'scale(1.1)'
@@ -1534,7 +1535,7 @@ const VendorManagement = () => {
                                   <IconButton 
                                     onClick={() => handleDelete(idx)}
                           sx={{ 
-                                    color: '#dc3545',
+                                    color: 'error.main',
                                     '&:hover': { 
                                       backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                       transform: 'scale(1.1)'
@@ -1582,7 +1583,7 @@ const VendorManagement = () => {
                 }}>
                   {/* Rows per page selector */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                   </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1600,7 +1601,7 @@ const VendorManagement = () => {
                             borderColor: 'rgba(251, 146, 60, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#fb923c',
+                            borderColor: 'primary.main',
                           }
                         }}
                     >
@@ -1615,7 +1616,7 @@ const VendorManagement = () => {
 
                   {/* Pagination info and controls */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {startIndex + 1}-{Math.min(endIndex, filteredVendors.length)} of {filteredVendors.length} vendors
                     </Typography>
                     
@@ -1697,7 +1698,7 @@ const VendorManagement = () => {
       >
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%)',
-          color: '#2c3e50',
+          color: 'text.primary',
           fontWeight: 700,
           fontSize: '1.8rem',
           py: 3,
@@ -1723,10 +1724,10 @@ const VendorManagement = () => {
               <Business sx={{ fontSize: 32, color: 'white' }} />
           </Box>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#2c3e50', mb: 0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                 {editIndex !== null ? 'Edit Vendor Information' : 'Add New Vendor'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {editIndex !== null ? 'Update vendor details' : 'Create vendor profile'}
               </Typography>
             </Box>
@@ -1734,10 +1735,10 @@ const VendorManagement = () => {
           <IconButton 
             onClick={handleCloseDialog}
             sx={{ 
-              color: '#64748b',
+              color: 'text.secondary',
               '&:hover': { 
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444'
+                color: 'error.main'
               }
             }}
           >
@@ -1771,8 +1772,9 @@ const VendorManagement = () => {
                 m: 3,
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                border: '1px solid #f44336',
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                border: 1,
+                borderColor: 'error.main',
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
             >
               {error}
@@ -1812,7 +1814,7 @@ const VendorManagement = () => {
                 '& .MuiStepConnector-line': {
                   height: 3,
                   border: 0,
-                  backgroundColor: '#e2e8f0',
+                  backgroundColor: 'divider',
                   borderRadius: 1,
                   transition: 'all 0.3s ease'
                 }
@@ -1854,19 +1856,19 @@ const VendorManagement = () => {
                               : isAccessible
                               ? '0 2px 8px rgba(0, 0, 0, 0.1)'
                               : '0 1px 4px rgba(0, 0, 0, 0.05)',
-                            color: completed || active ? 'white' : isAccessible ? '#64748b' : '#94a3b8',
+                            color: completed || active ? 'white' : isAccessible ? 'text.secondary' : 'text.secondary',
                             fontSize: '1.2rem',
                             fontWeight: 700,
                             transition: 'all 0.3s ease',
                             transform: active ? 'scale(1.1)' : 'scale(1)',
                             border: '3px solid',
                             borderColor: completed 
-                              ? '#10b981' 
+                              ? 'success.main' 
                               : active 
-                              ? '#fb923c' 
+                              ? 'primary.main' 
                               : isAccessible
-                              ? '#e2e8f0'
-                              : '#f1f5f9',
+                              ? 'divider'
+                              : 'action.hover',
                             cursor: isAccessible ? 'pointer' : 'not-allowed',
                             opacity: isAccessible ? 1 : 0.6,
                             '&:hover': isAccessible ? {
@@ -1888,13 +1890,13 @@ const VendorManagement = () => {
                       '& .MuiStepLabel-label': {
                         fontSize: '0.9rem',
                         fontWeight: 600,
-                        color: activeStep === index ? '#fb923c' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
+                        color: activeStep === index ? 'primary.main' : activeStep > index ? 'success.main' : isStepAccessible(index) ? 'text.secondary' : 'text.secondary',
                         mt: 1,
                         transition: 'all 0.3s ease',
                         cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                         opacity: isStepAccessible(index) ? 1 : 0.6,
                         '&:hover': isStepAccessible(index) ? {
-                          color: activeStep === index ? '#fb923c' : activeStep > index ? '#10b981' : '#fb923c',
+                          color: activeStep === index ? 'primary.main' : activeStep > index ? 'success.main' : 'primary.main',
                           fontWeight: 700
                         } : {}
                       },
@@ -1921,10 +1923,10 @@ const VendorManagement = () => {
             
             {/* Progress indicator */}
             <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
               Step {activeStep + 1} of {steps.length}
             </Typography>
-              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: '#e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                 <Box
                   sx={{
                     height: '100%',
@@ -1935,7 +1937,7 @@ const VendorManagement = () => {
                   }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ color: '#fb923c', fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 700 }}>
                 {Math.round(((activeStep + 1) / steps.length) * 100)}%
               </Typography>
             </Box>
@@ -1990,13 +1992,13 @@ const VendorManagement = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                       Basic Information
                     </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                           Vendor and business details
                         </Typography>
                       </Box>
@@ -2015,23 +2017,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#fb923c'
+                              borderBottomColor: 'primary.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#fb923c'
+                              borderBottomColor: 'primary.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2049,10 +2051,10 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#6b7280',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
@@ -2062,7 +2064,7 @@ const VendorManagement = () => {
                               backgroundColor: 'rgba(251, 146, 60, 0.05)',
                               borderRadius: '4px 4px 0 0',
                               paddingLeft: '8px',
-                              color: '#64748b'
+                              color: 'text.secondary'
                             }
                           }}
                         />
@@ -2070,7 +2072,7 @@ const VendorManagement = () => {
                       <Grid item xs={12} sm={6} md={4}>
                         <FormControl fullWidth variant="standard" required sx={{ minWidth: '200px' }}>
                           <InputLabel sx={{ 
-                            color: '#374151', 
+                            color: 'text.primary', 
                             fontSize: '14px', 
                             fontWeight: 500,
                             whiteSpace: 'nowrap',
@@ -2091,16 +2093,16 @@ const VendorManagement = () => {
                                     fontSize: '16px',
                                     fontWeight: 500,
                                     padding: '12px 16px',
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     whiteSpace: 'normal',
                                     wordWrap: 'break-word',
                                     '&:hover': {
                                       backgroundColor: 'rgba(251, 146, 60, 0.08)',
-                                      color: '#fb923c'
+                                      color: 'primary.main'
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: 'rgba(251, 146, 60, 0.12)',
-                                      color: '#fb923c',
+                                      color: 'primary.main',
                                       fontWeight: 600,
                                       '&:hover': {
                                         backgroundColor: 'rgba(251, 146, 60, 0.16)'
@@ -2112,18 +2114,18 @@ const VendorManagement = () => {
                             }}
                             sx={{
                               '& .MuiInput-underline:before': {
-                                borderBottomColor: '#e2e8f0'
+                                borderBottomColor: 'divider'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#fb923c'
+                                borderBottomColor: 'primary.main'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#fb923c'
+                                borderBottomColor: 'primary.main'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
                                 padding: '8px 0',
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 500,
                                 overflow: 'visible',
                                 textOverflow: 'unset',
@@ -2177,13 +2179,13 @@ const VendorManagement = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                       Contact Details
                     </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                           Address and location information
                         </Typography>
                       </Box>
@@ -2203,23 +2205,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2236,23 +2238,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2269,23 +2271,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2302,23 +2304,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2335,23 +2337,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2368,23 +2370,23 @@ const VendorManagement = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.main'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.primary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2422,13 +2424,13 @@ const VendorManagement = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                       Business Information
                     </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'secondary.main', fontWeight: 500 }}>
                           Legal and business documentation
                         </Typography>
                       </Box>
@@ -2448,8 +2450,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2468,8 +2470,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2485,8 +2487,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2503,8 +2505,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2519,7 +2521,7 @@ const VendorManagement = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#fb923c', 
+                      color: 'primary.main', 
                       fontWeight: 700, 
                       mb: 2,
                     display: 'flex',
@@ -2576,8 +2578,8 @@ const VendorManagement = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                               />
@@ -2596,8 +2598,8 @@ const VendorManagement = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                               />
@@ -2615,8 +2617,8 @@ const VendorManagement = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                               />
@@ -2633,8 +2635,8 @@ const VendorManagement = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                               />
@@ -2645,7 +2647,7 @@ const VendorManagement = () => {
                                   <IconButton 
                                     onClick={() => setPrimaryContact(idx)}
                                     sx={{ 
-                                      color: c.isPrimary ? '#ffc107' : '#6c757d',
+                                      color: c.isPrimary ? 'warning.main' : 'text.secondary',
                                       '&:hover': { backgroundColor: 'rgba(255, 193, 7, 0.1)' }
                                     }}
                                   >
@@ -2656,9 +2658,9 @@ const VendorManagement = () => {
                         onClick={() => removeContact(idx)} 
                         disabled={form.contacts.length === 1}
                         sx={{ 
-                                    color: '#dc3545',
+                                    color: 'error.main',
                                     '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.1)' },
-                                    '&:disabled': { color: '#6c757d' }
+                                    '&:disabled': { color: 'text.secondary' }
                         }}
                       >
                         <DeleteIcon fontSize="small" />
@@ -2673,11 +2675,11 @@ const VendorManagement = () => {
                   startIcon={<AddIcon />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#fb923c',
-                          color: '#fb923c',
+                          borderColor: 'primary.main',
+                          color: 'primary.main',
                           borderRadius: 2,
                     '&:hover': {
-                            borderColor: '#f97316',
+                            borderColor: 'primary.dark',
                             backgroundColor: 'rgba(251, 146, 60, 0.05)'
                     }
                   }}
@@ -2694,7 +2696,7 @@ const VendorManagement = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#fb923c', 
+                      color: 'primary.main', 
                       fontWeight: 700, 
                       mb: 2,
                       display: 'flex',
@@ -2750,8 +2752,8 @@ const VendorManagement = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                           }
                         }}
                               />
@@ -2768,8 +2770,8 @@ const VendorManagement = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                                   }
                                 }}
                               />
@@ -2786,8 +2788,8 @@ const VendorManagement = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                                   }
                                 }}
                               />
@@ -2804,8 +2806,8 @@ const VendorManagement = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#fb923c' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                    '&:hover fieldset': { borderColor: 'primary.main' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                                   }
                                 }}
                               />
@@ -2815,9 +2817,9 @@ const VendorManagement = () => {
                         onClick={() => removeProduct(idx)} 
                         disabled={form.products.length === 1}
                         sx={{ 
-                                  color: '#dc3545',
+                                  color: 'error.main',
                                   '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.1)' },
-                                  '&:disabled': { color: '#6c757d' }
+                                  '&:disabled': { color: 'text.secondary' }
                         }}
                       >
                         <DeleteIcon fontSize="small" />
@@ -2831,11 +2833,11 @@ const VendorManagement = () => {
                   startIcon={<AddIcon />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#fb923c',
-                          color: '#fb923c',
+                          borderColor: 'primary.main',
+                          color: 'primary.main',
                           borderRadius: 2,
                     '&:hover': {
-                            borderColor: '#f97316',
+                            borderColor: 'primary.dark',
                             backgroundColor: 'rgba(251, 146, 60, 0.05)'
                     }
                   }}
@@ -2852,7 +2854,7 @@ const VendorManagement = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#fb923c', 
+                      color: 'primary.main', 
                       fontWeight: 700, 
                       mb: 2,
                     display: 'flex',
@@ -2874,8 +2876,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2892,8 +2894,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2910,8 +2912,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2927,8 +2929,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -2943,7 +2945,7 @@ const VendorManagement = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#fb923c', 
+                      color: 'primary.main', 
                       fontWeight: 700, 
                       mb: 2,
                       display: 'flex',
@@ -2956,7 +2958,7 @@ const VendorManagement = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <FormControl fullWidth variant="standard">
-                          <InputLabel sx={{ color: '#374151', fontSize: '14px', fontWeight: 500 }}>Status</InputLabel>
+                          <InputLabel sx={{ color: 'text.primary', fontSize: '14px', fontWeight: 500 }}>Status</InputLabel>
                           <Select
                             name="status"
                             value={form.status}
@@ -2964,18 +2966,18 @@ const VendorManagement = () => {
                             label="Status"
                             sx={{
                               '& .MuiInput-underline:before': {
-                                borderBottomColor: '#e2e8f0'
+                                borderBottomColor: 'divider'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#fb923c'
+                                borderBottomColor: 'primary.main'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#fb923c'
+                                borderBottomColor: 'primary.main'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
                                 padding: '8px 0',
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 500
                               }
                             }}
@@ -3000,8 +3002,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -3019,8 +3021,8 @@ const VendorManagement = () => {
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: 2,
                                   '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                                  '&:hover fieldset': { borderColor: '#fb923c' },
-                                  '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                                  '&:hover fieldset': { borderColor: 'primary.main' },
+                                  '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                                 }
                               }}
                             />
@@ -3039,8 +3041,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -3057,8 +3059,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -3076,8 +3078,8 @@ const VendorManagement = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(251, 146, 60, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#fb923c' },
-                              '&.Mui-focused fieldset': { borderColor: '#fb923c' }
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -3114,8 +3116,8 @@ const VendorManagement = () => {
               variant="outlined"
               startIcon={<Schedule />}
               sx={{
-                borderColor: activeStep === 0 ? '#e2e8f0' : '#fb923c',
-                color: activeStep === 0 ? '#94a3b8' : '#fb923c',
+                borderColor: activeStep === 0 ? 'divider' : 'primary.main',
+                color: activeStep === 0 ? 'text.secondary' : 'primary.main',
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
@@ -3125,14 +3127,14 @@ const VendorManagement = () => {
                 minWidth: 120,
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  borderColor: activeStep === 0 ? '#e2e8f0' : '#f97316',
+                  borderColor: activeStep === 0 ? 'divider' : 'primary.dark',
                   backgroundColor: activeStep === 0 ? 'transparent' : 'rgba(251, 146, 60, 0.05)',
                   transform: activeStep === 0 ? 'none' : 'translateY(-2px)',
                   boxShadow: activeStep === 0 ? 'none' : '0 4px 12px rgba(251, 146, 60, 0.2)'
                 },
                 '&:disabled': {
-                  borderColor: '#e2e8f0',
-                  color: '#94a3b8',
+                  borderColor: 'divider',
+                  color: 'text.secondary',
                   backgroundColor: 'transparent'
                 }
               }}
@@ -3159,7 +3161,7 @@ const VendorManagement = () => {
                   background: isCurrentStepCompleted() 
                     ? 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)'
                     : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                  color: isCurrentStepCompleted() ? 'white' : '#94a3b8',
+                  color: isCurrentStepCompleted() ? 'white' : 'text.secondary',
                   borderRadius: 3,
                   px: 4,
                   py: 1.5,
@@ -3179,7 +3181,7 @@ const VendorManagement = () => {
                   } : {},
                   '&:disabled': {
                     background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                    color: '#94a3b8',
+                    color: 'text.secondary',
                     cursor: 'not-allowed'
                   }
                 }}
@@ -3224,10 +3226,10 @@ const VendorManagement = () => {
           
           {/* Progress indicator */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
               Progress: {Math.round(((activeStep + 1) / steps.length) * 100)}%
             </Typography>
-            <Box sx={{ width: 80, height: 6, backgroundColor: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ width: 80, height: 6, backgroundColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
               <Box
                 sx={{
                   height: '100%',
@@ -3245,7 +3247,7 @@ const VendorManagement = () => {
             startIcon={<Cancel />}
             variant="text"
             sx={{
-              color: '#6c757d',
+              color: 'text.secondary',
               borderRadius: 3,
               px: 3,
               py: 1.5,
@@ -3256,7 +3258,7 @@ const VendorManagement = () => {
               transition: 'all 0.3s ease',
               '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444',
+                color: 'error.main',
                 transform: 'translateY(-1px)',
                 boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
               }

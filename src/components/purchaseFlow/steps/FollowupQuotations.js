@@ -510,7 +510,7 @@ const FollowupQuotations = ({ onComplete }) => {
         <TableContainer component={Paper} sx={{ mb: 2 }}>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ background: '#e3f2fd' }}>
+              <TableRow sx={{ backgroundColor: 'action.hover' }}>
                 <TableCell>Indent Number</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -583,14 +583,14 @@ const FollowupQuotations = ({ onComplete }) => {
           <Typography variant="h6" sx={{ color: theme.palette.success.main, mb: 2 }}>Items for Indent {selectedIndent.IndentNumber}</Typography>
           {selectedIndent.Items && selectedIndent.Items.length > 0 ? (
             selectedIndent.Items.map(item => (
-              <Card key={item.itemCode} sx={{ mb: 3, border: `1px solid ${theme.palette.success.main}`, background: '#fff' }}>
+              <Card key={item.itemCode} sx={{ mb: 3, border: `1px solid ${theme.palette.success.main}`, background: 'background.paper' }}>
                 <CardContent>
                   <Typography variant="subtitle1" sx={{ color: theme.palette.success.main }}>Item: {item.itemName} (Code: {item.itemCode})</Typography>
                   <Typography variant="body2" sx={{ mb: 2 }}>Quantity: {item.quantity} | Specifications: {item.specifications}</Typography>
                   <TableContainer component={Paper} sx={{ mb: 2 }}>
                     <Table size="small">
                       <TableHead>
-                        <TableRow sx={{ background: '#e3f2fd' }}>
+                        <TableRow sx={{ backgroundColor: 'action.hover' }}>
                           <TableCell sx={{ fontWeight: 700 }}>Vendor Code</TableCell>
                           <TableCell sx={{ fontWeight: 700 }}>Vendor Name</TableCell>
                           <TableCell sx={{ fontWeight: 700 }}>Quotation Document</TableCell>
@@ -612,13 +612,13 @@ const FollowupQuotations = ({ onComplete }) => {
                               <TableCell>
                                 {hasQuotation ? (
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: 20 }} />
+                                    <PictureAsPdfIcon sx={{ color: 'error.main', fontSize: 20 }} />
                                     <Typography variant="body2" sx={{ color: theme.palette.success.main, fontWeight: 500 }}>
                                       {q.fileName || 'Quotation Document'}
                                     </Typography>
                                   </Box>
                                 ) : (
-                                  <Typography variant="body2" sx={{ color: '#999', fontStyle: 'italic' }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                                     No quotation uploaded
                                   </Typography>
                                 )}
@@ -628,12 +628,12 @@ const FollowupQuotations = ({ onComplete }) => {
                                   </Typography>
                                 )}
                                 {uploadState.error && (
-                                  <Typography variant="caption" sx={{ color: '#d32f2f', display: 'block', mt: 0.5 }}>
+                                  <Typography variant="caption" sx={{ color: 'error.main', display: 'block', mt: 0.5 }}>
                                     {uploadState.error}
                                   </Typography>
                                 )}
                                 {uploadState.success && (
-                                  <Typography variant="caption" sx={{ color: '#2e7d32', display: 'block', mt: 0.5 }}>
+                                  <Typography variant="caption" sx={{ color: 'success.main', display: 'block', mt: 0.5 }}>
                                     ✓ Uploaded successfully
                                   </Typography>
                                 )}
@@ -652,7 +652,7 @@ const FollowupQuotations = ({ onComplete }) => {
                                       textTransform: 'none',
                                       '&:hover': {
                                         borderColor: theme.palette.success.dark,
-                                        backgroundColor: '#f8fbff'
+                                        backgroundColor: 'action.hover'
                                       },
                                       '&:disabled': {
                                         borderColor: 'rgba(0, 0, 0, 0.26)',
@@ -683,7 +683,7 @@ const FollowupQuotations = ({ onComplete }) => {
                                         sx={{
                                           color: theme.palette.success.main,
                                           '&:hover': {
-                                            backgroundColor: '#e3f2fd'
+                                            backgroundColor: 'action.hover'
                                           }
                                         }}
                                       >
@@ -708,7 +708,7 @@ const FollowupQuotations = ({ onComplete }) => {
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button
               variant="contained"
-              sx={{ background: theme.palette.success.main, color: '#fff' }}
+              sx={{ background: theme.palette.success.main, color: 'common.white' }}
               onClick={handleCompleteStep}
               disabled={!allQuotationsUploaded(selectedIndent)}
             >

@@ -78,7 +78,7 @@ const FinishedGoodsMaster = () => {
           <IconButton
             onClick={() => navigate('/flow-management')}
             sx={{
-              color: '#1976d2',
+              color: 'primary.main',
               backgroundColor: 'rgba(25, 118, 210, 0.1)',
               '&:hover': {
                 backgroundColor: 'rgba(25, 118, 210, 0.2)',

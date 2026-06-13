@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Chip,
@@ -9,7 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
-  Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -18,11 +19,20 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import EventBusyRoundedIcon from '@mui/icons-material/EventBusyRounded';
+import InboxRoundedIcon from '@mui/icons-material/InboxRounded';
 import { usePermissions } from '../../context/PermissionContext';
 import LoadingScreen from '../common/LoadingScreen';
 import AccessDenied from '../auth/AccessDenied';
@@ -43,6 +53,28 @@ function statusColor(status) {
   if (status === 'blocked') return 'error';
   if (status === 'in_progress') return 'info';
   return 'warning';
+}
+
+function priorityColor(priority) {
+  if (priority === 'urgent') return 'error';
+  if (priority === 'high') return 'warning';
+  if (priority === 'medium') return 'info';
+  return 'default';
+}
+
+/** "in_progress" -> "In progress" */
+function humanize(value) {
+  if (!value) return '';
+  return String(value)
+    .replace(/_/g, ' ')
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
+
+function initialsOf(name = '') {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 const emptyEdit = {
@@ -190,126 +222,311 @@ function TeamTasksDashboard() {
     return <LoadingScreen message="Loading team tasks…" />;
   }
 
+  const hasFilters = Boolean(filterDepartment || filterEmployee);
+  const employeeOptions = employees.filter(
+    (row) => !filterDepartment || row.department === filterDepartment
+  );
+  const overdueCount = filteredTasks.filter((t) => isTaskOverdue(t)).length;
+
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
       <Stack spacing={3}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>
-            Team Tasks
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            View, filter, edit, and reassign tasks across departments.
-          </Typography>
-        </Box>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Avatar
+            variant="rounded"
+            sx={{
+              bgcolor: 'primary.main',
+              width: 48,
+              height: 48,
+              boxShadow: (t) => `0 6px 16px ${t.palette.primary.main}33`,
+            }}
+          >
+            <AssignmentOutlinedIcon />
+          </Avatar>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+              Team Tasks
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              View, filter, edit, and reassign tasks across departments.
+            </Typography>
+          </Box>
+        </Stack>
 
         {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
 
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Filter department</InputLabel>
-                <Select
-                  label="Filter department"
-                  value={filterDepartment}
-                  onChange={(e) => {
-                    setFilterDepartment(e.target.value);
-                    setFilterEmployee('');
-                  }}
-                >
-                  <MenuItem value="">All departments</MenuItem>
-                  {DEPARTMENT_OPTIONS.map((dept) => (
-                    <MenuItem key={dept} value={dept}>
-                      {dept}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Filter employee</InputLabel>
-                <Select
-                  label="Filter employee"
-                  value={filterEmployee}
-                  onChange={(e) => setFilterEmployee(e.target.value)}
-                >
-                  <MenuItem value="">All employees</MenuItem>
-                  {employees
-                    .filter((row) => !filterDepartment || row.department === filterDepartment)
-                    .map((row) => (
-                      <MenuItem key={row.id} value={row.id}>
-                        {row.full_name || row.email}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
-              <Chip label={`${filteredTasks.length} task(s)`} />
-            </Grid>
-          </Grid>
+        <Paper
+          variant="outlined"
+          sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2.5, bgcolor: 'background.paper' }}
+        >
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', md: 'center' }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.secondary', pr: 0.5 }}>
+              <FilterListRoundedIcon fontSize="small" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                Filters
+              </Typography>
+            </Stack>
+
+            <FormControl size="small" sx={{ minWidth: 220, flex: { md: 1 } }}>
+              <InputLabel>Department</InputLabel>
+              <Select
+                label="Department"
+                value={filterDepartment}
+                onChange={(e) => {
+                  setFilterDepartment(e.target.value);
+                  setFilterEmployee('');
+                }}
+              >
+                <MenuItem value="">All departments</MenuItem>
+                {DEPARTMENT_OPTIONS.map((dept) => (
+                  <MenuItem key={dept} value={dept}>
+                    {dept}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 220, flex: { md: 1 } }}>
+              <InputLabel>Employee</InputLabel>
+              <Select
+                label="Employee"
+                value={filterEmployee}
+                onChange={(e) => setFilterEmployee(e.target.value)}
+              >
+                <MenuItem value="">All employees</MenuItem>
+                {employeeOptions.map((row) => (
+                  <MenuItem key={row.id} value={row.id}>
+                    {row.full_name || row.email}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {hasFilters && (
+              <Button
+                size="small"
+                color="inherit"
+                startIcon={<ClearRoundedIcon />}
+                onClick={() => {
+                  setFilterDepartment('');
+                  setFilterEmployee('');
+                }}
+                sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
+              >
+                Clear
+              </Button>
+            )}
+
+            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'block' } }} />
+
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
+              {overdueCount > 0 && (
+                <Chip
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  icon={<EventBusyRoundedIcon />}
+                  label={`${overdueCount} overdue`}
+                  sx={{ fontWeight: 600 }}
+                />
+              )}
+              <Chip
+                label={`${filteredTasks.length} task${filteredTasks.length === 1 ? '' : 's'}`}
+                color="primary"
+                sx={{ fontWeight: 700 }}
+              />
+            </Stack>
+          </Stack>
         </Paper>
 
-        <Paper variant="outlined" sx={{ overflow: 'auto' }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Task</TableCell>
-                <TableCell>Assignee</TableCell>
-                <TableCell>Department</TableCell>
-                <TableCell>Priority</TableCell>
-                <TableCell>Due</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredTasks.map((task) => (
-                <TableRow key={task.id} sx={isTaskOverdue(task) ? { bgcolor: 'rgba(211, 47, 47, 0.06)' } : undefined}>
-                  <TableCell>
-                    <Typography variant="subtitle2">{task.title}</Typography>
-                    {task.description && (
-                      <Typography variant="caption" color="text.secondary">
-                        {task.description}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>{task.assignee?.full_name || task.assignee?.email || '—'}</TableCell>
-                  <TableCell>{task.department || task.assignee?.department || '—'}</TableCell>
-                  <TableCell>
-                    <Chip size="small" label={task.priority} />
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <span>{task.due_date || '—'}</span>
-                      {isTaskOverdue(task) && <Chip size="small" color="error" label="Overdue" />}
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Chip size="small" label={task.task_status} color={statusColor(task.task_status)} />
-                  </TableCell>
-                  <TableCell align="right">
-                    {canEdit('tasks') && (
-                      <Button size="small" onClick={() => openEdit(task)}>
-                        Edit
-                      </Button>
-                    )}
-                    {canDelete('tasks') && (
-                      <Button size="small" color="error" onClick={() => void handleDelete(task.id)}>
-                        Delete
-                      </Button>
-                    )}
-                  </TableCell>
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 320px)' }}>
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow
+                  sx={{
+                    '& th': {
+                      bgcolor: 'grey.50',
+                      color: 'text.secondary',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      borderBottom: (t) => `1px solid ${t.palette.divider}`,
+                      py: 1.25,
+                    },
+                  }}
+                >
+                  <TableCell>Task</TableCell>
+                  <TableCell>Assignee</TableCell>
+                  <TableCell>Department</TableCell>
+                  <TableCell>Priority</TableCell>
+                  <TableCell>Due</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
-              ))}
-              {filteredTasks.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7}>No tasks match the current filters.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {filteredTasks.map((task) => {
+                  const overdue = isTaskOverdue(task);
+                  const assigneeName = task.assignee?.full_name || task.assignee?.email || '';
+                  return (
+                    <TableRow
+                      key={task.id}
+                      hover
+                      sx={{
+                        '& td': { borderColor: 'divider', py: 1.25 },
+                        ...(overdue && {
+                          bgcolor: (t) => `${t.palette.error.main}0a`,
+                          '&:hover': { bgcolor: (t) => `${t.palette.error.main}14` },
+                        }),
+                      }}
+                    >
+                      <TableCell sx={{ maxWidth: 360 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+                          {task.title}
+                        </Typography>
+                        {task.description && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {task.description}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {assigneeName ? (
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Avatar
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                bgcolor: 'secondary.main',
+                              }}
+                            >
+                              {initialsOf(assigneeName)}
+                            </Avatar>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {assigneeName}
+                            </Typography>
+                          </Stack>
+                        ) : (
+                          <Typography variant="body2" color="text.disabled">
+                            Unassigned
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {task.department || task.assignee?.department || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={humanize(task.priority)}
+                          color={priorityColor(task.priority)}
+                          sx={{ fontWeight: 600 }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack
+                          direction="row"
+                          spacing={0.75}
+                          alignItems="center"
+                          useFlexGap
+                          flexWrap="wrap"
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              whiteSpace: 'nowrap',
+                              fontWeight: overdue ? 700 : 400,
+                              color: overdue ? 'error.main' : 'text.primary',
+                            }}
+                          >
+                            {task.due_date || '—'}
+                          </Typography>
+                          {overdue && (
+                            <Chip size="small" color="error" label="Overdue" sx={{ height: 20 }} />
+                          )}
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={humanize(task.task_status)}
+                          color={statusColor(task.task_status)}
+                          sx={{ fontWeight: 600 }}
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                          {canEdit('tasks') && (
+                            <Tooltip title="Edit / reassign">
+                              <IconButton size="small" color="primary" onClick={() => openEdit(task)}>
+                                <EditOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {canDelete('tasks') && (
+                            <Tooltip title="Delete">
+                              <IconButton size="small" color="error" onClick={() => void handleDelete(task.id)}>
+                                <DeleteOutlineRoundedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filteredTasks.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} sx={{ border: 0 }}>
+                      <Stack alignItems="center" spacing={1.5} sx={{ py: 6, color: 'text.secondary' }}>
+                        <InboxRoundedIcon sx={{ fontSize: 48, opacity: 0.4 }} />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          No tasks found
+                        </Typography>
+                        <Typography variant="body2" sx={{ maxWidth: 320, textAlign: 'center' }}>
+                          {hasFilters
+                            ? 'No tasks match the current filters. Try clearing them to see everything.'
+                            : 'There are no team tasks yet.'}
+                        </Typography>
+                        {hasFilters && (
+                          <Button
+                            size="small"
+                            startIcon={<ClearRoundedIcon />}
+                            onClick={() => {
+                              setFilterDepartment('');
+                              setFilterEmployee('');
+                            }}
+                          >
+                            Clear filters
+                          </Button>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </Stack>
 

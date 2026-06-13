@@ -918,7 +918,7 @@ const FGMaterialOutward = () => {
                           
                           <TableCell>
                             <Stack alignItems="flex-start" spacing={0.5}>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#f44336' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'error.main' }}>
                                 {entry.Quantity || '0'}
                               </Typography>
                             </Stack>
@@ -940,7 +940,7 @@ const FGMaterialOutward = () => {
                                 <Tooltip title="Mark as Complete">
                                   <IconButton
                                     size="small"
-                                    sx={{ color: '#2e7d32' }}
+                                    sx={{ color: 'success.main' }}
                                     onClick={() => handleComplete(entry, index)}
                                   >
                                     <CheckCircle />
@@ -1028,7 +1028,7 @@ const FGMaterialOutward = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#d32f2f',
+              color: 'error.main',
               '&:hover': {
                 backgroundColor: 'rgba(211, 47, 47, 0.1)'
               }
@@ -1100,19 +1100,19 @@ const FGMaterialOutward = () => {
                       }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: 'error.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1152,19 +1152,19 @@ const FGMaterialOutward = () => {
                     }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'divider'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#d32f2f'
+                          borderBottomColor: 'error.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#d32f2f'
+                          borderBottomColor: 'error.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#d32f2f'
+                            color: 'error.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1177,7 +1177,7 @@ const FGMaterialOutward = () => {
                 renderOption={(props, option) => (
                   <Box component="li" {...props} key={option["Product Code"]}>
                     <Box sx={{ width: '100%' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#d32f2f' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'error.main' }}>
                         {option["Product Code"]}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -1214,19 +1214,19 @@ const FGMaterialOutward = () => {
                 }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: 'error.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1253,19 +1253,19 @@ const FGMaterialOutward = () => {
                 }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: 'error.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1298,19 +1298,19 @@ const FGMaterialOutward = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: 'error.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: 'error.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1339,19 +1339,19 @@ const FGMaterialOutward = () => {
                 }}
                 sx={{
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: 'divider'
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#d32f2f'
+                    borderBottomColor: 'error.main'
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#d32f2f'
+                    borderBottomColor: 'error.main'
                   },
                   '& .MuiFormLabel-root': {
                     fontSize: '14px',
-                    color: '#666',
+                    color: 'text.secondary',
                     '&.Mui-focused': {
-                      color: '#d32f2f'
+                      color: 'error.main'
                     }
                   },
                   '& .MuiInputBase-input': {
@@ -1371,15 +1371,16 @@ const FGMaterialOutward = () => {
             variant="outlined"
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: 1,
+              borderColor: 'divider',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#d32f2f'
+                borderColor: 'error.main'
               }
             }}
           >

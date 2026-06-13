@@ -45,19 +45,19 @@ const MaterialIssueNavigation = () => {
       label: "Material Issue",
       icon: <OutwardIcon />,
       description: "Monitor material consumption and outgoing",
-      color: "#f44336"
+      color: "error.main"
     },
     {
       label: "Issue Reports",
       icon: <ReportIcon />,
       description: "Material issue reports and analytics",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Issue History",
       icon: <HistoryIcon />,
       description: "Historical material issue data",
-      color: "#ff9800"
+      color: "warning.main"
     }
   ];
 

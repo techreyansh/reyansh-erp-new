@@ -148,7 +148,7 @@ const PurchaseFlowLayout = () => {
                     border: `1px solid ${alpha("#ffffff", 0.2)}`,
                   }}
                 >
-                  <PurchaseIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "#ffffff" }} />
+                  <PurchaseIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "common.white" }} />
                 </Box>
                 
                 <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
@@ -185,7 +185,7 @@ const PurchaseFlowLayout = () => {
                         label={feature} 
                         sx={{ 
                           backgroundColor: alpha("#ffffff", 0.2), 
-                          color: "#ffffff",
+                          color: "common.white",
                           fontWeight: 600,
                           backdropFilter: "blur(10px)",
                           border: `1px solid ${alpha("#ffffff", 0.3)}`,
@@ -233,7 +233,7 @@ const PurchaseFlowLayout = () => {
                   px: 3,
                   py: 2,
                   '&.Mui-selected': {
-                    color: "#ffffff",
+                    color: "common.white",
                     backgroundColor: alpha("#ffffff", 0.15),
                   },
                   '&:hover': {
@@ -241,7 +241,7 @@ const PurchaseFlowLayout = () => {
                   },
                 },
                 '& .MuiTabs-indicator': {
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "common.white",
                   height: 3,
                   borderRadius: "3px 3px 0 0",
                 },

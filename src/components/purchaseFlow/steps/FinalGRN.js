@@ -295,7 +295,7 @@ const FinalGRN = () => {
             <Typography variant="h5" sx={{ color: theme.palette.info.main, fontWeight: 600, mb: 1 }}>
               No Purchase Orders Found
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', maxWidth: 400, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, mx: 'auto' }}>
               There are no purchase orders currently at step 18 (Final GRN). 
               POs will appear here once GRN is generated in step 17.
             </Typography>
@@ -318,7 +318,7 @@ const FinalGRN = () => {
                           <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.info.main }}>
                             PO #{po.POId}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             GRN: {po.GRNId || 'N/A'}
                           </Typography>
                         </Box>
@@ -330,10 +330,10 @@ const FinalGRN = () => {
                           <PersonIcon sx={{ color: theme.palette.info.main }} />
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#333' }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                             {po.VendorDetails?.vendorName || 'Vendor Name'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {po.VendorDetails?.vendorCode || 'Vendor Code'}
                           </Typography>
                         </Box>

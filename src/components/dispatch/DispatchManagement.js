@@ -309,10 +309,10 @@ const dispatchStatuses = [
 
 // Priority configuration
 const priorityConfig = {
-  'Low': { color: '#4CAF50', icon: <Flag /> },
-  'Medium': { color: '#FF9800', icon: <Flag /> },
-  'High': { color: '#F44336', icon: <Flag /> },
-  'Urgent': { color: '#9C27B0', icon: <Flag /> }
+  'Low': { color: 'success.main', icon: <Flag /> },
+  'Medium': { color: 'warning.main', icon: <Flag /> },
+  'High': { color: 'error.main', icon: <Flag /> },
+  'Urgent': { color: 'secondary.main', icon: <Flag /> }
 };
 
 const DispatchManagement = () => {
@@ -774,8 +774,8 @@ const DispatchManagement = () => {
                             label={dispatch.DispatchUniqueId || 'N/A'}
                             size="small"
                             sx={{
-                              backgroundColor: '#e8f5e9',
-                              color: '#2e7d32',
+                              backgroundColor: 'success.light',
+                              color: 'success.main',
                               fontWeight: 600,
                               fontFamily: 'monospace',
                               fontSize: '0.75rem'
@@ -804,8 +804,8 @@ const DispatchManagement = () => {
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                             <Typography 
                               variant="body2" 
-                              sx={{ 
-                                color: '#f57c00',
+                              sx={{
+                                color: 'warning.main',
                                 fontWeight: 600,
                                 fontSize: '0.7rem'
                               }}
@@ -814,8 +814,8 @@ const DispatchManagement = () => {
                             </Typography>
                             <Typography 
                               variant="caption" 
-                              sx={{ 
-                                color: '#546e7a',
+                              sx={{
+                                color: 'text.secondary',
                                 fontSize: '0.65rem'
                               }}
                             >
@@ -877,8 +877,8 @@ const DispatchManagement = () => {
                             label={dispatch.DispatchUniqueId || 'N/A'}
                             size="small"
                             sx={{
-                              backgroundColor: '#e8f5e9',
-                              color: '#2e7d32',
+                              backgroundColor: 'success.light',
+                              color: 'success.main',
                               fontWeight: 600,
                               fontFamily: 'monospace',
                               fontSize: '0.7rem',
@@ -902,8 +902,8 @@ const DispatchManagement = () => {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                           <Typography 
                             variant="body2" 
-                            sx={{ 
-                              color: '#f57c00',
+                            sx={{
+                              color: 'warning.main',
                               fontWeight: 600,
                               fontSize: '0.7rem'
                             }}
@@ -912,8 +912,8 @@ const DispatchManagement = () => {
                           </Typography>
                           <Typography 
                             variant="caption" 
-                            sx={{ 
-                              color: '#546e7a',
+                            sx={{
+                              color: 'text.secondary',
                               fontSize: '0.65rem'
                             }}
                           >
@@ -983,8 +983,8 @@ const DispatchManagement = () => {
                   <Chip
                     label={selectedDispatch.DispatchUniqueId || 'N/A'}
                     sx={{
-                      backgroundColor: '#e8f5e9',
-                      color: '#2e7d32',
+                      backgroundColor: 'success.light',
+                      color: 'success.main',
                       fontWeight: 600,
                       fontFamily: 'monospace',
                       fontSize: '0.875rem',
@@ -1023,8 +1023,8 @@ const DispatchManagement = () => {
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mb: 2 }}>
                     <Typography 
                       variant="body2" 
-                      sx={{ 
-                        color: '#f57c00',
+                      sx={{
+                        color: 'warning.main',
                         fontWeight: 600,
                         fontSize: '0.7rem'
                       }}
@@ -1033,8 +1033,8 @@ const DispatchManagement = () => {
                     </Typography>
                     <Typography 
                       variant="caption" 
-                      sx={{ 
-                        color: '#546e7a',
+                      sx={{
+                        color: 'text.secondary',
                         fontSize: '0.65rem'
                       }}
                     >

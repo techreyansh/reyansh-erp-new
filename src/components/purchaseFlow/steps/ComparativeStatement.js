@@ -771,7 +771,7 @@ const ComparativeStatement = ({ onComplete }) => {
             <Alert severity="info">No indents ready for comparative statement.</Alert>
           ) : (
             validIndents.map(indent => (
-              <Card key={indent.IndentNumber} sx={{ mb: 3, border: `1px solid ${theme.palette.success.main}`, background: '#fff' }}>
+              <Card key={indent.IndentNumber} sx={{ mb: 3, border: `1px solid ${theme.palette.success.main}`, background: 'background.paper' }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6" sx={{ color: theme.palette.success.main }}>Indent: {indent.IndentNumber}</Typography>
@@ -787,7 +787,7 @@ const ComparativeStatement = ({ onComplete }) => {
                             startIcon={<CheckIcon />}
                             sx={{ 
                               background: isComparativePrepared(indent) ? theme.palette.success.main : 'rgba(0, 0, 0, 0.12)',
-                              color: isComparativePrepared(indent) ? '#fff' : 'rgba(0, 0, 0, 0.26)',
+                              color: isComparativePrepared(indent) ? 'common.white' : 'rgba(0, 0, 0, 0.26)',
                               '&:disabled': {
                                 backgroundColor: 'rgba(0, 0, 0, 0.12)',
                                 color: 'rgba(0, 0, 0, 0.26)'
@@ -826,7 +826,7 @@ const ComparativeStatement = ({ onComplete }) => {
                         <TableContainer component={Paper} sx={{ mb: 2 }}>
                           <Table size="small">
                             <TableHead>
-                              <TableRow sx={{ background: '#e3f2fd' }}>
+                              <TableRow sx={{ backgroundColor: 'action.hover' }}>
                                 <TableCell>Vendor Code</TableCell>
                                 <TableCell>Vendor Name</TableCell>
                                 <TableCell>Contact</TableCell>
@@ -868,8 +868,8 @@ const ComparativeStatement = ({ onComplete }) => {
                                           variant="contained"
                                           size="small"
                                           sx={{ 
-                                            background: isVendorSaved ? '#4caf50' : theme.palette.success.main,
-                                            color: '#fff'
+                                            background: isVendorSaved ? theme.palette.success.main : theme.palette.success.main,
+                                            color: 'common.white'
                                           }}
                                           onClick={() => handlePrepareComparative(indent, item)}
                                         >
@@ -905,7 +905,7 @@ const ComparativeStatement = ({ onComplete }) => {
             <TableContainer component={Paper}>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ background: '#e3f2fd' }}>
+                  <TableRow sx={{ backgroundColor: 'action.hover' }}>
                     <TableCell>Vendor</TableCell>
                     <TableCell>Price</TableCell>
                     <TableCell>Delivery Time</TableCell>
@@ -993,10 +993,10 @@ const ComparativeStatement = ({ onComplete }) => {
             onClick={handleSaveComparative} 
             disabled={isSaving}
             variant="contained"
-            startIcon={isSaving ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : null}
+            startIcon={isSaving ? <CircularProgress size={16} sx={{ color: 'common.white' }} /> : null}
             sx={{ 
               background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-              color: '#fff',
+              color: 'common.white',
               px: 3,
               py: 1,
               fontWeight: 600,

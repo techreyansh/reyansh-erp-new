@@ -61,25 +61,25 @@ const Inventory = () => {
       label: "Stock Sheet",
       icon: <StockIcon />,
       description: "Manage raw materials and stock levels",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Finished Goods",
       icon: <FactoryIcon />,
       description: "Comprehensive finished goods management",
-      color: "#9c27b0"
+      color: "secondary.main"
     },
     {
       label: "Bill of Materials",
       icon: <BOMIcon />,
       description: "Product recipes and material requirements",
-      color: "#ff9800"
+      color: "warning.main"
     },
     {
       label: "Kitting",
       icon: <KittingIcon />,
       description: "Component assembly and kitting operations",
-      color: "#4caf50"
+      color: "success.main"
     }
   ];
 
@@ -88,7 +88,7 @@ const Inventory = () => {
       label: "FG Stock Sheet",
       icon: <StorageIcon />,
       description: "Finished goods stock management",
-      color: "#1976d2"
+      color: "primary.main"
     }
   ];
 

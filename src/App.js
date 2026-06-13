@@ -111,6 +111,8 @@ import DocumentLibrary from './components/DocumentLibrary/DocumentLibrary';
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
 const WelcomePage = lazy(() => import("./pages/WelcomePage"));
 const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOExecutiveDashboard"));
+const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
+const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
@@ -193,6 +195,16 @@ function AppContent() {
                     <CEOOnlyRoute>
                       <CEOExecutiveDashboard />
                     </CEOOnlyRoute>
+                  } />
+                  <Route path="/plant-command" element={
+                    <ProtectedRouteGate>
+                      <PlantHeadDashboard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/production-log" element={
+                    <ProtectedRouteGate>
+                      <ProductionLogModule />
+                    </ProtectedRouteGate>
                   } />
                   <Route path="/access-management" element={
                     <ProtectedRouteGate>
@@ -694,7 +706,7 @@ function AppContent() {
                     path="/crm"
                     element={
                       <ProtectedRouteGate>
-                        <Navigate to="/crm/leads" replace />
+                        <Navigate to="/crm/dashboard" replace />
                       </ProtectedRouteGate>
                     }
                   />

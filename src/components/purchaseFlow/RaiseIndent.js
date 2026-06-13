@@ -532,7 +532,7 @@ const RaiseIndent = () => {
           gutterBottom 
           sx={{ 
             fontWeight: 800,
-            color: '#2e7d32',
+            color: 'success.main',
             textShadow: '0 2px 4px rgba(0,0,0,0.1)',
             letterSpacing: '-0.02em'
           }}
@@ -543,7 +543,7 @@ const RaiseIndent = () => {
       
       {/* Material Intent Info Banner */}
       {materialIntentInfo && (
-        <Paper elevation={1} sx={{ p: 2, mb: 3, backgroundColor: '#e8f5e9', border: '1px solid #81c784' }}>
+        <Paper elevation={1} sx={{ p: 2, mb: 3, backgroundColor: 'action.hover', border: 1, borderColor: 'success.main' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <InfoIcon color="primary" />
             <Typography variant="body1" color="primary">
@@ -592,8 +592,8 @@ const RaiseIndent = () => {
       >
         <CardHeader
           avatar={
-            <Avatar sx={{ 
-              bgcolor: '#81c784',
+            <Avatar sx={{
+              bgcolor: 'success.main',
               boxShadow: '0 4px 12px rgba(129, 199, 132, 0.3)',
               width: 56,
               height: 56
@@ -604,7 +604,7 @@ const RaiseIndent = () => {
           title={
             <Typography variant="h5" sx={{ 
               fontWeight: 700, 
-              color: '#2c3e50',
+              color: 'text.primary',
               letterSpacing: '-0.01em'
             }}>
               New Indent Form
@@ -644,7 +644,7 @@ const RaiseIndent = () => {
             >
               <Typography variant="h6" sx={{ 
                 mb: 3, 
-                color: '#2c3e50', 
+                color: 'text.primary', 
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
@@ -767,8 +767,8 @@ const RaiseIndent = () => {
                 px: 4,
                 py: 1.5,
                 borderWidth: 2,
-                borderColor: '#9b59b6',
-                color: '#9b59b6',
+                borderColor: 'secondary.main',
+                color: 'secondary.main',
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
@@ -830,7 +830,7 @@ const RaiseIndent = () => {
         <CardHeader
           avatar={
             <Avatar sx={{ 
-              bgcolor: '#9b59b6',
+              bgcolor: 'secondary.main',
               boxShadow: '0 4px 12px rgba(155, 89, 182, 0.3)',
               width: 56,
               height: 56
@@ -841,7 +841,7 @@ const RaiseIndent = () => {
           title={
             <Typography variant="h5" sx={{ 
               fontWeight: 700, 
-              color: '#2c3e50',
+              color: 'text.primary',
               letterSpacing: '-0.01em'
             }}>
               All Indents
@@ -858,7 +858,7 @@ const RaiseIndent = () => {
                     borderRadius: 3,
                     backgroundColor: 'rgba(108, 117, 125, 0.2)',
                   }} />
-                  <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                     Refreshing...
                   </Typography>
                 </Box>
@@ -872,8 +872,8 @@ const RaiseIndent = () => {
                 sx={{ 
                   borderRadius: 3,
                   borderWidth: 2,
-                  borderColor: '#4a90e2',
-                  color: '#4a90e2',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
                   fontWeight: 600,
                   textTransform: 'none',
                 }}
@@ -897,31 +897,31 @@ const RaiseIndent = () => {
                 }}>
                   <TableCell sx={{ 
                     fontWeight: 700, 
-                    color: '#2c3e50',
+                    color: 'text.primary',
                     fontSize: '0.95rem',
                     borderBottom: '2px solid rgba(74, 144, 226, 0.2)'
                   }}>Indent Number</TableCell>
                   <TableCell sx={{ 
                     fontWeight: 700, 
-                    color: '#2c3e50',
+                    color: 'text.primary',
                     fontSize: '0.95rem',
                     borderBottom: '2px solid rgba(74, 144, 226, 0.2)'
                   }}>Details</TableCell>
                   <TableCell sx={{ 
                     fontWeight: 700, 
-                    color: '#2c3e50',
+                    color: 'text.primary',
                     fontSize: '0.95rem',
                     borderBottom: '2px solid rgba(74, 144, 226, 0.2)'
                   }}>Status</TableCell>
                   <TableCell sx={{ 
                     fontWeight: 700, 
-                    color: '#2c3e50',
+                    color: 'text.primary',
                     fontSize: '0.95rem',
                     borderBottom: '2px solid rgba(74, 144, 226, 0.2)'
                   }}>Created At</TableCell>
                   <TableCell sx={{ 
                     fontWeight: 700, 
-                    color: '#2c3e50',
+                    color: 'text.primary',
                     fontSize: '0.95rem',
                     borderBottom: '2px solid rgba(74, 144, 226, 0.2)'
                   }}>Actions</TableCell>
@@ -938,7 +938,7 @@ const RaiseIndent = () => {
                           borderRadius: 4,
                           backgroundColor: 'rgba(108, 117, 125, 0.2)',
                         }} />
-                        <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                        <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Loading indents...
                         </Typography>
                       </Box>
@@ -957,12 +957,12 @@ const RaiseIndent = () => {
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <AssignmentIcon sx={{ fontSize: 48, color: '#9b59b6' }} />
+                          <AssignmentIcon sx={{ fontSize: 48, color: 'secondary.main' }} />
                         </Box>
-                        <Typography variant="h6" sx={{ color: '#2c3e50', fontWeight: 600 }}>
+                        <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
                           No indents found
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center' }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
                           Create your first indent using the form above
                         </Typography>
                       </Box>
@@ -978,8 +978,8 @@ const RaiseIndent = () => {
                       >
                         <TableCell>
                           <Typography variant="h6" sx={{ 
-                            fontWeight: 700, 
-                            color: '#4a90e2',
+                            fontWeight: 700,
+                            color: 'primary.main',
                             letterSpacing: '-0.01em'
                           }}>
                             #{indent.IndentNumber}
@@ -994,22 +994,22 @@ const RaiseIndent = () => {
                               borderRadius: 2,
                               textTransform: 'none',
                               fontWeight: 600,
-                              color: '#9b59b6',
+                              color: 'secondary.main',
                             }}
                           >
                             {openGroups[indent.IndentNumber] ? 'Hide Items' : 'Show Items'}
                           </Button>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                             {indent.Status}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                             {new Date(indent.CreatedAt).toLocaleDateString()}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#adb5bd' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             {new Date(indent.CreatedAt).toLocaleTimeString()}
                           </Typography>
                         </TableCell>
@@ -1020,7 +1020,7 @@ const RaiseIndent = () => {
                               onClick={() => handleDeleteClick(indent.IndentNumber)}
                               sx={{ 
                                 backgroundColor: 'rgba(233, 30, 99, 0.1)',
-                                color: '#e91e63',
+                                color: 'error.main',
                               }}
                             >
                               <DeleteIcon fontSize="small" />
@@ -1038,7 +1038,7 @@ const RaiseIndent = () => {
                             }}>
                               <Typography variant="h6" sx={{ 
                                 mb: 3, 
-                                color: '#2c3e50', 
+                                color: 'text.primary', 
                                 fontWeight: 600,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1062,10 +1062,10 @@ const RaiseIndent = () => {
                                 <TableHead>
                                   <TableRow sx={{ 
                                   }}>
-                                    <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Item Code</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Item Name</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Quantity</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Specifications</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Item Code</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Item Name</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Quantity</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Specifications</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -1083,14 +1083,14 @@ const RaiseIndent = () => {
                                             variant="outlined"
                                             sx={{ 
                                               borderRadius: 2,
-                                              borderColor: '#4a90e2',
-                                              color: '#4a90e2',
+                                              borderColor: 'primary.main',
+                                              color: 'primary.main',
                                               fontWeight: 600,
                                               background: 'rgba(74, 144, 226, 0.05)'
                                             }}
                                           />
                                         </TableCell>
-                                        <TableCell sx={{ fontWeight: 500, color: '#2c3e50' }}>
+                                        <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
                                           {item.item}
                                         </TableCell>
                                         <TableCell>
@@ -1098,7 +1098,7 @@ const RaiseIndent = () => {
                                         <Typography variant="body2" sx={{ 
                                             maxWidth: 300, 
                                             wordWrap: 'break-word',
-                                            color: '#6c757d',
+                                            color: 'text.secondary',
                                             lineHeight: 1.5
                                           }}>
                                             {item.quantity}
@@ -1109,7 +1109,7 @@ const RaiseIndent = () => {
                                           <Typography variant="body2" sx={{ 
                                             maxWidth: 300, 
                                             wordWrap: 'break-word',
-                                            color: '#6c757d',
+                                            color: 'text.secondary',
                                             lineHeight: 1.5
                                           }}>
                                             {item.specifications}
@@ -1120,7 +1120,7 @@ const RaiseIndent = () => {
                                   ) : (
                                     <TableRow>
                                       <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                                        <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                           No items found in this indent
                                         </Typography>
                                       </TableCell>
@@ -1192,22 +1192,22 @@ const RaiseIndent = () => {
           borderBottom: '1px solid rgba(233, 30, 99, 0.2)'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ 
-              bgcolor: '#e91e63',
+            <Avatar sx={{
+              bgcolor: 'error.main',
               boxShadow: '0 4px 12px rgba(233, 30, 99, 0.3)'
             }}>
               <DeleteIcon />
             </Avatar>
-            <Typography variant="h6" sx={{ color: '#e91e63', fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ color: 'error.main', fontWeight: 700 }}>
               Confirm Deletion
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ p: 4 }}>
-          <Typography variant="body1" sx={{ mb: 2, color: '#2c3e50', fontWeight: 500 }}>
+          <Typography variant="body1" sx={{ mb: 2, color: 'text.primary', fontWeight: 500 }}>
             Are you sure you want to delete indent <strong style={{ color: '#e91e63' }}>#{indentToDelete}</strong>?
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
             This action cannot be undone. All items and associated data will be permanently removed.
           </Typography>
         </DialogContent>
@@ -1216,15 +1216,15 @@ const RaiseIndent = () => {
             onClick={() => setDeleteDialogOpen(false)}
             variant="outlined"
             sx={{ 
-              borderRadius: 3, 
+              borderRadius: 3,
               px: 4,
-              borderColor: '#6c757d',
-              color: '#6c757d',
+              borderColor: 'text.secondary',
+              color: 'text.secondary',
               fontWeight: 600,
               textTransform: 'none',
               '&:hover': {
-                borderColor: '#4a90e2',
-                color: '#4a90e2',
+                borderColor: 'primary.main',
+                color: 'primary.main',
                 background: 'rgba(74, 144, 226, 0.05)'
               }
             }}

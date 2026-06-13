@@ -73,9 +73,9 @@ const DispatchTest = () => {
           <Typography variant="h6" gutterBottom>
             Sample Data (First 3 Records):
           </Typography>
-          <Box sx={{ 
-            backgroundColor: '#f5f5f5', 
-            p: 2, 
+          <Box sx={{
+            backgroundColor: 'action.hover',
+            p: 2,
             borderRadius: 1,
             fontFamily: 'monospace',
             fontSize: '0.875rem',
@@ -90,9 +90,9 @@ const DispatchTest = () => {
         <Typography variant="h6" gutterBottom>
           Configuration Details:
         </Typography>
-        <Box sx={{ 
-          backgroundColor: '#f0f0f0', 
-          p: 2, 
+        <Box sx={{
+          backgroundColor: 'action.hover',
+          p: 2,
           borderRadius: 1,
           fontFamily: 'monospace',
           fontSize: '0.875rem'

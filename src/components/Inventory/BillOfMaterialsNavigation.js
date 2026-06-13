@@ -45,19 +45,19 @@ const BillOfMaterialsNavigation = () => {
       label: "Bill of Materials",
       icon: <BOMIcon />,
       description: "Product recipes and material requirements",
-      color: "#ff9800"
+      color: "warning.main"
     },
     {
       label: "BOM Reports",
       icon: <ReportIcon />,
       description: "Bill of materials reports and analytics",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "BOM History",
       icon: <HistoryIcon />,
       description: "Historical BOM data and changes",
-      color: "#4caf50"
+      color: "success.main"
     }
   ];
 

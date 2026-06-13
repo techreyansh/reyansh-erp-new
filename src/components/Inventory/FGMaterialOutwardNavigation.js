@@ -45,19 +45,19 @@ const FGMaterialOutwardNavigation = () => {
       label: "FG Material Outward",
       icon: <OutwardIcon />,
       description: "Monitor finished goods consumption and outgoing",
-      color: "#f44336"
+      color: "error.main"
     },
     {
       label: "Outward Reports",
       icon: <ReportIcon />,
       description: "FG material outward reports and analytics",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Outward History",
       icon: <HistoryIcon />,
       description: "Historical FG material outward data",
-      color: "#ff9800"
+      color: "warning.main"
     }
   ];
 

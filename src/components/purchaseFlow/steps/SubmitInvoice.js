@@ -143,7 +143,7 @@ const SubmitInvoice = () => {
             <Typography variant="h5" sx={{ color: theme.palette.success.main, fontWeight: 600, mb: 1 }}>
               No Purchase Orders Found
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', maxWidth: 400, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, mx: 'auto' }}>
               There are no purchase orders currently at step 19 (Submit Invoice to Accounts). 
               POs will appear here once they reach this stage.
             </Typography>
@@ -166,7 +166,7 @@ const SubmitInvoice = () => {
                           <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
                             PO #{po.POId}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Created: {po.CreatedAt ? new Date(po.CreatedAt).toLocaleDateString('en-US') : '-'}
                           </Typography>
                         </Box>
@@ -178,10 +178,10 @@ const SubmitInvoice = () => {
                           <PersonIcon sx={{ color: theme.palette.success.main }} />
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#333' }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                             {po.VendorDetails?.vendorName || 'Vendor Name'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {po.VendorDetails?.vendorCode || 'Vendor Code'}
                           </Typography>
                         </Box>

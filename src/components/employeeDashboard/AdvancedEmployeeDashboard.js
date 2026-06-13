@@ -39,8 +39,18 @@ import {
   Switch,
   FormControlLabel,
   TablePagination,
-  Snackbar
+  Snackbar,
+  Stack
 } from '@mui/material';
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import {
   Person as PersonIcon,
   Assignment as TaskIcon,
@@ -86,6 +96,8 @@ import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import AdminAccessControlSection from './AdminAccessControlSection';
 
+const DEPT_COLORS = ['#0D9488', '#0284C7', '#D97706', '#7C3AED', '#059669', '#DC2626', '#475569', '#DB2777'];
+
 // Animation components (using regular MUI components for now)
 const MotionBox = Box;
 const MotionCard = Card;
@@ -121,12 +133,10 @@ const AdvancedEmployeeDashboard = () => {
     loading: permissionsLoading,
     employee: rbacEmployee,
     authorized,
-    modules = [],
     role,
   } = usePermissions();
   const canManageEmployeeRecords = canCreate('employees') || canEdit('employees') || canDelete('employees');
   const canManageAccess = canEdit('employees');
-  const visibleModules = (modules || []).filter((module) => module?.can_view);
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -459,6 +469,26 @@ const AdvancedEmployeeDashboard = () => {
     return statuses.sort();
   };
 
+  const getWorkforceStats = () => {
+    const total = employees.length;
+    const active = employees.filter(e => String(e.Status || '').toLowerCase() === 'active').length;
+    const fullTime = employees.filter(e =>
+      String(e.EmployeeType || e.EmploymentType || '').toLowerCase().includes('full')
+    ).length;
+    return { total, active, inactive: total - active, departments: getDepartments().length, fullTime };
+  };
+
+  const getDepartmentDistribution = () => {
+    const map = new Map();
+    employees.forEach(e => {
+      const d = e.Department || 'Unassigned';
+      map.set(d, (map.get(d) || 0) + 1);
+    });
+    return Array.from(map.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  };
+
   // Pagination
   const paginatedEmployees = filteredEmployees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -500,101 +530,149 @@ const AdvancedEmployeeDashboard = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header Section */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ 
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)}, ${alpha(theme.palette.secondary.main, 0.12)})`,
-          borderRadius: 3,
-          p: 4,
-          color: 'primary.main',
-          position: 'relative',
-          overflow: 'hidden',
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
-        }}>
-          <Box sx={{ 
-            position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 200,
-            height: 200,
-            background: alpha(theme.palette.primary.main, 0.05),
-            borderRadius: '50%'
-          }} />
-          
-          <Grid container spacing={0} alignItems="center" justifyContent="space-between">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+      <Box sx={{ mb: 3 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2.5, sm: 3.5 },
+            borderRadius: 3,
+            color: '#fff',
+            position: 'relative',
+            overflow: 'hidden',
+            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 135%)`,
+          }}
+        >
+          <Box sx={{ position: 'absolute', top: -60, right: -40, width: 220, height: 220, bgcolor: 'rgba(255,255,255,0.08)', borderRadius: '50%' }} />
+          <Box sx={{ position: 'absolute', bottom: -80, right: 120, width: 160, height: 160, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: '50%' }} />
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            gap={2}
+            sx={{ position: 'relative' }}
+          >
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
                 {canManageEmployeeRecords ? 'Employee Dashboard' : 'My Dashboard'}
               </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9, mb: 2 }}>
-                {canManageEmployeeRecords ? 'Manage your workforce with advanced tools and insights' : 'View your profile, tasks, and performance'}
+              <Typography variant="body1" sx={{ opacity: 0.88, mt: 0.5 }}>
+                {canManageEmployeeRecords
+                  ? 'Manage your workforce with advanced tools and insights'
+                  : 'View your profile, tasks, and performance'}
               </Typography>
-              {canManageEmployeeRecords && (
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Chip
-                    icon={<GroupIcon />}
-                    label={`${employees.length} Employees`}
-                    sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}
-                  />
-                  <Chip
-                    icon={<WorkIcon />}
-                    label={`${getDepartments().length} Departments`}
-                    sx={{ bgcolor: alpha(theme.palette.secondary.main, 0.1), color: 'secondary.main' }}
-                  />
-                </Box>
-              )}
               {!canManageEmployeeRecords && selectedEmployee && (
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
                   <Chip
-                    icon={<WorkIcon />}
+                    icon={<WorkIcon sx={{ color: 'inherit !important' }} />}
                     label={selectedEmployee?.Department || rbacEmployee?.department || 'N/A'}
-                    sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }}
                   />
                   <Chip
-                    icon={<PersonIcon />}
+                    icon={<PersonIcon sx={{ color: 'inherit !important' }} />}
                     label={selectedEmployee?.Designation || role?.role_name || 'N/A'}
-                    sx={{ bgcolor: alpha(theme.palette.secondary.main, 0.1), color: 'secondary.main' }}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }}
                   />
-                </Box>
+                </Stack>
               )}
-              {visibleModules.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                  {visibleModules.map((module) => (
-                    <Chip
-                      key={module.module_key || module.module_id}
-                      size="small"
-                      variant="outlined"
-                      label={module.module_name || module.module_key}
-                    />
-                  ))}
-                </Box>
-              )}
-            </Grid>
+            </Box>
             {canManageEmployeeRecords && (
-              <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' }, display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddEmployee}
-                  sx={{
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                    color: 'primary.main',
-                    fontWeight: 600,
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.16),
-                      transform: 'translateY(-2px)'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  Add New Employee
-                </Button>
-              </Grid>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={handleAddEmployee}
+                sx={{
+                  bgcolor: '#fff',
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  borderRadius: 2,
+                  px: 3,
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
+                  '&:hover': { bgcolor: '#fff', transform: 'translateY(-2px)', boxShadow: '0 10px 26px rgba(0,0,0,0.24)' },
+                  transition: 'all 0.25s ease',
+                }}
+              >
+                Add New Employee
+              </Button>
             )}
-          </Grid>
-        </Box>
+          </Stack>
+        </Paper>
       </Box>
+
+      {/* Workforce analytics */}
+      {canManageEmployeeRecords && (() => {
+        const stats = getWorkforceStats();
+        const dist = getDepartmentDistribution();
+        const statCards = [
+          { label: 'Total Employees', value: stats.total, icon: GroupIcon, accent: '#0D9488' },
+          { label: 'Active', value: stats.active, icon: PersonIcon, accent: '#059669' },
+          { label: 'Departments', value: stats.departments, icon: WorkIcon, accent: '#0284C7' },
+          { label: 'Full-time', value: stats.fullTime, icon: StarIcon, accent: '#7C3AED' },
+        ];
+        return (
+          <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr', lg: '1.6fr 1fr' } }}>
+            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' } }}>
+              {statCards.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Card key={s.label} variant="outlined" sx={{ borderRadius: 2.5 }}>
+                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {s.label}
+                          </Typography>
+                          <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, lineHeight: 1.1 }}>
+                            {s.value}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${s.accent}1a`, color: s.accent, display: 'flex' }}>
+                          <Icon />
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </Box>
+            <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
+              <CardContent sx={{ py: 2, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                  Workforce by Department
+                </Typography>
+                <Box sx={{ height: 168 }}>
+                  {dist.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dist} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
+                        <XAxis type="number" hide allowDecimals={false} />
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          width={96}
+                          tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <RTooltip cursor={{ fill: alpha(theme.palette.primary.main, 0.08) }} contentStyle={{ borderRadius: 12, border: `1px solid ${theme.palette.divider}` }} />
+                        <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={14}>
+                          {dist.map((e, i) => (
+                            <Cell key={e.name} fill={DEPT_COLORS[i % DEPT_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <Stack alignItems="center" justifyContent="center" sx={{ height: '100%', color: 'text.disabled' }}>
+                      <Typography variant="body2">No department data</Typography>
+                    </Stack>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      })()}
 
       {error && (
         <Fade in={!!error}>
@@ -606,67 +684,64 @@ const AdvancedEmployeeDashboard = () => {
 
       {/* Controls Section - only show for users with employee-management permission */}
       {canManageEmployeeRecords && (
-        <Card sx={{ mb: 3, p: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="Search employees..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ 
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    bgcolor: alpha(theme.palette.primary.main, 0.02)
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={8}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                {/* Filter Button */}
-                <Button
-                  startIcon={<FilterIcon />}
-                  onClick={(e) => setFilterMenuAnchor(e.currentTarget)}
-                  variant="outlined"
-                  sx={{ borderRadius: 2 }}
-                >
-                  Filter
-                </Button>
-                
-                {/* Sort Button */}
-                <Button
-                  startIcon={<SortIcon />}
-                  onClick={(e) => setSortMenuAnchor(e.currentTarget)}
-                  variant="outlined"
-                  sx={{ borderRadius: 2 }}
-                >
-                  Sort
-                </Button>
-
-                {/* Refresh Button */}
-                <IconButton
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  sx={{ 
-                    border: 1, 
-                    borderColor: 'divider',
-                    borderRadius: 2
-                  }}
-                >
-                  <RefreshIcon />
-                </IconButton>
-              </Box>
-            </Grid>
-          </Grid>
+        <Card variant="outlined" sx={{ mb: 3, p: { xs: 1.5, sm: 2 }, borderRadius: 2.5 }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', md: 'center' }}
+          >
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search employees by name, code, department…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                flex: { md: 1 },
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: alpha(theme.palette.primary.main, 0.02),
+                },
+              }}
+            />
+            <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-end', md: 'flex-start' }}>
+              <Button
+                startIcon={<FilterIcon />}
+                onClick={(e) => setFilterMenuAnchor(e.currentTarget)}
+                variant={filterDepartment !== 'all' || filterStatus !== 'all' ? 'contained' : 'outlined'}
+                disableElevation
+                sx={{ borderRadius: 2, whiteSpace: 'nowrap' }}
+              >
+                Filter
+              </Button>
+              <Button
+                startIcon={<SortIcon />}
+                onClick={(e) => setSortMenuAnchor(e.currentTarget)}
+                variant="outlined"
+                sx={{ borderRadius: 2, whiteSpace: 'nowrap' }}
+              >
+                Sort
+              </Button>
+              <Tooltip title="Refresh">
+                <span>
+                  <IconButton
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Stack>
+          </Stack>
         </Card>
       )}
 
@@ -739,29 +814,30 @@ const AdvancedEmployeeDashboard = () => {
       {/* Employee Grid/List - only show for users with employee-management permission */}
       {canManageEmployeeRecords && (
         <>
-          <Grid container spacing={2}>
-            {paginatedEmployees.map((employee, index) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                lg={3}
-                xl={2}
-                key={employee.EmployeeCode}
-              >
-                <Box sx={{ height: '100%', p: 0.5 }}>
-                  <EmployeeCard
-                    employee={employee}
-                    onSelect={() => handleEmployeeSelect(employee)}
-                    onEdit={canManageEmployeeRecords ? (() => handleEditEmployee(employee)) : undefined}
-                    onView={() => handleViewEmployee(employee)}
-                    onDelete={canManageEmployeeRecords ? (() => handleDeleteEmployee(employee)) : undefined}
-                  />
-                </Box>
-              </Grid>
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 2,
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              },
+            }}
+          >
+            {paginatedEmployees.map((employee) => (
+              <Box key={employee.EmployeeCode} sx={{ height: '100%' }}>
+                <EmployeeCard
+                  employee={employee}
+                  onSelect={() => handleEmployeeSelect(employee)}
+                  onEdit={canManageEmployeeRecords ? (() => handleEditEmployee(employee)) : undefined}
+                  onView={() => handleViewEmployee(employee)}
+                  onDelete={canManageEmployeeRecords ? (() => handleDeleteEmployee(employee)) : undefined}
+                />
+              </Box>
             ))}
-          </Grid>
+          </Box>
 
           {/* Enhanced Pagination */}
           {filteredEmployees.length > 0 && (

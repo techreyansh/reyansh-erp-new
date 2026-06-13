@@ -64,6 +64,7 @@ import {
   Analytics,
   DarkModeOutlined,
   HomeOutlined,
+  GridOnOutlined,
   LightModeOutlined,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
@@ -213,6 +214,35 @@ const Header = () => {
           path: "/ceo-command",
           icon: <SecurityIcon />,
           roles: ["CEO"],
+        },
+        {
+          label: "Plant Command",
+          path: "/plant-command",
+          icon: <Dashboard />,
+          roles: [
+            "CEO",
+            "Production Manager",
+            "Process Coordinator",
+            "QC Manager",
+            "Cable Production Supervisor",
+            "Moulding Production Supervisor",
+            "Management/HOD",
+          ],
+        },
+        {
+          label: "Production Log",
+          path: "/production-log",
+          icon: <GridOnOutlined />,
+          roles: [
+            "CEO",
+            "Production Manager",
+            "Process Coordinator",
+            "QC Manager",
+            "Store Manager",
+            "Cable Production Supervisor",
+            "Moulding Production Supervisor",
+            "Management/HOD",
+          ],
         },
         {
           label: "Employee Access Management",
@@ -371,6 +401,7 @@ const Header = () => {
       label: "CRM",
       icon: <CRMIcon />,
       items: [
+        { label: "Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
         { label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
         { label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
         { label: "Follow-ups", path: "/crm/follow-ups", icon: <Assignment />, roles: crmModuleRoles },
@@ -379,6 +410,7 @@ const Header = () => {
         { label: "Activity Timeline", path: "/crm/timeline", icon: <Assignment />, roles: crmModuleRoles },
         { label: "Quotations", path: "/crm/quotations", icon: <TableChart />, roles: crmModuleRoles },
         { label: "Sales Orders", path: "/crm/sales-orders", icon: <ListAlt />, roles: crmModuleRoles },
+        { label: "Collections", path: "/crm/collections", icon: <TableChart />, roles: crmModuleRoles },
         { label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
         { label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
         { label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },

@@ -45,19 +45,19 @@ const KittingSheetNavigation = () => {
       label: "Kitting Sheet",
       icon: <KittingIcon />,
       description: "Assembly and kitting operations",
-      color: "#607d8b"
+      color: "secondary.main"
     },
     {
       label: "Kitting Reports",
       icon: <ReportIcon />,
       description: "Kitting operations reports and analytics",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Kitting History",
       icon: <HistoryIcon />,
       description: "Historical kitting operations data",
-      color: "#4caf50"
+      color: "success.main"
     }
   ];
 

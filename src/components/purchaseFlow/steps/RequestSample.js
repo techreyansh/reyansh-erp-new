@@ -236,7 +236,7 @@ const RequestSample = () => {
                     <TableContainer component={Paper} sx={{ mb: 2 }}>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ background: '#e3f2fd' }}>
+                          <TableRow sx={{ backgroundColor: 'action.hover' }}>
                             <TableCell>Vendor Code</TableCell>
                             <TableCell>Vendor Name</TableCell>
                             <TableCell>Contact</TableCell>
