@@ -365,7 +365,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
         elevation={0}
         sx={{ 
           p: 4,
-          border: '1px solid #e3f2fd',
+          border: 1, borderColor: 'divider',
           borderRadius: 3
         }}
       >
@@ -377,8 +377,8 @@ const SalesOrderList = ({ refreshTrigger }) => {
               size="small" 
               onClick={fetchSalesOrders}
               sx={{
-                color: '#d32f2f',
-                '&:hover': { backgroundColor: '#ffebee' }
+                color: 'error.main',
+                '&:hover': { backgroundColor: 'action.hover' }
               }}
             >
               Retry
@@ -386,7 +386,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
           }
           sx={{ 
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#d32f2f' }
+            '& .MuiAlert-icon': { color: 'error.main' }
           }}
         >
           {error}
@@ -545,10 +545,10 @@ const SalesOrderList = ({ refreshTrigger }) => {
             </Box>
           ) : (
             <>
-              <TableContainer>
-                <Table size="medium">
+              <TableContainer sx={{ maxHeight: 560 }}>
+                <Table size="medium" stickyHeader>
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                    <TableRow sx={{ '& th': { backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50] } }}>
                       <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}>Unique ID</TableCell>
                       <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}>SO ID</TableCell>
                       <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}>Product Name</TableCell>
@@ -600,8 +600,8 @@ const SalesOrderList = ({ refreshTrigger }) => {
                           sx={{
                             px: 1.5,
                             py: 0.5,
-                            backgroundColor: '#f3e5f5',
-                            color: '#7b1fa2',
+                            backgroundColor: 'action.hover',
+                            color: 'secondary.main',
                             borderRadius: 1,
                             fontSize: '0.7rem',
                             fontWeight: 600,
@@ -752,10 +752,10 @@ const SalesOrderList = ({ refreshTrigger }) => {
                                 onClick={() => handleDispatch(po)}
                                 disabled={po.Status === 'DISPATCH'}
                                 sx={{
-                                  color: po.Status === 'DISPATCH' ? 'text.disabled' : '#2e7d32',
+                                  color: po.Status === 'DISPATCH' ? 'text.disabled' : 'success.main',
                                   borderRadius: 2,
                                   '&:hover': { 
-                                    backgroundColor: po.Status === 'DISPATCH' ? 'transparent' : alpha('#2e7d32', 0.04),
+                                    backgroundColor: po.Status === 'DISPATCH' ? 'transparent' : alpha('success.main', 0.04),
                                     transform: po.Status === 'DISPATCH' ? 'none' : 'scale(1.1)',
                                     transition: 'all 0.2s ease'
                                   },
@@ -804,7 +804,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
               backgroundColor: alpha(theme.palette.primary.main, 0.02)
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   Rows per page:
                 </Typography>
                 <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -834,7 +834,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, salesOrders.filter(po => {
                     if (timeRange === 'all') return true;
                     const created = po.CreatedAt; if (!created) return false; const now = new Date(); const windowMs = timeRange === '24h' ? 24*60*60*1000 : timeRange === '7d' ? 7*24*60*60*1000 : 30*24*60*60*1000; const cutoff = new Date(now.getTime() - windowMs); const dt = new Date(created); return !isNaN(dt) && dt >= cutoff;
@@ -873,7 +873,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: 'linear-gradient(135deg, #0D9488 0%, #0284C7 100%)',
                           color: 'white',
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

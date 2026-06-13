@@ -473,7 +473,7 @@ const FGMaterialInward = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header Section */}
       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <Avatar sx={{ bgcolor: '#4caf50', width: 56, height: 56 }}>
+        <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
           <ProductIcon fontSize="large" />
         </Avatar>
         <Box>
@@ -495,14 +495,14 @@ const FGMaterialInward = () => {
         </Box>
         <Stack direction="row" spacing={2} sx={{ ml: 'auto' }}>
           <Tooltip title="Refresh Data">
-            <IconButton onClick={fetchEntries} sx={{ color: '#4caf50' }}>
+            <IconButton onClick={fetchEntries} sx={{ color: 'success.main' }}>
               <RefreshIcon />
             </IconButton>
           </Tooltip>
           {loading && (
             <CircularProgress 
               size={24} 
-              sx={{ color: '#4caf50' }}
+              sx={{ color: 'success.main' }}
             />
           )}
         </Stack>
@@ -513,7 +513,7 @@ const FGMaterialInward = () => {
         <Card sx={{ mb: 3, boxShadow: 3 }}>
           <CardContent>
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-              <AnalyticsIcon sx={{ color: '#4caf50' }} />
+              <AnalyticsIcon sx={{ color: 'success.main' }} />
               <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
                 Inward Summary
               </Typography>
@@ -523,8 +523,8 @@ const FGMaterialInward = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <Card variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    <Badge badgeContent={getTotalEntries()} sx={{ '& .MuiBadge-badge': { bgcolor: '#4caf50' } }}>
-                      <AssignmentIcon sx={{ color: '#4caf50' }} />
+                    <Badge badgeContent={getTotalEntries()} sx={{ '& .MuiBadge-badge': { bgcolor: 'success.main' } }}>
+                      <AssignmentIcon sx={{ color: 'success.main' }} />
                     </Badge>
                     <Box>
                       <Typography variant="body2" color="text.secondary">
@@ -632,14 +632,14 @@ const FGMaterialInward = () => {
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ p: 3, pb: 0 }}>
             <Stack direction="row" alignItems="center" spacing={2}>
-              <ProductIcon sx={{ color: '#4caf50' }} />
+              <ProductIcon sx={{ color: 'success.main' }} />
               <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
                 Material Inward Entries
               </Typography>
               {sortedItems.length > 0 && (
                 <Chip 
                   label={`${sortedItems.length} entries`} 
-                  sx={{ bgcolor: '#4caf50', color: 'white' }}
+                  sx={{ bgcolor: 'success.main', color: 'white' }}
                   size="small" 
                 />
               )}
@@ -667,7 +667,7 @@ const FGMaterialInward = () => {
                         <TableCell key={col} sx={{ 
                           fontWeight: 'bold', 
                           textTransform: 'uppercase',
-                          bgcolor: '#4caf50',
+                          bgcolor: 'success.main',
                           color: 'white',
                           fontSize: '0.75rem'
                         }}>
@@ -722,7 +722,7 @@ const FGMaterialInward = () => {
                           
                           <TableCell>
                             <Stack alignItems="flex-start" spacing={0.5}>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'success.main' }}>
                                 {item["Quantity"]}
                               </Typography>
                             </Stack>
@@ -743,7 +743,7 @@ const FGMaterialInward = () => {
                                 <Tooltip title="Mark as Complete">
                                   <IconButton
                                     size="small"
-                                    sx={{ color: '#2e7d32' }}
+                                    sx={{ color: 'success.main' }}
                                     onClick={() => handleComplete(item, index)}
                                   >
                                     <CheckIcon />
@@ -828,7 +828,7 @@ const FGMaterialInward = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#4caf50',
+              color: 'success.main',
               '&:hover': {
                 backgroundColor: 'rgba(76, 175, 80, 0.1)'
               }
@@ -900,19 +900,19 @@ const FGMaterialInward = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -935,7 +935,7 @@ const FGMaterialInward = () => {
                   renderOption={(props, option) => (
                     <Box component="li" {...props} key={option["Product Code"]}>
                       <Box sx={{ width: '100%' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#4caf50' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'success.main' }}>
                           {option["Product Code"]}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -968,19 +968,19 @@ const FGMaterialInward = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'divider'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: 'success.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: 'success.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#4caf50'
+                            color: 'success.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1015,19 +1015,19 @@ const FGMaterialInward = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1052,19 +1052,19 @@ const FGMaterialInward = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1095,19 +1095,19 @@ const FGMaterialInward = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1131,15 +1131,16 @@ const FGMaterialInward = () => {
             variant="outlined"
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: 1,
+              borderColor: 'divider',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#4caf50'
+                borderColor: 'success.main'
               }
             }}
           >

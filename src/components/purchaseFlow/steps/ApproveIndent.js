@@ -210,7 +210,7 @@ const ApproveIndent = () => {
                       <Collapse in={openGroups[indent.IndentNumber]} timeout="auto" unmountOnExit>
                         <Box sx={{ p: 2 }}>
                           <Typography variant="subtitle2" sx={{ mb: 1 }}>Items in this Indent</Typography>
-                          <Table size="small" sx={{ background: '#f9f9f9', borderRadius: 2 }}>
+                          <Table size="small" sx={{ backgroundColor: 'action.hover', borderRadius: 2 }}>
                             <TableHead>
                               <TableRow>
                                 <TableCell>Item Code</TableCell>

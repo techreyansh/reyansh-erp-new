@@ -1292,7 +1292,7 @@ const FGStockSheet = () => {
                                       navigate('/inventory/stock-sheet/fg-material-inward');
                                     }}
                                     sx={{ 
-                                      color: '#4caf50',
+                                      color: 'success.main',
                                       '&:hover': { 
                                         backgroundColor: 'rgba(76, 175, 80, 0.1)' 
                                       }
@@ -1316,7 +1316,7 @@ const FGStockSheet = () => {
                                       navigate('/inventory/stock-sheet/fg-material-outward');
                                     }}
                                     sx={{ 
-                                      color: '#f44336',
+                                      color: 'error.main',
                                       '&:hover': { 
                                         backgroundColor: 'rgba(244, 67, 54, 0.1)' 
                                       }
@@ -1404,7 +1404,7 @@ const FGStockSheet = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#1976d2',
+              color: 'primary.main',
               '&:hover': {
                 backgroundColor: 'rgba(25, 118, 210, 0.1)'
               }
@@ -1492,19 +1492,19 @@ const FGStockSheet = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'divider'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#1976d2'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1546,19 +1546,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1583,19 +1583,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1619,19 +1619,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1657,19 +1657,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1693,19 +1693,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1729,19 +1729,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1766,19 +1766,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1801,19 +1801,19 @@ const FGStockSheet = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'divider'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#1976d2'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#1976d2'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -1834,15 +1834,16 @@ const FGStockSheet = () => {
             variant="outlined"
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: 1,
+              borderColor: 'divider',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#1976d2'
+                borderColor: 'primary.main'
               }
             }}
           >

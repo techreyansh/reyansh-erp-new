@@ -259,7 +259,7 @@ const FloatRFQ = () => {
             ),
           }}
         />
-        <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
           Showing {paginatedIndents.length} of {filteredIndents.length} indents
         </Typography>
       </Box>
@@ -304,7 +304,7 @@ const FloatRFQ = () => {
                           px: 2,
                           ml: 2,
                           backgroundColor: canCompleteIndent(indent) ? theme.palette.success.main : 'rgba(0, 0, 0, 0.12)',
-                          color: canCompleteIndent(indent) ? '#fff' : 'rgba(0, 0, 0, 0.26)',
+                          color: canCompleteIndent(indent) ? 'common.white' : 'rgba(0, 0, 0, 0.26)',
                           '&:hover': {
                             backgroundColor: canCompleteIndent(indent) ? theme.palette.success.dark : 'rgba(0, 0, 0, 0.12)',
                           },
@@ -332,8 +332,8 @@ const FloatRFQ = () => {
                             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
                               {item.itemName} <Chip label={item.itemCode} size="small" sx={{ ml: 1, bgcolor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.main }} />
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#666' }}>Qty: {item.quantity}</Typography>
-                            <Typography variant="body2" sx={{ color: '#666' }}>Specs: {item.specifications}</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Qty: {item.quantity}</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Specs: {item.specifications}</Typography>
                           </Box>
                           <Button
                             variant="outlined"
@@ -366,7 +366,7 @@ const FloatRFQ = () => {
                             <TableBody>
                               {(!Array.isArray(item.vendors) || item.vendors.length === 0) ? (
                                 <TableRow>
-                                  <TableCell colSpan={3} align="center" sx={{ color: '#999' }}>
+                                  <TableCell colSpan={3} align="center" sx={{ color: 'text.secondary' }}>
                                     No vendors added for this item.
                                   </TableCell>
                                 </TableRow>
@@ -541,7 +541,7 @@ const FloatRFQ = () => {
             startIcon={<SaveIcon />}
             sx={{
               background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-              color: '#fff',
+              color: 'common.white',
               '&:hover': {
                 background: `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.main} 100%)`,
               }

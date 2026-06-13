@@ -267,10 +267,10 @@ const ApproveQuotation = () => {
           ) : (
             <Stack spacing={4}>
               {validIndents.map((indent) => (
-              <Card key={indent.IndentNumber} sx={{ mb: 3, border: '1px solid ${theme.palette.success.main}' }}>
+              <Card key={indent.IndentNumber} sx={{ mb: 3, border: `1px solid ${theme.palette.success.main}` }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" sx={{ color: '${theme.palette.success.main}' }}>
+                    <Typography variant="h6" sx={{ color: `${theme.palette.success.main}` }}>
                       Indent Number: {indent.IndentNumber}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1 }}>
@@ -303,7 +303,7 @@ const ApproveQuotation = () => {
                     return itemsArray && Array.isArray(itemsArray) && itemsArray.length > 0 ? (
                       itemsArray.map((item) => (
                         <Box key={item.itemCode} sx={{ mb: 3 }}>
-                          <Typography variant="subtitle1" sx={{ color: '${theme.palette.success.main}', mb: 1 }}>
+                          <Typography variant="subtitle1" sx={{ color: `${theme.palette.success.main}`, mb: 1 }}>
                             Item: {item.item || item.itemName} (Code: {item.itemCode})
                           </Typography>
                           <Typography variant="body2" sx={{ mb: 2 }}>
@@ -313,7 +313,7 @@ const ApproveQuotation = () => {
                           <TableContainer component={Paper} sx={{ mb: 2 }}>
                             <Table size="small">
                               <TableHead>
-                                <TableRow sx={{ background: '#e3f2fd' }}>
+                                <TableRow sx={{ backgroundColor: 'action.hover' }}>
                                   <TableCell>Vendor Code</TableCell>
                                   <TableCell>Vendor Name</TableCell>
                                   <TableCell>Price</TableCell>
@@ -353,7 +353,7 @@ const ApproveQuotation = () => {
                                               window.open(fileId, '_blank');
                                             }}
                                             size="small"
-                                            sx={{ color: '${theme.palette.success.main}' }}
+                                            sx={{ color: `${theme.palette.success.main}` }}
                                           >
                                             View
                                           </Button>

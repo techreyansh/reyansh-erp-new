@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   FormControl,
   Grid,
   InputLabel,
@@ -18,7 +19,7 @@ import { usePermissions } from '../../context/PermissionContext';
 import LoadingScreen from '../common/LoadingScreen';
 import AccessDenied from '../auth/AccessDenied';
 import { DEPARTMENT_OPTIONS } from '../../config/departments';
-import { listEmployeesByDepartment } from '../../services/rbacService';
+import { listEmployees, listEmployeesByDepartment } from '../../services/rbacService';
 import { createTask } from '../../services/taskService';
 
 const emptyTask = {
@@ -37,12 +38,46 @@ function TaskScheduler() {
   const [stepDepartment, setStepDepartment] = useState('');
   const [departmentEmployees, setDepartmentEmployees] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [form, setForm] = useState(emptyTask);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
   const canAssign = canCreate('tasks');
+
+  // Load every active employee once so each department option can preview its members.
+  useEffect(() => {
+    if (!canAssign) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listEmployees();
+        if (!cancelled) setAllEmployees((rows || []).filter((row) => row.is_active));
+      } catch (err) {
+        // Non-fatal: the department picker still works without the member preview.
+        console.warn('[TaskScheduler] Failed to load employees for department preview:', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [canAssign]);
+
+  /** Map of department -> array of active employees in it. */
+  const membersByDepartment = useMemo(() => {
+    const map = new Map();
+    allEmployees.forEach((row) => {
+      const dept = row.department || '';
+      if (!dept) return;
+      if (!map.has(dept)) map.set(dept, []);
+      map.get(dept).push(row);
+    });
+    return map;
+  }, [allEmployees]);
+
+  const memberNames = (dept) =>
+    (membersByDepartment.get(dept) || []).map((row) => row.full_name || row.email);
 
   useEffect(() => {
     if (!stepDepartment) {
@@ -147,12 +182,49 @@ function TaskScheduler() {
                   label="Department"
                   value={stepDepartment}
                   onChange={(e) => setStepDepartment(e.target.value)}
+                  renderValue={(dept) => {
+                    const count = (membersByDepartment.get(dept) || []).length;
+                    return (
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body1">{dept}</Typography>
+                        {count > 0 && (
+                          <Typography variant="body2" color="text.secondary">
+                            · {memberNames(dept).join(', ')}
+                          </Typography>
+                        )}
+                      </Stack>
+                    );
+                  }}
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 420 } } }}
                 >
-                  {DEPARTMENT_OPTIONS.map((dept) => (
-                    <MenuItem key={dept} value={dept}>
-                      {dept}
-                    </MenuItem>
-                  ))}
+                  {DEPARTMENT_OPTIONS.map((dept) => {
+                    const names = memberNames(dept);
+                    return (
+                      <MenuItem key={dept} value={dept} sx={{ alignItems: 'flex-start', py: 1.25 }}>
+                        <Stack spacing={0.5} sx={{ width: '100%' }}>
+                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                              {dept}
+                            </Typography>
+                            <Chip
+                              size="small"
+                              label={names.length === 1 ? '1 person' : `${names.length} people`}
+                              color={names.length > 0 ? 'primary' : 'default'}
+                              variant={names.length > 0 ? 'filled' : 'outlined'}
+                              sx={{ height: 20, fontWeight: 600 }}
+                            />
+                          </Stack>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ whiteSpace: 'normal', lineHeight: 1.4 }}
+                          >
+                            {names.length > 0 ? names.join(', ') : 'No active members'}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
 

@@ -45,19 +45,19 @@ const MaterialInwardNavigation = () => {
       label: "Material Inward",
       icon: <InwardIcon />,
       description: "Track incoming materials and supplies",
-      color: "#4caf50"
+      color: "success.main"
     },
     {
       label: "Inward Reports",
       icon: <ReportIcon />,
       description: "Material inward reports and analytics",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Inward History",
       icon: <HistoryIcon />,
       description: "Historical inward material data",
-      color: "#ff9800"
+      color: "warning.main"
     }
   ];
 

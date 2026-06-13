@@ -46,19 +46,19 @@ const StockSheetNavigation = () => {
       label: "Stock Sheet",
       icon: <StockIcon />,
       description: "Manage raw materials and stock levels",
-      color: "#2196f3"
+      color: "info.main"
     },
     {
       label: "Stock Analytics",
       icon: <TrendingUpIcon />,
       description: "Stock level analytics and reports",
-      color: "#4caf50"
+      color: "success.main"
     },
     {
       label: "Stock Overview",
       icon: <StorageIcon />,
       description: "Comprehensive stock overview",
-      color: "#ff9800"
+      color: "warning.main"
     }
   ];
 

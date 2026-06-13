@@ -218,7 +218,7 @@ const RecieveAndInspectMaterial = () => {
         ]}
       >
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-          <CircularProgress size={60} sx={{ color: '${theme.palette.success.main}' }} />
+          <CircularProgress size={60} sx={{ color: theme.palette.success.main }} />
         </Box>
       </BaseStepComponent>
     );
@@ -244,10 +244,10 @@ const RecieveAndInspectMaterial = () => {
 
       <Box sx={{ mb: 4 }}>
         <Card sx={{ 
-          background: 'linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
           color: 'white',
           borderRadius: 3,
-          boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.3)'
+          boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`
         }}>
           <CardContent sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -293,22 +293,22 @@ const RecieveAndInspectMaterial = () => {
           py: 8, 
           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 255, 0.9))',
           borderRadius: 3,
-          boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)'
+          boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`
         }}>
           <Box sx={{ mb: 3 }}>
-            <Avatar sx={{ 
-              width: 80, 
-              height: 80, 
-              mx: 'auto', 
+            <Avatar sx={{
+              width: 80,
+              height: 80,
+              mx: 'auto',
               mb: 2,
-              background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})'
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`
             }}>
               <AssignmentIcon sx={{ fontSize: 40 }} />
             </Avatar>
-            <Typography variant="h5" sx={{ color: '${theme.palette.success.main}', fontWeight: 600, mb: 1 }}>
+            <Typography variant="h5" sx={{ color: theme.palette.success.main, fontWeight: 600, mb: 1 }}>
               No Purchase Orders Found
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', maxWidth: 400, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, mx: 'auto' }}>
               There are no purchase orders currently at step 12 (Receive and Inspect Material). 
               Purchase orders will appear here once they reach this stage.
             </Typography>
@@ -320,37 +320,37 @@ const RecieveAndInspectMaterial = () => {
             <Card key={po.POId} sx={{ 
               borderRadius: 3,
               overflow: 'hidden',
-              boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)',
-              border: '1px solid ${alpha(theme.palette.success.main, 0.1)',
+              boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`,
+              border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
               transition: 'all 0.3s ease',
               '&:hover': {
                 transform: 'translateY(-2px)',
-                boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.2)'
+                boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.2)}`
               }
             }}>
               <CardContent sx={{ p: 0 }}>
                 {/* PO Header */}
                 <Box sx={{ 
                   p: 3, 
-                  background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05), ${alpha(theme.palette.success.dark, 0.05))',
-                  borderBottom: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                  background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)}, ${alpha(theme.palette.success.dark, 0.05)})`,
+                  borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                 }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ 
-                          bgcolor: '${theme.palette.success.main}', 
-                          width: 48, 
+                          bgcolor: theme.palette.success.main,
+                          width: 48,
                           height: 48,
-                          boxShadow: '0 4px 12px ${alpha(theme.palette.success.main, 0.3)'
+                          boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`
                         }}>
                           <BusinessIcon />
                         </Avatar>
                         <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '${theme.palette.success.main}' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
                             PO #{po.POId}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Created: {formatDate(po.CreatedAt)}
                           </Typography>
                         </Box>
@@ -360,17 +360,17 @@ const RecieveAndInspectMaterial = () => {
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ 
-                          bgcolor: '${alpha(theme.palette.success.main, 0.1)', 
-                          width: 40, 
-                          height: 40 
+                          bgcolor: alpha(theme.palette.success.main, 0.1),
+                          width: 40,
+                          height: 40
                         }}>
-                          <PersonIcon sx={{ color: '${theme.palette.success.main}' }} />
+                          <PersonIcon sx={{ color: theme.palette.success.main }} />
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#333' }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                             {po.VendorDetails?.vendorName || 'Vendor Name'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {po.VendorDetails?.vendorCode || 'Vendor Code'}
                           </Typography>
                         </Box>
@@ -383,10 +383,10 @@ const RecieveAndInspectMaterial = () => {
                           <IconButton
                             onClick={() => togglePOExpansion(po.POId)}
                             sx={{ 
-                              bgcolor: '${alpha(theme.palette.success.main, 0.1)',
-                              color: '${theme.palette.success.main}',
+                              bgcolor: alpha(theme.palette.success.main, 0.1),
+                              color: theme.palette.success.main,
                               '&:hover': {
-                                bgcolor: '${alpha(theme.palette.success.main, 0.2)',
+                                bgcolor: alpha(theme.palette.success.main, 0.2),
                                 transform: 'scale(1.1)'
                               }
                             }}
@@ -403,13 +403,13 @@ const RecieveAndInspectMaterial = () => {
                 <Box sx={{ 
                   p: 3, 
                   background: 'rgba(248, 250, 255, 0.9)',
-                  borderBottom: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                  borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                 }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} md={3}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {getStatusIcon(po.InspectionStatus)}
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           Status:
                         </Typography>
                         <Chip 
@@ -433,10 +433,10 @@ const RecieveAndInspectMaterial = () => {
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
                             '&:hover fieldset': {
-                              borderColor: '${theme.palette.success.main}'
+                              borderColor: theme.palette.success.main
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '${theme.palette.success.main}'
+                              borderColor: theme.palette.success.main
                             }
                           }
                         }}
@@ -451,13 +451,13 @@ const RecieveAndInspectMaterial = () => {
                           onClick={() => handleSaveInspection(po)}
                           disabled={!!processing[po.POId]}
                           sx={{ 
-                            borderColor: '${theme.palette.success.main}',
-                            color: '${theme.palette.success.main}',
+                            borderColor: theme.palette.success.main,
+                            color: theme.palette.success.main,
                             fontWeight: 600,
                             borderRadius: 2,
                             '&:hover': {
-                              borderColor: '${theme.palette.success.dark}',
-                              backgroundColor: '${alpha(theme.palette.success.main, 0.05)'
+                              borderColor: theme.palette.success.dark,
+                              backgroundColor: alpha(theme.palette.success.main, 0.05)
                             }
                           }}
                         >
@@ -470,12 +470,12 @@ const RecieveAndInspectMaterial = () => {
                           onClick={() => handleCompleteStep(po)}
                           disabled={!!processing[po.POId]}
                           sx={{ 
-                            background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                            background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                             color: 'white',
                             fontWeight: 600,
                             borderRadius: 2,
                             '&:hover': {
-                              background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                              background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                             },
                             '&:disabled': {
                               background: 'rgba(0, 0, 0, 0.12)',
@@ -503,12 +503,12 @@ const RecieveAndInspectMaterial = () => {
                         <Card sx={{ 
                           background: 'rgba(255, 255, 255, 0.9)',
                           borderRadius: 2,
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                         }}>
                           <CardContent>
-                            <Typography variant="h6" sx={{ 
-                              color: '${theme.palette.success.main}', 
-                              fontWeight: 600, 
+                            <Typography variant="h6" sx={{
+                              color: theme.palette.success.main,
+                              fontWeight: 600,
                               mb: 2,
                               display: 'flex',
                               alignItems: 'center',
@@ -520,73 +520,73 @@ const RecieveAndInspectMaterial = () => {
                             
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Vendor Name
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorName || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Vendor Code
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorCode || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Contact Person
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorContact || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Email
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '${theme.palette.success.main}', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: theme.palette.success.main, fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorEmail || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Phone
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorPhone || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Address
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorAddress || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   GSTIN
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorGSTIN || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   PAN
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorPAN || 'N/A'}
                                 </Typography>
                               </Box>
@@ -600,12 +600,12 @@ const RecieveAndInspectMaterial = () => {
                         <Card sx={{ 
                           background: 'rgba(255, 255, 255, 0.9)',
                           borderRadius: 2,
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                         }}>
                           <CardContent>
-                            <Typography variant="h6" sx={{ 
-                              color: '${theme.palette.success.main}', 
-                              fontWeight: 600, 
+                            <Typography variant="h6" sx={{
+                              color: theme.palette.success.main,
+                              fontWeight: 600,
                               mb: 2,
                               display: 'flex',
                               alignItems: 'center',
@@ -622,15 +622,15 @@ const RecieveAndInspectMaterial = () => {
                                     p: 2, 
                                     mb: 2, 
                                     borderRadius: 2,
-                                    background: '${alpha(theme.palette.success.main, 0.05)',
-                                    border: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                                    background: alpha(theme.palette.success.main, 0.05),
+                                    border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                                   }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '${theme.palette.success.main}', mb: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.success.main, mb: 1 }}>
                                       {item.itemName || item.item || 'Item Name'}
                                     </Typography>
                                     <Grid container spacing={1}>
                                       <Grid item xs={6}>
-                                        <Typography variant="caption" sx={{ color: '#666' }}>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                           Quantity:
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -638,7 +638,7 @@ const RecieveAndInspectMaterial = () => {
                                         </Typography>
                                       </Grid>
                                       <Grid item xs={6}>
-                                        <Typography variant="caption" sx={{ color: '#666' }}>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                           Price:
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -646,7 +646,7 @@ const RecieveAndInspectMaterial = () => {
                                         </Typography>
                                       </Grid>
                                       <Grid item xs={6}>
-                                        <Typography variant="caption" sx={{ color: '#666' }}>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                           Delivery Time:
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -654,7 +654,7 @@ const RecieveAndInspectMaterial = () => {
                                         </Typography>
                                       </Grid>
                                       <Grid item xs={6}>
-                                        <Typography variant="caption" sx={{ color: '#666' }}>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                           Terms:
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -665,7 +665,7 @@ const RecieveAndInspectMaterial = () => {
                                   </Box>
                                 ))
                               ) : (
-                                <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 2 }}>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>
                                   No items found
                                 </Typography>
                               )}
@@ -691,12 +691,12 @@ const RecieveAndInspectMaterial = () => {
         PaperProps={{
           sx: {
             borderRadius: 3,
-            boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.2)'
+            boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.2)}`
           }
         }}
       >
-        <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+        <DialogTitle sx={{
+          background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
           color: 'white',
           fontWeight: 600
         }}>
@@ -709,10 +709,10 @@ const RecieveAndInspectMaterial = () => {
         <DialogContent sx={{ p: 3 }}>
           {selectedPO && (
             <Box>
-              <Typography variant="h6" sx={{ color: '${theme.palette.success.main}', mb: 2 }}>
+              <Typography variant="h6" sx={{ color: theme.palette.success.main, mb: 2 }}>
                 PO #{selectedPO.POId}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+              <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
                 Save the current inspection status and notes for this purchase order.
               </Typography>
               
@@ -751,7 +751,7 @@ const RecieveAndInspectMaterial = () => {
           <Button
             onClick={() => setSaveDialogOpen(false)}
             sx={{ 
-              color: '#666',
+              color: 'text.secondary',
               fontWeight: 600,
               borderRadius: 2
             }}
@@ -763,13 +763,13 @@ const RecieveAndInspectMaterial = () => {
             variant="contained"
             disabled={!selectedPO || !!processing[selectedPO?.POId]}
             sx={{ 
-              background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
               color: 'white',
               fontWeight: 600,
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
               },
               '&:disabled': {
                 background: 'rgba(0, 0, 0, 0.12)',

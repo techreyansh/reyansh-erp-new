@@ -479,7 +479,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
           py: 8, 
           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 255, 0.9))',
           borderRadius: 3,
-          boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)}'
+          boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`
         }}>
           <Box sx={{ mb: 3 }}>
             <Avatar sx={{ 
@@ -494,7 +494,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
             <Typography variant="h5" sx={{ color: theme.palette.success.main, fontWeight: 600, mb: 1 }}>
               No Purchase Orders Found
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', maxWidth: 400, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, mx: 'auto' }}>
               There are no purchase orders currently at step 11 (Follow-up for Delivery). 
               Purchase orders will appear here once they reach this stage.
             </Typography>
@@ -508,21 +508,21 @@ ${user?.name || user?.email || 'Purchase Team'}`);
               <Card key={po.POId} sx={{ 
                 borderRadius: 3,
                 overflow: 'hidden',
-                boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)}',
-                border: '1px solid ${alpha(theme.palette.success.main, 0.1)}',
+                boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`,
+                border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
                 transition: 'all 0.3s ease',
                 background: 'white',
                 '&:hover': {
                   transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 40px ${alpha(theme.palette.success.main, 0.2)}'
+                  boxShadow: `0 12px 40px ${alpha(theme.palette.success.main, 0.2)}`
                 }
               }}>
               <CardContent sx={{ p: 0 }}>
                 {/* PO Header */}
                 <Box sx={{ 
                   p: 3, 
-                  background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)}, ${alpha(theme.palette.success.dark, 0.05)})',
-                  borderBottom: '1px solid ${alpha(theme.palette.success.main, 0.1)}'
+                  background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)}, ${alpha(theme.palette.success.dark, 0.05)})`,
+                  borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                 }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} md={4}>
@@ -531,7 +531,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           bgcolor: theme.palette.success.main, 
                           width: 48, 
                           height: 48,
-                          boxShadow: '0 4px 12px ${alpha(theme.palette.success.main, 0.3)}'
+                          boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`
                         }}>
                           <BusinessIcon />
                         </Avatar>
@@ -539,7 +539,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
                             PO #{po.POId}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Created: {formatDate(po.CreatedAt)}
                           </Typography>
                         </Box>
@@ -549,9 +549,9 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ 
-                          bgcolor: '${alpha(theme.palette.success.main, 0.1)}', 
-                          width: 48, 
-                          height: 48 
+                          bgcolor: `${alpha(theme.palette.success.main, 0.1)}`,
+                          width: 48,
+                          height: 48
                         }}>
                           <BusinessIcon sx={{ color: theme.palette.success.main }} />
                         </Avatar>
@@ -559,7 +559,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.success.main, mb: 0.5 }}>
                             {po.VendorDetails?.vendorName || 'N/A'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {po.VendorDetails?.vendorCode || 'N/A'} • {po.Items?.length || 0} items
                           </Typography>
                         </Box>
@@ -568,10 +568,10 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                     
                     <Grid item xs={12} md={4}>
                       <Box>
-                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                           Total Amount
                         </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#ff9800' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: 'warning.main' }}>
                           Rs {calculateTotalAmount(po.Items || []).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
@@ -599,14 +599,14 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           <IconButton
                             onClick={() => handleSendEmail(po)}
                             sx={{ 
-                              bgcolor: emailSent[po.POId] 
-                                ? 'rgba(76, 175, 80, 0.1)' 
-                                : '${alpha(theme.palette.success.main, 0.1)}',
-                              color: emailSent[po.POId] ? '#4caf50' : theme.palette.success.main,
+                              bgcolor: emailSent[po.POId]
+                                ? 'rgba(76, 175, 80, 0.1)'
+                                : alpha(theme.palette.success.main, 0.1),
+                              color: emailSent[po.POId] ? 'success.main' : theme.palette.success.main,
                               '&:hover': {
                                 bgcolor: emailSent[po.POId]
                                   ? 'rgba(76, 175, 80, 0.2)'
-                                  : '${alpha(theme.palette.success.main, 0.2)}',
+                                  : alpha(theme.palette.success.main, 0.2),
                                 transform: 'scale(1.1)'
                               }
                             }}
@@ -618,11 +618,11 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         <Tooltip title="Track Shipment" arrow>
                           <IconButton
                             onClick={() => handleTrackShipment(po)}
-                            sx={{ 
-                              bgcolor: '${alpha(theme.palette.success.main, 0.1)}',
+                            sx={{
+                              bgcolor: alpha(theme.palette.success.main, 0.1),
                               color: theme.palette.success.main,
                               '&:hover': {
-                                bgcolor: '${alpha(theme.palette.success.main, 0.2)}',
+                                bgcolor: alpha(theme.palette.success.main, 0.2),
                                 transform: 'scale(1.1)'
                               }
                             }}
@@ -634,11 +634,11 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         <Tooltip title={expandedPOs[po.POId] ? "Hide Details" : "View Details"} arrow>
                           <IconButton
                             onClick={() => togglePOExpansion(po.POId)}
-                            sx={{ 
-                              bgcolor: '${alpha(theme.palette.success.main, 0.1)}',
+                            sx={{
+                              bgcolor: alpha(theme.palette.success.main, 0.1),
                               color: theme.palette.success.main,
                               '&:hover': {
-                                bgcolor: '${alpha(theme.palette.success.main, 0.2)}',
+                                bgcolor: alpha(theme.palette.success.main, 0.2),
                                 transform: 'scale(1.1)'
                               }
                             }}
@@ -660,7 +660,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         <Card sx={{ 
                           background: 'rgba(255, 255, 255, 0.9)',
                           borderRadius: 2,
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)}'
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                         }}>
                           <CardContent>
                             <Typography variant="h6" sx={{ 
@@ -677,34 +677,34 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                             
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Vendor Name
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorName || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Vendor Code
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorCode || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Contact Person
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorContact || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Email
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: theme.palette.success.main, fontWeight: 500 }}>
@@ -713,55 +713,55 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Phone
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorPhone || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Address
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorAddress || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   State
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorState || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   GSTIN
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorGSTIN || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   PAN
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorPAN || 'N/A'}
                                 </Typography>
                               </Box>
                               
                               <Box>
-                                <Typography variant="subtitle2" sx={{ color: '#666', fontWeight: 600 }}>
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                                   Payment Terms
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: '#333', fontWeight: 500 }}>
+                                <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {po.VendorDetails?.vendorPaymentTerms || 'N/A'}
                                 </Typography>
                               </Box>
@@ -775,7 +775,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         <Card sx={{ 
                           background: 'rgba(255, 255, 255, 0.9)',
                           borderRadius: 2,
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)}'
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                         }}>
                           <CardContent>
                             <Typography variant="h6" sx={{ 
@@ -792,13 +792,13 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                             
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                               {poCopyFiles[po.POId] ? (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: '${alpha(theme.palette.success.main, 0.05)}', border: '1px solid ${alpha(theme.palette.success.main, 0.2)}' }}>
-                                  <DescriptionIcon sx={{ color: '${theme.palette.success.main}' }} />
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: alpha(theme.palette.success.main, 0.05), border: `1px solid ${alpha(theme.palette.success.main, 0.2)}` }}>
+                                  <DescriptionIcon sx={{ color: theme.palette.success.main }} />
                                   <Box>
-                                    <Typography variant="body2" sx={{ fontWeight: 600, color: '${theme.palette.success.main}' }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.success.main }}>
                                       {poCopyFiles[po.POId].fileName}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ color: '#666' }}>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                       Uploaded: {new Date(poCopyFiles[po.POId].uploadedAt).toLocaleString()}
                                     </Typography>
                                   </Box>
@@ -824,7 +824,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                         delete newState[po.POId];
                                         return newState;
                                       })}
-                                      sx={{ color: '#f44336' }}
+                                      sx={{ color: 'error.main' }}
                                     >
                                       <DeleteIcon fontSize="small" />
                                     </IconButton>
@@ -852,13 +852,13 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                         startIcon={uploadingFiles[po.POId] ? <CircularProgress size={16} /> : <CloudUploadIcon />}
                                         disabled={uploadingFiles[po.POId]}
                                         sx={{ 
-                                          borderColor: '${theme.palette.success.main}',
+                                          borderColor: theme.palette.success.main,
                                           color: theme.palette.success.main,
                                           fontWeight: 600,
                                           borderRadius: 2,
                                           '&:hover': {
                                             borderColor: theme.palette.success.dark,
-                                            backgroundColor: '${alpha(theme.palette.success.main, 0.05)}'
+                                            backgroundColor: alpha(theme.palette.success.main, 0.05)
                                           }
                                         }}
                                       >
@@ -866,7 +866,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                       </Button>
                                     </label>
                                   </Tooltip>
-                                  <Typography variant="caption" sx={{ color: '#666' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                     Supported formats: PDF, DOC, DOCX, JPG, PNG
                                   </Typography>
                                 </Box>
@@ -881,7 +881,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         <Card sx={{ 
                           background: 'rgba(255, 255, 255, 0.9)',
                           borderRadius: 2,
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)}'
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                         }}>
                           <CardContent>
                             <Typography variant="h6" sx={{ 
@@ -943,7 +943,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                           key={idx}
                                           sx={{ 
                                             '&:nth-of-type(odd)': { bgcolor: alpha(theme.palette.success.main, 0.02) },
-                                            '&:hover': { bgcolor: '${alpha(theme.palette.success.main, 0.05)}' }
+                                            '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.05) }
                                           }}
                                         >
                                           <TableCell sx={{ fontWeight: 600, color: theme.palette.success.main }}>
@@ -954,7 +954,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                               {item.itemName || item.item || 'N/A'}
                                             </Typography>
                                             {item.specifications && (
-                                              <Typography variant="caption" sx={{ color: '#666', display: 'block', mt: 0.5 }}>
+                                              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
                                                 {item.specifications.substring(0, 50)}
                                                 {item.specifications.length > 50 ? '...' : ''}
                                               </Typography>
@@ -983,18 +983,18 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                                   ) : (
                                     <TableRow>
                                       <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                                        <Typography variant="body2" sx={{ color: '#666' }}>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                           No items found
                                         </Typography>
                                       </TableCell>
                                     </TableRow>
                                   )}
                                   {po.Items && po.Items.length > 0 && (
-                                    <TableRow sx={{ bgcolor: '${alpha(theme.palette.success.main, 0.05)}' }}>
+                                    <TableRow sx={{ bgcolor: alpha(theme.palette.success.main, 0.05) }}>
                                       <TableCell colSpan={4} align="right" sx={{ fontWeight: 700, fontSize: '1rem' }}>
                                         Grand Total:
                                       </TableCell>
-                                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#ff9800' }}>
+                                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: 'warning.main' }}>
                                         Rs {calculateTotalAmount(po.Items).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                                       </TableCell>
                                     </TableRow>
@@ -1013,7 +1013,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                 <Box sx={{ 
                   p: 3, 
                   background: 'rgba(248, 250, 255, 0.9)',
-                  borderTop: '1px solid ${alpha(theme.palette.success.main, 0.1)}'
+                  borderTop: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -1022,14 +1022,14 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         startIcon={emailSent[po.POId] ? <CheckIcon /> : <EmailIcon />}
                         onClick={() => handleSendEmail(po)}
                         sx={{ 
-                          borderColor: emailSent[po.POId] ? '#4caf50' : '${theme.palette.success.main}',
-                          backgroundColor: emailSent[po.POId] ? '#4caf50' : 'transparent',
-                          color: emailSent[po.POId] ? 'white' : '${theme.palette.success.main}',
+                          borderColor: emailSent[po.POId] ? 'success.main' : theme.palette.success.main,
+                          backgroundColor: emailSent[po.POId] ? 'success.main' : 'transparent',
+                          color: emailSent[po.POId] ? 'white' : theme.palette.success.main,
                           fontWeight: 600,
                           borderRadius: 2,
                           '&:hover': {
-                            borderColor: emailSent[po.POId] ? '#388e3c' : '${theme.palette.success.dark}',
-                            backgroundColor: emailSent[po.POId] ? '#388e3c' : '${alpha(theme.palette.success.main, 0.05)}'
+                            borderColor: emailSent[po.POId] ? 'success.dark' : theme.palette.success.dark,
+                            backgroundColor: emailSent[po.POId] ? 'success.dark' : alpha(theme.palette.success.main, 0.05)
                           }
                         }}
                       >
@@ -1046,8 +1046,8 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           fontWeight: 600,
                           borderRadius: 2,
                           '&:hover': {
-                            borderColor: '${theme.palette.success.dark}',
-                            backgroundColor: '${alpha(theme.palette.success.main, 0.05)}'
+                            borderColor: theme.palette.success.dark,
+                            backgroundColor: alpha(theme.palette.success.main, 0.05)
                           }
                         }}
                       >
@@ -1070,18 +1070,18 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                           onClick={() => handleCompleteStep(po)}
                           disabled={!!tracking[po.POId] || !canCompleteStep(po)}
                           sx={{ 
-                            background: canCompleteStep(po) 
-                              ? 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})'
+                            background: canCompleteStep(po)
+                              ? `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`
                               : 'rgba(0, 0, 0, 0.12)',
                             color: canCompleteStep(po) ? 'white' : 'rgba(0, 0, 0, 0.38)',
                             fontWeight: 700,
                             borderRadius: 2,
                             px: 4,
                             py: 1.5,
-                            boxShadow: canCompleteStep(po) ? '0 4px 12px ${alpha(theme.palette.success.main, 0.3)}' : 'none',
+                            boxShadow: canCompleteStep(po) ? `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}` : 'none',
                             '&:hover': {
                               background: canCompleteStep(po)
-                                ? 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                                ? `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                                 : 'rgba(0, 0, 0, 0.12)',
                               boxShadow: canCompleteStep(po) ? `0 6px 20px ${alpha(theme.palette.success.main, 0.4)}` : 'none',
                               transform: canCompleteStep(po) ? 'translateY(-1px)' : 'none'
@@ -1125,7 +1125,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                       background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                       color: 'white',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                        background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                       }
                     }
                   }
@@ -1145,11 +1145,11 @@ ${user?.name || user?.email || 'Purchase Team'}`);
         PaperProps={{
           sx: {
             borderRadius: 3,
-            boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.2)}'
+            boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.2)}`
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
                                       background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
           color: 'white',
           fontWeight: 600
@@ -1163,10 +1163,10 @@ ${user?.name || user?.email || 'Purchase Team'}`);
         <DialogContent sx={{ p: 3 }}>
           {selectedPO && (
             <Box>
-              <Typography variant="h6" sx={{ color: '${theme.palette.success.main}', mb: 2 }}>
+              <Typography variant="h6" sx={{ color: theme.palette.success.main, mb: 2 }}>
                 PO #{selectedPO.POId}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+              <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
                 Set the expected delivery date for tracking purposes.
               </Typography>
               
@@ -1187,10 +1187,10 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
                           '&:hover fieldset': {
-                            borderColor: '${theme.palette.success.main}'
+                            borderColor: theme.palette.success.main
                           },
                           '&.Mui-focused fieldset': {
-                            borderColor: '${theme.palette.success.main}'
+                            borderColor: theme.palette.success.main
                           }
                         }
                       }
@@ -1206,7 +1206,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
           <Button
             onClick={() => setDateDialogOpen(false)}
             sx={{ 
-              color: '#666',
+              color: 'text.secondary',
               fontWeight: 600,
               borderRadius: 2
             }}
@@ -1224,7 +1224,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
               },
               '&:disabled': {
                 background: 'rgba(0, 0, 0, 0.12)',

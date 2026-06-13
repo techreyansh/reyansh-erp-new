@@ -212,7 +212,7 @@ const PurchaseFlowSubheader = () => {
                           height: 20, 
                           fontSize: '0.65rem',
                           backgroundColor: theme.palette.success.main,
-                          color: '#fff',
+                          color: 'common.white',
                           fontWeight: 600
                         }} 
                       />

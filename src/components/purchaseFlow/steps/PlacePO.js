@@ -828,7 +828,7 @@ Reyansh International Pvt Ltd`;
           background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
           color: 'white',
           borderRadius: 3,
-          boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.3)'
+          boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`
         }}>
           <CardContent sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -968,7 +968,7 @@ Reyansh International Pvt Ltd`;
               <Typography variant="h6" sx={{ color: theme.palette.success.main, fontWeight: 600, mb: 1 }}>
                           No POs Available
                         </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                           All purchase orders have been processed or none are ready for placement
                         </Typography>
                       </Box>
@@ -985,13 +985,13 @@ Reyansh International Pvt Ltd`;
                         sx={{ 
                           borderRadius: 3,
                           overflow: 'hidden',
-                          boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)',
-                          border: '1px solid ${alpha(theme.palette.success.main, 0.1)',
+                          boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`,
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
                           transition: 'all 0.3s ease',
                           background: 'white',
                           '&:hover': {
                             transform: 'translateY(-4px)',
-                            boxShadow: '0 12px 40px ${alpha(theme.palette.success.main, 0.2)'
+                            boxShadow: `0 12px 40px ${alpha(theme.palette.success.main, 0.2)}`
                           }
                         }}
                       >
@@ -999,8 +999,8 @@ Reyansh International Pvt Ltd`;
                           {/* PO Header */}
                           <Box sx={{ 
                             p: 3, 
-                            background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05), ${alpha(theme.palette.success.dark, 0.05))',
-                            borderBottom: '1px solid ${alpha(theme.palette.success.main, 0.1)'
+                            background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)}, ${alpha(theme.palette.success.dark, 0.05)})`,
+                            borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                           }}>
                             <Grid container spacing={2} alignItems="center">
                               <Grid item xs={12} md={4}>
@@ -1009,7 +1009,7 @@ Reyansh International Pvt Ltd`;
                                     bgcolor: theme.palette.success.main, 
                                     width: 48, 
                                     height: 48,
-                                    boxShadow: '0 4px 12px ${alpha(theme.palette.success.main, 0.3)'
+                                    boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`
                                   }}>
                                     <BusinessIcon />
                                   </Avatar>
@@ -1017,7 +1017,7 @@ Reyansh International Pvt Ltd`;
                                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
                                       PO #{po.POId}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ color: '#666' }}>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                       Created: {new Date(po.CreatedAt).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
@@ -1031,9 +1031,9 @@ Reyansh International Pvt Ltd`;
                               <Grid item xs={12} md={4}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                   <Avatar sx={{ 
-                                    bgcolor: '${alpha(theme.palette.success.main, 0.1)', 
-                                    width: 48, 
-                                    height: 48 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    width: 48,
+                                    height: 48
                                   }}>
                                     <BusinessIcon sx={{ color: theme.palette.success.main }} />
                                   </Avatar>
@@ -1041,7 +1041,7 @@ Reyansh International Pvt Ltd`;
                                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.success.main, mb: 0.5 }}>
                                       {po.VendorDetails?.vendorName || 'N/A'}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ color: '#666' }}>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                       {po.VendorDetails?.vendorCode || 'N/A'} • {po.Items?.length || 0} items
                                     </Typography>
                                   </Box>
@@ -1051,10 +1051,10 @@ Reyansh International Pvt Ltd`;
                               <Grid item xs={12} md={4}>
                                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                   <Box>
-                                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                                       Total Amount
                                     </Typography>
-                                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#ff9800' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'warning.main' }}>
                                       Rs {totalAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                                     </Typography>
                                     <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
@@ -1074,10 +1074,10 @@ Reyansh International Pvt Ltd`;
                                         handleToggleExpand(po.POId);
                                       }}
                                       sx={{ 
-                                        bgcolor: '${alpha(theme.palette.success.main, 0.1)',
+                                        bgcolor: alpha(theme.palette.success.main, 0.1),
                                         color: theme.palette.success.main,
                                         '&:hover': {
-                                          bgcolor: '${alpha(theme.palette.success.main, 0.2)',
+                                          bgcolor: alpha(theme.palette.success.main, 0.2),
                                           transform: 'scale(1.1)'
                                         }
                                       }}
@@ -1098,15 +1098,15 @@ Reyansh International Pvt Ltd`;
                             <Box sx={{ p: 3 }}>
                               <Grid container spacing={3}>
                             <Grid item xs={12} md={6}>
-                      <Card sx={{ 
-                        background: '${alpha(theme.palette.success.main, 0.02)',
-                        border: '1px solid ${alpha(theme.palette.success.main, 0.1)',
+                      <Card sx={{
+                        background: alpha(theme.palette.success.main, 0.02),
+                        border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
                         borderRadius: 2
                       }}>
                                 <CardContent>
-                          <Typography variant="subtitle2" sx={{ 
-                            fontWeight: 700, 
-                            color: theme.palette.success.main, 
+                          <Typography variant="subtitle2" sx={{
+                            fontWeight: 700,
+                            color: theme.palette.success.main,
                             mb: 2,
                             display: 'flex',
                             alignItems: 'center',
@@ -1127,7 +1127,7 @@ Reyansh International Pvt Ltd`;
                                   }}>
                                     {f.label}:
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#333' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.primary' }}>
                                     {po.VendorDetails[f.key] || 'N/A'}
                                   </Typography>
                                 </Box>
@@ -1138,15 +1138,15 @@ Reyansh International Pvt Ltd`;
                       </Card>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                      <Card sx={{ 
-                        background: '${alpha(theme.palette.success.main, 0.02)',
-                        border: '1px solid ${alpha(theme.palette.success.main, 0.1)',
+                      <Card sx={{
+                        background: alpha(theme.palette.success.main, 0.02),
+                        border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
                         borderRadius: 2
                       }}>
                                 <CardContent>
-                          <Typography variant="subtitle2" sx={{ 
-                            fontWeight: 700, 
-                            color: theme.palette.success.main, 
+                          <Typography variant="subtitle2" sx={{
+                            fontWeight: 700,
+                            color: theme.palette.success.main,
                             mb: 2,
                             display: 'flex',
                             alignItems: 'center',
@@ -1158,8 +1158,8 @@ Reyansh International Pvt Ltd`;
                                   <TableContainer>
                           <Table size="small">
                             <TableHead>
-                              <TableRow sx={{ 
-                                background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1), ${alpha(theme.palette.success.dark, 0.1))'
+                              <TableRow sx={{
+                                background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)}, ${alpha(theme.palette.success.dark, 0.1)})`
                               }}>
                                 <TableCell sx={{ fontWeight: 700, color: theme.palette.success.main, fontSize: '0.75rem' }}>#</TableCell>
                                 <TableCell sx={{ fontWeight: 700, color: theme.palette.success.main, fontSize: '0.75rem' }}>Code</TableCell>
@@ -1173,8 +1173,8 @@ Reyansh International Pvt Ltd`;
                                         {(po.Items || []).map((item, idx) => {
                                           const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
                                           return (
-                                <TableRow key={idx} sx={{ 
-                                  '&:hover': { background: '${alpha(theme.palette.success.main, 0.05)' }
+                                <TableRow key={idx} sx={{
+                                  '&:hover': { background: alpha(theme.palette.success.main, 0.05) }
                                 }}>
                                   <TableCell sx={{ fontSize: '0.75rem' }}>{idx + 1}</TableCell>
                                   <TableCell sx={{ fontSize: '0.75rem' }}>
@@ -1205,7 +1205,7 @@ Reyansh International Pvt Ltd`;
                                       size="small" 
                                       sx={{ 
                                         fontSize: '0.7rem',
-                                        background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                                        background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                                         color: 'white'
                                       }}
                                     />
@@ -1213,7 +1213,7 @@ Reyansh International Pvt Ltd`;
                                   <TableCell sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
                                     ₹{item.price}
                                   </TableCell>
-                                              <TableCell sx={{ fontSize: '0.75rem', fontWeight: 700, color: '${theme.palette.success.main}' }}>
+                                              <TableCell sx={{ fontSize: '0.75rem', fontWeight: 700, color: theme.palette.success.main }}>
                                                 ₹{itemTotal.toFixed(2)}
                                               </TableCell>
                                 </TableRow>
@@ -1234,11 +1234,11 @@ Reyansh International Pvt Ltd`;
                             startIcon={<DownloadIcon />}
                             onClick={() => handleDownloadPO(po)}
                             sx={{ 
-                              borderColor: '${theme.palette.success.main}',
+                              borderColor: theme.palette.success.main,
                               color: theme.palette.success.main,
                               '&:hover': {
-                                borderColor: '${theme.palette.success.dark}',
-                                background: '${alpha(theme.palette.success.main, 0.05)'
+                                borderColor: theme.palette.success.dark,
+                                background: alpha(theme.palette.success.main, 0.05)
                               }
                             }}
                           >
@@ -1251,9 +1251,9 @@ Reyansh International Pvt Ltd`;
                             startIcon={<EmailIcon />}
                             onClick={() => handleSendEmail(po)}
                             sx={{ 
-                              background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                               '&:hover': {
-                                background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                               }
                             }}
                           >
@@ -1311,10 +1311,10 @@ Reyansh International Pvt Ltd`;
                         fontSize: '1rem',
                         fontWeight: 600,
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                          background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                           color: 'white',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                            background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                           }
                         }
                       }
@@ -1342,11 +1342,11 @@ Reyansh International Pvt Ltd`;
         PaperProps={{
           sx: {
             borderRadius: 3,
-            boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.3)'
+            boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
           color: 'white',
           display: 'flex',
@@ -1393,9 +1393,9 @@ Reyansh International Pvt Ltd`;
                 </Typography>
               </Alert>
 
-              <Card sx={{ mb: 3, background: '${alpha(theme.palette.success.main, 0.02)', border: '1px solid ${alpha(theme.palette.success.main, 0.1)' }}>
+              <Card sx={{ mb: 3, background: alpha(theme.palette.success.main, 0.02), border: `1px solid ${alpha(theme.palette.success.main, 0.1)}` }}>
                 <CardContent>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '${theme.palette.success.main}', mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.success.main, mb: 2 }}>
                     Email Details
                   </Typography>
                   <Grid container spacing={2}>
@@ -1440,7 +1440,7 @@ Reyansh International Pvt Ltd`;
                 border: '1px solid rgba(255, 152, 0, 0.3)',
                 mb: 3
               }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: '#ff9800', mb: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main', mb: 1 }}>
                   📎 How to attach the PDF:
                 </Typography>
                 <Typography variant="body2" component="div" sx={{ pl: 2 }}>
@@ -1463,11 +1463,11 @@ Reyansh International Pvt Ltd`;
             startIcon={<DownloadIcon />}
             onClick={() => emailDialog.pdfUrl && handleDownloadPDFForEmail(emailDialog.pdfUrl, emailDialog.po?.POId)}
             sx={{
-              borderColor: '${theme.palette.success.main}',
-              color: '${theme.palette.success.main}',
+              borderColor: theme.palette.success.main,
+              color: theme.palette.success.main,
               '&:hover': {
-                borderColor: '${theme.palette.success.dark}',
-                background: '${alpha(theme.palette.success.main, 0.05)'
+                borderColor: theme.palette.success.dark,
+                background: alpha(theme.palette.success.main, 0.05)
               }
             }}
           >
@@ -1490,10 +1490,10 @@ Reyansh International Pvt Ltd`;
               startIcon={<EmailIcon />}
               onClick={() => emailDialog.po && emailDialog.pdfUrl && handleOpenEmailClient(emailDialog.po, emailDialog.pdfUrl)}
               sx={{
-                background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                 px: 3,
                 '&:hover': {
-                  background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                 }
               }}
             >
@@ -1517,11 +1517,11 @@ Reyansh International Pvt Ltd`;
         PaperProps={{
           sx: {
             borderRadius: 3,
-            boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.3)'
+            boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
           color: 'white',
           display: 'flex',
@@ -1570,10 +1570,10 @@ Reyansh International Pvt Ltd`;
                 }}>
                   <CheckCircleIcon sx={{ fontSize: 60, color: 'white' }} />
                 </Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#4caf50', mb: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
                   Download Complete!
                 </Typography>
-                <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
                   Your Purchase Order PDF has been downloaded successfully.
                 </Typography>
                 {downloadDialog.po && (
@@ -1581,8 +1581,8 @@ Reyansh International Pvt Ltd`;
                     label={`PO_${downloadDialog.po.POId}.pdf`}
                     icon={<PictureAsPdfIcon />}
                     sx={{ 
-                      background: '${alpha(theme.palette.success.main, 0.1)',
-                      color: '${theme.palette.success.main}',
+                      background: alpha(theme.palette.success.main, 0.1),
+                      color: theme.palette.success.main,
                       fontWeight: 600
                     }}
                   />
@@ -1595,7 +1595,7 @@ Reyansh International Pvt Ltd`;
                 width: 120, 
                 height: 120, 
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1), ${alpha(theme.palette.success.dark, 0.1))',
+                background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)}, ${alpha(theme.palette.success.dark, 0.1)})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1603,13 +1603,13 @@ Reyansh International Pvt Ltd`;
                 mb: 3,
                 position: 'relative'
               }}>
-                <CircularProgress 
-                  variant="determinate" 
-                  value={downloadDialog.progress} 
+                <CircularProgress
+                  variant="determinate"
+                  value={downloadDialog.progress}
                   size={100}
                   thickness={4}
                   sx={{
-                    color: '${theme.palette.success.main}',
+                    color: theme.palette.success.main,
                     position: 'absolute'
                   }}
                 />
@@ -1622,18 +1622,18 @@ Reyansh International Pvt Ltd`;
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <PictureAsPdfIcon sx={{ fontSize: 40, color: '${theme.palette.success.main}' }} />
+                  <PictureAsPdfIcon sx={{ fontSize: 40, color: theme.palette.success.main }} />
                 </Box>
               </Box>
-              
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '${theme.palette.success.main}', mb: 1 }}>
+
+              <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.success.main, mb: 1 }}>
                 {downloadDialog.status === 'preparing' && 'Preparing PDF...'}
                 {downloadDialog.status === 'generating' && 'Generating PDF...'}
                 {downloadDialog.status === 'finalizing' && 'Finalizing document...'}
                 {downloadDialog.status === 'downloading' && 'Downloading file...'}
               </Typography>
               
-              <Typography variant="body2" sx={{ color: '#666', mb: 3 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
                 {downloadDialog.progress}% Complete
               </Typography>
               
@@ -1643,9 +1643,9 @@ Reyansh International Pvt Ltd`;
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
-                  background: '${alpha(theme.palette.success.main, 0.1)',
+                  background: alpha(theme.palette.success.main, 0.1),
                   '& .MuiLinearProgress-bar': {
-                    background: 'linear-gradient(90deg, ${theme.palette.success.main}, #42a5f5)',
+                    background: `linear-gradient(90deg, ${theme.palette.success.main}, #42a5f5)`,
                     borderRadius: 4
                   }
                 }}
@@ -1660,11 +1660,11 @@ Reyansh International Pvt Ltd`;
               variant="contained"
               onClick={() => setDownloadDialog({ open: false, po: null, progress: 0, status: 'preparing' })}
               sx={{
-                background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})',
+                background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                 px: 4,
                 py: 1.5,
                 '&:hover': {
-                  background: 'linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)'
+                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
                 }
               }}
             >

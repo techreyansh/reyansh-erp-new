@@ -496,7 +496,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                       fontSize: '1.1rem'
                     }}
                   >
-                    Fill in the details below to create a new purchase order
+                    Fill in the details below to create a new sales order
                   </Typography>
                 </Box>
               </Box>
@@ -649,8 +649,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           InputProps={{ readOnly: true }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: '#f5f5f5',
-                              '& fieldset': { borderColor: '#e3f2fd' }
+                              backgroundColor: 'action.hover',
+                              '& fieldset': { borderColor: 'divider' }
                             }
                           }}
                         />
@@ -664,13 +664,13 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           fullWidth 
                           endIcon={itemSectionOpen ? <ExpandLess /> : <ExpandMore />}
                           sx={{
-                            borderColor: '#1976d2',
-                            color: '#1976d2',
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
                             py: 1.5,
                             minHeight: '56px',
                             '&:hover': {
-                              borderColor: '#1565c0',
-                              backgroundColor: '#f8fbff'
+                              borderColor: 'primary.dark',
+                              backgroundColor: 'action.hover'
                             }
                           }}
                         >
@@ -686,13 +686,13 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           startIcon={<Upload />} 
                           fullWidth
                           sx={{
-                            borderColor: '#1976d2',
-                            color: '#1976d2',
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
                             py: 1.5,
                             minHeight: '56px',
                             '&:hover': {
-                              borderColor: '#1565c0',
-                              backgroundColor: '#f8fbff'
+                              borderColor: 'primary.dark',
+                              backgroundColor: 'action.hover'
                             }
                           }}
                         >
@@ -735,8 +735,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                       sx={{ 
                         py: 2,
                         px: 4,
-                        backgroundColor: '#1976d2',
-                        '&:hover': { backgroundColor: '#1565c0' },
+                        backgroundColor: 'primary.main',
+                        '&:hover': { backgroundColor: 'primary.dark' },
                         fontSize: '1.1rem',
                         fontWeight: 600,
                         borderRadius: 2,
@@ -756,42 +756,42 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                     <Paper 
                       elevation={0}
                       sx={{ 
-                        border: '1px solid #e3f2fd',
+                        border: 1, borderColor: 'divider',
                         borderRadius: 2,
                         overflow: 'hidden'
                       }}
                     >
-                    <Box sx={{ p: 2, backgroundColor: '#f8fbff', borderBottom: '1px solid #e3f2fd' }}>
-                      <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 600 }}>
+                    <Box sx={{ p: 2, backgroundColor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
                         Added Items ({items.length})
                       </Typography>
                     </Box>
                     <TableContainer>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Unique ID</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>SO ID</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Item</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Description</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Code</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Order Type</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Qty</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Price</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Batch</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Actions</TableCell>
+                          <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Unique ID</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>SO ID</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Item</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Description</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Code</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Order Type</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Qty</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Price</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Batch</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {items.map((item, idx) => (
-                            <TableRow key={idx} sx={{ '&:hover': { backgroundColor: '#f8fbff' } }}>
+                            <TableRow key={idx} sx={{ '&:hover': { backgroundColor: 'action.hover' } }}>
                               <TableCell>
                                 <Box
                                   sx={{
                                     px: 1.5,
                                     py: 0.5,
-                                    backgroundColor: '#f3e5f5',
-                                    color: '#7b1fa2',
+                                    backgroundColor: 'action.hover',
+                                    color: 'secondary.main',
                                     borderRadius: 1,
                                     fontSize: '0.7rem',
                                     fontWeight: 600,
@@ -807,8 +807,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                                   sx={{
                                     px: 1.5,
                                     py: 0.5,
-                                    backgroundColor: '#e8f5e8',
-                                    color: '#2e7d32',
+                                    backgroundColor: 'action.hover',
+                                    color: 'success.main',
                                     borderRadius: 1,
                                     fontSize: '0.7rem',
                                     fontWeight: 600,
@@ -827,8 +827,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                                   sx={{
                                     px: 2,
                                     py: 0.5,
-                                    backgroundColor: '#e3f2fd',
-                                    color: '#1976d2',
+                                    backgroundColor: 'divider',
+                                    color: 'primary.main',
                                     borderRadius: 1,
                                     fontSize: '0.75rem',
                                     fontWeight: 500,
@@ -849,8 +849,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                                       size="small"
                                       sx={{ 
                                         minWidth: 'auto',
-                                        color: '#1976d2',
-                                        '&:hover': { backgroundColor: '#e3f2fd' }
+                                        color: 'primary.main',
+                                        '&:hover': { backgroundColor: 'divider' }
                                       }}
                                     >
                                       <Edit fontSize="small" />
@@ -863,7 +863,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                                       size="small"
                                       sx={{ 
                                         minWidth: 'auto',
-                                        '&:hover': { backgroundColor: '#ffebee' }
+                                        '&:hover': { backgroundColor: 'action.hover' }
                                       }}
                                     >
                                       <Delete fontSize="small" />
@@ -889,8 +889,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                       elevation={0}
                       sx={{ 
                         p: 3, 
-                        backgroundColor: '#f8fbff',
-                        border: '1px solid #e3f2fd',
+                        backgroundColor: 'action.hover',
+                        border: 1, borderColor: 'divider',
                         borderRadius: 2
                       }}
                     >
@@ -898,7 +898,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                       <Typography 
                         variant="h6" 
                         sx={{ 
-                          color: '#1976d2',
+                          color: 'primary.main',
                           fontWeight: 600
                         }}
                       >
@@ -914,8 +914,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           variant="outlined"
                           sx={{ 
                             fontWeight: 500,
-                            borderColor: '#2e7d32',
-                            color: '#2e7d32'
+                            borderColor: 'success.main',
+                            color: 'success.main'
                           }}
                         />
                       )}
@@ -937,7 +937,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           <InputLabel 
                             sx={{ 
                               color: 'text.secondary',
-                              backgroundColor: 'white',
+                              backgroundColor: 'background.paper',
                               px: 1,
                               '&.Mui-focused': {
                                 color: 'primary.main'
@@ -960,13 +960,13 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                             }}
                             sx={{
                               '& .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#e3f2fd' 
+                                borderColor: 'divider' 
                               },
                               '&:hover .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#1976d2' 
+                                borderColor: 'primary.main' 
                               },
                               '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#1976d2' 
+                                borderColor: 'primary.main' 
                               }
                             }}
                           >
@@ -1021,8 +1021,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           InputProps={{ readOnly: true }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: '#f5f5f5',
-                              '& fieldset': { borderColor: '#e3f2fd' }
+                              backgroundColor: 'action.hover',
+                              '& fieldset': { borderColor: 'divider' }
                             }
                           }}
                         />
@@ -1039,8 +1039,8 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           InputProps={{ readOnly: true }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: '#f5f5f5',
-                              '& fieldset': { borderColor: '#e3f2fd' }
+                              backgroundColor: 'action.hover',
+                              '& fieldset': { borderColor: 'divider' }
                             }
                           }}
                         />
@@ -1058,9 +1058,9 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           required
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              '& fieldset': { borderColor: '#e3f2fd' },
-                              '&:hover fieldset': { borderColor: '#1976d2' },
-                              '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+                              '& fieldset': { borderColor: 'divider' },
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -1078,9 +1078,9 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           required
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              '& fieldset': { borderColor: '#e3f2fd' },
-                              '&:hover fieldset': { borderColor: '#1976d2' },
-                              '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+                              '& fieldset': { borderColor: 'divider' },
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -1098,9 +1098,9 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           required
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              '& fieldset': { borderColor: '#e3f2fd' },
-                              '&:hover fieldset': { borderColor: '#1976d2' },
-                              '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+                              '& fieldset': { borderColor: 'divider' },
+                              '&:hover fieldset': { borderColor: 'primary.main' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
                             }
                           }}
                         />
@@ -1112,7 +1112,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           <InputLabel 
                             sx={{ 
                               color: 'text.secondary',
-                              backgroundColor: 'white',
+                              backgroundColor: 'background.paper',
                               px: 1,
                               '&.Mui-focused': {
                                 color: 'primary.main'
@@ -1128,13 +1128,13 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                             label="Order Type"
                             sx={{
                               '& .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#e3f2fd' 
+                                borderColor: 'divider' 
                               },
                               '&:hover .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#1976d2' 
+                                borderColor: 'primary.main' 
                               },
                               '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
-                                borderColor: '#1976d2' 
+                                borderColor: 'primary.main' 
                               }
                             }}
                           >
@@ -1154,10 +1154,10 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                           fullWidth
                           disabled={!itemData.itemName || !itemData.productDesc || !itemData.qty || !itemData.price || !itemData.batchSize}
                           sx={{
-                            backgroundColor: '#1976d2',
+                            backgroundColor: 'primary.main',
                             minHeight: '56px',
-                            '&:hover': { backgroundColor: '#1565c0' },
-                            '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' },
+                            '&:hover': { backgroundColor: 'primary.dark' },
+                            '&:disabled': { backgroundColor: 'action.disabledBackground', color: 'action.disabled' },
                             px: 3,
                             py: 1.5
                           }}
@@ -1174,12 +1174,12 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                             variant="outlined"
                             fullWidth
                             sx={{
-                              borderColor: '#1976d2',
-                              color: '#1976d2',
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
                               minHeight: '56px',
                               '&:hover': {
-                                borderColor: '#1565c0',
-                                backgroundColor: '#f8fbff'
+                                borderColor: 'primary.dark',
+                                backgroundColor: 'action.hover'
                               }
                             }}
                           >
@@ -1209,7 +1209,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
           onClose={() => setSuccess(false)}
           sx={{ 
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#2e7d32' }
+            '& .MuiAlert-icon': { color: 'success.main' }
           }}
         >
           Sales Order created successfully!

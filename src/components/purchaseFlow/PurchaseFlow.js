@@ -412,14 +412,14 @@ const PurchaseDashboard = () => {
                 width: "8px",
               },
               "&::-webkit-scrollbar-track": {
-                backgroundColor: "#f1f1f1",
+                backgroundColor: "action.hover",
                 borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#c1c1c1",
+                backgroundColor: "action.disabledBackground",
                 borderRadius: "4px",
                 "&:hover": {
-                  backgroundColor: "#a8a8a8",
+                  backgroundColor: "action.disabled",
                 },
               },
             }}>
@@ -1211,12 +1211,12 @@ const PurchaseFlow = () => {
                 <Box>
                   <Typography variant="h5" sx={{ 
                     fontWeight: 700, 
-                    color: '#4caf50',
+                    color: 'success.main',
                     mb: 0.5
                   }}>
                     {stepNames[trackerTab] || 'All Tasks'}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     {filteredIndents.length} {filteredIndents.length === 1 ? 'indent' : 'indents'} found
                   </Typography>
                 </Box>
@@ -1231,10 +1231,10 @@ const PurchaseFlow = () => {
                   sx={{
                     borderRadius: 2,
                     textTransform: 'none',
-                    borderColor: '#4caf50',
-                    color: '#4caf50',
+                    borderColor: 'success.main',
+                    color: 'success.main',
                     '&:hover': {
-                      borderColor: '#388e3c',
+                      borderColor: 'success.dark',
                       backgroundColor: 'rgba(76, 175, 80, 0.05)'
                     }
                   }}
@@ -1267,12 +1267,12 @@ const PurchaseFlow = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: '#4caf50' }} />
+                          <Search sx={{ color: 'success.main' }} />
                         </InputAdornment>
                       ),
                     }}
                   />
-                  <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                     Showing {paginatedIndents.length} of {filteredIndents.length} indents
                   </Typography>
                 </Box>
@@ -1288,7 +1288,7 @@ const PurchaseFlow = () => {
                     <TableRow sx={{ 
                       background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
                       '& th': {
-                        borderBottom: '2px solid #388e3c'
+                        borderBottom: 2, borderBottomColor: 'success.dark'
                       }
                     }}>
                       <TableCell sx={{ 
@@ -1345,12 +1345,12 @@ const PurchaseFlow = () => {
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}>
-                              <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 300 }}>📋</Typography>
+                              <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 300 }}>📋</Typography>
                             </Box>
-                            <Typography variant="h6" sx={{ color: '#4caf50', fontWeight: 600 }}>
+                            <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
                               No indents found
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#666', textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
                               Create your first indent to get started
                             </Typography>
                           </Box>
@@ -1368,7 +1368,7 @@ const PurchaseFlow = () => {
                           }}>
                             <TableCell sx={{ 
                               fontWeight: 600, 
-                              color: '#4caf50',
+                              color: 'success.main',
                               fontSize: '1.1rem',
                               borderBottom: '1px solid rgba(76, 175, 80, 0.1)'
                             }}>
@@ -1379,7 +1379,7 @@ const PurchaseFlow = () => {
                                 size="small" 
                                 onClick={() => toggleGroup(indent.IndentNumber)}
                                 sx={{ 
-                                  color: '#4caf50',
+                                  color: 'success.main',
                                   backgroundColor: 'rgba(76, 175, 80, 0.1)',
                                   '&:hover': {
                                     backgroundColor: 'rgba(76, 175, 80, 0.2)',
@@ -1414,12 +1414,12 @@ const PurchaseFlow = () => {
                             </TableCell>
                             <TableCell sx={{ 
                               borderBottom: '1px solid rgba(76, 175, 80, 0.1)',
-                              color: '#666'
+                              color: 'text.secondary'
                             }}>
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                 {new Date(indent.CreatedAt).toLocaleDateString()}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: '#999' }}>
+                              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                 {new Date(indent.CreatedAt).toLocaleTimeString()}
                               </Typography>
                             </TableCell>
@@ -1500,7 +1500,7 @@ const PurchaseFlow = () => {
                                       width: 12, 
                                       height: 12, 
                                       borderRadius: '50%', 
-                                      background: '#4caf50',
+                                      backgroundColor: 'success.main',
                                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                                     }} />
                                     Items in Indent #{indent.IndentNumber}
@@ -1517,10 +1517,10 @@ const PurchaseFlow = () => {
                                       <TableRow sx={{ 
                                         background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(21, 101, 192, 0.1))'
                                       }}>
-                                        <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Item Code</TableCell>
-                                        <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Item Name</TableCell>
-                                        <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Quantity</TableCell>
-                                        <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Specifications</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Item Code</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Item Name</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Quantity</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Specifications</TableCell>
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -1538,14 +1538,14 @@ const PurchaseFlow = () => {
                                                 variant="outlined"
                                                 sx={{ 
                                                   borderRadius: 2,
-                                                  borderColor: '#4caf50',
-                                                  color: '#4caf50',
+                                                  borderColor: 'success.main',
+                                                  color: 'success.main',
                                                   fontWeight: 600,
                                                   background: 'rgba(76, 175, 80, 0.05)'
                                                 }}
                                               />
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: 500, color: '#333' }}>
+                                            <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
                                               {item.item}
                                             </TableCell>
                                             <TableCell>
@@ -1565,7 +1565,7 @@ const PurchaseFlow = () => {
                                               <Typography variant="body2" sx={{ 
                                                 maxWidth: 300, 
                                                 wordWrap: 'break-word',
-                                                color: '#666',
+                                                color: 'text.secondary',
                                                 lineHeight: 1.5
                                               }}>
                                                 {item.specifications}
@@ -1576,7 +1576,7 @@ const PurchaseFlow = () => {
                                       ) : (
                                         <TableRow>
                                           <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
-                                            <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                                            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                               No items found in this indent
                                             </Typography>
                                           </TableCell>
@@ -1597,7 +1597,7 @@ const PurchaseFlow = () => {
                                       width: 12, 
                                       height: 12, 
                                       borderRadius: '50%', 
-                                      background: '#4caf50',
+                                      backgroundColor: 'success.main',
                                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                                     }} />
                                     Step Progress
@@ -1639,10 +1639,10 @@ const PurchaseFlow = () => {
                                                 <ListItemText
                                                   primary={
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#4caf50', minWidth: 80 }}>
+                                                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'success.main', minWidth: 80 }}>
                                                         Step {step.StepNumber || step.stepNumber}
                                                       </Typography>
-                                                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#333', flex: 1 }}>
+                                                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary', flex: 1 }}>
                                                         {step.Action || step.action}
                                                       </Typography>
                                                       <Chip 
@@ -1667,19 +1667,19 @@ const PurchaseFlow = () => {
                                                   }
                                                   secondary={
                                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
-                                                      <Typography variant="body2" sx={{ color: '#666' }}>
+                                                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                                         <strong>Role:</strong> {step.Role || step.role}
                                                       </Typography>
-                                                      <Typography variant="body2" sx={{ color: '#666' }}>
+                                                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                                         <strong>Assigned To:</strong> {step.AssignedTo || step.assignedTo || '-'}
                                                       </Typography>
-                                                      <Typography variant="body2" sx={{ color: '#666' }}>
+                                                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                                         <strong>Start Time:</strong> {step.StartTime ? new Date(step.StartTime).toLocaleString() : '-'}
                                                       </Typography>
-                                                      <Typography variant="body2" sx={{ color: '#666' }}>
+                                                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                                         <strong>End Time:</strong> {step.EndTime ? new Date(step.EndTime).toLocaleString() : '-'}
                                                       </Typography>
-                                                      <Typography variant="body2" sx={{ color: '#4caf50', fontWeight: 500 }}>
+                                                      <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 500 }}>
                                                         <strong>Step ID:</strong> {step.StepId || step.stepId}
                                                       </Typography>
                                                     </Box>
@@ -1691,7 +1691,7 @@ const PurchaseFlow = () => {
                                             <ListItem>
                                               <ListItemText
                                                 primary={
-                                                  <Typography variant="body2" sx={{ color: '#666', fontWeight: 500, textAlign: 'center', py: 3 }}>
+                                                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, textAlign: 'center', py: 3 }}>
                                                     No steps found
                                                   </Typography>
                                                 }
@@ -1713,7 +1713,7 @@ const PurchaseFlow = () => {
                                             borderRadius: 2
                                           }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                                 Rows per page:
                                               </Typography>
                                               <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1737,7 +1737,7 @@ const PurchaseFlow = () => {
                                                       borderColor: 'rgba(76, 175, 80, 0.5)'
                                                     },
                                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                      borderColor: '#4caf50'
+                                                      borderColor: 'success.main'
                                                     }
                                                   }}
                                                 >
@@ -1747,7 +1747,7 @@ const PurchaseFlow = () => {
                                                   <MenuItem value={50}>50</MenuItem>
                                                 </Select>
                                               </FormControl>
-                                              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                                 Showing {stepsPage * stepsRowsPerPage + 1} - {Math.min((stepsPage + 1) * stepsRowsPerPage, steps.length)} of {steps.length} steps
                                               </Typography>
                                             </Box>
@@ -1766,12 +1766,12 @@ const PurchaseFlow = () => {
                                               color="primary"
                                               sx={{
                                                 '& .MuiPaginationItem-root': {
-                                                  color: '#4caf50',
+                                                  color: 'success.main',
                                                   '&.Mui-selected': {
-                                                    backgroundColor: '#4caf50',
+                                                    backgroundColor: 'success.main',
                                                     color: 'white',
                                                     '&:hover': {
-                                                      backgroundColor: '#66bb6a'
+                                                      backgroundColor: 'success.light'
                                                     }
                                                   },
                                                   '&:hover': {
@@ -1807,7 +1807,7 @@ const PurchaseFlow = () => {
                   backgroundColor: 'rgba(248, 250, 255, 0.5)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                     </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1825,7 +1825,7 @@ const PurchaseFlow = () => {
                             borderColor: 'rgba(107, 114, 128, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#4caf50',
+                            borderColor: 'success.main',
                           }
                         }}
                       >
@@ -1838,7 +1838,7 @@ const PurchaseFlow = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {indentsPage * indentsRowsPerPage + 1}-{Math.min((indentsPage + 1) * indentsRowsPerPage, filteredIndents.length)} of {filteredIndents.length} indents
                     </Typography>
                     
@@ -1902,8 +1902,8 @@ const PurchaseFlow = () => {
                 <Box sx={{ 
                   width: 16, 
                   height: 16, 
-                  borderRadius: '50%', 
-                  background: '#4caf50',
+                  borderRadius: '50%',
+                  backgroundColor: 'success.main',
                   boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                 }} />
                 Purchase Orders
@@ -1933,12 +1933,12 @@ const PurchaseFlow = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Search sx={{ color: '#4caf50' }} />
+                        <Search sx={{ color: 'success.main' }} />
                       </InputAdornment>
                     ),
                   }}
                 />
-                <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   Showing {paginatedPOs.length} of {filteredPOs.length} purchase orders
                 </Typography>
               </Box>
@@ -1954,7 +1954,7 @@ const PurchaseFlow = () => {
                     <TableRow sx={{ 
                       background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
                       '& th': {
-                        borderBottom: '2px solid #388e3c'
+                        borderBottom: 2, borderBottomColor: 'success.dark'
                       }
                     }}>
                       <TableCell sx={{ 
@@ -2006,7 +2006,7 @@ const PurchaseFlow = () => {
                         }}>
                           <TableCell sx={{ 
                             fontWeight: 600, 
-                            color: '#4caf50',
+                            color: 'success.main',
                             fontSize: '1.1rem',
                             borderBottom: '1px solid rgba(76, 175, 80, 0.1)'
                           }}>
@@ -2017,7 +2017,7 @@ const PurchaseFlow = () => {
                               size="small" 
                               onClick={() => togglePOGroup(po.POId)}
                               sx={{ 
-                                color: '#4caf50',
+                                color: 'success.main',
                                 backgroundColor: 'rgba(76, 175, 80, 0.1)',
                                 '&:hover': {
                                   backgroundColor: 'rgba(76, 175, 80, 0.2)',
@@ -2052,12 +2052,12 @@ const PurchaseFlow = () => {
                           </TableCell>
                           <TableCell sx={{ 
                             borderBottom: '1px solid rgba(76, 175, 80, 0.1)',
-                            color: '#666'
+                            color: 'text.secondary'
                           }}>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>
                               {new Date(po.CreatedAt).toLocaleDateString()}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: '#999' }}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                               {new Date(po.CreatedAt).toLocaleTimeString()}
                             </Typography>
                           </TableCell>
@@ -2138,8 +2138,8 @@ const PurchaseFlow = () => {
                                   <Box sx={{ 
                                     width: 12, 
                                     height: 12, 
-                                    borderRadius: '50%', 
-                                    background: '#4caf50',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'success.main',
                                     boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                                   }} />
                                   Vendor Details
@@ -2154,34 +2154,34 @@ const PurchaseFlow = () => {
                                 }}>
                                   <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Vendor Name
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {po.VendorDetails?.vendorName || 'N/A'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Vendor Code
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {po.VendorDetails?.vendorCode || 'N/A'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Contact
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {po.VendorDetails?.vendorContact || 'N/A'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Email
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {po.VendorDetails?.vendorEmail || 'N/A'}
                                       </Typography>
                                     </Grid>
@@ -2199,8 +2199,8 @@ const PurchaseFlow = () => {
                                   <Box sx={{ 
                                     width: 12, 
                                     height: 12, 
-                                    borderRadius: '50%', 
-                                    background: '#4caf50',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'success.main',
                                     boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                                   }} />
                                   Items in PO
@@ -2217,12 +2217,12 @@ const PurchaseFlow = () => {
                                     <TableRow sx={{ 
                                       background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(21, 101, 192, 0.1))'
                                     }}>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Indent Number</TableCell>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Item Name</TableCell>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Quantity</TableCell>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Price</TableCell>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Delivery Time</TableCell>
-                                      <TableCell sx={{ fontWeight: 700, color: '#4caf50' }}>Terms</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Indent Number</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Item Name</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Quantity</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Price</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Delivery Time</TableCell>
+                                      <TableCell sx={{ fontWeight: 700, color: 'success.main' }}>Terms</TableCell>
                                     </TableRow>
                                   </TableHead>
                                   <TableBody>
@@ -2240,14 +2240,14 @@ const PurchaseFlow = () => {
                                               variant="outlined"
                                               sx={{ 
                                                 borderRadius: 2,
-                                                borderColor: '#4caf50',
-                                                color: '#4caf50',
+                                                borderColor: 'success.main',
+                                                color: 'success.main',
                                                 fontWeight: 600,
                                                 background: 'rgba(76, 175, 80, 0.05)'
                                               }}
                                             />
                                           </TableCell>
-                                          <TableCell sx={{ fontWeight: 500, color: '#333' }}>
+                                          <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
                                             {item.itemName}
                                           </TableCell>
                                           <TableCell>
@@ -2263,17 +2263,17 @@ const PurchaseFlow = () => {
                                               }}
                                             />
                                           </TableCell>
-                                          <TableCell sx={{ fontWeight: 500, color: '#333' }}>
+                                          <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
                                             ₹{item.price}
                                           </TableCell>
-                                          <TableCell sx={{ color: '#666' }}>
+                                          <TableCell sx={{ color: 'text.secondary' }}>
                                             {item.deliveryTime}
                                           </TableCell>
                                           <TableCell>
                                             <Typography variant="body2" sx={{ 
                                               maxWidth: 200, 
                                               wordWrap: 'break-word',
-                                              color: '#666',
+                                              color: 'text.secondary',
                                               lineHeight: 1.5
                                             }}>
                                               {item.terms}
@@ -2284,7 +2284,7 @@ const PurchaseFlow = () => {
                                     ) : (
                                       <TableRow>
                                         <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                                          <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                             No items found in this PO
                                           </Typography>
                                         </TableCell>
@@ -2304,8 +2304,8 @@ const PurchaseFlow = () => {
                                   <Box sx={{ 
                                     width: 12, 
                                     height: 12, 
-                                    borderRadius: '50%', 
-                                    background: '#4caf50',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'success.main',
                                     boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
                                   }} />
                                   Step Information
@@ -2319,34 +2319,34 @@ const PurchaseFlow = () => {
                                 }}>
                                   <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Current Step
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         Step {po.StepId}: {stepNumberToAction[po.StepId] || 'Unknown'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Next Step
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         Step {po.NextStep}: {stepNumberToAction[po.NextStep] || 'Unknown'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Assigned To
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {stepMappings.find(m => m.action === stepNumberToAction[po.NextStep])?.assignedTo || 'N/A'}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', mb: 1 }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                                         Last Modified
                                       </Typography>
-                                      <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 2 }}>
                                         {po.LastModifiedAt ? new Date(po.LastModifiedAt).toLocaleString() : 'N/A'}
                                       </Typography>
                                     </Grid>
@@ -2373,7 +2373,7 @@ const PurchaseFlow = () => {
                   backgroundColor: 'rgba(248, 250, 255, 0.5)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                     </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -2391,7 +2391,7 @@ const PurchaseFlow = () => {
                             borderColor: 'rgba(107, 114, 128, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#4caf50',
+                            borderColor: 'success.main',
                           }
                         }}
                       >
@@ -2404,7 +2404,7 @@ const PurchaseFlow = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {posPage * posRowsPerPage + 1}-{Math.min((posPage + 1) * posRowsPerPage, filteredPOs.length)} of {filteredPOs.length} purchase orders
                     </Typography>
                     

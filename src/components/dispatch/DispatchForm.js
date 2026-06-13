@@ -146,7 +146,7 @@ const EnhancedClientSelector = ({
         sx={{
           '& .MuiAutocomplete-listbox': {
             '& li': {
-              borderBottom: '1px solid',
+              borderBottom: 1,
               borderColor: 'divider',
               '&:last-child': {
                 borderBottom: 'none',
@@ -1094,7 +1094,7 @@ const DispatchForm = ({ onSuccess, onClose }) => {
                 sx={{ 
                   mb: 3,
                   borderRadius: 2,
-                  '& .MuiAlert-icon': { color: '#f57c00' }
+                  '& .MuiAlert-icon': { color: 'warning.main' }
                 }}
                 icon={<Warning />}
               >
@@ -1107,7 +1107,7 @@ const DispatchForm = ({ onSuccess, onClose }) => {
                 sx={{ 
                   mb: 3,
                   borderRadius: 2,
-                  '& .MuiAlert-icon': { color: '#d32f2f' }
+                  '& .MuiAlert-icon': { color: 'error.main' }
                 }}
                 icon={<ErrorIcon />}
               >
@@ -1760,15 +1760,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         PaperProps={{
           sx: {
             borderRadius: 3,
-            border: '1px solid #e3f2fd'
+            border: 1,
+            borderColor: 'divider'
           }
         }}
       >
-        <DialogTitle sx={{ color: '#1976d2', fontWeight: 600 }}>
+        <DialogTitle sx={{ color: 'primary.main', fontWeight: 600 }}>
           Confirm Dispatch Submission
         </DialogTitle>
         <DialogContent>
-          <Typography sx={{ color: '#37474f', lineHeight: 1.6 }}>
+          <Typography sx={{ color: 'text.primary', lineHeight: 1.6 }}>
             Are you sure you want to submit this dispatch plan? This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -1777,11 +1778,11 @@ const DispatchForm = ({ onSuccess, onClose }) => {
             onClick={() => setConfirmOpen(false)} 
             variant="outlined"
             sx={{
-              borderColor: '#1976d2',
-              color: '#1976d2',
+              borderColor: 'primary.main',
+              color: 'primary.main',
               '&:hover': {
-                borderColor: '#1565c0',
-                backgroundColor: '#f8fbff'
+                borderColor: 'primary.dark',
+                backgroundColor: 'action.hover'
               }
             }}
           >
@@ -1791,8 +1792,8 @@ const DispatchForm = ({ onSuccess, onClose }) => {
             onClick={handleConfirm} 
             variant="contained"
             sx={{
-              backgroundColor: '#1976d2',
-              '&:hover': { backgroundColor: '#1565c0' }
+              backgroundColor: 'primary.main',
+              '&:hover': { backgroundColor: 'primary.dark' }
             }}
           >
             Confirm
@@ -1812,7 +1813,7 @@ const DispatchForm = ({ onSuccess, onClose }) => {
           sx={{ 
             width: "100%",
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#2e7d32' }
+            '& .MuiAlert-icon': { color: 'success.main' }
           }}
           icon={<CheckCircle />}
         >
@@ -1832,7 +1833,7 @@ const DispatchForm = ({ onSuccess, onClose }) => {
           sx={{ 
             width: "100%",
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#d32f2f' }
+            '& .MuiAlert-icon': { color: 'error.main' }
           }}
           icon={<ErrorIcon />}
         >

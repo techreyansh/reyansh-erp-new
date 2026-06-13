@@ -102,7 +102,7 @@ const DecisionOnRejection = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Card sx={{ background: 'linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)', color: 'white', borderRadius: 3, boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.3)', mb: 4 }}>
+      <Card sx={{ background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`, color: 'white', borderRadius: 3, boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`, mb: 4 }}>
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Avatar sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', width: 56, height: 56 }}>
@@ -126,15 +126,15 @@ const DecisionOnRejection = () => {
           <CircularProgress />
         </Box>
       ) : pos.length === 0 ? (
-        <Card sx={{ textAlign: 'center', py: 8, background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 255, 0.9))', borderRadius: 3, boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)' }}>
+        <Card sx={{ textAlign: 'center', py: 8, background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 255, 0.9))', borderRadius: 3, boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}` }}>
           <Box sx={{ mb: 3 }}>
-            <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, background: 'linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})' }}>
+            <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})` }}>
               <AssignmentIcon sx={{ fontSize: 40 }} />
             </Avatar>
-            <Typography variant="h5" sx={{ color: '${theme.palette.success.main}', fontWeight: 600, mb: 1 }}>
+            <Typography variant="h5" sx={{ color: `${theme.palette.success.main}`, fontWeight: 600, mb: 1 }}>
               No Purchase Orders Found
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', maxWidth: 400, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, mx: 'auto' }}>
               There are no purchase orders currently at step 14 (Decision on Rejection). 
               POs will appear here once they reach this stage.
             </Typography>
@@ -143,21 +143,21 @@ const DecisionOnRejection = () => {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {pos.map(po => (
-            <Card key={po.POId} sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 4px 20px ${alpha(theme.palette.success.main, 0.1)', border: '1px solid ${alpha(theme.palette.success.main, 0.1)', transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 32px ${alpha(theme.palette.success.main, 0.2)' } }}>
+            <Card key={po.POId} sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.1)}`, border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`, transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.2)}` } }}>
               <CardContent sx={{ p: 0 }}>
                 {/* PO Header */}
-                <Box sx={{ p: 3, background: 'linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05), ${alpha(theme.palette.success.dark, 0.05))', borderBottom: '1px solid ${alpha(theme.palette.success.main, 0.1)' }}>
+                <Box sx={{ p: 3, background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)}, ${alpha(theme.palette.success.dark, 0.05)})`, borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}` }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: '${theme.palette.success.main}', width: 48, height: 48, boxShadow: '0 4px 12px ${alpha(theme.palette.success.main, 0.3)' }}>
+                        <Avatar sx={{ bgcolor: `${theme.palette.success.main}`, width: 48, height: 48, boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}` }}>
                           <BusinessIcon />
                         </Avatar>
                         <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '${theme.palette.success.main}' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: `${theme.palette.success.main}` }}>
                             PO #{po.POId}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Created: {po.CreatedAt ? new Date(po.CreatedAt).toLocaleDateString('en-US') : '-'}
                           </Typography>
                         </Box>
@@ -165,14 +165,14 @@ const DecisionOnRejection = () => {
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: '${alpha(theme.palette.success.main, 0.1)', width: 40, height: 40 }}>
-                          <PersonIcon sx={{ color: '${theme.palette.success.main}' }} />
+                        <Avatar sx={{ bgcolor: `${alpha(theme.palette.success.main, 0.1)}`, width: 40, height: 40 }}>
+                          <PersonIcon sx={{ color: `${theme.palette.success.main}` }} />
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#333' }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                             {po.VendorDetails?.vendorName || 'Vendor Name'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {po.VendorDetails?.vendorCode || 'Vendor Code'}
                           </Typography>
                         </Box>
@@ -181,12 +181,12 @@ const DecisionOnRejection = () => {
                     <Grid item xs={12} md={4}>
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Tooltip title={expandedPOs[po.POId] ? "Hide Details" : "View Details"} arrow>
-                          <IconButton onClick={() => togglePOExpansion(po.POId)} sx={{ bgcolor: '${alpha(theme.palette.success.main, 0.1)', color: '${theme.palette.success.main}', '&:hover': { bgcolor: '${alpha(theme.palette.success.main, 0.2)', transform: 'scale(1.1)' } }}>
+                          <IconButton onClick={() => togglePOExpansion(po.POId)} sx={{ bgcolor: `${alpha(theme.palette.success.main, 0.1)}`, color: `${theme.palette.success.main}`, '&:hover': { bgcolor: `${alpha(theme.palette.success.main, 0.2)}`, transform: 'scale(1.1)' } }}>
                             {expandedPOs[po.POId] ? <VisibilityOffIcon /> : <ViewIcon />}
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Send Email to Vendor" arrow>
-                          <IconButton onClick={() => handleSendEmail(po)} sx={{ bgcolor: '${alpha(theme.palette.success.main, 0.1)', color: '${theme.palette.success.main}', '&:hover': { bgcolor: '${alpha(theme.palette.success.main, 0.2)', transform: 'scale(1.1)' } }}>
+                          <IconButton onClick={() => handleSendEmail(po)} sx={{ bgcolor: `${alpha(theme.palette.success.main, 0.1)}`, color: `${theme.palette.success.main}`, '&:hover': { bgcolor: `${alpha(theme.palette.success.main, 0.2)}`, transform: 'scale(1.1)' } }}>
                             <EmailIcon />
                           </IconButton>
                         </Tooltip>
@@ -252,8 +252,8 @@ const DecisionOnRejection = () => {
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
                         Rejection Note
                       </Typography>
-                      <Paper sx={{ p: 2, bgcolor: '#fffbe6', border: '1px solid #ffe082', borderRadius: 2 }}>
-                        <Typography variant="body2" sx={{ color: '#b26a00' }}>{po.RejectionNote || 'No rejection note provided.'}</Typography>
+                      <Paper sx={{ p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'warning.main', borderRadius: 2 }}>
+                        <Typography variant="body2" sx={{ color: 'warning.main' }}>{po.RejectionNote || 'No rejection note provided.'}</Typography>
                       </Paper>
                     </Box>
                   </Box>
