@@ -583,7 +583,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                       borderColor: 'rgba(102, 126, 234, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#667eea',
+                      borderColor: '#1E7DBE',
                     }
                   }}
                 >
@@ -623,7 +623,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                         color: 'white',
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -719,7 +719,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+                background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -993,11 +993,11 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '180px',
-              background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
               color: 'white',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1565c0, #00acc1)',
+                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },

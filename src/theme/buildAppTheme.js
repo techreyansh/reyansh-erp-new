@@ -28,41 +28,52 @@ const lightShadows = [
   "0 84px 92px -4px rgba(15, 23, 42, 0.17), 0 40px 44px -2px rgba(15, 23, 42, 0.08)",
 ];
 
+// Brand kit fonts: Montserrat (display/headings), Inter (body).
+const DISPLAY = '"Montserrat", "Segoe UI", Arial, sans-serif';
+const BODY = '"Inter", "Helvetica Neue", Arial, sans-serif';
+
 const typography = {
-  fontFamily: '"Plus Jakarta Sans", "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+  fontFamily: BODY,
   h1: {
-    fontWeight: 700,
+    fontFamily: DISPLAY,
+    fontWeight: 800,
     fontSize: "2.25rem",
-    lineHeight: 1.25,
+    lineHeight: 1.2,
     letterSpacing: "-0.025em",
   },
   h2: {
-    fontWeight: 700,
+    fontFamily: DISPLAY,
+    fontWeight: 800,
     fontSize: "1.875rem",
-    lineHeight: 1.3,
+    lineHeight: 1.25,
     letterSpacing: "-0.02em",
   },
   h3: {
-    fontWeight: 600,
+    fontFamily: DISPLAY,
+    fontWeight: 700,
     fontSize: "1.5rem",
-    lineHeight: 1.35,
+    lineHeight: 1.3,
     letterSpacing: "-0.015em",
   },
   h4: {
-    fontWeight: 600,
+    fontFamily: DISPLAY,
+    fontWeight: 700,
     fontSize: "1.25rem",
-    lineHeight: 1.4,
+    lineHeight: 1.35,
+    letterSpacing: "-0.01em",
   },
   h5: {
-    fontWeight: 600,
+    fontFamily: DISPLAY,
+    fontWeight: 700,
     fontSize: "1.125rem",
-    lineHeight: 1.45,
+    lineHeight: 1.4,
     letterSpacing: "-0.01em",
   },
   h6: {
-    fontWeight: 600,
+    fontFamily: DISPLAY,
+    fontWeight: 700,
     fontSize: "1rem",
-    lineHeight: 1.5,
+    lineHeight: 1.45,
   },
   body1: {
     fontSize: { xs: "0.875rem", sm: "0.9rem", md: "0.9375rem", lg: "1rem" },
@@ -91,15 +102,15 @@ function lightPalette() {
   return {
     mode: "light",
     primary: {
-      main: "#0D9488",
-      light: "#14B8A6",
-      dark: "#0F766E",
+      main: "#45ADE6",
+      light: "#84D2FC",
+      dark: "#1E7DBE",
       contrastText: "#FFFFFF",
     },
     secondary: {
-      main: "#475569",
-      light: "#64748B",
-      dark: "#334155",
+      main: "#2D3D4C",
+      light: "#3A4B5C",
+      dark: "#1E2B38",
       contrastText: "#FFFFFF",
     },
     success: {
@@ -109,10 +120,10 @@ function lightPalette() {
       lighter: "#D1FAE5",
     },
     error: {
-      main: "#DC2626",
-      light: "#EF4444",
-      dark: "#B91C1C",
-      lighter: "#FEE2E2",
+      main: "#C0392B",
+      light: "#D75444",
+      dark: "#97271C",
+      lighter: "#FBE3E0",
     },
     warning: {
       main: "#D97706",
@@ -121,19 +132,19 @@ function lightPalette() {
       lighter: "#FEF3C7",
     },
     info: {
-      main: "#0284C7",
-      light: "#0EA5E9",
-      dark: "#0369A1",
-      lighter: "#E0F2FE",
+      main: "#1E7DBE",
+      light: "#45ADE6",
+      dark: "#155E8C",
+      lighter: "#CFE6F6",
     },
     background: {
-      default: "#F1F5F9",
+      default: "#F2F5F7",
       paper: "#FFFFFF",
     },
     text: {
-      primary: "#0F172A",
-      secondary: "#475569",
-      disabled: "#94A3B8",
+      primary: "#2D3D4C",
+      secondary: "#81898F",
+      disabled: "#AAB2B8",
     },
     grey: {
       50: "#F8FAFC",
@@ -147,7 +158,7 @@ function lightPalette() {
       800: "#1E293B",
       900: "#0F172A",
     },
-    divider: "rgba(15, 23, 42, 0.08)",
+    divider: "#E2E8ED",
   };
 }
 
@@ -155,16 +166,16 @@ function darkPalette() {
   return {
     mode: "dark",
     primary: {
-      main: "#2DD4BF",
-      light: "#5EEAD4",
-      dark: "#14B8A6",
-      contrastText: "#0F172A",
+      main: "#45ADE6",
+      light: "#84D2FC",
+      dark: "#1E7DBE",
+      contrastText: "#0B1A24",
     },
     secondary: {
-      main: "#94A3B8",
-      light: "#CBD5E1",
-      dark: "#64748B",
-      contrastText: "#0F172A",
+      main: "#A9B2BA",
+      light: "#C7CDD3",
+      dark: "#81898F",
+      contrastText: "#1E2B38",
     },
     success: {
       main: "#34D399",
@@ -173,10 +184,10 @@ function darkPalette() {
       lighter: "rgba(16, 185, 129, 0.2)",
     },
     error: {
-      main: "#F87171",
-      light: "#FCA5A5",
-      dark: "#EF4444",
-      lighter: "rgba(248, 113, 113, 0.18)",
+      main: "#E05548",
+      light: "#EC7468",
+      dark: "#C0392B",
+      lighter: "rgba(224, 85, 72, 0.2)",
     },
     warning: {
       main: "#FBBF24",
@@ -185,19 +196,19 @@ function darkPalette() {
       lighter: "rgba(251, 191, 36, 0.2)",
     },
     info: {
-      main: "#38BDF8",
-      light: "#7DD3FC",
-      dark: "#0EA5E9",
-      lighter: "rgba(56, 189, 248, 0.18)",
+      main: "#45ADE6",
+      light: "#84D2FC",
+      dark: "#1E7DBE",
+      lighter: "rgba(69, 173, 230, 0.18)",
     },
     background: {
-      default: "#0F172A",
-      paper: "#1E293B",
+      default: "#1E2B38",
+      paper: "#2D3D4C",
     },
     text: {
-      primary: "#F1F5F9",
-      secondary: "#94A3B8",
-      disabled: "#64748B",
+      primary: "#F2F5F7",
+      secondary: "#A9B2BA",
+      disabled: "#6B767E",
     },
     grey: {
       50: "#F8FAFC",
@@ -211,7 +222,7 @@ function darkPalette() {
       800: "#1E293B",
       900: "#0F172A",
     },
-    divider: "rgba(148, 163, 184, 0.14)",
+    divider: "rgba(226, 232, 237, 0.12)",
   };
 }
 
@@ -230,16 +241,16 @@ const components = {
         "&:hover": {
           boxShadow:
             theme.palette.mode === "dark"
-              ? "0 2px 12px rgba(45, 212, 191, 0.22)"
-              : "0 2px 8px rgba(13, 148, 136, 0.2)",
+              ? "0 2px 12px rgba(69, 173, 230, 0.22)"
+              : "0 2px 8px rgba(69, 173, 230, 0.2)",
           transform: "scale(1.02)",
         },
         "&:active": {
           transform: "scale(0.98)",
           boxShadow:
             theme.palette.mode === "dark"
-              ? "0 1px 6px rgba(45, 212, 191, 0.18)"
-              : "0 1px 4px rgba(13, 148, 136, 0.15)",
+              ? "0 1px 6px rgba(69, 173, 230, 0.18)"
+              : "0 1px 4px rgba(69, 173, 230, 0.15)",
         },
         "&.MuiLoadingButton-loading": {
           "& .MuiButton-startIcon, & .MuiButton-endIcon": { opacity: 0.6 },
@@ -249,8 +260,8 @@ const components = {
         "&:hover": {
           boxShadow:
             theme.palette.mode === "dark"
-              ? "0 4px 16px rgba(45, 212, 191, 0.28)"
-              : "0 4px 12px rgba(13, 148, 136, 0.25)",
+              ? "0 4px 16px rgba(69, 173, 230, 0.28)"
+              : "0 4px 12px rgba(69, 173, 230, 0.25)",
           transform: "scale(1.02)",
         },
       }),
@@ -259,14 +270,14 @@ const components = {
         "&:hover": {
           borderWidth: "1.5px",
           backgroundColor:
-            theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.1)" : "rgba(13, 148, 136, 0.04)",
+            theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.1)" : "rgba(69, 173, 230, 0.04)",
           transform: "scale(1.02)",
         },
       }),
       text: ({ theme }) => ({
         "&:hover": {
           backgroundColor:
-            theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.12)" : "rgba(13, 148, 136, 0.06)",
+            theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.12)" : "rgba(69, 173, 230, 0.06)",
         },
       }),
     },
@@ -351,12 +362,12 @@ const components = {
     styleOverrides: {
       root: ({ theme }) => ({
         "&:hover": {
-          backgroundColor: theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.06)" : "rgba(13, 148, 136, 0.03)",
+          backgroundColor: theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.06)" : "rgba(69, 173, 230, 0.03)",
         },
         "&.Mui-selected": {
-          backgroundColor: theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.1)" : "rgba(13, 148, 136, 0.06)",
+          backgroundColor: theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.1)" : "rgba(69, 173, 230, 0.06)",
           "&:hover": {
-            backgroundColor: theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.14)" : "rgba(13, 148, 136, 0.09)",
+            backgroundColor: theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.14)" : "rgba(69, 173, 230, 0.09)",
           },
         },
       }),
@@ -387,8 +398,8 @@ const components = {
             borderWidth: "2px",
             boxShadow:
               theme.palette.mode === "dark"
-                ? "0 0 0 3px rgba(45, 212, 191, 0.2)"
-                : "0 0 0 3px rgba(13, 148, 136, 0.12)",
+                ? "0 0 0 3px rgba(69, 173, 230, 0.2)"
+                : "0 0 0 3px rgba(69, 173, 230, 0.12)",
           },
           "&.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline": {
             boxShadow:
@@ -427,7 +438,7 @@ const components = {
         borderRadius: 8,
         transition: "background-color 0.18s ease, transform 0.1s ease",
         "&:hover": {
-          backgroundColor: theme.palette.mode === "dark" ? "rgba(45, 212, 191, 0.12)" : "rgba(13, 148, 136, 0.08)",
+          backgroundColor: theme.palette.mode === "dark" ? "rgba(69, 173, 230, 0.12)" : "rgba(69, 173, 230, 0.08)",
         },
         "&:active": {
           transform: "scale(0.97)",

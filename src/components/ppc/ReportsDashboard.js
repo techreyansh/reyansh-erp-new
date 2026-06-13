@@ -33,7 +33,7 @@ const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="target" fill="#94A3B8" />
-                <Bar dataKey="production" fill="#0D9488" />
+                <Bar dataKey="production" fill="#45ADE6" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -66,7 +66,7 @@ const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
                 <XAxis dataKey="machine" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="utilization" fill="#0284C7" />
+                <Bar dataKey="utilization" fill="#1E7DBE" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>

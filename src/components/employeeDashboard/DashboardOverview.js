@@ -33,7 +33,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import KPICard from '../common/KPICard';
 import employeeService from '../../services/employeeService';
 
-const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3'];
+const COLORS = ['#4caf50', '#ff9800', '#f44336', '#45ADE6'];
 
 const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
   const [timeTrackingData, setTimeTrackingData] = useState([]);
@@ -233,7 +233,7 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
                         labelFormatter={(date) => new Date(date).toLocaleDateString()}
                         formatter={(value) => [`${value}h`, 'Hours']}
                       />
-                      <Bar dataKey="hours" fill="#2196f3" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="hours" fill="#45ADE6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>

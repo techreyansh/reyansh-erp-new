@@ -620,7 +620,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                     }}
                   >
                     <Box sx={{ p: 2, backgroundColor: '#f8fbff', borderBottom: '1px solid #e3f2fd' }}>
-                      <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 600 }}>
+                      <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600 }}>
                         Current Items ({items.length})
                       </Typography>
                     </Box>
@@ -628,14 +628,14 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                       <Table size="small">
                         <TableHead>
                           <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Item</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Description</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Code</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Order Type</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Qty</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Price</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Batch</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>Actions</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Item</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Description</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Code</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Order Type</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Qty</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Price</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Batch</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -650,7 +650,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                                   size="small"
                                   sx={{
                                     backgroundColor: '#e3f2fd',
-                                    color: '#1976d2',
+                                    color: '#45ADE6',
                                     fontSize: '0.75rem',
                                     fontWeight: 500
                                   }}
@@ -666,7 +666,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                                       onClick={() => handleEditItem(idx)}
                                       size="small"
                                       sx={{ 
-                                        color: '#1976d2',
+                                        color: '#45ADE6',
                                         '&:hover': { backgroundColor: '#e3f2fd' }
                                       }}
                                     >
@@ -714,7 +714,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                       <Typography 
                         variant="h6" 
                         sx={{ 
-                          color: '#1976d2',
+                          color: '#45ADE6',
                           fontWeight: 600
                         }}
                       >
@@ -873,8 +873,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                           fullWidth
                           disabled={!itemData.itemName || !itemData.productDesc || !itemData.qty || !itemData.price || !itemData.batchSize}
                           sx={{
-                            backgroundColor: '#1976d2',
-                            '&:hover': { backgroundColor: '#1565c0' },
+                            backgroundColor: '#45ADE6',
+                            '&:hover': { backgroundColor: '#1E7DBE' },
                             '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' }
                           }}
                         >
@@ -902,10 +902,10 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                             variant="outlined"
                             fullWidth
                             sx={{
-                              borderColor: '#1976d2',
-                              color: '#1976d2',
+                              borderColor: '#45ADE6',
+                              color: '#45ADE6',
                               '&:hover': {
-                                borderColor: '#1565c0',
+                                borderColor: '#1E7DBE',
                                 backgroundColor: '#f8fbff'
                               }
                             }}
@@ -929,10 +929,10 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                     onClick={() => setItemSectionOpen(true)}
                     startIcon={<Add />}
                     sx={{
-                      borderColor: '#1976d2',
-                      color: '#1976d2',
+                      borderColor: '#45ADE6',
+                      color: '#45ADE6',
                       '&:hover': {
-                        borderColor: '#1565c0',
+                        borderColor: '#1E7DBE',
                         backgroundColor: '#f8fbff'
                       }
                     }}
@@ -951,10 +951,10 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
           onClick={handleClose}
           disabled={loading}
           sx={{
-            borderColor: '#1976d2',
-            color: '#1976d2',
+            borderColor: '#45ADE6',
+            color: '#45ADE6',
             '&:hover': {
-              borderColor: '#1565c0',
+              borderColor: '#1E7DBE',
               backgroundColor: '#f8fbff'
             }
           }}
@@ -971,8 +971,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
           }
           startIcon={<Save />}
           sx={{
-            backgroundColor: '#1976d2',
-            '&:hover': { backgroundColor: '#1565c0' },
+            backgroundColor: '#45ADE6',
+            '&:hover': { backgroundColor: '#1E7DBE' },
             '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' }
           }}
         >

@@ -554,7 +554,7 @@ const PowerCordMaster = () => {
             variant="h4" 
             sx={{ 
               fontWeight: "bold", 
-              color: "#1976d2",
+              color: "#45ADE6",
               fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
             }}
           >
@@ -576,7 +576,7 @@ const PowerCordMaster = () => {
           startIcon={<AddIcon />}
           onClick={() => setDialogOpen(true)}
           sx={{ 
-            bgcolor: "#1976d2",
+            bgcolor: "#45ADE6",
             whiteSpace: 'nowrap',
             flexShrink: 0
           }}
@@ -736,7 +736,7 @@ const PowerCordMaster = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#667eea',
+                        borderColor: '#1E7DBE',
                       }
                     }}
                   >
@@ -775,7 +775,7 @@ const PowerCordMaster = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           color: 'white',
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -862,7 +862,7 @@ const PowerCordMaster = () => {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+                    <Typography variant="body2" sx={{ fontWeight: "bold", color: "#45ADE6" }}>
                       {cord.clientCode || "—"}
                     </Typography>
                   </TableCell>
@@ -966,7 +966,7 @@ const PowerCordMaster = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#667eea',
+                        borderColor: '#1E7DBE',
                       }
                     }}
                   >
@@ -1006,7 +1006,7 @@ const PowerCordMaster = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           color: 'white',
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

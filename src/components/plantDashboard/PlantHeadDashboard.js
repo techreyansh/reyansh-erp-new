@@ -135,7 +135,7 @@ function derivePlantAttention(d) {
 }
 
 const STATUS_COLORS = {
-  RUNNING: '#0284C7',
+  RUNNING: '#1E7DBE',
   PENDING: '#D97706',
   COMPLETED: '#059669',
   FAILED: '#DC2626',
@@ -187,10 +187,10 @@ const PlantHeadDashboard = () => {
   const rejectionColor = k.rejectionRate < 0.05 ? '#059669' : k.rejectionRate < 0.1 ? '#D97706' : '#DC2626';
 
   const kpiCards = [
-    { label: 'Output Today', value: Math.round(k.producedToday ?? 0).toLocaleString('en-IN'), sub: 'units produced', icon: PrecisionManufacturingOutlined, accent: '#0D9488', path: '/ppc/production-tracking' },
+    { label: 'Output Today', value: Math.round(k.producedToday ?? 0).toLocaleString('en-IN'), sub: 'units produced', icon: PrecisionManufacturingOutlined, accent: '#45ADE6', path: '/ppc/production-tracking' },
     { label: 'Plan Achievement', value: pct(k.achievement ?? 0), sub: `${Math.round(k.producedQty ?? 0).toLocaleString('en-IN')} / ${Math.round(k.targetQty ?? 0).toLocaleString('en-IN')}`, icon: RuleOutlined, accent: achievementColor, path: '/ppc/production-plan' },
     { label: 'Rejection %', value: pct(k.rejectionRate ?? 0), sub: 'defects / total', icon: ReportProblemOutlined, accent: rejectionColor, path: '/ppc/quality-control' },
-    { label: 'Running Jobs', value: k.running ?? 0, sub: `${k.pendingJobs ?? 0} pending`, icon: FactoryOutlined, accent: '#0284C7', path: '/ppc/work-orders' },
+    { label: 'Running Jobs', value: k.running ?? 0, sub: `${k.pendingJobs ?? 0} pending`, icon: FactoryOutlined, accent: '#1E7DBE', path: '/ppc/work-orders' },
     { label: 'Plans In Progress', value: k.inProgressPlans ?? 0, sub: `${k.planCount ?? 0} total`, icon: PlaylistAddCheckOutlined, accent: '#7C3AED', path: '/ppc/production-plan' },
     { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: 'ready to ship', icon: LocalShippingOutlined, accent: '#DB2777', path: '/dispatch-management' },
   ];
@@ -237,8 +237,8 @@ const PlantHeadDashboard = () => {
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
         {/* No-data hint */}
         {!loading && data && !data.hasData && (
-          <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2.5, display: 'flex', gap: 1.5, alignItems: 'center', bgcolor: alpha('#0284C7', 0.04), borderColor: alpha('#0284C7', 0.3) }}>
-            <InfoOutlined sx={{ color: '#0284C7' }} />
+          <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2.5, display: 'flex', gap: 1.5, alignItems: 'center', bgcolor: alpha('#1E7DBE', 0.04), borderColor: alpha('#1E7DBE', 0.3) }}>
+            <InfoOutlined sx={{ color: '#1E7DBE' }} />
             <Typography variant="body2" color="text.secondary">
               No production plans or work orders found yet. This dashboard populates from the PPC module (production plans → work orders → QC). Create a plan to see live metrics.
             </Typography>
@@ -302,7 +302,7 @@ const PlantHeadDashboard = () => {
                 <Stack spacing={1.5} sx={{ height: '100%', overflowY: 'auto', pr: 0.5 }}>
                   {data.planProgress.map((p) => {
                     const ratio = p.target > 0 ? Math.min(p.produced / p.target, 1) : 0;
-                    const barColor = ratio >= 0.9 ? '#059669' : ratio >= 0.6 ? '#0284C7' : '#D97706';
+                    const barColor = ratio >= 0.9 ? '#059669' : ratio >= 0.6 ? '#1E7DBE' : '#D97706';
                     return (
                       <Box key={p.id}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>

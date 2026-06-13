@@ -256,7 +256,7 @@ const SendQuotation = () => {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%);
             min-height: 100vh;
         }
         .container {
@@ -268,7 +268,7 @@ const SendQuotation = () => {
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%);
             color: white;
             padding: 40px;
             text-align: center;
@@ -292,11 +292,11 @@ const SendQuotation = () => {
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #1E7DBE;
         }
         .customer-info h3 {
             margin: 0 0 20px 0;
-            color: #667eea;
+            color: #1E7DBE;
             font-size: 1.5em;
         }
         .info-grid {
@@ -322,7 +322,7 @@ const SendQuotation = () => {
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .products-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%);
             color: white;
             padding: 20px;
             text-align: left;
@@ -359,7 +359,7 @@ const SendQuotation = () => {
             color: #666;
         }
         .quotation-number {
-            background: #667eea;
+            background: #1E7DBE;
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
@@ -414,7 +414,7 @@ const SendQuotation = () => {
                 </div>
             </div>
 
-            <h3 style="color: #667eea; margin-bottom: 20px;">Products & Pricing</h3>
+            <h3 style="color: #1E7DBE; margin-bottom: 20px;">Products & Pricing</h3>
             <table class="products-table">
                 <thead>
                     <tr>
@@ -608,7 +608,7 @@ const SendQuotation = () => {
         alignItems="center" 
         minHeight="400px"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
           borderRadius: 3,
           p: 4
         }}
@@ -633,7 +633,7 @@ const SendQuotation = () => {
             {/* Enhanced Header */}
             <Card sx={{ 
               mb: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
@@ -781,7 +781,7 @@ const SendQuotation = () => {
                 <Table>
                   <TableHead>
                     <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                     }}>
                       <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Customer</TableCell>
@@ -801,7 +801,7 @@ const SendQuotation = () => {
                             <Avatar sx={{ 
                               width: 80, 
                               height: 80, 
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                               mb: 2
                             }}>
                               <Receipt sx={{ fontSize: 40 }} />
@@ -855,7 +855,7 @@ const SendQuotation = () => {
                                   <Avatar sx={{ 
                                     width: 40, 
                                     height: 40, 
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                                   }}>
                                     {(lead.FullName || lead.CustomerName || 'C').charAt(0)}
                                   </Avatar>
@@ -884,7 +884,7 @@ const SendQuotation = () => {
                                       sx={{ 
                                         mr: 0.5, 
                                         mb: 0.5,
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                         color: 'white'
                                       }} 
                                     />
@@ -984,7 +984,7 @@ const SendQuotation = () => {
               fullWidth
             >
               <DialogTitle sx={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                 color: 'white'
               }}>
                 <Box display="flex" alignItems="center" gap={2}>
@@ -1111,7 +1111,7 @@ const SendQuotation = () => {
                                 key={index}
                                 label={product} 
                                 sx={{ 
-                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                   color: 'white',
                                   fontWeight: 600
                                 }} 
@@ -1182,9 +1182,9 @@ const SendQuotation = () => {
                   onClick={handleSubmit}
                   disabled={loading}
                   sx={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)'
+                      background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)'
                     }
                   }}
                 >

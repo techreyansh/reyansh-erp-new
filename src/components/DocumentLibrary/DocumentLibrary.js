@@ -705,7 +705,7 @@ const DocumentLibrary = () => {
       <Fade in timeout={600}>
         <Box sx={{ 
           mb: 4, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)', 
           color: 'white',
           borderRadius: 4,
           overflow: 'hidden',
@@ -855,7 +855,7 @@ const DocumentLibrary = () => {
                       textTransform: 'none',
                       fontWeight: 'bold',
                       boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       '&:hover': {
                         boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
                         transform: 'translateY(-2px)'
@@ -1275,8 +1275,8 @@ const DocumentLibrary = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         background: item.type === 'folder'
-                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                          : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
+                          : 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
                         mb: 2,
                         boxShadow: item.type === 'folder'
                           ? '0 8px 16px rgba(102, 126, 234, 0.3)'
@@ -1521,8 +1521,8 @@ const DocumentLibrary = () => {
                             width: 56,
                             height: 56,
                             background: item.type === 'folder'
-                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                              : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                              ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
+                              : 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
                             boxShadow: item.type === 'folder'
                               ? '0 4px 12px rgba(102, 126, 234, 0.3)'
                               : '0 4px 12px rgba(245, 87, 108, 0.3)'
@@ -2052,7 +2052,7 @@ const DocumentLibrary = () => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
                 <Card sx={{ 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                   color: 'white',
                   textAlign: 'center',
                   p: 3
@@ -2069,7 +2069,7 @@ const DocumentLibrary = () => {
 
               <Grid item xs={12} md={4}>
                 <Card sx={{ 
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  background: 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
                   color: 'white',
                   textAlign: 'center',
                   p: 3
@@ -2086,7 +2086,7 @@ const DocumentLibrary = () => {
 
               <Grid item xs={12} md={4}>
                 <Card sx={{ 
-                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                   color: 'white',
                   textAlign: 'center',
                   p: 3

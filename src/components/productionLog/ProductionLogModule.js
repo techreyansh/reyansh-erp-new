@@ -226,9 +226,9 @@ const ProductionLogModule = () => {
         {extraction && (
           <>
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent="#0284C7" /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent="#1E7DBE" /></Grid>
               <Grid item xs={6} md={3}><StatCard label="Total Target" value={Math.round(totalTarget).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#7C3AED" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#0D9488" /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#45ADE6" /></Grid>
               <Grid item xs={6} md={3}><StatCard label="Achievement" value={`${achievementPct}%`} icon={AutoAwesomeOutlined} accent={achievementPct >= 90 ? '#059669' : achievementPct >= 70 ? '#D97706' : '#DC2626'} /></Grid>
             </Grid>
 

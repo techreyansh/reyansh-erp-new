@@ -202,8 +202,8 @@ const CEOExecutiveDashboard = () => {
   }
 
   const kpiCards = [
-    { label: 'Revenue (This Month)', value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: '#0D9488', path: '/dashboard' },
-    { label: 'Order Book', value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: '#0284C7', path: '/crm/sales-orders' },
+    { label: 'Revenue (This Month)', value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: '#45ADE6', path: '/dashboard' },
+    { label: 'Order Book', value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: '#1E7DBE', path: '/crm/sales-orders' },
     { label: 'Collected', value: inrCompact(k.collected), icon: AccountBalanceWalletOutlined, accent: '#059669', path: '/crm/collections' },
     { label: 'Outstanding', value: inrCompact(k.outstanding), icon: TrendingUpRounded, accent: '#D97706', path: '/crm/collections' },
     { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: '#7C3AED', path: '/dispatch-management' },
@@ -317,20 +317,20 @@ const CEOExecutiveDashboard = () => {
                   <AreaChart data={data.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="cc-ord" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0284C7" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#0284C7" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="cc-col" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0D9488" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
                     <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                     <YAxis tickFormatter={inrCompact} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={70} />
                     <RTooltip formatter={(v) => inrCompact(v)} />
-                    <Area type="monotone" dataKey="ordered" stroke="#0284C7" strokeWidth={2} fill="url(#cc-ord)" name="Ordered" />
-                    <Area type="monotone" dataKey="collected" stroke="#0D9488" strokeWidth={2} fill="url(#cc-col)" name="Collected" />
+                    <Area type="monotone" dataKey="ordered" stroke="#1E7DBE" strokeWidth={2} fill="url(#cc-ord)" name="Ordered" />
+                    <Area type="monotone" dataKey="collected" stroke="#45ADE6" strokeWidth={2} fill="url(#cc-col)" name="Collected" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (

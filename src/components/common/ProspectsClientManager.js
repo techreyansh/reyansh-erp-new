@@ -1802,7 +1802,7 @@ const ProspectsClientManager = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1A1F71, #2E3A8F, #f093fb)',
+              background: 'linear-gradient(90deg, #1A1F71, #2E3A8F, #84D2FC)',
               zIndex: 2
             }
           }
@@ -3330,7 +3330,7 @@ const ProspectsClientManager = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #1A1F71, #2E3A8F, #f093fb)',
+            background: 'linear-gradient(90deg, #1A1F71, #2E3A8F, #84D2FC)',
           }
         }}>
           <Box sx={{ display: 'flex', gap: 2 }}>

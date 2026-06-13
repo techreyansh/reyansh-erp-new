@@ -12,7 +12,7 @@ import { Box, Card, CardContent, Skeleton, Stack, Typography, alpha } from '@mui
  * @param {boolean} [loading]
  * @param {function} [onClick]
  */
-function StatCard({ label, value, sub, icon: Icon, accent = '#0D9488', loading, onClick }) {
+function StatCard({ label, value, sub, icon: Icon, accent = '#45ADE6', loading, onClick }) {
   return (
     <Card
       variant="outlined"

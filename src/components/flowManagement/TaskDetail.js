@@ -154,7 +154,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
     >
       <DialogTitle 
         sx={{ 
-          backgroundColor: '#1976d2',
+          backgroundColor: '#45ADE6',
           color: 'white',
           py: 2,
           px: 3,
@@ -198,7 +198,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           backgroundColor: '#f8fafc',
           minHeight: 56,
           '& .MuiTabs-indicator': {
-            backgroundColor: '#1976d2',
+            backgroundColor: '#45ADE6',
             height: 2,
             borderRadius: '2px 2px 0 0'
           },
@@ -219,11 +219,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             minHeight: 56,
             fontSize: '0.875rem',
             '&.Mui-selected': { 
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#1976d2',
+              color: '#45ADE6',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -240,11 +240,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             minHeight: 56,
             fontSize: '0.875rem',
             '&.Mui-selected': { 
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#1976d2',
+              color: '#45ADE6',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -262,11 +262,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               minHeight: 56,
               fontSize: '0.875rem',
               '&.Mui-selected': { 
-                color: '#1976d2',
+                color: '#45ADE6',
                 fontWeight: 600
               },
               '&:hover': {
-                color: '#1976d2',
+                color: '#45ADE6',
                 backgroundColor: 'rgba(25, 118, 210, 0.04)'
               }
             }}
@@ -284,11 +284,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             minHeight: 56,
             fontSize: '0.875rem',
             '&.Mui-selected': { 
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#1976d2',
+              color: '#45ADE6',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -305,11 +305,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             minHeight: 56,
             fontSize: '0.875rem',
             '&.Mui-selected': { 
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#1976d2',
+              color: '#45ADE6',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -343,7 +343,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -357,7 +357,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   }}>
                     Client Code
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2', fontSize: '1rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6', fontSize: '1rem' }}>
                     {task.ClientCode}
                   </Typography>
                   {sheetData?.client?.clientName && (
@@ -378,7 +378,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -392,7 +392,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   }}>
                     Product Code
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2', fontSize: '1rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6', fontSize: '1rem' }}>
                     {task.ProductCode}
                   </Typography>
                   {sheetData?.product?.productName && (
@@ -413,7 +413,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -443,7 +443,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -473,7 +473,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -513,7 +513,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     boxShadow: isOverdue(task.DueDate) 
                       ? '0 4px 12px rgba(220, 38, 38, 0.12)' 
                       : '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: isOverdue(task.DueDate) ? '#dc2626' : '#1976d2'
+                    borderColor: isOverdue(task.DueDate) ? '#dc2626' : '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -562,7 +562,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -592,7 +592,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -632,7 +632,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     }}
                   >
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-                      <Description sx={{ fontSize: 16, mr: 1, color: '#1976d2' }} />
+                      <Description sx={{ fontSize: 16, mr: 1, color: '#45ADE6' }} />
                       Description
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500, color: '#37474f', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
@@ -662,7 +662,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     }}
                   >
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-                      <Description sx={{ fontSize: 16, mr: 1, color: '#1976d2' }} />
+                      <Description sx={{ fontSize: 16, mr: 1, color: '#45ADE6' }} />
                       PO Document
                     </Typography>
                     <Button
@@ -799,7 +799,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                                     ? '#ff9800'
                                     : index === orderedDates.length - 1
                                     ? '#4caf50'
-                                    : '#1976d2',
+                                    : '#45ADE6',
                                   color: 'white',
                                   fontWeight: 600,
                                   minWidth: 45,
@@ -833,7 +833,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                                   ? '#e65100'
                                   : index === orderedDates.length - 1
                                   ? '#2e7d32'
-                                  : '#1976d2',
+                                  : '#45ADE6',
                                 backgroundColor: displayDate === 'N/A'
                                   ? '#f1f5f9'
                                   : task.Status === stageInfo.status
@@ -929,7 +929,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   '&:hover': {
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                    borderColor: '#1976d2',
+                    borderColor: '#45ADE6',
                     backgroundColor: 'rgba(25, 118, 210, 0.05)'
                   }
                 }}
@@ -971,7 +971,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                               borderColor: '#3b82f6',
                               color: '#3b82f6',
                               '&:hover': {
-                                borderColor: '#1565c0',
+                                borderColor: '#1E7DBE',
                                 backgroundColor: '#f8fbff'
                               },
                               width: { xs: '100%', sm: 'auto' }
@@ -981,7 +981,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                           </Button>
                         </label>
                         {file && (
-                          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#1976d2' }}>
+                          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#45ADE6' }}>
                             Selected: {file.name}
                           </Typography>
                         )}
@@ -1022,12 +1022,12 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
                 boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                borderColor: '#1976d2'
+                borderColor: '#45ADE6'
               }
             }}
           >
-            <Timeline sx={{ fontSize: 48, color: '#1976d2', mb: 2 }} />
-            <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 600, mb: 1 }}>
+            <Timeline sx={{ fontSize: 48, color: '#45ADE6', mb: 2 }} />
+            <Typography variant="h5" sx={{ color: '#45ADE6', fontWeight: 600, mb: 1 }}>
               Flow Progress
             </Typography>
             <Typography variant="h6" sx={{ color: '#546e7a', fontWeight: 500, mb: 2 }}>
@@ -1179,7 +1179,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             textTransform: 'none',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
-              borderColor: '#1976d2',
+              borderColor: '#45ADE6',
               backgroundColor: 'rgba(59, 130, 246, 0.08)',
               transform: 'translateY(-1px)',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)'

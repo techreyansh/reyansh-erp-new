@@ -462,6 +462,7 @@ const Header = () => {
         { subheader: "Insights", label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
         { subheader: "Insights", label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
         { subheader: "Flow", label: "Sales Flow", path: "/sales-flow", icon: <PurchaseIcon />, roles: ["Customer Relations Manager", "Sales Executive", "NPD", "Quality Engineer", "Director", "Production Manager", "Store Manager", "Accounts Executive", "CEO"] },
+        { subheader: "Data", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
       ],
     },
     {

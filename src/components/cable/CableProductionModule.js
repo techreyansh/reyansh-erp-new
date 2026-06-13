@@ -452,7 +452,7 @@ const CableDashboard = () => {
                 { step: 3, label: "Extrusion", color: "#9c27b0", description: "Single core PVC coating" },
                 { step: 4, label: "Laying", color: "#673ab7", description: "Multi-core cable assembly" },
                 { step: 5, label: "Sheathing", color: "#3f51b5", description: "Outer protective coating" },
-                { step: 6, label: "Finishing", color: "#2196f3", description: "Quality testing & packaging" },
+                { step: 6, label: "Finishing", color: "#45ADE6", description: "Quality testing & packaging" },
               ].map((process, index) => (
                 <Stack key={index} direction="column" alignItems="center" spacing={2}>
                   <Box 

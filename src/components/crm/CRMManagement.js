@@ -1868,7 +1868,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -1880,7 +1880,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -1905,7 +1905,7 @@ const CRMManagement = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Basic Information Section */}
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                 <Business sx={{ fontSize: 20 }} />
                 Basic Information
               </Typography>
@@ -1929,9 +1929,9 @@ const CRMManagement = () => {
                           }}
                           sx={{
                             '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                            '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                            '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                             '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                         }}
                       />
@@ -1951,9 +1951,9 @@ const CRMManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -1974,9 +1974,9 @@ const CRMManagement = () => {
                     sx={{
                       '& .MuiInputBase-root': { alignItems: 'flex-start' },
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } }
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }
                     }}
                   />
                 </Box>
@@ -1984,7 +1984,7 @@ const CRMManagement = () => {
 
             {/* Opportunity Details Section */}
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                 <TrendingUp sx={{ fontSize: 20 }} />
                 Opportunity Details
               </Typography>
@@ -2003,9 +2003,9 @@ const CRMManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -2054,9 +2054,9 @@ const CRMManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -2075,9 +2075,9 @@ const CRMManagement = () => {
                           },
                           sx: {
                             '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                            '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                            '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                             '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                         }
                       } 
@@ -2097,9 +2097,9 @@ const CRMManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -2117,9 +2117,9 @@ const CRMManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -2129,7 +2129,7 @@ const CRMManagement = () => {
 
             {/* Additional Information Section */}
             <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                 <Note sx={{ fontSize: 20 }} />
                 Additional Information
               </Typography>
@@ -2149,9 +2149,9 @@ const CRMManagement = () => {
                     sx={{
                       '& .MuiInputBase-root': { alignItems: 'flex-start' },
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } }
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }
                     }}
                   />
                 </Box>
@@ -2230,7 +2230,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2242,7 +2242,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -2527,7 +2527,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2539,7 +2539,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -2751,7 +2751,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2763,7 +2763,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -2976,7 +2976,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2988,7 +2988,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -3156,7 +3156,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3168,7 +3168,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -3212,7 +3212,7 @@ const CRMManagement = () => {
 
                 {/* Note Content */}
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                     <Note sx={{ fontSize: 20 }} />
                     Content
                   </Typography>
@@ -3233,7 +3233,7 @@ const CRMManagement = () => {
 
                 {/* Note Metadata */}
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                     <Business sx={{ fontSize: 20 }} />
                     Information
                   </Typography>
@@ -3288,7 +3288,7 @@ const CRMManagement = () => {
                 {/* Tags if available */}
                 {selectedNote.tags && selectedNote.tags.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#1976d2' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
                       <Category sx={{ fontSize: 20 }} />
                       Tags
                     </Typography>
@@ -3318,8 +3318,8 @@ const CRMManagement = () => {
               startIcon={<CloseIcon />}
               size="large"
               sx={{ 
-                bgcolor: '#1976d2',
-                '&:hover': { bgcolor: '#1565c0' }
+                bgcolor: '#45ADE6',
+                '&:hover': { bgcolor: '#1E7DBE' }
               }}
             >
               Close
@@ -3365,7 +3365,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3377,7 +3377,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -3577,7 +3577,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3589,7 +3589,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -3817,7 +3817,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3829,7 +3829,7 @@ const CRMManagement = () => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',

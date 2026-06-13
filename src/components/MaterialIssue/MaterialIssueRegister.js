@@ -1044,16 +1044,16 @@ const MaterialIssueRegister = () => {
                             borderBottomColor: '#e0e0e0'
                           },
                           '& .MuiInput-underline:after': {
-                            borderBottomColor: '#1976d2'
+                            borderBottomColor: '#45ADE6'
                           },
                           '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                            borderBottomColor: '#1976d2'
+                            borderBottomColor: '#45ADE6'
                           },
                           '& .MuiFormLabel-root': {
                             fontSize: '14px',
                             color: '#666',
                             '&.Mui-focused': {
-                              color: '#1976d2'
+                              color: '#45ADE6'
                             }
                           },
                           '& .MuiInputBase-input': {

@@ -873,7 +873,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #0D9488 0%, #0284C7 100%)',
+                          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
                           color: 'white',
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

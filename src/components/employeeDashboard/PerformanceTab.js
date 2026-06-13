@@ -216,9 +216,9 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                       <Line 
                         type="monotone" 
                         dataKey="score" 
-                        stroke="#2196f3" 
+                        stroke="#45ADE6" 
                         strokeWidth={3}
-                        dot={{ fill: '#2196f3', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: '#45ADE6', strokeWidth: 2, r: 4 }}
                       />
                       <Line 
                         type="monotone" 
@@ -267,8 +267,8 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                     <Radar
                       name="Score"
                       dataKey="score"
-                      stroke="#2196f3"
-                      fill="#2196f3"
+                      stroke="#45ADE6"
+                      fill="#45ADE6"
                       fillOpacity={0.3}
                       strokeWidth={2}
                     />

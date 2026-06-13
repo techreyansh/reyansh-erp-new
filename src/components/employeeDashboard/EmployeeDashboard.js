@@ -186,9 +186,9 @@ const EmployeeDashboard = () => {
           <Paper sx={{ 
             p: 3, 
             mb: 3, 
-            background: `linear-gradient(135deg, ${alpha('#667eea', 0.08)} 0%, ${alpha('#764ba2', 0.12)} 100%)`,
+            background: `linear-gradient(135deg, ${alpha('#1E7DBE', 0.08)} 0%, ${alpha('#45ADE6', 0.12)} 100%)`,
             color: 'primary.main',
-            border: `1px solid ${alpha('#667eea', 0.2)}`
+            border: `1px solid ${alpha('#1E7DBE', 0.2)}`
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>

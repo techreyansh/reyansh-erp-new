@@ -272,9 +272,9 @@ const StyledChip = styled(Chip)(({ theme, variant }) => {
         };
       case 'info':
         return {
-          background: `linear-gradient(135deg, #2196F3 0%, #03A9F4 100%)`,
+          background: `linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)`,
           color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#2196F3', 0.3)}`,
+          boxShadow: `0 4px 12px ${alpha('#45ADE6', 0.3)}`,
         };
       default:
         return {

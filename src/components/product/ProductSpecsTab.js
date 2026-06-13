@@ -91,7 +91,7 @@ const ProductSpecsTab = ({ product }) => {
                     Molding Machine: {product.moldingMachineManpower || 0} | 
                     Packing Line: {product.packingLineManpower || 0}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 600, mt: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 600, mt: 1 }}>
                     Total: {parseInt(product.assemblyLineManpower || 0) + parseInt(product.cableCuttingManpower || 0) + parseInt(product.moldingMachineManpower || 0) + parseInt(product.packingLineManpower || 0)}
                   </Typography>
                 </Box>

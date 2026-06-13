@@ -924,14 +924,14 @@ const CompanyKittingSheet = () => {
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #1976d2;
+            border-bottom: 2px solid #45ADE6;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
             margin-bottom: 10px;
           }
           .report-title {
@@ -947,12 +947,12 @@ const CompanyKittingSheet = () => {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid #45ADE6;
             margin-bottom: 30px;
           }
           .batch-info h3 {
             margin: 0 0 15px 0;
-            color: #1976d2;
+            color: #45ADE6;
             font-size: 16px;
           }
           .info-row {
@@ -983,7 +983,7 @@ const CompanyKittingSheet = () => {
           .items-table th {
             background-color: #f5f5f5;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
           }
           .items-table tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -998,7 +998,7 @@ const CompanyKittingSheet = () => {
           }
           .process-cable {
             background-color: #e3f2fd;
-            color: #1976d2;
+            color: #45ADE6;
           }
           .process-moulding {
             background-color: #fff3e0;
@@ -1148,14 +1148,14 @@ const CompanyKittingSheet = () => {
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #1976d2;
+            border-bottom: 2px solid #45ADE6;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
             margin-bottom: 10px;
           }
           .report-title {
@@ -1177,11 +1177,11 @@ const CompanyKittingSheet = () => {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid #45ADE6;
           }
           .detail-section h3 {
             margin: 0 0 15px 0;
-            color: #1976d2;
+            color: #45ADE6;
             font-size: 16px;
           }
           .detail-row {
@@ -1364,14 +1364,14 @@ const CompanyKittingSheet = () => {
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #1976d2;
+            border-bottom: 2px solid #45ADE6;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
             margin-bottom: 10px;
           }
           .report-title {
@@ -1393,11 +1393,11 @@ const CompanyKittingSheet = () => {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid #45ADE6;
           }
           .detail-section h3 {
             margin: 0 0 15px 0;
-            color: #1976d2;
+            color: #45ADE6;
             font-size: 16px;
           }
           .detail-row {
@@ -1713,7 +1713,7 @@ const CompanyKittingSheet = () => {
             component="h1" 
             sx={{ 
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+              background: 'linear-gradient(45deg, #45ADE6, #84D2FC)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
@@ -1824,9 +1824,9 @@ const CompanyKittingSheet = () => {
                 startIcon={<GenerateIcon />}
                 sx={{ 
                   py: 1.5,
-                  background: 'linear-gradient(45deg, #2196f3, #21cbf3)',
+                  background: 'linear-gradient(45deg, #45ADE6, #21cbf3)',
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #1976d2, #00bcd4)',
+                    background: 'linear-gradient(45deg, #45ADE6, #00bcd4)',
                   }
                 }}
               >
@@ -1909,7 +1909,7 @@ const CompanyKittingSheet = () => {
       {/* Tab Navigation System */}
       <Card sx={{ mb: 3, boxShadow: 3 }}>
         <Box sx={{ 
-          background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+          background: 'linear-gradient(45deg, #45ADE6 30%, #84D2FC 90%)',
           color: 'white',
           p: 2
         }}>
@@ -1956,7 +1956,7 @@ const CompanyKittingSheet = () => {
         <Card sx={{ mb: 3, boxShadow: 3 }}>
           <CardContent>
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Avatar sx={{ bgcolor: '#2196f3' }}>
+              <Avatar sx={{ bgcolor: '#45ADE6' }}>
                 <ViewIcon />
               </Avatar>
               <Box>
@@ -2014,13 +2014,13 @@ const CompanyKittingSheet = () => {
               <Stack spacing={3}>
                 {Object.entries(filterIssuedItemsByTime(issuedItemsList, showLast24Hours)).map(([kittingId, issues]) => (
                   <Card key={kittingId} variant="outlined" sx={{ 
-                    border: '2px solid #2196f3',
+                    border: '2px solid #45ADE6',
                     '&:hover': { boxShadow: 6 }
                   }}>
                     <CardContent>
                       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
                         <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#45ADE6' }}>
                             Kitting ID: {kittingId}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">

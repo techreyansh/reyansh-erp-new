@@ -2424,15 +2424,15 @@ const FlowManagement = () => {
   // Get tab color based on index
   const getTabColor = (index) => {
     switch (index) {
-      case 0: return '#1976d2';
-      case 1: return '#2196f3';
+      case 0: return '#45ADE6';
+      case 1: return '#45ADE6';
       case 2: return '#4caf50';
       case 3: return '#ff9800';
       case 4: return '#4caf50';
       case 5: return '#ff9800';
-      case 6: return '#2196f3';
+      case 6: return '#45ADE6';
       case 7: return '#9c27b0';
-      default: return '#1976d2';
+      default: return '#45ADE6';
     }
   };
 

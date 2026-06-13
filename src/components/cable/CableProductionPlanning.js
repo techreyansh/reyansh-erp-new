@@ -2337,7 +2337,7 @@ const CableProductionPlanning = () => {
               <IconButton
                 onClick={() => navigate('/flow-management')}
                 sx={{
-                  color: '#1976d2',
+                  color: '#45ADE6',
                   backgroundColor: 'rgba(25, 118, 210, 0.1)',
                   '&:hover': {
                     backgroundColor: 'rgba(25, 118, 210, 0.2)',
@@ -2629,9 +2629,9 @@ const CableProductionPlanning = () => {
               <StepContent>
                 {/* Order Summary Banner */}
                 {(formData.orderNumber || formData.productCode) && (
-                  <Box sx={{ mb: 3, p: 2.5, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: 2, boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)' }}>
+                  <Box sx={{ mb: 3, p: 2.5, background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)', borderRadius: 2, boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)' }}>
                     <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" alignItems="center">
-                      {formData.orderNumber && (<Chip label={`📋 Order: ${formData.orderNumber}`} size="small" sx={{ bgcolor: 'white', fontWeight: 600, color: '#667eea' }} />)}
+                      {formData.orderNumber && (<Chip label={`📋 Order: ${formData.orderNumber}`} size="small" sx={{ bgcolor: 'white', fontWeight: 600, color: '#1E7DBE' }} />)}
                       {formData.customerName && (<Chip label={`👤 Client: ${formData.customerName}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', fontWeight: 500 }} />)}
                       {formData.productCode && (<Chip label={`📦 Product: ${formData.productCode}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', fontWeight: 500 }} />)}
                       {formData.quantity && (<Chip label={`🔢 Qty: ${formData.quantity} pcs`} size="small" sx={{ bgcolor: '#4caf50', color: 'white', fontWeight: 600 }} />)}
@@ -2642,8 +2642,8 @@ const CableProductionPlanning = () => {
                 {/* Basic Order Details */}
                 <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, border: '2px solid #e3f2fd', overflow: 'hidden' }}>
                   <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box component="span" sx={{ width: 4, height: 16, bgcolor: '#1976d2', borderRadius: 1 }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#45ADE6', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box component="span" sx={{ width: 4, height: 16, bgcolor: '#45ADE6', borderRadius: 1 }} />
                       Basic Order Details
                     </Typography>
                   </Box>
@@ -2713,8 +2713,8 @@ const CableProductionPlanning = () => {
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             '& fieldset': { borderColor: '#e3f2fd' },
-                            '&:hover fieldset': { borderColor: '#1976d2' },
-                            '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+                            '&:hover fieldset': { borderColor: '#45ADE6' },
+                            '&.Mui-focused fieldset': { borderColor: '#45ADE6' }
                           }
                         }}
                       >

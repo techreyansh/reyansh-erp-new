@@ -243,7 +243,7 @@ Sales Team`;
             {/* Enhanced Header */}
             <Card sx={{ 
               mb: 4,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
@@ -287,7 +287,7 @@ Sales Team`;
                         width: 60,
                         height: 60,
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                        background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -301,7 +301,7 @@ Sales Team`;
                           right: -2,
                           bottom: -2,
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+                          background: 'linear-gradient(135deg, #1E7DBE, #45ADE6, #84D2FC)',
                           zIndex: -1,
                           opacity: 0.7
                         }
@@ -342,7 +342,7 @@ Sales Team`;
                     border: '1px solid rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <WorkspacePremium sx={{ color: '#fee140', fontSize: 20 }} />
+                    <WorkspacePremium sx={{ color: '#84D2FC', fontSize: 20 }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                       Step 2
                     </Typography>
@@ -366,13 +366,13 @@ Sales Team`;
                   <Avatar sx={{ 
                     width: 48, 
                     height: 48, 
-                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                     boxShadow: '0 4px 16px rgba(79, 172, 254, 0.3)'
                   }}>
                     <Assignment sx={{ fontSize: 24 }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2', mb: 0.5 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
                       Leads Ready for Initial Call
                     </Typography>
                     <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -398,7 +398,7 @@ Sales Team`;
                   <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                        <TableRow sx={{ background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)' }}>
                           <TableCell sx={{ color: 'white', fontWeight: 600 }}>Enquiry Number</TableCell>
                           <TableCell sx={{ color: 'white', fontWeight: 600 }}>Customer Name</TableCell>
                           <TableCell sx={{ color: 'white', fontWeight: 600 }}>Company</TableCell>
@@ -426,7 +426,7 @@ Sales Team`;
                                 label={lead.LogId} 
                                 size="small"
                                 sx={{ 
-                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                   color: 'white',
                                   fontWeight: 600
                                 }}
@@ -488,7 +488,7 @@ Sales Team`;
                                     size="small"
                                     onClick={() => handleViewDetails(lead)}
                                     sx={{ 
-                                      color: '#667eea',
+                                      color: '#1E7DBE',
                                       '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.1)' }
                                     }}
                                   >
@@ -524,13 +524,13 @@ Sales Team`;
                                       }, 100);
                                     }}
                                     sx={{ 
-                                      background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                                      background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                                       color: 'white',
                                       fontSize: '0.75rem',
                                       px: 1.5,
                                       py: 0.5,
                                       '&:hover': {
-                                        background: 'linear-gradient(135deg, #fee140 0%, #fa709a 100%)',
+                                        background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)',
                                         transform: 'translateY(-1px)',
                                         boxShadow: '0 4px 12px rgba(250, 112, 154, 0.4)'
                                       }
@@ -619,10 +619,10 @@ Sales Team`;
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
                             '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#667eea'
+                              borderColor: '#1E7DBE'
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#667eea',
+                              borderColor: '#1E7DBE',
                               borderWidth: 2
                             }
                           }
@@ -659,10 +659,10 @@ Sales Team`;
                               borderRadius: 2,
                               px: 4,
                               py: 1.5,
-                              borderColor: '#667eea',
-                              color: '#667eea',
+                              borderColor: '#1E7DBE',
+                              color: '#1E7DBE',
                               '&:hover': {
-                                borderColor: '#764ba2',
+                                borderColor: '#45ADE6',
                                 backgroundColor: 'rgba(102, 126, 234, 0.04)'
                               }
                             }}
@@ -675,7 +675,7 @@ Sales Team`;
                             startIcon={loading ? <CircularProgress size={20} /> : <AutoAwesome />}
                             disabled={loading || !needs.trim()}
                             sx={{
-                              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                              background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                               color: 'white',
                               fontWeight: 700,
                               px: 5,
@@ -686,7 +686,7 @@ Sales Team`;
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 12px 40px rgba(250, 112, 154, 0.6)',
-                                background: 'linear-gradient(135deg, #fee140 0%, #fa709a 100%)'
+                                background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)'
                               }
                             }}
                           >
@@ -708,7 +708,7 @@ Sales Team`;
               fullWidth
             >
               <DialogTitle sx={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -819,7 +819,7 @@ Sales Team`;
                                      label={displayLabel} 
                                      size="small"
                                      sx={{ 
-                                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                       background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                        color: 'white'
                                      }}
                                    />
@@ -835,7 +835,7 @@ Sales Team`;
                                    label={displayLabel} 
                                    size="small"
                                    sx={{ 
-                                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                     background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                      color: 'white'
                                    }}
                                  />
@@ -873,7 +873,7 @@ Sales Team`;
                                    label={displayLabel} 
                                    size="small"
                                    sx={{ 
-                                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                     background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                      color: 'white'
                                    }}
                                  />
@@ -917,7 +917,7 @@ Sales Team`;
                   }}
                   variant="contained"
                   sx={{
-                    background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                     color: 'white'
                   }}
                 >

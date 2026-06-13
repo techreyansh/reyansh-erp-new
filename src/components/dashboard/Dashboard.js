@@ -94,10 +94,10 @@ const Dashboard = () => {
   const k = data?.kpis || {};
 
   const kpiCards = [
-    { label: 'Order Book', value: inrCompact(k.orderBook), sub: 'Total order value', icon: ReceiptLongOutlined, accent: '#0D9488' },
+    { label: 'Order Book', value: inrCompact(k.orderBook), sub: 'Total order value', icon: ReceiptLongOutlined, accent: '#45ADE6' },
     { label: 'Revenue Collected', value: inrCompact(k.collected), sub: 'Payments received', icon: PaidOutlined, accent: '#059669' },
     { label: 'Outstanding', value: inrCompact(k.outstanding), sub: 'Yet to be collected', icon: AccountBalanceWalletOutlined, accent: '#D97706' },
-    { label: 'Open Quotations', value: inrCompact(k.openQuoteValue), sub: 'Active quote value', icon: TrendingUpRounded, accent: '#0284C7' },
+    { label: 'Open Quotations', value: inrCompact(k.openQuoteValue), sub: 'Active quote value', icon: TrendingUpRounded, accent: '#1E7DBE' },
     { label: 'Active Clients', value: k.clients ?? 0, sub: `${k.prospects ?? 0} prospects`, icon: GroupsOutlined, accent: '#7C3AED' },
     { label: 'Vendors', value: k.vendors ?? 0, sub: 'Approved suppliers', icon: StorefrontOutlined, accent: '#475569' },
     { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: '#DC2626' },
@@ -181,20 +181,20 @@ const Dashboard = () => {
               <AreaChart data={data.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gOrdered" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0D9488" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="gCollected" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0284C7" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#0284C7" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
                 <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={{ stroke: grid }} />
                 <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={inrCompact} width={64} />
                 <RTooltip formatter={(v) => inrFull(v)} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
-                <Area type="monotone" dataKey="ordered" name="Ordered" stroke="#0D9488" strokeWidth={2.5} fill="url(#gOrdered)" />
-                <Area type="monotone" dataKey="collected" name="Collected" stroke="#0284C7" strokeWidth={2.5} fill="url(#gCollected)" />
+                <Area type="monotone" dataKey="ordered" name="Ordered" stroke="#45ADE6" strokeWidth={2.5} fill="url(#gOrdered)" />
+                <Area type="monotone" dataKey="collected" name="Collected" stroke="#1E7DBE" strokeWidth={2.5} fill="url(#gCollected)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -309,7 +309,7 @@ const Dashboard = () => {
                 <XAxis dataKey="name" tick={axisStyle} tickLine={false} axisLine={{ stroke: grid }} />
                 <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
                 <RTooltip cursor={{ fill: `${theme.palette.primary.main}10` }} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36} fill="#0284C7" />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36} fill="#1E7DBE" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

@@ -532,7 +532,7 @@ const CableProductMaster = () => {
                         size="small"
                         sx={{
                           backgroundColor: product.uniqueId ? '#e3f2fd' : '#f5f5f5',
-                          color: product.uniqueId ? '#1976d2' : '#9e9e9e',
+                          color: product.uniqueId ? '#45ADE6' : '#9e9e9e',
                           fontWeight: 600,
                           fontFamily: 'monospace',
                           fontSize: '0.7rem'
@@ -678,7 +678,7 @@ const CableProductMaster = () => {
                       borderColor: 'rgba(102, 126, 234, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#667eea',
+                      borderColor: '#1E7DBE',
                     }
                   }}
                 >
@@ -717,7 +717,7 @@ const CableProductMaster = () => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                         color: 'white',
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

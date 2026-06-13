@@ -650,7 +650,7 @@ const ProductList = () => {
                                     fontSize: '0.6rem',
                                     height: 16,
                                     backgroundColor: '#e3f2fd',
-                                    color: '#1976d2',
+                                    color: '#45ADE6',
                                     border: '1px solid rgba(25, 118, 210, 0.2)'
                                   }}
                                 />
@@ -800,7 +800,7 @@ const ProductList = () => {
                           borderColor: 'rgba(102, 126, 234, 0.5)',
                         },
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#667eea',
+                          borderColor: '#1E7DBE',
                         }
                       }}
                     >
@@ -841,7 +841,7 @@ const ProductList = () => {
                             boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                           },
                           '&.Mui-selected': {
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                             color: 'white',
                             fontWeight: 800,
                             boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -978,11 +978,11 @@ const ProductList = () => {
           {selectedProduct && (
             <Box sx={{ p: 3 }}>
               {/* Debug: Show all sections are rendering */}
-              <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 1, border: '2px solid #1976d2' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2' }}>
+              <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 1, border: '2px solid #45ADE6' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                   🔍 DEBUG: All sections should be visible below
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#1976d2' }}>
+                <Typography variant="body2" sx={{ color: '#45ADE6' }}>
                   Product: {selectedProduct.productCode} | Total fields: {Object.keys(selectedProduct).length}
                 </Typography>
               </Box>
@@ -1000,9 +1000,9 @@ const ProductList = () => {
                       justifyContent: 'center',
                       mr: 2
                     }}>
-                      <Inventory sx={{ fontSize: 20, color: '#1976d2' }} />
+                      <Inventory sx={{ fontSize: 20, color: '#45ADE6' }} />
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                       Basic Information (9 fields)
                     </Typography>
                   </Box>
@@ -1041,7 +1041,7 @@ const ProductList = () => {
                         <Typography variant="body2" sx={{ color: '#2c3e50', mb: 0.5 }}>
                           Molding: {selectedProduct.moldingMachineManpower || 0} | Packing: {selectedProduct.packingLineManpower || 0}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#1976d2', fontWeight: 600 }}>
+                        <Typography variant="body1" sx={{ color: '#45ADE6', fontWeight: 600 }}>
                           Total: {parseInt(selectedProduct.assemblyLineManpower || 0) + parseInt(selectedProduct.cableCuttingManpower || 0) + parseInt(selectedProduct.moldingMachineManpower || 0) + parseInt(selectedProduct.packingLineManpower || 0)}
                         </Typography>
                       </Box>
@@ -1188,7 +1188,7 @@ const ProductList = () => {
                                 size="small"
                                 sx={{
                                   backgroundColor: '#e3f2fd',
-                                  color: '#1976d2',
+                                  color: '#45ADE6',
                                   border: '1px solid rgba(25, 118, 210, 0.2)',
                                   fontSize: '0.75rem'
                                 }}
@@ -1358,7 +1358,7 @@ const ProductList = () => {
                   
                   <Grid container spacing={3}>
                     {[
-                      { field: 'drawing', label: 'Drawing', color: '#1976d2', icon: '📄' },
+                      { field: 'drawing', label: 'Drawing', color: '#45ADE6', icon: '📄' },
                       { field: 'fpa', label: 'FPA', color: '#7b1fa2', icon: '📋' },
                       { field: 'pdi', label: 'PDI', color: '#388e3c', icon: '✅' },
                       { field: 'processChecksheet', label: 'Process Checksheet', color: '#f57c00', icon: '📝' },

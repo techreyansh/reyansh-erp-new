@@ -94,7 +94,7 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
     >
       <DialogTitle
         sx={{
-          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
           color: 'white',
           py: 3,
           display: 'flex',
@@ -141,8 +141,8 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
             sx={{
               '& .MuiOutlinedInput-root': {
                 '& fieldset': { borderColor: '#e3f2fd' },
-                '&:hover fieldset': { borderColor: '#1976d2' },
-                '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+                '&:hover fieldset': { borderColor: '#45ADE6' },
+                '&.Mui-focused fieldset': { borderColor: '#45ADE6' }
               }
             }}
           />
@@ -159,8 +159,8 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <ScheduleIcon sx={{ color: '#1976d2' }} />
-              <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 600 }}>
+              <ScheduleIcon sx={{ color: '#45ADE6' }} />
+              <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600 }}>
                 Production Timeline
               </Typography>
             </Box>
@@ -192,7 +192,7 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
                       sx={{
                         backgroundColor: index === orderedDates.length - 1 
                           ? '#4caf50' 
-                          : '#1976d2',
+                          : '#45ADE6',
                         color: 'white',
                         fontWeight: 600,
                         minWidth: 50
@@ -214,7 +214,7 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
                       fontFamily: 'monospace',
                       fontSize: '0.95rem',
                       fontWeight: 600,
-                      color: index === orderedDates.length - 1 ? '#2e7d32' : '#1976d2',
+                      color: index === orderedDates.length - 1 ? '#2e7d32' : '#45ADE6',
                       backgroundColor: index === orderedDates.length - 1 
                         ? 'white' 
                         : '#e3f2fd',
@@ -245,10 +245,10 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
           onClick={handleClose}
           variant="outlined"
           sx={{
-            borderColor: '#1976d2',
-            color: '#1976d2',
+            borderColor: '#45ADE6',
+            color: '#45ADE6',
             '&:hover': {
-              borderColor: '#1565c0',
+              borderColor: '#1E7DBE',
               backgroundColor: '#f8fbff'
             }
           }}

@@ -40,7 +40,7 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
       id: 'NEW',
       label: 'New SO',
       icon: <PlayArrow />,
-      color: '#2196f3',
+      color: '#45ADE6',
       description: 'New Sales Order'
     },
     {
@@ -117,7 +117,7 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
       case 'DELIVERED':
         return <CheckCircle sx={{ color: '#4caf50' }} />;
       default:
-        return <PlayArrow sx={{ color: '#2196f3' }} />;
+        return <PlayArrow sx={{ color: '#45ADE6' }} />;
     }
   };
 

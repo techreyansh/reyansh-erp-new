@@ -243,7 +243,7 @@ const ApproveStrategicDeals = () => {
             {/* Header */}
             <Card sx={{ 
               mb: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
@@ -309,7 +309,7 @@ const ApproveStrategicDeals = () => {
                     <Table>
                       <TableHead>
                         <TableRow sx={{ 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                         }}>
                           <TableCell sx={{ color: 'white', fontWeight: 700 }}>Log ID</TableCell>
                           <TableCell sx={{ color: 'white', fontWeight: 700 }}>Customer</TableCell>
@@ -328,7 +328,7 @@ const ApproveStrategicDeals = () => {
                                 <Avatar sx={{ 
                                   width: 80, 
                                   height: 80, 
-                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                   mb: 2
                                 }}>
                                   <AccountBalance sx={{ fontSize: 40 }} />
@@ -366,7 +366,7 @@ const ApproveStrategicDeals = () => {
                                     <Avatar sx={{ 
                                       width: 32, 
                                       height: 32, 
-                                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                       fontSize: '0.875rem'
                                     }}>
                                       {lead.CustomerName?.charAt(0)}
@@ -450,7 +450,7 @@ const ApproveStrategicDeals = () => {
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
               }}>
                 <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#1e3a8a' }}>
+                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#1E7DBE' }}>
                     Strategic Deal Approval Form
                   </Typography>
                   
@@ -464,7 +464,7 @@ const ApproveStrategicDeals = () => {
                           <Avatar sx={{ 
                             width: 40, 
                             height: 40, 
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                           }}>
                             <Person sx={{ fontSize: 20 }} />
                           </Avatar>
@@ -587,10 +587,10 @@ const ApproveStrategicDeals = () => {
                             borderRadius: 2,
                             px: 4,
                             py: 1.5,
-                            borderColor: '#667eea',
-                            color: '#667eea',
+                            borderColor: '#1E7DBE',
+                            color: '#1E7DBE',
                             '&:hover': {
-                              borderColor: '#764ba2',
+                              borderColor: '#45ADE6',
                               backgroundColor: 'rgba(102, 126, 234, 0.04)'
                             }
                           }}

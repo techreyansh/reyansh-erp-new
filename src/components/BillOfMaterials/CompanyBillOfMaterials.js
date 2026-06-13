@@ -1261,13 +1261,13 @@ const CompanyBillOfMaterials = () => {
             .row .k { color: #475569; }
             .row .v { font-weight: 600; }
             table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            thead th { background: #1e3a8a; color: #fff; padding: 8px; border: 1px solid #1b3a7a; }
+            thead th { background: #1E7DBE; color: #fff; padding: 8px; border: 1px solid #1b3a7a; }
             tbody td { padding: 8px; border: 1px solid #cbd5e1; }
             tbody tr:nth-child(even) { background: #f8fafc; }
             .sign-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
             @media (max-width: 768px) { .sign-grid { grid-template-columns: repeat(2, 1fr); } }
             .sign { text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; }
-            .sign .label { font-size: 12px; font-weight: 700; color: #1e3a8a; margin-bottom: 8px; }
+            .sign .label { font-size: 12px; font-weight: 700; color: #1E7DBE; margin-bottom: 8px; }
             .sign .line { height: 40px; border-bottom: 2px solid #64748b; margin-bottom: 6px; }
             .sign .hint { font-size: 10px; color: #64748b; }
           </style>
@@ -1585,7 +1585,7 @@ const CompanyBillOfMaterials = () => {
             component="h1" 
             sx={{ 
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #1e3a8a, #4c6cb7)',
+              background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
@@ -1699,9 +1699,9 @@ const CompanyBillOfMaterials = () => {
                   onClick={handleOpenDialog}
                   disabled={loading}
                   sx={{
-                    background: 'linear-gradient(45deg, #1e3a8a, #4c6cb7)',
+                    background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #001a5c, #1e3a8a)',
+                      background: 'linear-gradient(45deg, #001a5c, #1E7DBE)',
                     }
                   }}
                 >
@@ -1798,7 +1798,7 @@ const CompanyBillOfMaterials = () => {
                       }}
                     >
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1e3a8a' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1E7DBE' }}>
                           {bom.id || 'N/A'}
                         </Typography>
                       </TableCell>
@@ -1950,7 +1950,7 @@ const CompanyBillOfMaterials = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1e3a8a, #4c6cb7, #f59e0b)',
+              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #f59e0b)',
               zIndex: 2
             }
           }
@@ -1974,7 +1974,7 @@ const CompanyBillOfMaterials = () => {
               sx={{
                 p: 2,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                 boxShadow: '0 8px 20px rgba(30, 58, 138, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
@@ -2060,7 +2060,7 @@ const CompanyBillOfMaterials = () => {
                 },
                   '& .MuiStepConnector-active': {
                     '& .MuiStepConnector-line': {
-                      background: 'linear-gradient(90deg, #1e3a8a, #4c6cb7)',
+                      background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                       boxShadow: '0 2px 8px rgba(30, 58, 138, 0.3)'
                     },
                   },
@@ -2113,7 +2113,7 @@ const CompanyBillOfMaterials = () => {
                               background: completed 
                                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                                 : active 
-                                ? 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)'
+                                ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                                 : isAccessible
                                 ? 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)'
                                 : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
@@ -2131,7 +2131,7 @@ const CompanyBillOfMaterials = () => {
                               borderColor: completed 
                                 ? '#10b981' 
                                 : active 
-                                ? '#1e3a8a' 
+                                ? '#1E7DBE' 
                                 : isAccessible
                                 ? '#e2e8f0'
                                 : '#f1f5f9',
@@ -2156,19 +2156,19 @@ const CompanyBillOfMaterials = () => {
                         '& .MuiStepLabel-label': {
                           fontSize: '0.9rem',
                           fontWeight: 600,
-                          color: activeStep === index ? '#1e3a8a' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
+                          color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
                           mt: 1,
                           transition: 'all 0.3s ease',
                           cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                           opacity: isStepAccessible(index) ? 1 : 0.6,
                           '&:hover': isStepAccessible(index) ? {
-                            color: activeStep === index ? '#1e3a8a' : activeStep > index ? '#10b981' : '#1e3a8a',
+                            color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : '#1E7DBE',
                             fontWeight: 700
                           } : {}
                         },
                         '& .MuiStepLabel-active': {
                           '& .MuiStepLabel-label': {
-                            color: '#1e3a8a !important',
+                            color: '#1E7DBE !important',
                             fontWeight: 700
                           }
                         },
@@ -2210,13 +2210,13 @@ const CompanyBillOfMaterials = () => {
                       const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
                       return ((activeStep + 1) / totalSteps) * 100;
                     })()}%`,
-                    background: 'linear-gradient(90deg, #1e3a8a, #4c6cb7)',
+                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                     borderRadius: 2,
                     transition: 'width 0.3s ease'
                   }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ color: '#1e3a8a', fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 700 }}>
                 {(() => {
                   const bomCategory = selectedBom ? (selectedBom.category || selectedBom.bomCategory) : null;
                   const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
@@ -2267,7 +2267,7 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
@@ -2312,7 +2312,7 @@ const CompanyBillOfMaterials = () => {
                         readOnly: true,
                         style: { 
                           fontWeight: 'bold',
-                          color: '#1e3a8a'
+                          color: '#1E7DBE'
                         }
                       }}
                       helperText="Auto-generated unique identifier"
@@ -2409,7 +2409,7 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
@@ -2610,7 +2610,7 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
@@ -2740,7 +2740,7 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
@@ -2969,7 +2969,7 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
@@ -3157,7 +3157,7 @@ const CompanyBillOfMaterials = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #1e3a8a, #4c6cb7, #f59e0b)',
+            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #f59e0b)',
           }
         }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -3167,8 +3167,8 @@ const CompanyBillOfMaterials = () => {
               variant="outlined"
               startIcon={<ScheduleIcon />}
               sx={{
-                borderColor: activeStep === 0 ? '#e2e8f0' : '#1e3a8a',
-                color: activeStep === 0 ? '#94a3b8' : '#1e3a8a',
+                borderColor: activeStep === 0 ? '#e2e8f0' : '#1E7DBE',
+                color: activeStep === 0 ? '#94a3b8' : '#1E7DBE',
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
@@ -3200,7 +3200,7 @@ const CompanyBillOfMaterials = () => {
                 endIcon={<ScheduleIcon />}
                 sx={{
                   background: isCurrentStepCompleted() 
-                    ? 'linear-gradient(135deg, #1e3a8a 0%, #4c6cb7 100%)'
+                    ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                     : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
                   color: isCurrentStepCompleted() ? 'white' : '#94a3b8',
                   borderRadius: 3,
@@ -3216,7 +3216,7 @@ const CompanyBillOfMaterials = () => {
                   transition: 'all 0.3s ease',
                   cursor: isCurrentStepCompleted() ? 'pointer' : 'not-allowed',
                   '&:hover': isCurrentStepCompleted() ? {
-                    background: 'linear-gradient(135deg, #001a5c 0%, #1e3a8a 100%)',
+                    background: 'linear-gradient(135deg, #001a5c 0%, #1E7DBE 100%)',
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 25px rgba(30, 58, 138, 0.4)'
                   } : {},
@@ -3281,7 +3281,7 @@ const CompanyBillOfMaterials = () => {
                     const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
                     return ((activeStep + 1) / totalSteps) * 100;
                   })()}%`,
-                  background: 'linear-gradient(90deg, #1e3a8a, #4c6cb7)',
+                  background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                   borderRadius: 3,
                   transition: 'width 0.3s ease'
                 }}

@@ -1017,14 +1017,14 @@ const StockManagement = () => {
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #1976d2;
+            border-bottom: 2px solid #45ADE6;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
             margin-bottom: 10px;
           }
           .report-title {
@@ -1046,11 +1046,11 @@ const StockManagement = () => {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid #45ADE6;
           }
           .detail-section h3 {
             margin: 0 0 15px 0;
-            color: #1976d2;
+            color: #45ADE6;
             font-size: 16px;
           }
           .detail-row {
@@ -1497,7 +1497,7 @@ const StockManagement = () => {
               component="h1" 
           sx={{
                 fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #1976d2, #90caf9)',
+                background: 'linear-gradient(45deg, #45ADE6, #90caf9)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -1592,9 +1592,9 @@ const StockManagement = () => {
                   startIcon={<AddIcon />}
                   size="large"
           sx={{
-                    background: 'linear-gradient(45deg, #1976d2, #90caf9)',
+                    background: 'linear-gradient(45deg, #45ADE6, #90caf9)',
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                      background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
                     }
                   }}
                 >
@@ -2263,7 +2263,7 @@ const StockManagement = () => {
             variant="h4" 
             sx={{ 
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -2598,7 +2598,7 @@ const StockManagement = () => {
               <Box sx={{ flex: '1 1 100%', minWidth: '100%' }}>
                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                   <VendorIcon color="primary" />
-                  <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                  <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 'bold' }}>
                     Vendor Management
                   </Typography>
                   <Button
@@ -2953,14 +2953,14 @@ const StockManagement = () => {
             startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
             sx={{ 
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
               color: 'white',
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1565c0, #00acc1)',
+                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -3155,7 +3155,7 @@ const StockManagement = () => {
           >
             <Stack direction="row" alignItems="center" spacing={2} sx={{ flexGrow: 1 }}>
               <Avatar sx={{ 
-                bgcolor: '#1976d2', 
+                bgcolor: '#45ADE6', 
                 width: { xs: 40, md: 48 }, 
                 height: { xs: 40, md: 48 },
                 boxShadow: 2
@@ -3165,7 +3165,7 @@ const StockManagement = () => {
               <Box>
                 <Typography variant="h6" sx={{ 
                   fontWeight: 700, 
-                  color: '#1976d2',
+                  color: '#45ADE6',
                   fontSize: { xs: '1.1rem', md: '1.25rem' },
                   fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                 }}>
@@ -3189,7 +3189,7 @@ const StockManagement = () => {
             <Box>
               {/* Company Header */}
               <Card sx={{ 
-                background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', 
+                background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)', 
                 color: 'white', 
                 p: { xs: 2, md: 3 }, 
                 textAlign: 'center',
@@ -3242,10 +3242,10 @@ const StockManagement = () => {
                     }
                   }}>
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                      <AssignmentIcon sx={{ color: '#1976d2', fontSize: 24 }} />
+                      <AssignmentIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600, 
-                        color: '#1976d2',
+                        color: '#45ADE6',
                         fontSize: '1.1rem'
                       }}>
                         Item Information
@@ -3254,7 +3254,7 @@ const StockManagement = () => {
                     <Stack spacing={2.5}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>🏷️</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏷️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Item Code:
                           </Typography>
@@ -3265,7 +3265,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📦</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📦</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Item Name:
                           </Typography>
@@ -3276,7 +3276,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>🏷️</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏷️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Category:
                           </Typography>
@@ -3287,7 +3287,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>🏭</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏭</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Make:
                           </Typography>
@@ -3298,7 +3298,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>⚖️</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>⚖️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Unit:
                           </Typography>
@@ -3309,7 +3309,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📍</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📍</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Location:
                           </Typography>
@@ -3337,10 +3337,10 @@ const StockManagement = () => {
                     }
                   }}>
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                      <StorageIcon sx={{ color: '#1976d2', fontSize: 24 }} />
+                      <StorageIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600, 
-                        color: '#1976d2',
+                        color: '#45ADE6',
                         fontSize: '1.1rem'
                       }}>
                         Stock Levels
@@ -3349,7 +3349,7 @@ const StockManagement = () => {
                     <Stack spacing={2.5}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📊</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📊</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Current Stock:
                           </Typography>
@@ -3357,7 +3357,7 @@ const StockManagement = () => {
                         <Stack direction="row" alignItems="center" spacing={1}>
                           <Typography variant="h6" sx={{ 
                             fontWeight: 700, 
-                            color: '#1976d2',
+                            color: '#45ADE6',
                             fontSize: '1.3rem'
                           }}>
                             {selectedItemDetails.currentStock || '0'}
@@ -3383,7 +3383,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📉</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📉</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Minimum Level:
                           </Typography>
@@ -3394,7 +3394,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📈</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📈</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Maximum Level:
                           </Typography>
@@ -3405,7 +3405,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>⚠️</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>⚠️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Reorder Point:
                           </Typography>
@@ -3416,7 +3416,7 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#1976d2', fontSize: 16 }}>✅</Typography>
+                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>✅</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Status:
                           </Typography>
@@ -3469,10 +3469,10 @@ const StockManagement = () => {
                           }
                         }}>
                           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                            <VendorIcon sx={{ color: '#1976d2', fontSize: 24 }} />
+                            <VendorIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
                             <Typography variant="h6" sx={{ 
                               fontWeight: 600, 
-                              color: '#1976d2',
+                              color: '#45ADE6',
                               fontSize: '1.1rem'
                             }}>
                               Vendor Information
@@ -3482,7 +3482,7 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#1976d2', fontSize: 16 }}>🏢</Typography>
+                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏢</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Vendor Code:
                                   </Typography>
@@ -3495,7 +3495,7 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#1976d2', fontSize: 16 }}>👤</Typography>
+                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>👤</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Vendor Name:
                                   </Typography>
@@ -3508,7 +3508,7 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📞</Typography>
+                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📞</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Contact Person:
                                   </Typography>
@@ -3521,7 +3521,7 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#1976d2', fontSize: 16 }}>📧</Typography>
+                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📧</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Email:
                                   </Typography>
@@ -3554,10 +3554,10 @@ const StockManagement = () => {
                       }
                     }}>
                       <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                        <InfoIcon sx={{ color: '#1976d2', fontSize: 24 }} />
+                        <InfoIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
                         <Typography variant="h6" sx={{ 
                           fontWeight: 600, 
-                          color: '#1976d2',
+                          color: '#45ADE6',
                           fontSize: '1.1rem'
                         }}>
                           Item Specifications
@@ -3610,9 +3610,9 @@ const StockManagement = () => {
               py: 1,
               fontWeight: 600,
               '&:hover': {
-                borderColor: '#1976d2',
+                borderColor: '#45ADE6',
                 backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                color: '#1976d2'
+                color: '#45ADE6'
               }
             }}
           >
@@ -3624,7 +3624,7 @@ const StockManagement = () => {
             startIcon={<PrintIcon />}
             size={isMobile ? "medium" : "large"}
             sx={{ 
-              bgcolor: '#1976d2',
+              bgcolor: '#45ADE6',
               color: 'white',
               borderRadius: 2,
               px: { xs: 2, md: 3 },
@@ -3632,7 +3632,7 @@ const StockManagement = () => {
               fontWeight: 600,
               boxShadow: 2,
               '&:hover': { 
-                bgcolor: '#1565c0',
+                bgcolor: '#1E7DBE',
                 transform: 'translateY(-1px)',
                 boxShadow: 4
               }
@@ -3815,7 +3815,7 @@ const StockManagement = () => {
                         <Box sx={{ mt: 3 }}>
                           <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                             <VendorIcon color="primary" />
-                            <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                            <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 'bold' }}>
                               Vendor Management
                             </Typography>
                             <Button
