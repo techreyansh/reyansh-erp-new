@@ -33,7 +33,12 @@ How to write a task (so it can run unattended): one line goal + (optional) detai
    - [!] Bottom-up (BOM-based) costing mode — auto-pull rates from the BOM. **Needs: BOM (task 2).**
    - [ ] Connect a saved costing → CRM quotation (and a printable, customer-ready quote view).
 
-6. [ ] _(your next task…)_
+6. [x] **AI Purchase-Order ingestion** — BUILT. Upload card on `/po-ingestion` → Edge Function `extract-purchase-order` (Claude) → preview header + line items → "Apply" pre-fills the Sales Order form with real qty/price/desc.
+   - **Runtime needs (to function):** `supabase functions deploy extract-purchase-order` + `ANTHROPIC_API_KEY` (same secret as Production Log).
+
+7. [x] **Sensible default ordering everywhere (no data change)** — DONE. Clients/Prospects already open A–Z; the shared `ModuleTablePage` (CRM leads/customers/quotations/orders/collections) already sorts by first column + has click-to-sort headers; added newest-first defaults to leads/quotations/orders/collections and to the Costing entries table. No stored data was changed.
+
+8. [ ] _(your next task…)_
 
 ---
 

@@ -59,13 +59,15 @@ const ModuleTablePage = ({
   loading,
   readOnly = false,
   onSaveRow,
-  onDeleteRow
+  onDeleteRow,
+  defaultSortBy,
+  defaultSortDirection,
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState(columns[0]?.key || "id");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [sortBy, setSortBy] = useState(defaultSortBy || columns[0]?.key || "id");
+  const [sortDirection, setSortDirection] = useState(defaultSortDirection || "asc");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [formValues, setFormValues] = useState({});

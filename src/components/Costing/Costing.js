@@ -197,6 +197,15 @@ const Costing = () => {
     }
   }, [formData, settings]);
 
+  // Default order: newest costing entries first.
+  const sortedEntries = useMemo(() => {
+    return [...costingEntries].sort((a, b) => {
+      const da = new Date(a.Date || a.date || 0).getTime();
+      const db = new Date(b.Date || b.date || 0).getTime();
+      return (db || 0) - (da || 0);
+    });
+  }, [costingEntries]);
+
   const handleSubmit = async () => {
     try {
       // Use incremented values for saving
@@ -1383,7 +1392,7 @@ const Costing = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                costingEntries
+                sortedEntries
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((entry, index) => (
                   <TableRow 

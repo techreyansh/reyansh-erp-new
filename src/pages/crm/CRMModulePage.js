@@ -92,6 +92,8 @@ const CRMModulePage = () => {
       ],
       data: crm?.leads || [],
       idPrefix: "LD",
+      defaultSortBy: "createdDate",
+      defaultSortDirection: "desc",
       onSaveRow: crmPpcBackendService.upsertLead,
       onDeleteRow: (row) => crmPpcBackendService.deleteLead(row.id),
     },
@@ -145,6 +147,8 @@ const CRMModulePage = () => {
       data: (crm?.quotations || []).map((q) => ({ ...q, amountFmt: inr(q.amount) })),
       formFields: [],
       idPrefix: "QT",
+      defaultSortBy: "issueDate",
+      defaultSortDirection: "desc",
       readOnly: true,
     },
     "sales-orders": {
@@ -161,6 +165,8 @@ const CRMModulePage = () => {
       data: (crm?.salesOrders || []).map((o) => ({ ...o, amountFmt: inr(o.amount) })),
       formFields: [],
       idPrefix: "SO",
+      defaultSortBy: "orderDate",
+      defaultSortDirection: "desc",
       readOnly: true,
     },
     collections: {
@@ -177,6 +183,8 @@ const CRMModulePage = () => {
       data: (crm?.collections || []).map((p) => ({ ...p, amountFmt: inr(p.amount) })),
       formFields: [],
       idPrefix: "PAY",
+      defaultSortBy: "date",
+      defaultSortDirection: "desc",
       readOnly: true,
     },
     "follow-ups": {
