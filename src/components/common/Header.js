@@ -27,6 +27,8 @@ import {
   InputAdornment,
   Paper,
   Skeleton,
+  Collapse,
+  ListSubheader,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -53,7 +55,6 @@ import {
   Input,
   Group as PeopleIcon,
   Business,
-  AccountTree,
   MoreVert,
   Message,
   LocalShipping,
@@ -66,6 +67,8 @@ import {
   HomeOutlined,
   GridOnOutlined,
   LightModeOutlined,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { usePermissions } from "../../context/PermissionContext";
@@ -88,6 +91,10 @@ const Header = () => {
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [openSections, setOpenSections] = useState({});
+
+  const toggleSection = (key) =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const handleMenuOpen = (event, menuKey) => {
     setAnchorEl(prev => ({ ...prev, [menuKey]: event.currentTarget }));
@@ -200,7 +207,7 @@ const Header = () => {
   const menuGroups = [
     {
       key: "dashboard",
-      label: "Dashboard",
+      label: "Overview",
       icon: <Dashboard />,
       items: [
         {
@@ -210,12 +217,14 @@ const Header = () => {
           roles: ["all"],
         },
         {
+          subheader: "Command Centers",
           label: "CEO Master Control",
           path: "/ceo-command",
           icon: <SecurityIcon />,
           roles: ["CEO"],
         },
         {
+          subheader: "Command Centers",
           label: "Plant Command",
           path: "/plant-command",
           icon: <Dashboard />,
@@ -230,6 +239,28 @@ const Header = () => {
           ],
         },
         {
+          subheader: "Command Centers",
+          label: "Main Dashboard",
+          path: "/dashboard",
+          icon: <Dashboard />,
+          roles: ["CEO", "Process Coordinator"],
+        },
+        {
+          subheader: "Dashboards",
+          label: "Employee Dashboard",
+          path: "/employee-dashboard",
+          icon: <EmployeeIcon />,
+          roles: ["CEO", "HR Manager"],
+        },
+        {
+          subheader: "Dashboards",
+          label: "Client Dashboard",
+          path: "/client-dashboard",
+          icon: <Dashboard />,
+          roles: ["Customer Relations Manager", "CEO", "Store Manager"],
+        },
+        {
+          subheader: "Operations",
           label: "Production Log",
           path: "/production-log",
           icon: <GridOnOutlined />,
@@ -245,13 +276,7 @@ const Header = () => {
           ],
         },
         {
-          label: "Employee Access Management",
-          path: "/access-management",
-          icon: <SecurityIcon />,
-          moduleKey: "employees",
-          requireEdit: true,
-        },
-        {
+          subheader: "Tasks",
           label: "Task Scheduler",
           path: "/task-scheduler",
           icon: <Assignment />,
@@ -259,6 +284,7 @@ const Header = () => {
           requireCreate: true,
         },
         {
+          subheader: "Tasks",
           label: "Team Tasks",
           path: "/team-tasks",
           icon: <Assignment />,
@@ -266,30 +292,22 @@ const Header = () => {
           requireEdit: true,
         },
         {
+          subheader: "Tasks",
           label: "My Tasks",
           path: "/my-tasks",
           icon: <Assignment />,
           moduleKey: "tasks",
         },
         {
-          label: "Main Dashboard",
-          path: "/dashboard",
-          icon: <Dashboard />,
-          roles: ["CEO", "Process Coordinator"],
+          subheader: "Admin & Finance",
+          label: "Employee Access Management",
+          path: "/access-management",
+          icon: <SecurityIcon />,
+          moduleKey: "employees",
+          requireEdit: true,
         },
         {
-          label: "Employee Dashboard",
-          path: "/employee-dashboard",
-          icon: <EmployeeIcon />,
-          roles: ["CEO", "HR Manager"],
-        },
-        {
-          label: "Client Dashboard",
-          path: "/client-dashboard",
-          icon: <Dashboard />,
-          roles: ["Customer Relations Manager", "CEO", "Store Manager"],
-        },
-        {
+          subheader: "Admin & Finance",
           label: "Costing",
           path: "/costing",
           icon: <CostingIcon />,
@@ -299,76 +317,102 @@ const Header = () => {
     },
     {
       key: "management",
-      label: "Management",
+      label: "Sales & Operations",
       icon: <Business />,
       items: [
         {
+          subheader: "Sales & Clients",
           label: "Products",
           path: "/products",
           icon: <ProductIcon />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
-          label: "Inventory",
-          path: "/inventory",
-          icon: <InventoryIcon />,
-          roles: ["Store Manager", "CEO"],
-        },
-        {
+          subheader: "Sales & Clients",
           label: "Clients",
           path: "/clients",
           icon: <ListAlt />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
+          subheader: "Sales & Clients",
           label: "Prospects Clients",
           path: "/prospects-clients",
           icon: <ListAlt />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
+          subheader: "Sales & Clients",
           label: "Client Orders",
           path: "/client-orders",
           icon: <OrderIcon />,
           roles: ["Customer Relations Manager", "Sales Executive", "CEO"],
         },
         {
+          subheader: "Sales & Clients",
           label: "Sales Order Ingestion",
           path: "/po-ingestion",
           icon: <Input />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
+          subheader: "Inventory & Dispatch",
+          label: "Inventory",
+          path: "/inventory",
+          icon: <InventoryIcon />,
+          roles: ["Store Manager", "CEO"],
+        },
+        {
+          subheader: "Inventory & Dispatch",
           label: "Dispatch Planning",
           path: "/dispatch",
           icon: <Assignment />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
+          subheader: "Inventory & Dispatch",
           label: "Dispatch Management",
           path: "/dispatch-management",
           icon: <LocalShipping />,
           roles: ["Customer Relations Manager", "CEO"],
         },
         {
+          subheader: "Inventory & Dispatch",
+          label: "Order to Dispatch System",
+          path: "/flow-management",
+          icon: <Assignment />,
+          roles: ["Store Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "QC Manager", "Process Coordinator", "Customer Relations Manager", "CEO"],
+        },
+        {
+          subheader: "Procurement",
           label: "Vendors",
           path: "/vendor-management",
           icon: <Business />,
           roles: ["CEO", "Purchase Executive", "Management / HOD"],
         },
         {
+          subheader: "Procurement",
+          label: "Purchase Flow",
+          path: "/purchase-flow",
+          icon: <PurchaseIcon />,
+          roles: ["Process Coordinator", "Purchase Executive", "Management / HOD", "Store Manager", "QC Manager", "Accounts Executive", "CEO"],
+        },
+        {
+          subheader: "Documents",
           label: "Document Library",
           path: "/document-library",
           icon: <Storage />,
           roles: ["CEO"],
         },
         {
+          subheader: "Tasks",
           label: "Task Checklist",
           path: "/task-checklist",
           icon: <Assignment />,
           roles: ["all"],
         },
         {
+          subheader: "Tasks",
           label: "Task Scheduler",
           path: "/task-scheduler",
           icon: <Assignment />,
@@ -376,6 +420,7 @@ const Header = () => {
           requireCreate: true,
         },
         {
+          subheader: "Tasks",
           label: "Team Tasks",
           path: "/team-tasks",
           icon: <Assignment />,
@@ -383,12 +428,14 @@ const Header = () => {
           requireEdit: true,
         },
         {
+          subheader: "Tasks",
           label: "My Tasks",
           path: "/my-tasks",
           icon: <Assignment />,
           moduleKey: "tasks",
         },
         {
+          subheader: "Tasks",
           label: "Task Compliance Admin",
           path: "/task-compliance-admin",
           icon: <TableChart />,
@@ -401,117 +448,45 @@ const Header = () => {
       label: "CRM",
       icon: <CRMIcon />,
       items: [
-        { label: "Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
-        { label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
-        { label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
-        { label: "Follow-ups", path: "/crm/follow-ups", icon: <Assignment />, roles: crmModuleRoles },
-        { label: "Deals", path: "/crm/deals", icon: <TrendingUp />, roles: crmModuleRoles },
-        { label: "Lead Scoring", path: "/crm/lead-scoring", icon: <Analytics />, roles: crmModuleRoles },
-        { label: "Activity Timeline", path: "/crm/timeline", icon: <Assignment />, roles: crmModuleRoles },
-        { label: "Quotations", path: "/crm/quotations", icon: <TableChart />, roles: crmModuleRoles },
-        { label: "Sales Orders", path: "/crm/sales-orders", icon: <ListAlt />, roles: crmModuleRoles },
-        { label: "Collections", path: "/crm/collections", icon: <TableChart />, roles: crmModuleRoles },
-        { label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
-        { label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
-        { label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Follow-ups", path: "/crm/follow-ups", icon: <Assignment />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Deals", path: "/crm/deals", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Lead Scoring", path: "/crm/lead-scoring", icon: <Analytics />, roles: crmModuleRoles },
+        { subheader: "Pipeline", label: "Activity Timeline", path: "/crm/timeline", icon: <Assignment />, roles: crmModuleRoles },
+        { subheader: "Orders & Billing", label: "Quotations", path: "/crm/quotations", icon: <TableChart />, roles: crmModuleRoles },
+        { subheader: "Orders & Billing", label: "Sales Orders", path: "/crm/sales-orders", icon: <ListAlt />, roles: crmModuleRoles },
+        { subheader: "Orders & Billing", label: "Collections", path: "/crm/collections", icon: <TableChart />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Flow", label: "Sales Flow", path: "/sales-flow", icon: <PurchaseIcon />, roles: ["Customer Relations Manager", "Sales Executive", "NPD", "Quality Engineer", "Director", "Production Manager", "Store Manager", "Accounts Executive", "CEO"] },
       ],
     },
     {
       key: "ppc",
-      label: "PPC",
+      label: "Production",
       icon: <ProductionIcon />,
       items: [
-        { label: "Production Plan", path: "/ppc/production-plan", icon: <Assignment />, roles: ppcModuleRoles },
-        { label: "Work Orders", path: "/ppc/work-orders", icon: <ListAlt />, roles: ppcModuleRoles },
-        { label: "Inventory", path: "/ppc/inventory", icon: <InventoryIcon />, roles: ppcModuleRoles },
-        { label: "Dispatch", path: "/ppc/dispatch", icon: <LocalShipping />, roles: ppcModuleRoles },
-        { label: "Reports", path: "/ppc/reports", icon: <Dashboard />, roles: ppcModuleRoles },
-        { label: "BOM", path: "/ppc/bom", icon: <TableChart />, roles: ppcModuleRoles },
-        { label: "MRP", path: "/ppc/mrp", icon: <Analytics />, roles: ppcModuleRoles },
-        { label: "Capacity", path: "/ppc/capacity", icon: <Dashboard />, roles: ppcModuleRoles },
-        { label: "Routing", path: "/ppc/routing", icon: <Assignment />, roles: ppcModuleRoles },
-        { label: "Production Tracking", path: "/ppc/tracking", icon: <TrendingUp />, roles: ppcModuleRoles },
-        { label: "Quality Control", path: "/ppc/qc", icon: <SecurityIcon />, roles: ppcModuleRoles },
-        { label: "Scrap Tracking", path: "/ppc/scrap", icon: <DebugIcon />, roles: ppcModuleRoles },
-        { label: "Maintenance", path: "/ppc/maintenance", icon: <Settings />, roles: ppcModuleRoles },
-        { label: "Dispatch Intelligence", path: "/ppc/dispatch-intelligence", icon: <LocalShipping />, roles: ppcModuleRoles },
-        { label: "Production Costing", path: "/ppc/costing", icon: <CostingIcon />, roles: ppcModuleRoles },
-        { label: "Integrated Dashboard", path: "/ppc/advanced-dashboard", icon: <Dashboard />, roles: ppcModuleRoles },
-      ],
-    },
-    {
-      key: "workflows",
-      label: "Workflows",
-      icon: <AccountTree />,
-      items: [
-        {
-          label: "Order to Dispatch System",
-          path: "/flow-management",
-          icon: <Assignment />,
-          roles: [
-            "Store Manager",
-            "Cable Production Supervisor",
-            "Moulding Production Supervisor",
-            "QC Manager",
-            "Process Coordinator",
-            "Customer Relations Manager",
-            "CEO",
-          ],
-        },
-        {
-          label: "My Tasks",
-          path: "/my-tasks",
-          icon: <Assignment />,
-          roles: [
-            "Store Manager",
-            "Cable Production Supervisor",
-            "Moulding Production Supervisor",
-            "QC Manager",
-            "CEO",
-          ],
-        },
-        {
-          label: "Purchase Flow",
-          path: "/purchase-flow",
-          icon: <PurchaseIcon />,
-          roles: [
-            "Process Coordinator",
-            "Purchase Executive",
-            "Management / HOD",
-            "Store Manager",
-            "QC Manager",
-            "Accounts Executive",
-            "CEO"
-          ],
-        },
-        {
-          label: "Sales Flow",
-          path: "/sales-flow",
-          icon: <PurchaseIcon />,
-          roles: [
-            "Customer Relations Manager",
-            "Sales Executive",
-            "NPD",
-            "Quality Engineer",
-            "Director",
-            "Production Manager",
-            "Store Manager",
-            "Accounts Executive",
-            "CEO"
-          ],
-        },
-        {
-          label: "Cable Production",
-          path: "/cable-production",
-          icon: <CableIcon />,
-          roles: ["CEO", "Customer Relations Manager", "Cable Production Supervisor"],
-        },
-        {
-          label: "Molding Production",
-          path: "/molding",
-          icon: <ProductionIcon />,
-          roles: ["CEO", "Customer Relations Manager", "Moulding Production Supervisor", "Production Manager", "Store Manager"],
-        },
+        { subheader: "Planning", label: "Production Plan", path: "/ppc/production-plan", icon: <Assignment />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "Work Orders", path: "/ppc/work-orders", icon: <ListAlt />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "BOM", path: "/ppc/bom", icon: <TableChart />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "MRP", path: "/ppc/mrp", icon: <Analytics />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "Capacity", path: "/ppc/capacity", icon: <Dashboard />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "Routing", path: "/ppc/routing", icon: <Assignment />, roles: ppcModuleRoles },
+        { subheader: "Shop Floor", label: "Production Tracking", path: "/ppc/tracking", icon: <TrendingUp />, roles: ppcModuleRoles },
+        { subheader: "Shop Floor", label: "Quality Control", path: "/ppc/qc", icon: <SecurityIcon />, roles: ppcModuleRoles },
+        { subheader: "Shop Floor", label: "Scrap Tracking", path: "/ppc/scrap", icon: <DebugIcon />, roles: ppcModuleRoles },
+        { subheader: "Shop Floor", label: "Maintenance", path: "/ppc/maintenance", icon: <Settings />, roles: ppcModuleRoles },
+        { subheader: "Logistics", label: "Inventory", path: "/ppc/inventory", icon: <InventoryIcon />, roles: ppcModuleRoles },
+        { subheader: "Logistics", label: "Dispatch", path: "/ppc/dispatch", icon: <LocalShipping />, roles: ppcModuleRoles },
+        { subheader: "Logistics", label: "Dispatch Intelligence", path: "/ppc/dispatch-intelligence", icon: <LocalShipping />, roles: ppcModuleRoles },
+        { subheader: "Insights", label: "Reports", path: "/ppc/reports", icon: <Dashboard />, roles: ppcModuleRoles },
+        { subheader: "Insights", label: "Production Costing", path: "/ppc/costing", icon: <CostingIcon />, roles: ppcModuleRoles },
+        { subheader: "Insights", label: "Integrated Dashboard", path: "/ppc/advanced-dashboard", icon: <Dashboard />, roles: ppcModuleRoles },
+        { subheader: "Lines", label: "Cable Production", path: "/cable-production", icon: <CableIcon />, roles: ["CEO", "Customer Relations Manager", "Cable Production Supervisor"] },
+        { subheader: "Lines", label: "Molding Production", path: "/molding", icon: <ProductionIcon />, roles: ["CEO", "Customer Relations Manager", "Moulding Production Supervisor", "Production Manager", "Store Manager"] },
       ],
     },
     // System items
@@ -603,6 +578,27 @@ const Header = () => {
   // Check if any item in a group is active
   const isGroupActive = (group) => {
     return group.items.some(item => isPathActive(item.path));
+  };
+
+  // In the drawer, a section is open if the user toggled it, otherwise it
+  // defaults to open only when it contains the active route.
+  const isSectionOpen = (group) =>
+    openSections[group.key] !== undefined ? openSections[group.key] : isGroupActive(group);
+
+  // Turn a flat (already permission-filtered) item list into a render list that
+  // inserts a subheader row whenever the item's `subheader` changes. Subheaders
+  // attached to filtered-out items simply never appear, so empty groups are safe.
+  const withSubheaders = (items) => {
+    const out = [];
+    let last = null;
+    items.forEach((item) => {
+      if (item.subheader && item.subheader !== last) {
+        out.push({ type: "subheader", label: item.subheader, key: `sh-${item.subheader}` });
+        last = item.subheader;
+      }
+      out.push({ type: "item", item });
+    });
+    return out;
   };
 
   // Highlight matched text in search results
@@ -758,35 +754,52 @@ const Header = () => {
                       }
                     }}
                   >
-                    {group.items.map((item) => (
-                      <MenuItem
-                        key={item.path}
-                        component={Link}
-                        to={item.path}
-                        onClick={() => handleMenuClose(group.key)}
-                        sx={{
-                          py: 1.5,
-                          px: 2,
-                          "&:hover": {
-                            backgroundColor: theme.palette.grey[50],
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36, color: isPathActive(item.path) ? theme.palette.primary.main : theme.palette.text.secondary }}>
-                          {item.icon}
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={item.label}
+                    {withSubheaders(group.items).map((node) =>
+                      node.type === "subheader" ? (
+                        <ListSubheader
+                          key={node.key}
+                          disableSticky
                           sx={{
-                            "& .MuiTypography-root": {
-                              fontWeight: isPathActive(item.path) ? 600 : 400,
-                              color: isPathActive(item.path) ? theme.palette.text.primary : theme.palette.text.secondary,
-                              fontSize: "0.875rem",
-                            }
+                            lineHeight: "30px",
+                            mt: 0.5,
+                            fontSize: "0.68rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            color: theme.palette.text.disabled,
+                            backgroundColor: "transparent",
                           }}
-                        />
-                      </MenuItem>
-                    ))}
+                        >
+                          {node.label}
+                        </ListSubheader>
+                      ) : (
+                        <MenuItem
+                          key={node.item.path}
+                          component={Link}
+                          to={node.item.path}
+                          onClick={() => handleMenuClose(group.key)}
+                          sx={{
+                            py: 1.25,
+                            px: 2,
+                            "&:hover": { backgroundColor: theme.palette.grey[50] },
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36, color: isPathActive(node.item.path) ? theme.palette.primary.main : theme.palette.text.secondary }}>
+                            {node.item.icon}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={node.item.label}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontWeight: isPathActive(node.item.path) ? 600 : 400,
+                                color: isPathActive(node.item.path) ? theme.palette.text.primary : theme.palette.text.secondary,
+                                fontSize: "0.875rem",
+                              },
+                            }}
+                          />
+                        </MenuItem>
+                      )
+                    )}
                   </Menu>
                 </Box>
               ))}
@@ -1044,51 +1057,81 @@ const Header = () => {
                   </Box>
                 </ListItem>
                 
-                {finalMenuGroups.map((group) => (
-                  <React.Fragment key={group.key}>
-                    <ListItem sx={{ px: 3, py: 1 }}>
-                      <Typography variant="overline" sx={{ fontWeight: 600, color: theme.palette.text.secondary, fontSize: "0.75rem" }}>
-                        {group.label.toUpperCase()}
-                      </Typography>
-                    </ListItem>
-                    
-                    {group.items.map((item) => (
+                {finalMenuGroups.map((group) => {
+                  const sectionOpen = isSectionOpen(group);
+                  const sectionActive = isGroupActive(group);
+                  return (
+                    <React.Fragment key={group.key}>
                       <ListItem
                         button
-                        key={item.path}
-                        component={Link}
-                        to={item.path}
-                        selected={isPathActive(item.path)}
-                        sx={{
-                          pl: 4,
-                          pr: 3,
-                          py: 1.5,
-                          "&.Mui-selected": {
-                            backgroundColor: "#eff6ff",
-                            "&:hover": {
-                              backgroundColor: "#dbeafe",
-                            },
-                          },
-                        }}
+                        onClick={() => toggleSection(group.key)}
+                        sx={{ px: 2.5, py: 1.25 }}
                       >
-                        <ListItemIcon sx={{ minWidth: 36, color: isPathActive(item.path) ? theme.palette.primary.main : theme.palette.text.secondary }}>
-                          {item.icon}
+                        <ListItemIcon sx={{ minWidth: 36, color: sectionActive ? theme.palette.primary.main : theme.palette.text.secondary }}>
+                          {group.icon}
                         </ListItemIcon>
-                        <ListItemText 
-                          primary={item.label}
+                        <ListItemText
+                          primary={group.label}
                           sx={{
                             "& .MuiTypography-root": {
-                              fontWeight: isPathActive(item.path) ? 600 : 400,
-                              fontSize: "0.875rem",
-                            }
+                              fontWeight: 700,
+                              fontSize: "0.8rem",
+                              letterSpacing: "0.05em",
+                              textTransform: "uppercase",
+                              color: sectionActive ? theme.palette.text.primary : theme.palette.text.secondary,
+                            },
                           }}
                         />
+                        {sectionOpen ? <ExpandLess sx={{ color: theme.palette.text.disabled }} /> : <ExpandMore sx={{ color: theme.palette.text.disabled }} />}
                       </ListItem>
-                    ))}
-                    
-                    <Divider sx={{ my: 1 }} />
-                  </React.Fragment>
-                ))}
+
+                      <Collapse in={sectionOpen} timeout="auto" unmountOnExit>
+                        {withSubheaders(group.items).map((node) =>
+                          node.type === "subheader" ? (
+                            <ListItem key={node.key} sx={{ pl: 4, pr: 3, py: 0.25 }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, fontSize: "0.66rem", letterSpacing: "0.07em", textTransform: "uppercase", color: theme.palette.text.disabled }}>
+                                {node.label}
+                              </Typography>
+                            </ListItem>
+                          ) : (
+                            <ListItem
+                              button
+                              key={node.item.path}
+                              component={Link}
+                              to={node.item.path}
+                              onClick={toggleDrawer}
+                              selected={isPathActive(node.item.path)}
+                              sx={{
+                                pl: 5,
+                                pr: 3,
+                                py: 1,
+                                "&.Mui-selected": {
+                                  backgroundColor: "#eff6ff",
+                                  "&:hover": { backgroundColor: "#dbeafe" },
+                                },
+                              }}
+                            >
+                              <ListItemIcon sx={{ minWidth: 34, color: isPathActive(node.item.path) ? theme.palette.primary.main : theme.palette.text.secondary }}>
+                                {node.item.icon}
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={node.item.label}
+                                sx={{
+                                  "& .MuiTypography-root": {
+                                    fontWeight: isPathActive(node.item.path) ? 600 : 400,
+                                    fontSize: "0.875rem",
+                                  },
+                                }}
+                              />
+                            </ListItem>
+                          )
+                        )}
+                      </Collapse>
+
+                      <Divider />
+                    </React.Fragment>
+                  );
+                })}
 
                 {/* Quick Actions */}
                 <Box sx={{ px: 3, py: 2 }}>
