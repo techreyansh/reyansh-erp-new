@@ -155,8 +155,8 @@ const ProductionLogModule = () => {
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
         <Alert severity="info" icon={<InfoOutlined />} sx={{ mb: 3, borderRadius: 2.5 }}>
-          AI reading runs in a Supabase Edge Function (your Anthropic key stays server-side). If extraction says the service isn't reachable, deploy it:
-          <code style={{ margin: '0 4px' }}>supabase functions deploy extract-production-log</code> and set <code>ANTHROPIC_API_KEY</code>.
+          AI reading runs in a Supabase Edge Function (your Gemini key stays server-side). If extraction says the service isn't reachable, deploy it:
+          <code style={{ margin: '0 4px' }}>supabase functions deploy extract-production-log</code> and set <code>GEMINI_API_KEY</code>.
         </Alert>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2.5 }} onClose={() => setError(null)}>{error}</Alert>}

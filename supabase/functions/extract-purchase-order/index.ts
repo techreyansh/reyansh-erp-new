@@ -1,25 +1,15 @@
 // Supabase Edge Function: extract-purchase-order
 //
 // Reads an uploaded purchase order — PDF, image/scan, or Excel/CSV — and uses
-// Claude (vision + PDF + structured output) to extract the header and line
-// items so the Sales Order Ingestion form can be auto-filled.
+// Google Gemini (vision + PDF + structured output) to extract the header and
+// line items so the Sales Order Ingestion form can be auto-filled.
 //
 // Deploy:
 //   supabase functions deploy extract-purchase-order
-//   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...   (same key as the Production Log fn)
+//   supabase secrets set GEMINI_API_KEY=AIza...   (same key as the Production Log fn)
 //
-// Model: claude-opus-4-8 (vision + structured outputs).
-import Anthropic from "npm:@anthropic-ai/sdk@^0.69.0";
-
-const MODEL = "claude-opus-4-8";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+// Model: gemini-2.5-flash (vision + structured outputs) — see ../_shared/gemini.ts.
+import { CORS, json, generateJson, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
 
 const PO_SCHEMA = {
   type: "object",
@@ -66,40 +56,28 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return json({ error: "ANTHROPIC_API_KEY secret is not set on the Edge Function." }, 500);
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set on the Edge Function." }, 500);
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
   const files = Array.isArray(body.files) ? body.files : [];
   if (!files.length) return json({ error: "No files provided." }, 400);
 
-  const client = new Anthropic({ apiKey });
   try {
-    const content: any[] = [{ type: "text", text: "Extract the purchase order from the document(s) below." }];
+    const parts: GeminiPart[] = [{ text: "Extract the purchase order from the document(s) below." }];
     for (const f of files) {
       if (f.kind === "pdf" && f.dataBase64) {
-        content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: f.dataBase64 } });
+        parts.push({ inlineData: { mimeType: "application/pdf", data: f.dataBase64 } });
       } else if (f.kind === "image" && f.dataBase64) {
-        content.push({ type: "image", source: { type: "base64", media_type: f.mediaType || "image/jpeg", data: f.dataBase64 } });
+        parts.push({ inlineData: { mimeType: f.mediaType || "image/jpeg", data: f.dataBase64 } });
       } else if (f.kind === "sheet" && Array.isArray(f.rows)) {
-        content.push({ type: "text", text: `--- Spreadsheet: ${f.name || "PO"} ---\n${JSON.stringify(f.rows).slice(0, 200000)}` });
+        parts.push({ text: `--- Spreadsheet: ${f.name || "PO"} ---\n${JSON.stringify(f.rows).slice(0, 200000)}` });
       }
     }
 
-    const resp = await client.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      thinking: { type: "adaptive" },
-      system: SYSTEM,
-      output_config: { format: { type: "json_schema", schema: PO_SCHEMA } },
-      messages: [{ role: "user", content }],
-    });
-
-    if (resp.stop_reason === "refusal") return json({ error: "The request was declined by safety classifiers." }, 422);
-    const textBlock = resp.content.find((b: any) => b.type === "text");
-    const parsed = textBlock ? JSON.parse((textBlock as any).text) : null;
-    return json({ model: resp.model, result: parsed, usage: resp.usage });
+    const { result, usage } = await generateJson({ apiKey, system: SYSTEM, parts, schema: PO_SCHEMA });
+    return json({ model: GEMINI_MODEL, result, usage });
   } catch (e) {
     return json({ error: e?.message || String(e) }, 500);
   }

@@ -1,7 +1,7 @@
 /**
  * Purchase-Order extraction service (client side).
  * Prepares a PO file (PDF / image / Excel-CSV) and calls the
- * `extract-purchase-order` Edge Function, which runs Claude server-side.
+ * `extract-purchase-order` Edge Function, which runs Gemini server-side.
  */
 import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabaseClient';
@@ -72,7 +72,7 @@ export async function extractPurchaseOrder(prepared) {
   if (error) {
     const msg = error?.message || String(error);
     if (/not found|404|Failed to (fetch|send)/i.test(msg)) {
-      throw new Error('AI service not reachable. Deploy the Edge Function (supabase functions deploy extract-purchase-order) and set ANTHROPIC_API_KEY.');
+      throw new Error('AI service not reachable. Deploy the Edge Function (supabase functions deploy extract-purchase-order) and set GEMINI_API_KEY.');
     }
     throw new Error(msg);
   }

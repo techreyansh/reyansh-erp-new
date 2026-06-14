@@ -10,6 +10,7 @@ import {
   StorefrontOutlined,
   ChevronRightRounded,
   MenuBookOutlined,
+  MarkEmailReadOutlined,
 } from '@mui/icons-material';
 
 // The CRM lifecycle, in order. Each stage maps to a /crm section.
@@ -20,6 +21,7 @@ export const CRM_STAGES = [
   { key: 'follow-ups', label: 'Follow-ups', desc: 'Next action', path: '/crm/follow-ups', icon: EventAvailableOutlined },
   { key: 'deals', label: 'Deals', desc: 'Pipeline', path: '/crm/deals', icon: TrendingUpOutlined },
   { key: 'customers', label: 'Customers', desc: 'Won → account', path: '/crm/customers', icon: StorefrontOutlined },
+  { key: 'campaigns', label: 'Campaigns', desc: 'Email outreach', path: '/crm/campaigns', icon: MarkEmailReadOutlined },
 ];
 
 /**

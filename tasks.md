@@ -17,7 +17,7 @@ How to write a task (so it can run unattended): one line goal + (optional) detai
 > Add your tasks here. The ones below are the open items from our sessions — reorder, delete, or add to them.
 
 1. [ ] **Deploy the Production Log AI** — apply migration + deploy the `extract-production-log` Edge Function + set the key.
-   - Needs: `ANTHROPIC_API_KEY` (from console.anthropic.com), and Supabase Dashboard access (already used). Mostly your action; Claude can prep everything.
+   - Needs: `GEMINI_API_KEY` (from aistudio.google.com), and Supabase Dashboard access (already used). Mostly your action; Claude can prep everything.
 
 2. [ ] **BOM — cable + molding (two-level, product-wise)** — cable sub-assembly BOM → becomes a raw-material line in the finished power-cord BOM; raw materials from Inventory, finished product to FG store. Match the existing Inventory BOM format.
    - Needs: a quick walkthrough / example of how one power cord breaks down (cable + plug + terminals + other material).
@@ -33,8 +33,8 @@ How to write a task (so it can run unattended): one line goal + (optional) detai
    - [!] Bottom-up (BOM-based) costing mode — auto-pull rates from the BOM. **Needs: BOM (task 2).**
    - [ ] Connect a saved costing → CRM quotation (and a printable, customer-ready quote view).
 
-6. [x] **AI Purchase-Order ingestion** — BUILT. Upload card on `/po-ingestion` → Edge Function `extract-purchase-order` (Claude) → preview header + line items → "Apply" pre-fills the Sales Order form with real qty/price/desc.
-   - **Runtime needs (to function):** `supabase functions deploy extract-purchase-order` + `ANTHROPIC_API_KEY` (same secret as Production Log).
+6. [x] **AI Purchase-Order ingestion** — BUILT. Upload card on `/po-ingestion` → Edge Function `extract-purchase-order` (Gemini) → preview header + line items → "Apply" pre-fills the Sales Order form with real qty/price/desc.
+   - **Runtime needs (to function):** `supabase functions deploy extract-purchase-order` + `GEMINI_API_KEY` (same secret as Production Log).
 
 7. [x] **Sensible default ordering everywhere (no data change)** — DONE. Clients/Prospects already open A–Z; the shared `ModuleTablePage` (CRM leads/customers/quotations/orders/collections) already sorts by first column + has click-to-sort headers; added newest-first defaults to leads/quotations/orders/collections and to the Costing entries table. No stored data was changed.
 

@@ -160,7 +160,7 @@ const AIPurchaseOrderUpload = ({ onApply }) => {
       )}
 
       <Alert severity="info" icon={<InfoOutlined />} sx={{ mt: 2, borderRadius: 2 }}>
-        Runs via a Supabase Edge Function (your Anthropic key stays server-side). If it says "not reachable", deploy <code>extract-purchase-order</code> and set <code>ANTHROPIC_API_KEY</code>.
+        Runs via a Supabase Edge Function (your Gemini key stays server-side). If it says "not reachable", deploy <code>extract-purchase-order</code> and set <code>GEMINI_API_KEY</code>.
       </Alert>
     </Paper>
   );

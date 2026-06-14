@@ -7,6 +7,7 @@ import CRMEnterprisePanels from "../../components/crm/CRMEnterprisePanels";
 import CRMDashboard from "../../components/crm/CRMDashboard";
 import CRMFlowStrip from "../../components/crm/CRMFlowStrip";
 import CRMGuide from "../../components/crm/CRMGuide";
+import EmailCampaignsModule from "../../components/crm/email/EmailCampaignsModule";
 import { crmMock, crmPpcLookups } from "../../data/mock/crmPpcData";
 import { useEnterpriseERPStore } from "../../hooks/useEnterpriseERPStore";
 import crmPpcBackendService from "../../services/crmPpcBackendService";
@@ -216,6 +217,11 @@ const CRMModulePage = () => {
   // CRM onboarding / playbook
   if (section === "guide") {
     return <CRMGuide />;
+  }
+
+  // Email Campaigns — AI-personalized outreach sequences sent from Gmail
+  if (section === "campaigns") {
+    return <EmailCampaignsModule />;
   }
 
   // CRM dashboard (overview)

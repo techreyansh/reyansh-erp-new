@@ -4,10 +4,10 @@
  * Handles the client side of the hourly-production pipeline:
  *  - parse Excel/CSV to rows (xlsx, already a project dependency)
  *  - read photos to base64 for vision
- *  - call the `extract-production-log` Edge Function (Claude vision + structured output)
+ *  - call the `extract-production-log` Edge Function (Gemini vision + structured output)
  *  - save normalized rows to the production_hourly_log table
  *
- * The Edge Function holds the Anthropic key; the browser never sees it.
+ * The Edge Function holds the Gemini key; the browser never sees it.
  */
 import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabaseClient';
@@ -146,7 +146,7 @@ export async function saveExtraction({ entries, sourceName, sourceKind, departme
 function friendlyFnError(error) {
   const msg = error?.message || String(error);
   if (/not found|404|Failed to fetch|Failed to send/i.test(msg)) {
-    return 'AI service not reachable. Deploy the Edge Function (supabase functions deploy extract-production-log) and set ANTHROPIC_API_KEY.';
+    return 'AI service not reachable. Deploy the Edge Function (supabase functions deploy extract-production-log) and set GEMINI_API_KEY.';
   }
   return msg;
 }

@@ -188,7 +188,9 @@ CREATE TABLE IF NOT EXISTS public.email_enrollments (
                   CHECK (status IN ('active', 'completed', 'paused', 'replied',
                                     'unsubscribed', 'bounced', 'failed')),
   current_step  integer NOT NULL DEFAULT 0,     -- last step number sent; 0 = none yet
-  next_send_at  timestamptz NOT NULL DEFAULT now(),
+  -- when the next step is due. NULL = nothing scheduled (e.g. a draft is waiting
+  -- on human review, or the run is complete).
+  next_send_at  timestamptz DEFAULT now(),
   last_sent_at  timestamptz,
   gmail_thread_id text,                          -- keep the whole sequence in one thread
   replied_at    timestamptz,
@@ -285,6 +287,63 @@ BEGIN
          FOR EACH ROW EXECUTE FUNCTION public.email_touch_updated_at();', t, t);
   END LOOP;
 END $$;
+
+-- ---------------------------------------------------------------------------
+-- When a message flips to 'sent', advance its enrollment to the next step.
+-- This is the single source of truth for sequence progression, so BOTH the
+-- scheduler's auto-send AND a human approving a draft from the review queue
+-- move the enrollment forward identically.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.email_advance_enrollment_on_send()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_next public.email_campaign_steps%ROWTYPE;
+  v_found boolean := false;
+BEGIN
+  IF NEW.enrollment_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- find the next active step after the one just sent
+  SELECT * INTO v_next
+  FROM public.email_campaign_steps s
+  WHERE s.campaign_id = NEW.campaign_id
+    AND s.step_order = COALESCE(NEW.step_order, 0) + 1
+    AND s.is_active = true
+  LIMIT 1;
+  v_found := FOUND;
+
+  IF v_found THEN
+    UPDATE public.email_enrollments e
+    SET current_step = COALESCE(NEW.step_order, e.current_step),
+        next_send_at = now()
+                       + make_interval(days => v_next.delay_days, hours => v_next.delay_hours),
+        status = CASE WHEN e.status IN ('paused','replied','unsubscribed','bounced','failed')
+                      THEN e.status ELSE 'active' END,
+        updated_at = now()
+    WHERE e.id = NEW.enrollment_id;
+  ELSE
+    -- no more steps: the sequence is finished for this contact
+    UPDATE public.email_enrollments e
+    SET current_step = COALESCE(NEW.step_order, e.current_step),
+        status = CASE WHEN e.status IN ('paused','replied','unsubscribed','bounced','failed')
+                      THEN e.status ELSE 'completed' END,
+        next_send_at = NULL,
+        updated_at = now()
+    WHERE e.id = NEW.enrollment_id;
+  END IF;
+
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS trg_email_message_sent ON public.email_messages;
+CREATE TRIGGER trg_email_message_sent
+AFTER UPDATE OF status ON public.email_messages
+FOR EACH ROW
+WHEN (NEW.status = 'sent' AND OLD.status IS DISTINCT FROM 'sent')
+EXECUTE FUNCTION public.email_advance_enrollment_on_send();
 
 -- ---------------------------------------------------------------------------
 -- Helper RPC: upsert a contact (used by CSV import + "pull from CRM").
