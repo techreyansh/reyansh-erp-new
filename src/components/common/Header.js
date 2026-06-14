@@ -70,7 +70,6 @@ import {
   ExpandLess,
   ExpandMore,
   MarkEmailRead as CampaignIcon,
-  SyncAlt as SyncAltIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { usePermissions } from "../../context/PermissionContext";
@@ -321,13 +320,6 @@ const Header = () => {
           icon: <CostingIcon />,
           roles: ["CEO"],
         },
-        {
-          subheader: "Admin & Finance",
-          label: "PPC Integration",
-          path: "/integration/ppc",
-          icon: <SyncAltIcon />,
-          roles: ["CEO"],
-        },
       ],
     },
     {
@@ -505,6 +497,22 @@ const Header = () => {
         { subheader: "Insights", label: "Integrated Dashboard", path: "/ppc/advanced-dashboard", icon: <Dashboard />, roles: ppcModuleRoles },
         { subheader: "Lines", label: "Cable Production", path: "/cable-production", icon: <CableIcon />, roles: ["CEO", "Customer Relations Manager", "Cable Production Supervisor"] },
         { subheader: "Lines", label: "Molding Production", path: "/molding", icon: <ProductionIcon />, roles: ["CEO", "Customer Relations Manager", "Moulding Production Supervisor", "Production Manager", "Store Manager"] },
+      ],
+    },
+    {
+      key: "master-data",
+      label: "Master Data",
+      icon: <Storage />,
+      items: [
+        {
+          subheader: "Administration",
+          label: "Master Data Hub",
+          path: "/master-data",
+          icon: <GridOnOutlined />,
+          roles: ["CEO", "Management / HOD", "HR Manager"],
+          moduleKey: "employees",
+          requireEdit: true,
+        },
       ],
     },
     // System items

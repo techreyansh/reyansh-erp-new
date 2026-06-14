@@ -115,13 +115,13 @@ const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantH
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const AccountabilityScorecard = lazy(() => import("./components/accountability/AccountabilityScorecard"));
+const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
-const PPCIntegrationPage = lazy(() => import("./pages/integration/PPCIntegrationPage"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -199,6 +199,11 @@ function AppContent() {
                       <CEOExecutiveDashboard />
                     </CEOOnlyRoute>
                   } />
+                  <Route path="/master-data" element={
+                    <CEOOnlyRoute>
+                      <MasterDataHub />
+                    </CEOOnlyRoute>
+                  } />
                   <Route path="/plant-command" element={
                     <ProtectedRouteGate>
                       <PlantHeadDashboard />
@@ -222,11 +227,6 @@ function AppContent() {
                   <Route path="/access-management" element={
                     <CEOOnlyRoute>
                       <AccessManagementPage />
-                    </CEOOnlyRoute>
-                  } />
-                  <Route path="/integration/ppc" element={
-                    <CEOOnlyRoute>
-                      <PPCIntegrationPage />
                     </CEOOnlyRoute>
                   } />
                   <Route path="/profile" element={

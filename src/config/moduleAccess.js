@@ -31,6 +31,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/accountability', moduleKey: MODULE_KEYS.DASHBOARD },
+  { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
 ];
 
 export function getModuleKeyForPath(pathname = '') {
@@ -50,6 +51,7 @@ const ROUTE_ACTION_RULES = [
   { test: (path) => path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
   { test: (path) => path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
 ];
 
