@@ -220,9 +220,9 @@ function AppContent() {
                     </ProtectedRouteGate>
                   } />
                   <Route path="/access-management" element={
-                    <ProtectedRouteGate>
+                    <CEOOnlyRoute>
                       <AccessManagementPage />
-                    </ProtectedRouteGate>
+                    </CEOOnlyRoute>
                   } />
                   <Route path="/integration/ppc" element={
                     <CEOOnlyRoute>

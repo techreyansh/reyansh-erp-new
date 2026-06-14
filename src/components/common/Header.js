@@ -312,8 +312,7 @@ const Header = () => {
           label: "Employee Access Management",
           path: "/access-management",
           icon: <SecurityIcon />,
-          moduleKey: "employees",
-          requireEdit: true,
+          roles: ["CEO"],
         },
         {
           subheader: "Admin & Finance",

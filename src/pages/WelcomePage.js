@@ -54,7 +54,25 @@ import { usePermissions } from "../context/PermissionContext";
 import LoadingScreen from "../components/common/LoadingScreen";
 import AccessDenied from "../components/auth/AccessDenied";
 import { getExecutiveSummary } from "../services/executiveDashboardService";
+import { listMyTasks, isTaskOverdue } from "../services/taskService";
 import { StatCard, Panel, EmptyChart, CHART_COLORS, inrCompact } from "../components/common/kit";
+
+// Modules most relevant to each department — used to surface a person's own
+// workspace first on the role-aware home.
+const DEPT_MODULES = {
+  Sales: ["sales", "crm", "tasks"],
+  CRM: ["crm", "sales", "tasks"],
+  Production: ["production", "inventory", "dispatch", "tasks"],
+  Inventory: ["inventory", "dispatch", "tasks"],
+  Accounts: ["accounts", "reports", "tasks"],
+  Dispatch: ["dispatch", "inventory", "tasks"],
+  HR: ["employees", "tasks", "reports"],
+  Management: ["crm", "sales", "production", "inventory", "dispatch", "reports", "tasks"],
+};
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
 
 function getDisplayName(user) {
   if (user?.name) return user.name;
@@ -97,6 +115,7 @@ function WelcomePage() {
   const permissions = usePermissions();
   const [now, setNow] = useState(() => new Date());
   const [data, setData] = useState(null);
+  const [myTasks, setMyTasks] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -104,18 +123,23 @@ function WelcomePage() {
   const showAnalytics = accessBucket !== "employee";
 
   const load = useCallback(async (isRefresh = false) => {
-    if (!showAnalytics) { setLoading(false); return; }
     if (isRefresh) setRefreshing(true);
     try {
-      const summary = await getExecutiveSummary();
-      setData(summary);
+      if (showAnalytics) {
+        const summary = await getExecutiveSummary();
+        setData(summary);
+      } else if (user?.email) {
+        // Employee bucket — real task KPIs instead of placeholders.
+        const tasks = await listMyTasks(user.email);
+        setMyTasks(tasks);
+      }
     } catch (e) {
       // degrade silently — page still renders quick actions
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [showAnalytics]);
+  }, [showAnalytics, user]);
 
   useEffect(() => {
     load();
@@ -125,11 +149,31 @@ function WelcomePage() {
 
   const displayName = getDisplayName(user);
   const roleLabel = permissions.role?.role_name || role || user?.roleCode || "Employee";
-  const actions = allActions.filter((a) => {
-    if (a.requireCreate) return permissions.canCreate?.(a.key);
-    if (a.requireEdit) return permissions.canEdit?.(a.key);
-    return permissions.canView?.(a.key);
-  });
+  const department = permissions.employee?.department || "";
+  const deptModules = DEPT_MODULES[department] || [];
+
+  // Filter by access, then surface the person's own department modules first.
+  const actions = useMemo(() => {
+    const visible = allActions.filter((a) => {
+      if (a.requireCreate) return permissions.canCreate?.(a.key);
+      if (a.requireEdit) return permissions.canEdit?.(a.key);
+      return permissions.canView?.(a.key);
+    }).map((a) => ({ ...a, primary: deptModules.includes(a.key) }));
+    return visible.sort((x, y) => Number(y.primary) - Number(x.primary));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permissions, department]);
+
+  // Real task KPIs for the employee bucket.
+  const taskKpis = useMemo(() => {
+    const list = myTasks || [];
+    const today = new Date();
+    const isDone = (t) => String(t.task_status || "").toLowerCase() === "completed";
+    const dueToday = list.filter((t) => t.due_date && isSameDay(new Date(t.due_date), today) && !isDone(t)).length;
+    const pending = list.filter((t) => !isDone(t)).length;
+    const completed = list.filter(isDone).length;
+    const overdue = list.filter((t) => isTaskOverdue(t)).length;
+    return { dueToday, pending, completed, overdue };
+  }, [myTasks]);
 
   const k = data?.kpis || {};
   const mtdRevenue = data?.revenueTrend?.length ? data.revenueTrend[data.revenueTrend.length - 1].collected : 0;
@@ -146,12 +190,12 @@ function WelcomePage() {
       ];
     }
     return [
-      { label: "Today's Tasks", value: "—", sub: "Assigned to you", icon: ChecklistOutlined, accent: "#1E7DBE", path: "/task-checklist" },
-      { label: "Pending", value: "—", sub: "Need action", icon: AssignmentTurnedInOutlined, accent: "#D97706", path: "/my-tasks" },
-      { label: "Completed", value: "—", sub: "This shift", icon: TrendingUpOutlined, accent: "#059669", path: "/my-tasks" },
-      { label: "Compliance", value: "—", sub: "Current score", icon: BarChartOutlined, accent: "#7C3AED", path: "/task-checklist" },
+      { label: "Due Today", value: taskKpis.dueToday, sub: "Assigned to you", icon: ChecklistOutlined, accent: "#1E7DBE", path: "/my-tasks" },
+      { label: "Pending", value: taskKpis.pending, sub: "Need action", icon: AssignmentTurnedInOutlined, accent: "#D97706", path: "/my-tasks" },
+      { label: "Completed", value: taskKpis.completed, sub: "All time", icon: TrendingUpOutlined, accent: "#059669", path: "/my-tasks" },
+      { label: "Overdue", value: taskKpis.overdue, sub: "Past due date", icon: BarChartOutlined, accent: taskKpis.overdue > 0 ? "#DC2626" : "#7C3AED", path: "/my-tasks" },
     ];
-  }, [showAnalytics, mtdRevenue, k]);
+  }, [showAnalytics, mtdRevenue, k, taskKpis]);
 
   if (permissions.loading) return <LoadingScreen message="Loading dashboard…" />;
   if (!permissions.authorized || !permissions.employee) return <AccessDenied />;
@@ -181,7 +225,9 @@ function WelcomePage() {
                 <Chip label={roleLabel} size="small" sx={{ bgcolor: "rgba(255,255,255,0.22)", color: "#fff", fontWeight: 700 }} />
               </Stack>
               <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 560 }}>
-                Welcome to your ERP command center. Review priorities, then jump into the module you need.
+                {showAnalytics
+                  ? "Welcome to your ERP command center. Review priorities, then jump into the module you need."
+                  : `Here's your workspace${department ? ` for ${department}` : ""}. ${taskKpis.pending} task${taskKpis.pending === 1 ? "" : "s"} need your attention${taskKpis.overdue > 0 ? `, ${taskKpis.overdue} overdue` : ""}.`}
               </Typography>
             </Box>
             <Stack direction="row" spacing={1.5} alignItems="center">
@@ -324,12 +370,15 @@ function WelcomePage() {
             const Icon = action.icon;
             return (
               <Grid item xs={6} sm={4} md={3} key={`${action.key}-${action.title}`}>
-                <Card variant="outlined" sx={{ height: "100%" }}>
+                <Card variant="outlined" sx={{ height: "100%", borderColor: action.primary ? "primary.main" : "divider", bgcolor: action.primary ? alpha(theme.palette.primary.main, 0.04) : "background.paper" }}>
                   <CardActionArea onClick={() => navigate(action.path)} sx={{ height: "100%", alignItems: "stretch" }}>
                     <CardContent sx={{ height: "100%" }}>
-                      <Box sx={{ width: 42, height: 42, borderRadius: 1.5, display: "flex", alignItems: "center", justifyContent: "center", bgcolor: alpha(theme.palette.primary.main, 0.1), mb: 1.5 }}>
-                        <Icon sx={{ color: "primary.main" }} />
-                      </Box>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Box sx={{ width: 42, height: 42, borderRadius: 1.5, display: "flex", alignItems: "center", justifyContent: "center", bgcolor: alpha(theme.palette.primary.main, 0.1), mb: 1.5 }}>
+                          <Icon sx={{ color: "primary.main" }} />
+                        </Box>
+                        {action.primary && <Chip size="small" color="primary" label="Your area" sx={{ height: 20, fontSize: 10, fontWeight: 700 }} />}
+                      </Stack>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{action.title}</Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{action.description}</Typography>
                     </CardContent>
