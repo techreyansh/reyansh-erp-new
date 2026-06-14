@@ -114,12 +114,14 @@ const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOEx
 const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
+const AccountabilityScorecard = lazy(() => import("./components/accountability/AccountabilityScorecard"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
+const PPCIntegrationPage = lazy(() => import("./pages/integration/PPCIntegrationPage"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -212,10 +214,20 @@ function AppContent() {
                       <CRMImport />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/accountability" element={
+                    <ProtectedRouteGate>
+                      <AccountabilityScorecard />
+                    </ProtectedRouteGate>
+                  } />
                   <Route path="/access-management" element={
                     <ProtectedRouteGate>
                       <AccessManagementPage />
                     </ProtectedRouteGate>
+                  } />
+                  <Route path="/integration/ppc" element={
+                    <CEOOnlyRoute>
+                      <PPCIntegrationPage />
+                    </CEOOnlyRoute>
                   } />
                   <Route path="/profile" element={
                     <ProtectedRouteGate>

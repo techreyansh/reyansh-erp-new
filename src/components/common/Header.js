@@ -69,6 +69,8 @@ import {
   LightModeOutlined,
   ExpandLess,
   ExpandMore,
+  MarkEmailRead as CampaignIcon,
+  SyncAlt as SyncAltIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { usePermissions } from "../../context/PermissionContext";
@@ -260,6 +262,13 @@ const Header = () => {
           roles: ["Customer Relations Manager", "CEO", "Store Manager"],
         },
         {
+          subheader: "Accountability",
+          label: "My Scorecard",
+          path: "/accountability",
+          icon: <SecurityIcon />,
+          roles: ["all"],
+        },
+        {
           subheader: "Operations",
           label: "Production Log",
           path: "/production-log",
@@ -311,6 +320,13 @@ const Header = () => {
           label: "Costing",
           path: "/costing",
           icon: <CostingIcon />,
+          roles: ["CEO"],
+        },
+        {
+          subheader: "Admin & Finance",
+          label: "PPC Integration",
+          path: "/integration/ppc",
+          icon: <SyncAltIcon />,
           roles: ["CEO"],
         },
       ],
@@ -462,6 +478,7 @@ const Header = () => {
         { subheader: "Insights", label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
         { subheader: "Insights", label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
         { subheader: "Insights", label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Outreach", label: "Email Campaigns", path: "/crm/campaigns", icon: <CampaignIcon />, roles: crmModuleRoles },
         { subheader: "Flow", label: "Sales Flow", path: "/sales-flow", icon: <PurchaseIcon />, roles: ["Customer Relations Manager", "Sales Executive", "NPD", "Quality Engineer", "Director", "Production Manager", "Store Manager", "Accounts Executive", "CEO"] },
         { subheader: "Data", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
       ],
