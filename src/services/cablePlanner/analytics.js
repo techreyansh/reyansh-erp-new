@@ -2,6 +2,7 @@
 // Pure functions ported from the planner's orderRiskScore / machineLoadForecast.
 // Computed from orders + the generated schedule only (no extra data source).
 import { isWorkingDay } from "./time.js";
+import { estimateRM } from "./materials.js";
 
 const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
@@ -70,4 +71,53 @@ export function machineLoadForecast(machineId, schedule, machine, days = 14, bas
 /** Load heatmap for every machine over the window. */
 export function loadHeatmap(machines = [], schedule = [], days = 14, baseDate = new Date()) {
   return machines.map((m) => ({ machine: m, days: machineLoadForecast(m.id, schedule, m, days, baseDate) }));
+}
+
+/**
+ * rmBurndown(schedule, cablesById, stock, days, baseDate) — projected on-hand
+ * balance of copper / PVC-insulation / PVC-sheath over the planning window.
+ * Each order's total RM (estimateRM over its finished metres) is consumed on the
+ * day that order's relevant stage starts: copper at first bunching/core, ins at
+ * first core, sheath at first sheathing. Returns the daily balance series plus
+ * the first shortage day (and a reorder day 2 days earlier).
+ */
+export function rmBurndown(schedule = [], cablesById = {}, stock = {}, days = 30, baseDate = new Date()) {
+  // Group jobs by order.
+  const byOrder = {};
+  for (const j of schedule) (byOrder[j.orderId] = byOrder[j.orderId] || []).push(j);
+
+  // Accumulate consumption per local day.
+  const consume = {}; // dateStr → { copper, ins, sh }
+  const add = (dateStr, key, qty) => {
+    if (!dateStr) return;
+    consume[dateStr] = consume[dateStr] || { copper: 0, ins: 0, sh: 0 };
+    consume[dateStr][key] += qty;
+  };
+  const earliestDay = (jobs, stages) => {
+    const ts = jobs.filter((j) => stages.includes(j.stage)).map((j) => +new Date(j.startTime));
+    return ts.length ? localDateStr(new Date(Math.min(...ts))) : null;
+  };
+
+  for (const jobs of Object.values(byOrder)) {
+    const cable = cablesById[jobs[0].cableId];
+    if (!cable) continue;
+    const rm = estimateRM(cable, num(jobs[0].orderM));
+    add(earliestDay(jobs, ["bunching", "core"]), "copper", rm.copper);
+    add(earliestDay(jobs, ["core"]), "ins", rm.ins);
+    add(earliestDay(jobs, ["sheathing"]), "sh", rm.sh);
+  }
+
+  let copper = num(stock.copperKg), ins = num(stock.pvcInsKg), sh = num(stock.pvcShKg);
+  const base = startOfDay(baseDate);
+  const series = [];
+  let shortageDay = null;
+  for (let i = 0; i < days; i++) {
+    const day = new Date(base); day.setDate(base.getDate() + i);
+    const key = localDateStr(day);
+    const c = consume[key];
+    if (c) { copper -= c.copper; ins -= c.ins; sh -= c.sh; }
+    if (shortageDay === null && (copper < 0 || ins < 0 || sh < 0)) shortageDay = i;
+    series.push({ date: key, copper: +copper.toFixed(1), ins: +ins.toFixed(1), sh: +sh.toFixed(1) });
+  }
+  return { series, shortageDay, reorderDay: shortageDay === null ? null : Math.max(0, shortageDay - 2) };
 }

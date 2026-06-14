@@ -7,14 +7,20 @@ import {
   Box, Paper, Stack, Typography, Button, Chip, CircularProgress, Snackbar, Alert,
   TextField, MenuItem, FormControlLabel, Switch, Table, TableHead, TableRow,
   TableCell, TableBody, Tooltip, alpha, useTheme,
+  Dialog, DialogTitle, DialogContent, DialogActions, Link,
 } from "@mui/material";
 import {
   PlayArrowRounded, SaveRounded, RefreshRounded, AutoAwesomeRounded, WarningAmberRounded,
+  UploadFileRounded, Inventory2Rounded,
 } from "@mui/icons-material";
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, Legend, ReferenceLine,
+} from "recharts";
 import sheetService from "../../services/sheetService";
+import { supabase } from "../../lib/supabaseClient";
 import {
   runAutoSchedule, sumRM, DEFAULT_MACHINES, STAGE_LABEL,
-  loadHeatmap, orderRiskWatchlist,
+  loadHeatmap, orderRiskWatchlist, rmBurndown,
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
 
@@ -60,6 +66,10 @@ export default function CableAutoPlanner() {
     catch { return { copperKg: 0, pvcInsKg: 0, pvcShKg: 0 }; }
   });
   useEffect(() => { try { localStorage.setItem(RM_STOCK_KEY, JSON.stringify(stock)); } catch { /* ignore */ } }, [stock]);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [loadingInv, setLoadingInv] = useState(false);
 
   const notify = (message, severity = "success") => setSnack({ message, severity });
 
@@ -127,6 +137,74 @@ export default function CableAutoPlanner() {
   // Decision support: who's at risk, where's the bottleneck.
   const watchlist = useMemo(() => orderRiskWatchlist(orders, result?.schedule || []), [orders, result]);
   const heatmap = useMemo(() => (result ? loadHeatmap(DEFAULT_MACHINES, result.schedule, 14) : []), [result]);
+  const hasStock = stock.copperKg > 0 || stock.pvcInsKg > 0 || stock.pvcShKg > 0;
+  const burndown = useMemo(
+    () => (result?.schedule?.length && hasStock ? rmBurndown(result.schedule, cablesById, stock, 30) : null),
+    [result, cablesById, stock, hasStock],
+  );
+
+  // Bulk paste-import → append rows to the Cable Production Plans sheet.
+  // Accepts CSV "Customer, Code, Qty, Due" or power-cord "Customer, Code, 5000x1.5, Due".
+  const parsePlanLines = (text) => {
+    const rows = [];
+    for (const raw of (text || "").split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line || /^customer/i.test(line)) continue; // skip blanks + header
+      const parts = line.split(/[\t,;]/).map((s) => s.trim());
+      if (parts.length < 3) continue;
+      const [customer, code, qtyRaw, dueRaw] = parts;
+      let quantity = 0, length = 1, totalMeters = 0;
+      const cordMatch = String(qtyRaw).match(/^([\d.]+)\s*[xX]\s*([\d.]+)$/); // pcs x len
+      if (cordMatch) { quantity = +cordMatch[1]; length = +cordMatch[2]; totalMeters = quantity * length; }
+      else { totalMeters = Number(String(qtyRaw).replace(/[^\d.]/g, "")) || 0; quantity = totalMeters; }
+      if (!code || totalMeters <= 0) continue;
+      rows.push({
+        customerName: customer || "", productCode: code, totalMeters, quantity, length,
+        dueDate: (dueRaw || "").slice(0, 10), priority: "normal", status: "pending",
+      });
+    }
+    return rows;
+  };
+
+  const doImport = async () => {
+    const rows = parsePlanLines(pasteText);
+    if (!rows.length) { notify("No valid lines found. Use: Customer, Code, Qty, Due", "warning"); return; }
+    setImporting(true);
+    try {
+      await sheetService.batchAppendRows("Cable Production Plans", rows);
+      setPasteOpen(false); setPasteText("");
+      notify(`Imported ${rows.length} production plan(s)`);
+      await load();
+    } catch (e) {
+      notify(`Import failed: ${e.message}`, "error");
+    } finally { setImporting(false); }
+  };
+
+  // Best-effort: read on-hand from real inventory and classify RM into the 3
+  // buckets by item name/code. Prefills the editable fields (stays manual-overridable).
+  const loadFromInventory = async () => {
+    setLoadingInv(true);
+    try {
+      const { data, error } = await supabase
+        .from("inventory_stock")
+        .select("quantity, products(name, code, description)");
+      if (error) throw error;
+      const buckets = { copperKg: 0, pvcInsKg: 0, pvcShKg: 0 };
+      let matched = 0;
+      for (const row of data || []) {
+        const p = row.products || {};
+        const hay = `${p.name || ""} ${p.code || ""} ${p.description || ""}`.toLowerCase();
+        const qty = Number(row.quantity) || 0;
+        if (/copper|conductor|wire ?rod|\bcu\b/.test(hay)) { buckets.copperKg += qty; matched++; }
+        else if (/insulat|type[\s-]?a|ins(\b|ulation)/.test(hay)) { buckets.pvcInsKg += qty; matched++; }
+        else if (/sheath|jacket|st1|st2|outer/.test(hay)) { buckets.pvcShKg += qty; matched++; }
+      }
+      setStock(buckets);
+      notify(matched ? `Loaded on-hand from inventory (${matched} item(s) matched)` : "No copper/PVC items matched in inventory — enter manually", matched ? "success" : "warning");
+    } catch (e) {
+      notify(`Inventory read failed: ${e.message}`, "error");
+    } finally { setLoadingInv(false); }
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -137,6 +215,7 @@ export default function CableAutoPlanner() {
           <Typography variant="h6" sx={{ fontWeight: 800 }}>Auto Planner</Typography>
           <Chip size="small" variant="outlined" label={`${cables.length} cables · ${orders.length} plans`} />
           <Box sx={{ flex: 1 }} />
+          <Button size="small" startIcon={<UploadFileRounded />} onClick={() => setPasteOpen(true)} sx={{ textTransform: "none" }}>Import plans</Button>
           <Button size="small" startIcon={<RefreshRounded />} onClick={load} sx={{ textTransform: "none" }}>Reload</Button>
         </Stack>
 
@@ -179,6 +258,10 @@ export default function CableAutoPlanner() {
               <TextField key={r.key} size="small" type="number" label={r.label} value={stock[r.stockKey]}
                 onChange={(e) => setStock({ ...stock, [r.stockKey]: Number(e.target.value) || 0 })} sx={{ width: 150 }} />
             ))}
+            <Button size="small" variant="outlined" startIcon={loadingInv ? <CircularProgress size={14} /> : <Inventory2Rounded />}
+              onClick={loadFromInventory} disabled={loadingInv} sx={{ textTransform: "none" }}>
+              Load from inventory
+            </Button>
           </Stack>
         )}
       </Paper>
@@ -271,6 +354,33 @@ export default function CableAutoPlanner() {
             </Paper>
           )}
 
+          {/* RM BURN-DOWN — projected on-hand over 30 days */}
+          {burndown && (
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, mb: 2 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>RM burn-down (30 days)</Typography>
+                {burndown.shortageDay != null && (
+                  <Chip size="small" color="error" label={`Shortage in ${burndown.shortageDay}d · reorder by day ${burndown.reorderDay}`} />
+                )}
+              </Stack>
+              <Box sx={{ height: 240 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={burndown.series} margin={{ top: 5, right: 8, left: -8, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.08)} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(d) => d.slice(5)} interval={4} />
+                    <YAxis tick={{ fontSize: 10 }} width={48} />
+                    <RTooltip formatter={(v) => `${v} kg`} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <ReferenceLine y={0} stroke="#DC2626" strokeDasharray="4 4" />
+                    <Line type="monotone" dataKey="copper" name="Copper" stroke="#b45309" dot={false} strokeWidth={2} />
+                    <Line type="monotone" dataKey="ins" name="PVC Ins" stroke="#0ea5e9" dot={false} strokeWidth={2} />
+                    <Line type="monotone" dataKey="sh" name="PVC Sheath" stroke="#10b981" dot={false} strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+            </Paper>
+          )}
+
           {/* MACHINE LOAD HEATMAP */}
           <Heatmap heatmap={heatmap} theme={theme} />
 
@@ -314,6 +424,32 @@ export default function CableAutoPlanner() {
           </Paper>
         </>
       )}
+
+      {/* BULK PASTE IMPORT */}
+      <Dialog open={pasteOpen} onClose={() => setPasteOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle sx={{ fontWeight: 800 }}>Import production plans</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            Paste one order per line. Format: <code>Customer, Cable Code, Qty, Due (YYYY-MM-DD)</code>.
+            For power cords use <code>pieces×length</code> as the quantity, e.g. <code>Havells, PC-16A-15, 5000×1.5, 2026-07-10</code>.
+          </Typography>
+          <TextField
+            multiline minRows={6} fullWidth autoFocus value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            placeholder={"BluStar, R3C25, 5000, 2026-07-05\nHavells, PC-16A-15, 5000×1.5, 2026-07-10"}
+            sx={{ fontFamily: "monospace" }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            New cable codes should exist in <Link href="/cable-production" underline="hover">Cable Products</Link> for scheduling to pick them up.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPasteOpen(false)} sx={{ textTransform: "none" }}>Cancel</Button>
+          <Button variant="contained" onClick={doImport} disabled={importing} startIcon={importing ? <CircularProgress size={16} /> : <UploadFileRounded />} sx={{ textTransform: "none" }}>
+            {importing ? "Importing…" : "Import"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar open={!!snack} autoHideDuration={5000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         {snack ? <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(null)}>{snack.message}</Alert> : undefined}

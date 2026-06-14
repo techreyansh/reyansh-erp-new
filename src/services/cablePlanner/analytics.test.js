@@ -1,5 +1,6 @@
-import { orderRiskScore, riskLevel, orderRiskWatchlist, machineLoadForecast, loadHeatmap } from "./analytics.js";
+import { orderRiskScore, riskLevel, orderRiskWatchlist, machineLoadForecast, loadHeatmap, rmBurndown } from "./analytics.js";
 import { DEFAULT_MACHINES } from "./machineConfig.js";
+import { estimateRM } from "./materials.js";
 
 const daysFromNow = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 
@@ -69,5 +70,37 @@ describe("loadHeatmap", () => {
     const hm = loadHeatmap(DEFAULT_MACHINES, [], 14);
     expect(hm).toHaveLength(DEFAULT_MACHINES.length);
     expect(hm[0].days).toHaveLength(14);
+  });
+});
+
+describe("rmBurndown", () => {
+  const cable = { id: "c1", code: "R3C25", cores: 3, size: 2.5, strandCount: 50, insThick: 0.8, shThick: 1.0 };
+  const cablesById = { c1: cable };
+  const base = new Date("2026-06-15T00:00:00");
+  const day = (n) => { const d = new Date(base); d.setDate(base.getDate() + n); d.setHours(10); return d.toISOString(); };
+  // One order: core starts day0, sheathing day2.
+  const schedule = [
+    { orderId: "o1", cableId: "c1", stage: "core", startTime: day(0), orderM: 5000 },
+    { orderId: "o1", cableId: "c1", stage: "sheathing", startTime: day(2), orderM: 5000 },
+  ];
+  const rm = estimateRM(cable, 5000);
+
+  test("balance drops by copper+ins on the core day, by sheath on the sheathing day", () => {
+    const stock = { copperKg: rm.copper + 10, pvcInsKg: rm.ins + 10, pvcShKg: rm.sh + 10 };
+    const { series } = rmBurndown(schedule, cablesById, stock, 5, base);
+    expect(series).toHaveLength(5);
+    // day0: copper & ins consumed; sheath untouched
+    expect(series[0].copper).toBeCloseTo(10, 0);
+    expect(series[0].ins).toBeCloseTo(10, 0);
+    expect(series[0].sh).toBeCloseTo(rm.sh + 10, 0);
+    // day2: sheath consumed
+    expect(series[2].sh).toBeCloseTo(10, 0);
+  });
+
+  test("flags a shortage day + reorder day when stock is insufficient", () => {
+    const stock = { copperKg: 0, pvcInsKg: 0, pvcShKg: 0 };
+    const { shortageDay, reorderDay } = rmBurndown(schedule, cablesById, stock, 5, base);
+    expect(shortageDay).toBe(0);          // copper goes negative immediately
+    expect(reorderDay).toBe(0);            // max(0, 0-2)
   });
 });
