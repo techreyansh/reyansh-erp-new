@@ -5,3 +5,4 @@ export * from "./geometry.js";
 export * from "./materials.js";
 export * from "./time.js";
 export * from "./scheduler.js";
+export * from "./jobSpecs.js";

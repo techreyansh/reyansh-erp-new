@@ -5,7 +5,7 @@
 // It does NOT mutate inputs and never prompts; stock block/warn is returned as
 // data for the UI to act on.
 import { STAGE_ORDER, CONST, coreColorsFor } from "./machineConfig.js";
-import { estimateRM, sumRM } from "./materials.js";
+import { sumRM } from "./materials.js";
 import { workingStart, addBusinessHours, subtractBusinessHours } from "./time.js";
 
 export function machinesByStage(machines) {

@@ -99,6 +99,7 @@ import ReleasePayment from './components/purchaseFlow/steps/ReleasePayment';
 import Costing from './components/Costing/Costing';
 import SortVendors from './components/purchaseFlow/steps/SortVendors';
 import CableProductionModule from './components/cable/CableProductionModule';
+import CableFloorView from './components/cable/CableFloorView';
 import MoldingProductionModule from './components/molding/MoldingProductionModule';
 import MoldingMainNavigation from './components/molding/MoldingMainNavigation';
 import MoldingDashboardNavigation from './components/molding/MoldingDashboardNavigation';
@@ -321,6 +322,21 @@ function AppContent() {
                   <Route path="/cable-production/production-planning" element={
                     <ProtectedRouteGate>
                       <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/auto-planner" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/job-cards" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-floor" element={
+                    <ProtectedRouteGate>
+                      <CableFloorView />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/cable-production/machine-scheduling" element={

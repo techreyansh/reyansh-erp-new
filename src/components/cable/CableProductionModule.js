@@ -28,6 +28,7 @@ import {
   Power as CableIcon,
   Engineering as PlanningIcon,
   Schedule as ScheduleIcon,
+  AutoAwesomeRounded as AutoPlannerIcon,
   Dashboard as DashboardIcon,
   TrendingUp as TrendingIcon,
   Speed as SpeedIcon,
@@ -42,6 +43,8 @@ import {
 import KPICard from "../common/KPICard";
 import CableProductionPlanning from "./CableProductionPlanning";
 import MachineScheduling from "./MachineScheduling";
+import CableAutoPlanner from "./CableAutoPlanner";
+import CableJobCards from "./CableJobCards";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -595,6 +598,20 @@ const CableProductionModule = () => {
       component: <CableProductionPlanning />,
       description: "Planning and schedules",
       route: "/cable-production/production-planning",
+    },
+    {
+      label: "Auto Planner",
+      icon: <AutoPlannerIcon />,
+      component: <CableAutoPlanner />,
+      description: "4-machine auto-scheduler",
+      route: "/cable-production/auto-planner",
+    },
+    {
+      label: "Job Cards",
+      icon: <AssignmentIcon />,
+      component: <CableJobCards />,
+      description: "Operator cards + actuals",
+      route: "/cable-production/job-cards",
     },
     {
       label: "Machine Scheduling",

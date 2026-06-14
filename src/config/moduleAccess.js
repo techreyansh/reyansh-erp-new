@@ -22,7 +22,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug', moduleKey: MODULE_KEYS.SETTINGS },
   { test: (path) => path.startsWith('/crm'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/sales-flow') || path === '/clients' || path === '/prospects-clients' || path === '/client-orders' || path === '/po-ingestion' || path === '/client-dashboard' || path === '/products', moduleKey: MODULE_KEYS.SALES },
-  { test: (path) => path === '/plant-command' || path === '/production-log' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
+  { test: (path) => path === '/plant-command' || path === '/production-log' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path.startsWith('/inventory'), moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path === '/costing', moduleKey: MODULE_KEYS.ACCOUNTS },
