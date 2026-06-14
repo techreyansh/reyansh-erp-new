@@ -33,6 +33,13 @@ const dueLabel = (due) => {
   return `due in ${d}d`;
 };
 const loadColor = (pct) => (pct > 100 ? "#DC2626" : pct > 75 ? "#D97706" : pct > 25 ? "#65A30D" : pct > 0 ? "#86EFAC" : "transparent");
+const RM_STOCK_KEY = "reyansh_cable_rm_stock_v1";
+// Engine RM keys → on-hand stock keys + labels, for the shortage view.
+const RM_ROWS = [
+  { key: "copper", stockKey: "copperKg", label: "Copper" },
+  { key: "ins", stockKey: "pvcInsKg", label: "PVC Insulation" },
+  { key: "sh", stockKey: "pvcShKg", label: "PVC Sheath" },
+];
 
 export default function CableAutoPlanner() {
   const theme = useTheme();
@@ -44,8 +51,15 @@ export default function CableAutoPlanner() {
   const [snack, setSnack] = useState(null);
   const [opts, setOpts] = useState({
     startDate: todayStr(), mode: "forward", priority: "due_date",
-    scope: "pending", batching: false, batchWindow: 7, checkStock: "skip",
+    scope: "pending", batching: false, batchWindow: 7, checkStock: "warn",
   });
+  // On-hand raw material (kg). Persisted locally so it survives reloads; feeds
+  // the scheduler's stock check + the shortage view.
+  const [stock, setStock] = useState(() => {
+    try { return { copperKg: 0, pvcInsKg: 0, pvcShKg: 0, ...(JSON.parse(localStorage.getItem(RM_STOCK_KEY) || "{}")) }; }
+    catch { return { copperKg: 0, pvcInsKg: 0, pvcShKg: 0 }; }
+  });
+  useEffect(() => { try { localStorage.setItem(RM_STOCK_KEY, JSON.stringify(stock)); } catch { /* ignore */ } }, [stock]);
 
   const notify = (message, severity = "success") => setSnack({ message, severity });
 
@@ -74,7 +88,7 @@ export default function CableAutoPlanner() {
     try {
       const res = runAutoSchedule({
         cables, machines: DEFAULT_MACHINES, speeds: [], orders,
-        options: { ...opts, startDate: new Date(`${opts.startDate}T09:00:00`) },
+        options: { ...opts, stock, startDate: new Date(`${opts.startDate}T09:00:00`) },
       });
       setResult(res);
       if (res.blocked) notify("Blocked: insufficient RM stock (see shortfalls).", "warning");
@@ -142,6 +156,11 @@ export default function CableAutoPlanner() {
             <MenuItem value="pending">Pending only</MenuItem>
             <MenuItem value="all">All open</MenuItem>
           </TextField>
+          <TextField select size="small" label="Stock check" value={opts.checkStock} onChange={(e) => setOpts({ ...opts, checkStock: e.target.value })} sx={{ width: 150 }}>
+            <MenuItem value="skip">Ignore stock</MenuItem>
+            <MenuItem value="warn">Warn on short</MenuItem>
+            <MenuItem value="block">Block on short</MenuItem>
+          </TextField>
           <FormControlLabel control={<Switch checked={opts.batching} onChange={(e) => setOpts({ ...opts, batching: e.target.checked })} />} label="Batch similar specs" />
           <Button variant="contained" startIcon={<PlayArrowRounded />} onClick={run} disabled={loading} sx={{ textTransform: "none" }}>
             Run auto-schedule
@@ -152,6 +171,16 @@ export default function CableAutoPlanner() {
             </Button>
           )}
         </Stack>
+
+        {opts.checkStock !== "skip" && (
+          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center" sx={{ mt: 1.5, pt: 1.5, borderTop: "1px dashed", borderColor: "divider" }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>On-hand RM (kg):</Typography>
+            {RM_ROWS.map((r) => (
+              <TextField key={r.key} size="small" type="number" label={r.label} value={stock[r.stockKey]}
+                onChange={(e) => setStock({ ...stock, [r.stockKey]: Number(e.target.value) || 0 })} sx={{ width: 150 }} />
+            ))}
+          </Stack>
+        )}
       </Paper>
 
       {/* ORDER RISK WATCHLIST — surfaces what needs attention even before planning */}
@@ -206,6 +235,40 @@ export default function CableAutoPlanner() {
             <Alert severity="warning" icon={<WarningAmberRounded />} sx={{ mb: 2 }}>
               {result.missedDue.length} order(s) finish after their due date: {result.missedDue.map((d) => d.orderNo || d.orderId).join(", ")}
             </Alert>
+          )}
+
+          {/* RM SHORTAGE — required (this plan) vs on-hand */}
+          {opts.checkStock !== "skip" && result.stock && (
+            <Paper variant="outlined" sx={{ borderRadius: 2.5, mb: 2, overflow: "hidden" }}>
+              <Box sx={{ px: 2, py: 1.25 }}>
+                <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>Raw material — required vs on-hand</Typography>
+              </Box>
+              <Box sx={{ overflowX: "auto" }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>{["Material", "Required", "On-hand", "Balance", "Status"].map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}</TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {RM_ROWS.map((r) => {
+                      const required = result.stock.required?.[r.key] || 0;
+                      const onHand = stock[r.stockKey] || 0;
+                      const bal = onHand - required;
+                      const level = bal < 0 ? "short" : bal < required * 0.2 ? "low" : "ok";
+                      const color = level === "short" ? "#DC2626" : level === "low" ? "#D97706" : "#16A34A";
+                      return (
+                        <TableRow key={r.key} hover>
+                          <TableCell sx={{ fontWeight: 600 }}>{r.label}</TableCell>
+                          <TableCell>{kg(required)}</TableCell>
+                          <TableCell>{kg(onHand)}</TableCell>
+                          <TableCell sx={{ color, fontWeight: 700 }}>{bal < 0 ? `-${kg(Math.abs(bal))}` : kg(bal)}</TableCell>
+                          <TableCell><Chip size="small" label={level === "short" ? "SHORT" : level === "low" ? "LOW" : "OK"} sx={{ bgcolor: alpha(color, 0.15), color, fontWeight: 700 }} /></TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Paper>
           )}
 
           {/* MACHINE LOAD HEATMAP */}
