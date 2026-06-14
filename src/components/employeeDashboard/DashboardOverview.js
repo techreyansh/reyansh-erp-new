@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import KPICard from '../common/KPICard';
+import AccountabilityWidget from './AccountabilityWidget';
 import employeeService from '../../services/employeeService';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#45ADE6'];
@@ -138,6 +139,11 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
       </Grid>
 
       <Grid container spacing={3}>
+        {/* Accountability — live weekly score + action items */}
+        <Grid item xs={12} md={6}>
+          <AccountabilityWidget email={employee?.Email} />
+        </Grid>
+
         {/* Tasks Overview */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
