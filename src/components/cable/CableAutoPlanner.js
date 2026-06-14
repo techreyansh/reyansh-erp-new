@@ -14,14 +14,25 @@ import {
 import sheetService from "../../services/sheetService";
 import {
   runAutoSchedule, sumRM, DEFAULT_MACHINES, STAGE_LABEL,
+  loadHeatmap, orderRiskWatchlist,
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
 
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
+const RISK_COLOR = { critical: "#DC2626", warn: "#D97706", watch: "#2563EB", ok: "#16A34A" };
 const kg = (v) => `${(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 1 })} kg`;
 const m = (v) => `${(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })} m`;
 const fmtDT = (iso) => new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
 const todayStr = () => new Date().toISOString().slice(0, 10);
+const dueLabel = (due) => {
+  if (!due) return "no due date";
+  const d = Math.floor((new Date(due).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+  if (d < 0) return `${Math.abs(d)}d overdue`;
+  if (d === 0) return "due today";
+  if (d === 1) return "due tomorrow";
+  return `due in ${d}d`;
+};
+const loadColor = (pct) => (pct > 100 ? "#DC2626" : pct > 75 ? "#D97706" : pct > 25 ? "#65A30D" : pct > 0 ? "#86EFAC" : "transparent");
 
 export default function CableAutoPlanner() {
   const theme = useTheme();
@@ -99,6 +110,10 @@ export default function CableAutoPlanner() {
     return sumRM(items);
   }, [result, orders, cablesById]);
 
+  // Decision support: who's at risk, where's the bottleneck.
+  const watchlist = useMemo(() => orderRiskWatchlist(orders, result?.schedule || []), [orders, result]);
+  const heatmap = useMemo(() => (result ? loadHeatmap(DEFAULT_MACHINES, result.schedule, 14) : []), [result]);
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* CONTROLS */}
@@ -139,6 +154,33 @@ export default function CableAutoPlanner() {
         </Stack>
       </Paper>
 
+      {/* ORDER RISK WATCHLIST — surfaces what needs attention even before planning */}
+      {!loading && watchlist.length > 0 && (
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, mb: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+            <WarningAmberRounded fontSize="small" color="warning" />
+            <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>
+              Order risk watchlist ({watchlist.length})
+            </Typography>
+          </Stack>
+          <Stack spacing={0.75}>
+            {watchlist.slice(0, 8).map(({ order, level }) => (
+              <Stack key={order.id} direction="row" alignItems="center" spacing={1.5}
+                sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: alpha(RISK_COLOR[level], 0.08) }}>
+                <Chip size="small" label={level} sx={{ bgcolor: RISK_COLOR[level], color: "#fff", fontWeight: 700, height: 20, textTransform: "capitalize" }} />
+                <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 90 }}>{order.orderNo || order.id}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }} noWrap>
+                  {order.customer || "—"} · {cablesById[order.cableId]?.code || order.cableId} · {m(order.qtyM)}
+                </Typography>
+                <Typography variant="caption" sx={{ color: RISK_COLOR[level], fontWeight: 700 }}>
+                  {dueLabel(order.dueDate)}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+        </Paper>
+      )}
+
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress /></Box>
       ) : !result ? (
@@ -165,6 +207,9 @@ export default function CableAutoPlanner() {
               {result.missedDue.length} order(s) finish after their due date: {result.missedDue.map((d) => d.orderNo || d.orderId).join(", ")}
             </Alert>
           )}
+
+          {/* MACHINE LOAD HEATMAP */}
+          <Heatmap heatmap={heatmap} theme={theme} />
 
           {/* GANTT */}
           <Gantt schedule={result.schedule} machines={DEFAULT_MACHINES} theme={theme} />
@@ -219,6 +264,46 @@ function SummaryCard({ label, value, warn }) {
     <Paper variant="outlined" sx={{ px: 2, py: 1.25, borderRadius: 2, minWidth: 120, borderColor: warn ? "warning.main" : "divider" }}>
       <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1, color: warn ? "warning.main" : "text.primary" }}>{value}</Typography>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
+    </Paper>
+  );
+}
+
+// 14-day machine-load heatmap: one row per machine, a cell per day shaded by % load.
+function Heatmap({ heatmap, theme }) {
+  if (!heatmap.length) return null;
+  const labels = heatmap[0].days;
+  return (
+    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, mb: 2, overflow: "hidden" }}>
+      <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>Machine load (next 14 days)</Typography>
+      <Box sx={{ overflowX: "auto", mt: 1 }}>
+        <Box sx={{ minWidth: 720 }}>
+          <Box sx={{ display: "flex", pl: "120px", mb: 0.5 }}>
+            {labels.map((d, i) => (
+              <Box key={i} sx={{ flex: 1, fontSize: 10, textAlign: "center", color: new Date(d.date + "T00:00:00").getDay() === 0 ? "error.main" : "text.secondary" }}>
+                {new Date(d.date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit" })}
+              </Box>
+            ))}
+          </Box>
+          {heatmap.map(({ machine, days }) => (
+            <Box key={machine.id} sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+              <Box sx={{ width: 120, flexShrink: 0, fontSize: 12, fontWeight: 700 }}>{machine.name}</Box>
+              {days.map((d, i) => (
+                <Tooltip key={i} title={`${d.date}: ${d.hrs}h / ${d.capacity}h (${d.pct}%)`}>
+                  <Box sx={{
+                    flex: 1, height: 22, mx: "1px", borderRadius: 0.5,
+                    bgcolor: d.capacity === 0 ? alpha(theme.palette.text.primary, 0.04) : loadColor(d.pct),
+                    border: d.capacity === 0 ? "none" : `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700,
+                    color: d.pct > 75 ? "#fff" : "text.secondary",
+                  }}>
+                    {d.pct > 0 ? `${d.pct}` : ""}
+                  </Box>
+                </Tooltip>
+              ))}
+            </Box>
+          ))}
+        </Box>
+      </Box>
     </Paper>
   );
 }
