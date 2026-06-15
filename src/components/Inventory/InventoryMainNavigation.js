@@ -249,8 +249,8 @@ const InventoryMainNavigation = () => {
       label: "Stock Sheet",
       icon: <StockIcon />,
       description: "Manage raw materials and stock levels",
-      color: "#2196f3",
-      gradient: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+      color: "#45ADE6",
+      gradient: "linear-gradient(135deg, #45ADE6 0%, #45ADE6 100%)",
       route: "/inventory/stock-sheet"
     },
     {
@@ -345,7 +345,7 @@ const InventoryMainNavigation = () => {
         <Card 
           sx={{ 
             mb: 4, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
             color: 'white',
             boxShadow: 6
           }}

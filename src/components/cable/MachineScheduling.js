@@ -131,7 +131,7 @@ const MachineScheduling = () => {
     bunching: {
       name: "Bunching Machine",
       icon: <BunchingIcon />,
-      color: "#2196f3",
+      color: "#45ADE6",
       machines: ["BM-001"],
       capacity: 5000, // meters per hour
       setupTime: 1.0,

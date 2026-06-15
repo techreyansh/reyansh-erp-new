@@ -22,7 +22,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug', moduleKey: MODULE_KEYS.SETTINGS },
   { test: (path) => path.startsWith('/crm'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/sales-flow') || path === '/clients' || path === '/prospects-clients' || path === '/client-orders' || path === '/po-ingestion' || path === '/client-dashboard' || path === '/products', moduleKey: MODULE_KEYS.SALES },
-  { test: (path) => path === '/plant-command' || path === '/production-log' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
+  { test: (path) => path === '/plant-command' || path === '/production-log' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path.startsWith('/inventory'), moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path === '/costing', moduleKey: MODULE_KEYS.ACCOUNTS },
@@ -30,6 +30,8 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/task-scheduler' || path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
+  { test: (path) => path === '/accountability', moduleKey: MODULE_KEYS.DASHBOARD },
+  { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
 ];
 
 export function getModuleKeyForPath(pathname = '') {
@@ -49,6 +51,7 @@ const ROUTE_ACTION_RULES = [
   { test: (path) => path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
   { test: (path) => path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
 ];
 

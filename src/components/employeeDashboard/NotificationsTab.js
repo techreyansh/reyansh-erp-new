@@ -326,11 +326,11 @@ const NotificationsTab = ({ employeeCode, notifications, onNotificationRead }) =
                 fontWeight: 500
               },
               '& .MuiTablePagination-select': {
-                color: '#1976d2',
+                color: '#45ADE6',
                 fontWeight: 600
               },
               '& .MuiIconButton-root': {
-                color: '#1976d2',
+                color: '#45ADE6',
                 '&:hover': { backgroundColor: '#e3f2fd' },
                 '&.Mui-disabled': { color: '#9e9e9e' }
               }

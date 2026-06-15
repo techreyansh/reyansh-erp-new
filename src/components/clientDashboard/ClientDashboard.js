@@ -906,7 +906,7 @@ const ClientDashboard = () => {
 
         {/* Payments Tab */}
         <TabPanel value={activeTab} index={1}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1976d2' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
             Payments
           </Typography>
           {dashboardData.payments.length === 0 ? (
@@ -916,12 +916,12 @@ const ClientDashboard = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Payment ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Order ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Amount</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Method</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Payment ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Order ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Method</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -956,7 +956,7 @@ const ClientDashboard = () => {
 
         {/* Quotations Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1976d2' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
             Quotations
           </Typography>
           {dashboardData.quotations.length === 0 ? (
@@ -966,12 +966,12 @@ const ClientDashboard = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Quotation ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Quotation No.</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Issue Date</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Valid Until</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Amount</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Quotation ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Quotation No.</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Issue Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Valid Until</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -1006,7 +1006,7 @@ const ClientDashboard = () => {
 
         {/* Messages Tab */}
         <TabPanel value={activeTab} index={3}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1976d2' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
             Message Center
           </Typography>
           <Alert severity="info" sx={{ mb: 3 }}>
@@ -1016,7 +1016,7 @@ const ClientDashboard = () => {
 
         {/* Notifications Tab */}
         <TabPanel value={activeTab} index={4}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1976d2' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
             Notifications
           </Typography>
           {dashboardData.notifications.length === 0 ? (
@@ -1029,13 +1029,13 @@ const ClientDashboard = () => {
                 <Grid item xs={12} key={notification.id}>
                   <Card sx={{ 
                     borderRadius: 2, 
-                    border: notification.read ? '1px solid #e3f2fd' : '2px solid #1976d2',
+                    border: notification.read ? '1px solid #e3f2fd' : '2px solid #45ADE6',
                     backgroundColor: notification.read ? 'inherit' : '#f8fbff'
                   }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                             {notification.type}
                           </Typography>
                           <Typography variant="body2" sx={{ mt: 1 }}>

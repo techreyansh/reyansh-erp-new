@@ -128,7 +128,7 @@ const QuickActionButton = ({
         }}
       >
         <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
           color: 'white',
           py: 2
         }}>
@@ -170,10 +170,10 @@ const QuickActionButton = ({
                   startIcon={<Upload />}
                   size="small"
                   sx={{
-                    borderColor: '#1976d2',
-                    color: '#1976d2',
+                    borderColor: '#45ADE6',
+                    color: '#45ADE6',
                     '&:hover': {
-                      borderColor: '#1565c0',
+                      borderColor: '#1E7DBE',
                       backgroundColor: '#f8fbff'
                     }
                   }}
@@ -182,7 +182,7 @@ const QuickActionButton = ({
                 </Button>
               </label>
               {file && (
-                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#1976d2' }}>
+                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#45ADE6' }}>
                   Selected: {file.name}
                 </Typography>
               )}
@@ -201,10 +201,10 @@ const QuickActionButton = ({
             onClick={handleClose}
             variant="outlined"
             sx={{
-              borderColor: '#1976d2',
-              color: '#1976d2',
+              borderColor: '#45ADE6',
+              color: '#45ADE6',
               '&:hover': {
-                borderColor: '#1565c0',
+                borderColor: '#1E7DBE',
                 backgroundColor: '#f8fbff'
               }
             }}

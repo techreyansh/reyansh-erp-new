@@ -59,8 +59,8 @@ const MoldingMainNavigation = () => {
       label: "Power Cord Master",
       icon: <PowerCordIcon />,
       description: "Manage power cord specifications and product variants",
-      color: "#2196f3",
-      gradient: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+      color: "#45ADE6",
+      gradient: "linear-gradient(135deg, #45ADE6 0%, #45ADE6 100%)",
       route: "/molding/power-cord-master"
     },
     {
@@ -298,7 +298,7 @@ const MoldingMainNavigation = () => {
       <Fade in timeout={1000}>
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {[
-            { label: "Active Orders", value: "24", icon: <PowerCordIcon />, color: "#2196f3" },
+            { label: "Active Orders", value: "24", icon: <PowerCordIcon />, color: "#45ADE6" },
             { label: "Production Plans", value: "8", icon: <PlanningIcon />, color: "#9c27b0" },
             { label: "Machines Running", value: "8/10", icon: <SpeedIcon />, color: "#4caf50" },
             { label: "Efficiency", value: "97%", icon: <TrendingUpIcon />, color: "#ff9800" }

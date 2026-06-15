@@ -111,7 +111,7 @@ const HolidayManagerDialog = ({ open, onClose }) => {
           <Box sx={{ minWidth: 320 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Legend</Typography>
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-              <Chip icon={<EventBusy />} label="Holiday (company)" sx={{ backgroundColor: alpha('#2196f3', 0.15) }} />
+              <Chip icon={<EventBusy />} label="Holiday (company)" sx={{ backgroundColor: alpha('#45ADE6', 0.15) }} />
               <Chip icon={<EventBusy />} label="Holiday on base holiday" sx={{ backgroundColor: alpha('#ff80ab', 0.25) }} />
               <Chip icon={<CheckCircle />} label="Base Holiday/Sunday" sx={{ backgroundColor: alpha('#ffc107', 0.25) }} />
             </Stack>

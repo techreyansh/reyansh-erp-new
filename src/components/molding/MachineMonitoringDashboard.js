@@ -257,7 +257,7 @@ const MachineMonitoringDashboard = () => {
     switch (status) {
       case 'running': return '#4caf50';
       case 'idle': return '#ff9800';
-      case 'setup': return '#2196f3';
+      case 'setup': return '#45ADE6';
       case 'maintenance': return '#f44336';
       case 'alarm': return '#e91e63';
       default: return '#9e9e9e';
@@ -285,7 +285,7 @@ const MachineMonitoringDashboard = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "#45ADE6" }}>
           📊 Real-time Machine Monitoring
         </Typography>
         <Button
@@ -344,7 +344,7 @@ const MachineMonitoringDashboard = () => {
                   </Grid>
                   <Grid item xs={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <PressureIcon sx={{ mr: 1, color: '#2196f3' }} />
+                      <PressureIcon sx={{ mr: 1, color: '#45ADE6' }} />
                       <Typography variant="body2">
                         {Math.round(machine.sensors.injectionPressure)} bar
                       </Typography>
@@ -374,7 +374,7 @@ const MachineMonitoringDashboard = () => {
                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                       OEE Score
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#45ADE6' }}>
                       {calculateOEE(machine)}%
                     </Typography>
                   </Box>

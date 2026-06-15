@@ -116,7 +116,7 @@ const ProductionDemo = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#1976d2" }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#45ADE6" }}>
         🎬 Production Management Demo
       </Typography>
       

@@ -28,6 +28,7 @@ import {
   Power as CableIcon,
   Engineering as PlanningIcon,
   Schedule as ScheduleIcon,
+  AutoAwesomeRounded as AutoPlannerIcon,
   Dashboard as DashboardIcon,
   TrendingUp as TrendingIcon,
   Speed as SpeedIcon,
@@ -42,6 +43,8 @@ import {
 import KPICard from "../common/KPICard";
 import CableProductionPlanning from "./CableProductionPlanning";
 import MachineScheduling from "./MachineScheduling";
+import CableAutoPlanner from "./CableAutoPlanner";
+import CableJobCards from "./CableJobCards";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -452,7 +455,7 @@ const CableDashboard = () => {
                 { step: 3, label: "Extrusion", color: "#9c27b0", description: "Single core PVC coating" },
                 { step: 4, label: "Laying", color: "#673ab7", description: "Multi-core cable assembly" },
                 { step: 5, label: "Sheathing", color: "#3f51b5", description: "Outer protective coating" },
-                { step: 6, label: "Finishing", color: "#2196f3", description: "Quality testing & packaging" },
+                { step: 6, label: "Finishing", color: "#45ADE6", description: "Quality testing & packaging" },
               ].map((process, index) => (
                 <Stack key={index} direction="column" alignItems="center" spacing={2}>
                   <Box 
@@ -595,6 +598,20 @@ const CableProductionModule = () => {
       component: <CableProductionPlanning />,
       description: "Planning and schedules",
       route: "/cable-production/production-planning",
+    },
+    {
+      label: "Auto Planner",
+      icon: <AutoPlannerIcon />,
+      component: <CableAutoPlanner />,
+      description: "4-machine auto-scheduler",
+      route: "/cable-production/auto-planner",
+    },
+    {
+      label: "Job Cards",
+      icon: <AssignmentIcon />,
+      component: <CableJobCards />,
+      description: "Operator cards + actuals",
+      route: "/cable-production/job-cards",
     },
     {
       label: "Machine Scheduling",

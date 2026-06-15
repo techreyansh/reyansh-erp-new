@@ -153,6 +153,7 @@ class CostingService {
       gauge,
       innerOD,
       bunch,
+      laying,
       noOfCores,
       roundOD,
       flatB,
@@ -184,31 +185,25 @@ class CostingService {
     const copperRateNum = parseFloat(copperRate) || 700;
     const pvcRateNum = parseFloat(pvcRate) || 100;
 
-    // Auto-calculate bunch based on copper strands
-    let bunchNum = 0;
-    if (cuStrandsNum > 24) {
-      bunchNum = 3;
-    } else {
-      bunchNum = 0;
-    }
+    // Bunch % and Laying % are manual inputs (matching the costing sheet's
+    // F and M columns). When blank, fall back to sensible defaults.
+    const bunchPct = (bunch === "" || bunch == null) ? (cuStrandsNum > 24 ? 3 : 0) : (parseFloat(bunch) || 0);
+    const layingPct = (laying === "" || laying == null) ? (noOfCoresNum > 2 ? 1 : 0) : (parseFloat(laying) || 0);
+    const bunchFrac = Math.min(Math.max(bunchPct, 0) / 100, 0.95);
+    const layingFrac = Math.min(Math.max(layingPct, 0) / 100, 0.95);
+    const bunchNum = bunchPct;
+    const layingNum = layingPct;
 
-    // Auto-calculate laying based on number of cores
-    let layingNum = 0;
-    if (noOfCoresNum > 2) {
-      layingNum = 1;
-    } else {
-      layingNum = 0;
-    }
+    // Copper Weight (Kgs/100 mtr) — base, uplifted by bunch%.
+    // Excel: 0.703*D^2*C / (1 - bunch)   (the F2*G2 self-reference is a % uplift)
+    const copperWeight = (0.703 * gaugeNum * gaugeNum * cuStrandsNum) / (1 - bunchFrac);
 
-    // Calculate Copper Weight using new formula: 0.703*D2*D2*C2+F2*G2
-    // Where D2 = gauge, C2 = cuStrands, F2 = bunch, G2 = noOfCores
-    const copperWeight = 0.703 * gaugeNum * gaugeNum * cuStrandsNum + bunchNum * noOfCoresNum;
-
-    // Calculate PVC Weight (Kgs/100 mtr)
+    // PVC Weight (Kgs/100 mtr) — informational; cost uses Final PVC round/flat.
     const pvcWeight = 1.67 * 0.0785 * (innerODNum * innerODNum - gaugeNum * gaugeNum * cuStrandsNum);
 
-    // Calculate Final Copper (Kgs/100 mtr)
-    const finalCopper = copperWeight * noOfCoresNum + bunchNum * noOfCoresNum;
+    // Final Copper (Kgs/100 mtr) — copper weight × cores, uplifted by laying%.
+    // Excel: G2*I2 / (1 - laying)
+    const finalCopper = (copperWeight * noOfCoresNum) / (1 - layingFrac);
 
     // Calculate Final PVC Round (Kgs/100 mtr)
     const finalPVCRound = roundODNum === 0 ? 0 : 1.67 * (0.785 * roundODNum * roundODNum - 0.785 * gaugeNum * gaugeNum * cuStrandsNum * noOfCoresNum) / 10;

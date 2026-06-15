@@ -31,7 +31,7 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
       id: config.statusCodes.NEW,
       label: 'New Order',
       icon: <Assignment />,
-      color: '#2196f3',
+      color: '#45ADE6',
       description: 'New purchase order created'
     },
     {
@@ -129,7 +129,7 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
       }}
     >
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 600, mb: 1 }}>
+        <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600, mb: 1 }}>
           Production Flow Progress
         </Typography>
         <LinearProgress 
@@ -140,7 +140,7 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
             borderRadius: 4,
             backgroundColor: '#e3f2fd',
             '& .MuiLinearProgress-bar': {
-              background: 'linear-gradient(90deg, #1976d2, #42a5f5)',
+              background: 'linear-gradient(90deg, #45ADE6, #84D2FC)',
               borderRadius: 4
             }
           }} 
@@ -235,11 +235,11 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
                           startIcon={<ArrowBack />}
                           onClick={() => onNavigateToStep && onNavigateToStep(steps[index - 1].id)}
                           sx={{
-                            borderColor: '#1976d2',
-                            color: '#1976d2',
+                            borderColor: '#45ADE6',
+                            color: '#45ADE6',
                             '&:hover': {
                               backgroundColor: '#f8fbff',
-                              borderColor: '#1565c0'
+                              borderColor: '#1E7DBE'
                             }
                           }}
                         >

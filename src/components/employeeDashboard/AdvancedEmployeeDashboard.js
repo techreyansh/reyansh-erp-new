@@ -96,7 +96,7 @@ import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import AdminAccessControlSection from './AdminAccessControlSection';
 
-const DEPT_COLORS = ['#0D9488', '#0284C7', '#D97706', '#7C3AED', '#059669', '#DC2626', '#475569', '#DB2777'];
+const DEPT_COLORS = ['#45ADE6', '#1E7DBE', '#D97706', '#7C3AED', '#059669', '#DC2626', '#475569', '#DB2777'];
 
 // Animation components (using regular MUI components for now)
 const MotionBox = Box;
@@ -605,9 +605,9 @@ const AdvancedEmployeeDashboard = () => {
         const stats = getWorkforceStats();
         const dist = getDepartmentDistribution();
         const statCards = [
-          { label: 'Total Employees', value: stats.total, icon: GroupIcon, accent: '#0D9488' },
+          { label: 'Total Employees', value: stats.total, icon: GroupIcon, accent: '#45ADE6' },
           { label: 'Active', value: stats.active, icon: PersonIcon, accent: '#059669' },
-          { label: 'Departments', value: stats.departments, icon: WorkIcon, accent: '#0284C7' },
+          { label: 'Departments', value: stats.departments, icon: WorkIcon, accent: '#1E7DBE' },
           { label: 'Full-time', value: stats.fullTime, icon: StarIcon, accent: '#7C3AED' },
         ];
         return (

@@ -40,7 +40,7 @@ import {
   YAxis,
 } from 'recharts';
 
-const COLORS = ['#0D9488', '#0284C7', '#D97706', '#7C3AED', '#059669', '#DC2626', '#475569', '#DB2777'];
+const COLORS = ['#45ADE6', '#1E7DBE', '#D97706', '#7C3AED', '#059669', '#DC2626', '#475569', '#DB2777'];
 
 function inrCompact(v) {
   const n = Number(v) || 0;
@@ -114,13 +114,13 @@ export default function CRMDashboard({ data, loading }) {
   }
 
   const kpiCards = [
-    { label: 'Total Leads', value: k.totalLeads ?? 0, sub: `${k.activeLeads ?? 0} active`, icon: GroupsOutlined, accent: '#0D9488' },
+    { label: 'Total Leads', value: k.totalLeads ?? 0, sub: `${k.activeLeads ?? 0} active`, icon: GroupsOutlined, accent: '#45ADE6' },
     { label: 'Customers', value: k.totalCustomers ?? 0, sub: 'Active accounts', icon: GroupsOutlined, accent: '#7C3AED' },
-    { label: 'Order Value', value: inrCompact(k.orderValue), sub: 'Total booked', icon: ReceiptLongOutlined, accent: '#0284C7' },
+    { label: 'Order Value', value: inrCompact(k.orderValue), sub: 'Total booked', icon: ReceiptLongOutlined, accent: '#1E7DBE' },
     { label: 'Collected', value: inrCompact(k.collected), sub: 'Payments in', icon: PaidOutlined, accent: '#059669' },
     { label: 'Outstanding', value: inrCompact(k.outstanding), sub: 'To collect', icon: AccountBalanceWalletOutlined, accent: '#D97706' },
     { label: 'Open Quotes', value: inrCompact(k.openQuoteValue), sub: `${k.openQuotations ?? 0} quotations`, icon: RequestQuoteOutlined, accent: '#DB2777' },
-    { label: 'Conversion', value: `${k.conversionRate ?? 0}%`, sub: 'Lead → order', icon: TrendingUpRounded, accent: '#0D9488' },
+    { label: 'Conversion', value: `${k.conversionRate ?? 0}%`, sub: 'Lead → order', icon: TrendingUpRounded, accent: '#45ADE6' },
     { label: 'Won Deals', value: k.wonLeads ?? 0, sub: 'Qualified/converted', icon: EmojiEventsOutlined, accent: '#059669' },
   ];
 
@@ -141,20 +141,20 @@ export default function CRMDashboard({ data, loading }) {
               <AreaChart data={s.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
                 <defs>
                   <linearGradient id="cgOrd" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0D9488" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="cgCol" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0284C7" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#0284C7" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={{ stroke: grid }} />
                 <YAxis tick={axis} tickLine={false} axisLine={false} tickFormatter={inrCompact} width={62} />
                 <RTooltip formatter={(v) => inrFull(v)} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
-                <Area type="monotone" dataKey="ordered" name="Ordered" stroke="#0D9488" strokeWidth={2.5} fill="url(#cgOrd)" />
-                <Area type="monotone" dataKey="collected" name="Collected" stroke="#0284C7" strokeWidth={2.5} fill="url(#cgCol)" />
+                <Area type="monotone" dataKey="ordered" name="Ordered" stroke="#45ADE6" strokeWidth={2.5} fill="url(#cgOrd)" />
+                <Area type="monotone" dataKey="collected" name="Collected" stroke="#1E7DBE" strokeWidth={2.5} fill="url(#cgCol)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : <Empty />}
@@ -203,7 +203,7 @@ export default function CRMDashboard({ data, loading }) {
                 <XAxis dataKey="name" tick={axis} tickLine={false} axisLine={{ stroke: grid }} />
                 <YAxis tick={axis} tickLine={false} axisLine={false} allowDecimals={false} />
                 <RTooltip cursor={{ fill: `${theme.palette.primary.main}10` }} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={34} fill="#0D9488" />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={34} fill="#45ADE6" />
               </BarChart>
             </ResponsiveContainer>
           ) : <Empty />}
@@ -249,7 +249,7 @@ export default function CRMDashboard({ data, loading }) {
         <Divider />
         <Stack divider={<Divider />} sx={{ maxHeight: 380, overflow: 'auto' }}>
           {(data?.timeline || []).map((e, i) => {
-            const color = e.type === 'Order' ? '#0284C7' : e.type === 'Payment' ? '#059669' : e.type === 'Quotation' ? '#DB2777' : '#0D9488';
+            const color = e.type === 'Order' ? '#1E7DBE' : e.type === 'Payment' ? '#059669' : e.type === 'Quotation' ? '#DB2777' : '#45ADE6';
             return (
               <Stack key={i} direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} sx={{ px: 2, py: 1.25 }}>
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>

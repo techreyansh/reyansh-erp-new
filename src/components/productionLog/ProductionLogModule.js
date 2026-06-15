@@ -155,8 +155,8 @@ const ProductionLogModule = () => {
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
         <Alert severity="info" icon={<InfoOutlined />} sx={{ mb: 3, borderRadius: 2.5 }}>
-          AI reading runs in a Supabase Edge Function (your Anthropic key stays server-side). If extraction says the service isn't reachable, deploy it:
-          <code style={{ margin: '0 4px' }}>supabase functions deploy extract-production-log</code> and set <code>ANTHROPIC_API_KEY</code>.
+          AI reading runs in a Supabase Edge Function (your Gemini key stays server-side). If extraction says the service isn't reachable, deploy it:
+          <code style={{ margin: '0 4px' }}>supabase functions deploy extract-production-log</code> and set <code>GEMINI_API_KEY</code>.
         </Alert>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2.5 }} onClose={() => setError(null)}>{error}</Alert>}
@@ -226,9 +226,9 @@ const ProductionLogModule = () => {
         {extraction && (
           <>
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent="#0284C7" /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent="#1E7DBE" /></Grid>
               <Grid item xs={6} md={3}><StatCard label="Total Target" value={Math.round(totalTarget).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#7C3AED" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#0D9488" /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#45ADE6" /></Grid>
               <Grid item xs={6} md={3}><StatCard label="Achievement" value={`${achievementPct}%`} icon={AutoAwesomeOutlined} accent={achievementPct >= 90 ? '#059669' : achievementPct >= 70 ? '#D97706' : '#DC2626'} /></Grid>
             </Grid>
 

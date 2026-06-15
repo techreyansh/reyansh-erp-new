@@ -583,7 +583,7 @@ const ClientManager = () => {
           width: 100,
           height: 100,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #667eea, #764ba2)',
+          background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
           opacity: 0.3,
           animation: 'float 6s ease-in-out infinite',
           zIndex: 0
@@ -597,7 +597,7 @@ const ClientManager = () => {
           width: 150,
           height: 150,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #764ba2, #667eea)',
+          background: 'linear-gradient(45deg, #45ADE6, #1E7DBE)',
           opacity: 0.2,
           animation: 'float 8s ease-in-out infinite reverse',
           zIndex: 0
@@ -611,7 +611,7 @@ const ClientManager = () => {
           width: 80,
           height: 80,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #667eea, #764ba2)',
+          background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
           opacity: 0.4,
           animation: 'float 7s ease-in-out infinite',
           zIndex: 0
@@ -625,7 +625,7 @@ const ClientManager = () => {
           width: 120,
           height: 120,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #764ba2, #667eea)',
+          background: 'linear-gradient(45deg, #45ADE6, #1E7DBE)',
           opacity: 0.3,
           animation: 'float 9s ease-in-out infinite reverse',
           zIndex: 0
@@ -639,7 +639,7 @@ const ClientManager = () => {
         sx={{ 
           p: 4, 
           mb: 4, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
           color: 'white',
           borderRadius: 4,
           position: 'relative',
@@ -835,7 +835,7 @@ const ClientManager = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #667eea, #764ba2)',
+              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
               zIndex: 1
             }
         }}
@@ -854,7 +854,7 @@ const ClientManager = () => {
               <Typography 
                   variant="h4" 
                 sx={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -880,7 +880,7 @@ const ClientManager = () => {
                 startIcon={<Add />}
                 onClick={() => handleOpen(null, null)}
                 sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                     '&:hover': { 
                       background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
                       transform: 'translateY(-2px)',
@@ -903,8 +903,8 @@ const ClientManager = () => {
                 onClick={handleRefresh}
                 disabled={loading}
                 sx={{
-                    borderColor: '#667eea',
-                    color: '#667eea',
+                    borderColor: '#1E7DBE',
+                    color: '#1E7DBE',
                     '&:hover': { 
                       borderColor: '#5a6fd8',
                       backgroundColor: 'rgba(102, 126, 234, 0.1)',
@@ -942,7 +942,7 @@ const ClientManager = () => {
                 left: 0,
                 right: 0,
                 height: '3px',
-                background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                 zIndex: 1
               }
             }}>
@@ -956,7 +956,7 @@ const ClientManager = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: '#667eea' }} />
+                          <Search sx={{ color: '#1E7DBE' }} />
                         </InputAdornment>
                       ),
                     }}
@@ -965,8 +965,8 @@ const ClientManager = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#667eea' },
-                        '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                        '&:hover fieldset': { borderColor: '#1E7DBE' },
+                        '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                       }
                     }}
                   />
@@ -1026,7 +1026,7 @@ const ClientManager = () => {
                       <IconButton
                         onClick={() => setViewMode('table')}
                         sx={{
-                          color: viewMode === 'table' ? '#667eea' : '#6c757d',
+                          color: viewMode === 'table' ? '#1E7DBE' : '#6c757d',
                           backgroundColor: viewMode === 'table' ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
                         }}
                       >
@@ -1037,7 +1037,7 @@ const ClientManager = () => {
                       <IconButton
                         onClick={() => setViewMode('card')}
                         sx={{
-                          color: viewMode === 'card' ? '#667eea' : '#6c757d',
+                          color: viewMode === 'card' ? '#1E7DBE' : '#6c757d',
                           backgroundColor: viewMode === 'card' ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
                         }}
                       >
@@ -1047,7 +1047,7 @@ const ClientManager = () => {
                     <Tooltip title="Refresh">
                       <IconButton
                         onClick={() => window.location.reload()}
-                        sx={{ color: '#667eea' }}
+                        sx={{ color: '#1E7DBE' }}
                       >
                         <Refresh />
                       </IconButton>
@@ -1087,7 +1087,7 @@ const ClientManager = () => {
                       width: 60,
                       height: 60,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1122,7 +1122,7 @@ const ClientManager = () => {
                             left: 0,
                             right: 0,
                             height: '3px',
-                            background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                             zIndex: 1
                           }
                         }}
@@ -1130,7 +1130,7 @@ const ClientManager = () => {
                 <Table size="medium">
               <TableHead>
                     <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       '& .MuiTableCell-head': {
                         color: 'white',
                         fontWeight: 800,
@@ -1215,7 +1215,7 @@ const ClientManager = () => {
                         >
                           <TableCell sx={{ fontWeight: 600, color: '#2c3e50' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Business sx={{ color: '#667eea', fontSize: 20 }} />
+                              <Business sx={{ color: '#1E7DBE', fontSize: 20 }} />
                               <Box>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {client.clientName}
@@ -1231,7 +1231,7 @@ const ClientManager = () => {
                         label={client.clientCode}
                         size="small"
                         sx={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                 color: 'white',
                                 fontWeight: 600,
                                 fontSize: '0.75rem'
@@ -1252,7 +1252,7 @@ const ClientManager = () => {
                           </TableCell>
                           <TableCell sx={{ color: '#2c3e50' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <LocationOn sx={{ fontSize: 16, color: '#667eea' }} />
+                              <LocationOn sx={{ fontSize: 16, color: '#1E7DBE' }} />
                               <Box>
                       <Typography 
                         variant="body2" 
@@ -1274,7 +1274,7 @@ const ClientManager = () => {
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                               {client.contacts?.slice(0, 2).map((c, i) => (
                           <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <Person fontSize="small" sx={{ color: '#667eea' }} />
+                                  <Person fontSize="small" sx={{ color: '#1E7DBE' }} />
                                   <Typography variant="body2" sx={{ color: '#2c3e50', fontWeight: 600 }}>
                               {c.name}
                             </Typography>
@@ -1344,7 +1344,7 @@ const ClientManager = () => {
                         <IconButton 
                           onClick={() => handleOpen(client, idx)}
                           sx={{ 
-                                    color: '#667eea',
+                                    color: '#1E7DBE',
                                     '&:hover': { 
                                       backgroundColor: 'rgba(102, 126, 234, 0.1)',
                                       transform: 'scale(1.1)'
@@ -1496,7 +1496,7 @@ const ClientManager = () => {
                                 border: '1px solid rgba(102, 126, 234, 0.1)'
                               }}>
                                 <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
+                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E7DBE' }}>
                                     {client.totalOrders || 0}
                                   </Typography>
                                   <Typography variant="caption" sx={{ color: '#64748b' }}>
@@ -1504,7 +1504,7 @@ const ClientManager = () => {
                                   </Typography>
                                 </Box>
                                 <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
+                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E7DBE' }}>
                                     ₹{client.totalValue ? (client.totalValue / 100000).toFixed(1) + 'L' : '0'}
                                   </Typography>
                                   <Typography variant="caption" sx={{ color: '#64748b' }}>
@@ -1547,7 +1547,7 @@ const ClientManager = () => {
                                   onClick={() => handleOpen(client, idx)}
                                   sx={{
                                     flex: 1,
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                     color: 'white',
                                     fontWeight: 600,
                                     '&:hover': {
@@ -1607,7 +1607,7 @@ const ClientManager = () => {
                     left: 0,
                     right: 0,
                     height: '3px',
-                    background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                     zIndex: 1
                   }
                 }}>
@@ -1631,7 +1631,7 @@ const ClientManager = () => {
                             borderColor: 'rgba(102, 126, 234, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#667eea',
+                            borderColor: '#1E7DBE',
                           }
                         }}
                       >
@@ -1673,7 +1673,7 @@ const ClientManager = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                               color: 'white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1718,7 +1718,7 @@ const ClientManager = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #667eea, #764ba2, #f093fb)',
+              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #84D2FC)',
               zIndex: 2
             }
           }
@@ -1742,7 +1742,7 @@ const ClientManager = () => {
               sx={{
                 p: 2,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                 boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
@@ -1827,7 +1827,7 @@ const ClientManager = () => {
                 },
                 '& .MuiStepConnector-active': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                     boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
                   },
                 },
@@ -1873,7 +1873,7 @@ const ClientManager = () => {
                             background: completed 
                               ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                               : active 
-                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                              ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                               : isAccessible
                               ? 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)'
                               : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
@@ -1891,7 +1891,7 @@ const ClientManager = () => {
                             borderColor: completed 
                               ? '#10b981' 
                               : active 
-                              ? '#667eea' 
+                              ? '#1E7DBE' 
                               : isAccessible
                               ? '#e2e8f0'
                               : '#f1f5f9',
@@ -1916,19 +1916,19 @@ const ClientManager = () => {
                       '& .MuiStepLabel-label': {
                         fontSize: '0.9rem',
                         fontWeight: 600,
-                        color: activeStep === index ? '#667eea' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
+                        color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
                         mt: 1,
                         transition: 'all 0.3s ease',
                         cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                         opacity: isStepAccessible(index) ? 1 : 0.6,
                         '&:hover': isStepAccessible(index) ? {
-                          color: activeStep === index ? '#667eea' : activeStep > index ? '#10b981' : '#667eea',
+                          color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : '#1E7DBE',
                           fontWeight: 700
                         } : {}
                       },
                       '& .MuiStepLabel-active': {
                         '& .MuiStepLabel-label': {
-                          color: '#667eea !important',
+                          color: '#1E7DBE !important',
                           fontWeight: 700
                         }
                       },
@@ -1957,13 +1957,13 @@ const ClientManager = () => {
                   sx={{
                     height: '100%',
                     width: `${((activeStep + 1) / steps.length) * 100}%`,
-                    background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                     borderRadius: 2,
                     transition: 'width 0.3s ease'
                   }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ color: '#667eea', fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 700 }}>
                 {Math.round(((activeStep + 1) / steps.length) * 100)}%
               </Typography>
             </Box>
@@ -2010,7 +2010,7 @@ const ClientManager = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
                         }}
                       >
@@ -2046,10 +2046,10 @@ const ClientManager = () => {
                               borderBottomColor: '#e2e8f0'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#667eea'
+                              borderBottomColor: '#1E7DBE'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#667eea'
+                              borderBottomColor: '#1E7DBE'
                             },
                             '& .MuiFormLabel-root': {
                               color: '#374151',
@@ -2124,11 +2124,11 @@ const ClientManager = () => {
                                     wordWrap: 'break-word',
                                     '&:hover': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                                      color: '#667eea'
+                                      color: '#1E7DBE'
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.12)',
-                                      color: '#667eea',
+                                      color: '#1E7DBE',
                                       fontWeight: 600,
                                       '&:hover': {
                                         backgroundColor: 'rgba(102, 126, 234, 0.16)'
@@ -2143,10 +2143,10 @@ const ClientManager = () => {
                                 borderBottomColor: '#e2e8f0'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#667eea'
+                                borderBottomColor: '#1E7DBE'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#667eea'
+                                borderBottomColor: '#1E7DBE'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
@@ -2484,8 +2484,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2504,8 +2504,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2521,8 +2521,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2539,8 +2539,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2556,7 +2556,7 @@ const ClientManager = () => {
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="h6" sx={{ 
-                        color: '#667eea', 
+                        color: '#1E7DBE', 
                         fontWeight: 700, 
                         display: 'flex',
                         alignItems: 'center',
@@ -2568,7 +2568,7 @@ const ClientManager = () => {
                       <IconButton 
                         onClick={() => setContactSectionCollapsed(!contactSectionCollapsed)}
                         size="small"
-                        sx={{ color: '#667eea' }}
+                        sx={{ color: '#1E7DBE' }}
                       >
                         {contactSectionCollapsed ? <ExpandMore /> : <ExpandLess />}
                       </IconButton>
@@ -2604,7 +2604,7 @@ const ClientManager = () => {
                           mb: 1.5, 
                           p: 1.5,
                           background: 'rgba(255, 255, 255, 0.8)',
-                          border: c.isPrimary ? '2px solid #667eea' : '1px solid rgba(102, 126, 234, 0.1)',
+                          border: c.isPrimary ? '2px solid #1E7DBE' : '1px solid rgba(102, 126, 234, 0.1)',
                           borderRadius: 2
                         }}>
                           <Grid container spacing={2} alignItems="center">
@@ -2621,8 +2621,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                           }
                         }}
                       />
@@ -2641,8 +2641,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                           }
                         }}
                       />
@@ -2660,8 +2660,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                           }
                         }}
                       />
@@ -2678,8 +2678,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                           }
                         }}
                       />
@@ -2718,8 +2718,8 @@ const ClientManager = () => {
                   startIcon={<Add />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#667eea',
-                          color: '#667eea',
+                          borderColor: '#1E7DBE',
+                          color: '#1E7DBE',
                           borderRadius: 2,
                     '&:hover': {
                             borderColor: '#5a6fd8',
@@ -2740,7 +2740,7 @@ const ClientManager = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#667eea', 
+                      color: '#1E7DBE', 
                       fontWeight: 700, 
                       mb: 2,
                     display: 'flex',
@@ -2763,8 +2763,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2782,8 +2782,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2800,8 +2800,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2817,8 +2817,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -2834,7 +2834,7 @@ const ClientManager = () => {
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="h6" sx={{ 
-                        color: '#667eea', 
+                        color: '#1E7DBE', 
                         fontWeight: 700, 
                         display: 'flex',
                         alignItems: 'center',
@@ -2846,7 +2846,7 @@ const ClientManager = () => {
                       <IconButton 
                         onClick={() => setProductsSectionCollapsed(!productsSectionCollapsed)}
                         size="small"
-                        sx={{ color: '#667eea' }}
+                        sx={{ color: '#1E7DBE' }}
                       >
                         {productsSectionCollapsed ? <ExpandMore /> : <ExpandLess />}
                       </IconButton>
@@ -2907,7 +2907,7 @@ const ClientManager = () => {
                                       <IconButton
                                         size="small"
                                         onClick={() => regenerateProductCode(idx)}
-                                        sx={{ color: '#667eea' }}
+                                        sx={{ color: '#1E7DBE' }}
                                       >
                                         <Refresh fontSize="small" />
                                       </IconButton>
@@ -2918,8 +2918,8 @@ const ClientManager = () => {
                                       size="small"
                                       onClick={() => toggleProductCodeAutoGenerate(idx)}
                                       sx={{ 
-                                        color: productCodeAutoGenerate[idx] ? '#667eea' : '#6c757d',
-                                        '&:hover': { color: '#667eea' }
+                                        color: productCodeAutoGenerate[idx] ? '#1E7DBE' : '#6c757d',
+                                        '&:hover': { color: '#1E7DBE' }
                                       }}
                                     >
                                       {productCodeAutoGenerate[idx] ? <CheckCircle fontSize="small" /> : <Edit fontSize="small" />}
@@ -2933,8 +2933,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' },
                               '&.Mui-disabled': {
                                 backgroundColor: 'rgba(102, 126, 234, 0.05)',
                                 '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.2)' }
@@ -2957,8 +2957,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                                   }
                                 }}
                               />
@@ -2975,8 +2975,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                                   }
                                 }}
                               />
@@ -2993,8 +2993,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#667eea' },
-                                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                                   }
                                 }}
                               />
@@ -3020,8 +3020,8 @@ const ClientManager = () => {
                   startIcon={<Add />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#667eea',
-                          color: '#667eea',
+                          borderColor: '#1E7DBE',
+                          color: '#1E7DBE',
                           borderRadius: 2,
                     '&:hover': {
                             borderColor: '#5a6fd8',
@@ -3042,7 +3042,7 @@ const ClientManager = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#667eea', 
+                      color: '#1E7DBE', 
                       fontWeight: 700, 
                       mb: 2,
                       display: 'flex',
@@ -3075,11 +3075,11 @@ const ClientManager = () => {
                                     wordWrap: 'break-word',
                                     '&:hover': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                                      color: '#667eea'
+                                      color: '#1E7DBE'
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.12)',
-                                      color: '#667eea',
+                                      color: '#1E7DBE',
                                       fontWeight: 600,
                                       '&:hover': {
                                         backgroundColor: 'rgba(102, 126, 234, 0.16)'
@@ -3094,10 +3094,10 @@ const ClientManager = () => {
                                 borderBottomColor: '#e2e8f0'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#667eea'
+                                borderBottomColor: '#1E7DBE'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#667eea'
+                                borderBottomColor: '#1E7DBE'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
@@ -3137,8 +3137,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             },
                             '& .MuiFormLabel-root': {
                               whiteSpace: 'nowrap',
@@ -3161,8 +3161,8 @@ const ClientManager = () => {
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: 2,
                                   '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                  '&:hover fieldset': { borderColor: '#667eea' },
-                                  '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                  '&:hover fieldset': { borderColor: '#1E7DBE' },
+                                  '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                                 }
                               }}
                             />
@@ -3181,8 +3181,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -3199,8 +3199,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -3218,8 +3218,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#667eea' },
-                              '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                              '&:hover fieldset': { borderColor: '#1E7DBE' },
+                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
                             }
                           }}
                         />
@@ -3246,7 +3246,7 @@ const ClientManager = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #667eea, #764ba2, #f093fb)',
+            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #84D2FC)',
           }
         }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -3256,8 +3256,8 @@ const ClientManager = () => {
               variant="outlined"
               startIcon={<Schedule />}
               sx={{
-                borderColor: activeStep === 0 ? '#e2e8f0' : '#667eea',
-                color: activeStep === 0 ? '#94a3b8' : '#667eea',
+                borderColor: activeStep === 0 ? '#e2e8f0' : '#1E7DBE',
+                color: activeStep === 0 ? '#94a3b8' : '#1E7DBE',
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
@@ -3299,7 +3299,7 @@ const ClientManager = () => {
                     endIcon={<Schedule />}
                 sx={{
                   background: isCurrentStepCompleted() 
-                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                     : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
                   color: isCurrentStepCompleted() ? 'white' : '#94a3b8',
                   borderRadius: 3,
@@ -3374,7 +3374,7 @@ const ClientManager = () => {
                 sx={{
                   height: '100%',
                   width: `${((activeStep + 1) / steps.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
                   borderRadius: 3,
                   transition: 'width 0.3s ease'
                 }}

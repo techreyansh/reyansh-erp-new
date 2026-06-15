@@ -416,7 +416,7 @@ const LogAndQualifyLeads = () => {
             {/* Enhanced Header */}
             <Card sx={{ 
               mb: 4,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
@@ -460,7 +460,7 @@ const LogAndQualifyLeads = () => {
                         width: 60,
                         height: 60,
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                        background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -474,7 +474,7 @@ const LogAndQualifyLeads = () => {
                           right: -2,
                           bottom: -2,
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+                          background: 'linear-gradient(135deg, #1E7DBE, #45ADE6, #84D2FC)',
                           zIndex: -1,
                           opacity: 0.7
                         }
@@ -515,7 +515,7 @@ const LogAndQualifyLeads = () => {
                     border: '1px solid rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <WorkspacePremium sx={{ color: '#fee140', fontSize: 20 }} />
+                    <WorkspacePremium sx={{ color: '#84D2FC', fontSize: 20 }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                       Step 1
                     </Typography>
@@ -541,9 +541,9 @@ const LogAndQualifyLeads = () => {
                   backgroundColor: '#f8f9fa'
                 }}>
                   <Box display="flex" alignItems="center" gap={2}>
-                    <Person sx={{ fontSize: 28, color: '#1976d2' }} />
+                    <Person sx={{ fontSize: 28, color: '#45ADE6' }} />
                     <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2', mb: 0.5 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
                         Lead Information
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -567,8 +567,8 @@ const LogAndQualifyLeads = () => {
                         }}>
                           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                             <Box display="flex" alignItems="center" gap={1.5}>
-                              <AccountCircle sx={{ fontSize: 22, color: '#1976d2' }} />
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                              <AccountCircle sx={{ fontSize: 22, color: '#45ADE6' }} />
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                                 Client/Prospect Selection (Optional)
                               </Typography>
                             </Box>
@@ -578,7 +578,7 @@ const LogAndQualifyLeads = () => {
                                 onClick={loadClients}
                                 disabled={loadingClients}
                                 sx={{
-                                  color: '#667eea',
+                                  color: '#1E7DBE',
                                   '&:hover': {
                                     backgroundColor: 'rgba(102, 126, 234, 0.1)'
                                   }
@@ -604,10 +604,10 @@ const LogAndQualifyLeads = () => {
                                       borderColor: '#e0e0e0'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }}
@@ -648,10 +648,10 @@ const LogAndQualifyLeads = () => {
                                   }}
                                   sx={{
                                     borderRadius: 2,
-                                    borderColor: createNewProspect ? '#667eea' : '#e0e0e0',
-                                    color: createNewProspect ? '#667eea' : 'text.secondary',
+                                    borderColor: createNewProspect ? '#1E7DBE' : '#e0e0e0',
+                                    color: createNewProspect ? '#1E7DBE' : 'text.secondary',
                                     '&:hover': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       backgroundColor: 'rgba(102, 126, 234, 0.04)'
                                     }
                                   }}
@@ -689,8 +689,8 @@ const LogAndQualifyLeads = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Person sx={{ fontSize: 22, color: '#1976d2' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <Person sx={{ fontSize: 22, color: '#45ADE6' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Basic Information
                             </Typography>
                           </Box>
@@ -714,7 +714,7 @@ const LogAndQualifyLeads = () => {
                                     borderRadius: 2,
                                     backgroundColor: '#f5f5f5',
                                     '& .MuiOutlinedInput-input': {
-                                      color: '#1976d2',
+                                      color: '#45ADE6',
                                       fontWeight: 600
                                     }
                                   }
@@ -741,10 +741,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -771,10 +771,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -795,8 +795,8 @@ const LogAndQualifyLeads = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Phone sx={{ fontSize: 22, color: '#1976d2' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <Phone sx={{ fontSize: 22, color: '#45ADE6' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Contact Information
                             </Typography>
                           </Box>
@@ -820,10 +820,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -851,10 +851,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -882,10 +882,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -906,8 +906,8 @@ const LogAndQualifyLeads = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Assignment sx={{ fontSize: 22, color: '#1976d2' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <Assignment sx={{ fontSize: 22, color: '#45ADE6' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Assignment & Classification
                             </Typography>
                           </Box>
@@ -926,10 +926,10 @@ const LogAndQualifyLeads = () => {
                                       borderColor: errors.customerType ? '#d32f2f' : '#e0e0e0'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }}
@@ -962,10 +962,10 @@ const LogAndQualifyLeads = () => {
                                       borderColor: errors.leadAssignedTo ? '#d32f2f' : '#e0e0e0'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }}
@@ -997,8 +997,8 @@ const LogAndQualifyLeads = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <ShoppingCart sx={{ fontSize: 22, color: '#1976d2' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <ShoppingCart sx={{ fontSize: 22, color: '#45ADE6' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Products Interested
                             </Typography>
                           </Box>
@@ -1019,7 +1019,7 @@ const LogAndQualifyLeads = () => {
                                         label={product ? product.label : value}
                                         size="small"
                                         sx={{
-                                          backgroundColor: '#667eea',
+                                          backgroundColor: '#1E7DBE',
                                           color: 'white',
                                           '& .MuiChip-deleteIcon': {
                                             color: 'white'
@@ -1036,10 +1036,10 @@ const LogAndQualifyLeads = () => {
                                   borderColor: errors.productsInterested ? '#d32f2f' : '#e0e0e0'
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#667eea'
+                                  borderColor: '#1E7DBE'
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#667eea',
+                                  borderColor: '#1E7DBE',
                                   borderWidth: 2
                                 }
                               }}
@@ -1077,8 +1077,8 @@ const LogAndQualifyLeads = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Notes sx={{ fontSize: 22, color: '#1976d2' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <Notes sx={{ fontSize: 22, color: '#45ADE6' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Details
                             </Typography>
                           </Box>
@@ -1105,10 +1105,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -1135,10 +1135,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea'
+                                      borderColor: '#1E7DBE'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#667eea',
+                                      borderColor: '#1E7DBE',
                                       borderWidth: 2
                                     }
                                   }
@@ -1215,7 +1215,7 @@ const LogAndQualifyLeads = () => {
                         startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <AutoAwesome />}
                         disabled={loading}
                         sx={{
-                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                           color: 'white',
                           fontWeight: 700,
                           px: 4,
@@ -1227,10 +1227,10 @@ const LogAndQualifyLeads = () => {
                           '&:hover': {
                             transform: 'translateY(-2px)',
                             boxShadow: '0 8px 24px rgba(79, 172, 254, 0.6)',
-                            background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)'
+                            background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)'
                           },
                           '&:disabled': {
-                            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                            background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
                             opacity: 0.7
                           }
                         }}

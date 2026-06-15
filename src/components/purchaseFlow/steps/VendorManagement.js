@@ -979,7 +979,7 @@ const VendorManagement = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #667eea, #764ba2)',
+              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
               zIndex: 1
             }
         }}
@@ -1235,7 +1235,7 @@ const VendorManagement = () => {
                       width: 60,
                       height: 60,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

@@ -222,7 +222,7 @@ const Inventory = () => {
         <Card 
           sx={{ 
             mb: 4, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
             color: 'white',
             boxShadow: 6
           }}
@@ -323,7 +323,7 @@ const Inventory = () => {
                 },
                 '& .MuiTabs-indicator': {
                   height: 4,
-                  background: 'linear-gradient(45deg, #667eea, #764ba2)'
+                  background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)'
                 }
               }}
             >
@@ -354,7 +354,7 @@ const Inventory = () => {
         <Fade in timeout={1000}>
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {[
-              { label: "Total Stock Items", value: "1,247", icon: <StorageIcon />, color: "#2196f3" },
+              { label: "Total Stock Items", value: "1,247", icon: <StorageIcon />, color: "#45ADE6" },
               { label: "Critical Stock", value: "23", icon: <TrendingUpIcon />, color: "#f44336" },
               { label: "Inward Today", value: "45", icon: <InwardIcon />, color: "#4caf50" },
               { label: "Outward Today", value: "38", icon: <OutwardIcon />, color: "#ff9800" }

@@ -1,29 +1,18 @@
 // Supabase Edge Function: extract-production-log
 //
 // Reads uploaded production sheets — Excel/CSV (parsed to rows client-side) AND
-// photos of handwritten/printed sheets (vision) — and uses Claude to:
+// photos of handwritten/printed sheets (vision) — and uses Google Gemini to:
 //   mode "extract": unpivot any format into normalized line × time-slot rows
 //   mode "analyze": produce root-cause / comparison / downtime / summary insights
 //
-// The Anthropic API key stays server-side (Edge Function secret), never in the browser.
+// The Gemini API key stays server-side (Edge Function secret), never in the browser.
 //
 // Deploy:
 //   supabase functions deploy extract-production-log
-//   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+//   supabase secrets set GEMINI_API_KEY=AIza...
 //
-// Model: claude-opus-4-8 (vision + structured outputs). Pin/bump the SDK version as needed.
-import Anthropic from "npm:@anthropic-ai/sdk@^0.69.0";
-
-const MODEL = "claude-opus-4-8";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+// Model: gemini-2.5-flash (vision + structured outputs) — see ../_shared/gemini.ts.
+import { CORS, json, generateJson, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
 
 // ---- Structured output schemas -------------------------------------------------
 const EXTRACT_SCHEMA = {
@@ -124,37 +113,31 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return json({ error: "ANTHROPIC_API_KEY secret is not set on the Edge Function." }, 500);
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set on the Edge Function." }, 500);
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
 
   const mode = body?.mode === "analyze" ? "analyze" : "extract";
-  const client = new Anthropic({ apiKey });
 
   try {
-    const content: any[] = [];
+    const parts: GeminiPart[] = [];
 
     if (mode === "extract") {
       const files = Array.isArray(body.files) ? body.files : [];
       if (!files.length) return json({ error: "No files provided." }, 400);
 
-      content.push({
-        type: "text",
+      parts.push({
         text: `Extract normalized production rows from the ${files.length} file(s) below.` +
           (body.department ? ` Hint: department is "${body.department}".` : ""),
       });
       for (const f of files) {
         if (f.kind === "image" && f.dataBase64) {
-          content.push({ type: "text", text: `--- Photo: ${f.name || "sheet"} ---` });
-          content.push({
-            type: "image",
-            source: { type: "base64", media_type: f.mediaType || "image/jpeg", data: f.dataBase64 },
-          });
+          parts.push({ text: `--- Photo: ${f.name || "sheet"} ---` });
+          parts.push({ inlineData: { mimeType: f.mediaType || "image/jpeg", data: f.dataBase64 } });
         } else if (f.kind === "sheet" && Array.isArray(f.rows)) {
-          content.push({
-            type: "text",
+          parts.push({
             text: `--- Spreadsheet: ${f.name || "sheet"} (JSON rows) ---\n${JSON.stringify(f.rows).slice(0, 200000)}`,
           });
         }
@@ -162,28 +145,18 @@ Deno.serve(async (req) => {
     } else {
       const rows = Array.isArray(body.rows) ? body.rows : [];
       if (!rows.length) return json({ error: "No normalized rows provided to analyze." }, 400);
-      content.push({
-        type: "text",
+      parts.push({
         text: `Analyze these normalized hourly production rows:\n${JSON.stringify(rows).slice(0, 200000)}`,
       });
     }
 
-    const resp = await client.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      thinking: { type: "adaptive" },
+    const { result, usage } = await generateJson({
+      apiKey,
       system: mode === "extract" ? EXTRACT_SYSTEM : ANALYZE_SYSTEM,
-      output_config: { format: { type: "json_schema", schema: mode === "extract" ? EXTRACT_SCHEMA : ANALYZE_SCHEMA } },
-      messages: [{ role: "user", content }],
+      parts,
+      schema: mode === "extract" ? EXTRACT_SCHEMA : ANALYZE_SCHEMA,
     });
-
-    if (resp.stop_reason === "refusal") {
-      return json({ error: "The request was declined by safety classifiers." }, 422);
-    }
-
-    const textBlock = resp.content.find((b: any) => b.type === "text");
-    const parsed = textBlock ? JSON.parse((textBlock as any).text) : null;
-    return json({ mode, model: resp.model, result: parsed, usage: resp.usage });
+    return json({ mode, model: GEMINI_MODEL, result, usage });
   } catch (e) {
     return json({ error: e?.message || String(e) }, 500);
   }

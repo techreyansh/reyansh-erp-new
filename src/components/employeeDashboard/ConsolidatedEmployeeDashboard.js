@@ -655,7 +655,7 @@ const ConsolidatedEmployeeDashboard = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#667eea',
+                        borderColor: '#1E7DBE',
                       }
                     }}
                   >
@@ -695,7 +695,7 @@ const ConsolidatedEmployeeDashboard = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                           color: 'white',
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

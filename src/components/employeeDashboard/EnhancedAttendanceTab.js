@@ -483,7 +483,7 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 '& .MuiTablePagination-select': {
                   borderColor: '#e3f2fd',
                   '&:focus': {
-                    borderColor: '#1976d2'
+                    borderColor: '#45ADE6'
                   }
                 }
               }}
@@ -582,7 +582,7 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
               variant="h4" 
               sx={{ 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+                background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -896,11 +896,11 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '180px',
-              background: 'linear-gradient(135deg, #1976d2, #00bcd4)',
+              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
               color: 'white',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1565c0, #00acc1)',
+                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },

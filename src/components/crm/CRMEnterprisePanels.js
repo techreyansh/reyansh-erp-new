@@ -191,21 +191,63 @@ const CRMEnterprisePanels = ({
           setViewName={setViewName}
           onSaveView={saveView}
         />
-        <Paper sx={{ p: 2, boxShadow: 2 }}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={1} mb={2}>
-            <TextField size="small" label="Entity ID" value={selectedEntity} onChange={(e) => setSelectedEntity(e.target.value)} />
-            <TextField size="small" label="Type" value={timelineType} onChange={(e) => setTimelineType(e.target.value)} />
-            <TextField size="small" type="date" label="Date" InputLabelProps={{ shrink: true }} value={timelineDate} onChange={(e) => setTimelineDate(e.target.value)} />
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, md: 2.5 } }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={800}>Activity Timeline</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {filteredTimeline.length} event{filteredTimeline.length !== 1 ? "s" : ""}
+              </Typography>
+            </Box>
           </Stack>
-          <Box sx={{ borderLeft: "2px solid", borderColor: "divider", pl: 2 }}>
-            {filteredTimeline.map((event) => (
-              <Box key={event.id} sx={{ mb: 2, position: "relative" }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "primary.main", position: "absolute", left: -27, top: 6 }} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>{event.action}</Typography>
-                <Typography variant="caption" color="text.secondary">{new Date(event.timestamp).toLocaleString()} • {event.user} • {event.type}</Typography>
-              </Box>
-            ))}
-          </Box>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mb: 2.5 }}>
+            <TextField size="small" label="Entity ID" value={selectedEntity} onChange={(e) => setSelectedEntity(e.target.value)} sx={{ minWidth: 160 }} />
+            <TextField size="small" label="Type" value={timelineType} onChange={(e) => setTimelineType(e.target.value)} sx={{ minWidth: 140 }} />
+            <TextField size="small" type="date" label="Date" InputLabelProps={{ shrink: true }} value={timelineDate} onChange={(e) => setTimelineDate(e.target.value)} sx={{ minWidth: 170 }} />
+          </Stack>
+
+          {filteredTimeline.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 5, textAlign: "center" }}>
+              No activity matches these filters.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                position: "relative",
+                pl: 3,
+                "&::before": { content: '""', position: "absolute", left: 7, top: 6, bottom: 6, width: "2px", bgcolor: "divider" },
+              }}
+            >
+              {filteredTimeline.map((event) => {
+                const tc = { Call: "#1E7DBE", Meeting: "#45ADE6", Status: "#D97706", Email: "#7C3AED", Note: "#81898F", Order: "#059669" }[event.type] || "#81898F";
+                return (
+                  <Box key={event.id} sx={{ position: "relative", pb: 2 }}>
+                    <Box
+                      sx={{
+                        position: "absolute", left: -22, top: 8, width: 12, height: 12, borderRadius: "50%",
+                        bgcolor: tc, border: "2px solid", borderColor: "background.paper",
+                      }}
+                    />
+                    <Stack
+                      direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}
+                      sx={{ p: 1.25, borderRadius: 1.5, transition: "background-color 0.15s ease", "&:hover": { bgcolor: "action.hover" } }}
+                    >
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{event.action}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(event.timestamp).toLocaleString()} • {event.user}
+                        </Typography>
+                      </Box>
+                      {event.type && (
+                        <Chip size="small" label={event.type} variant="outlined" sx={{ fontWeight: 700, flexShrink: 0, color: tc, borderColor: tc }} />
+                      )}
+                    </Stack>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
         </Paper>
       </Stack>
     );

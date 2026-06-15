@@ -801,12 +801,12 @@ const ProductForm = ({ product, onClose }) => {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: 1,
-                color: '#1976d2',
+                color: '#45ADE6',
                 fontWeight: 600,
                 fontSize: '1.1rem'
               }}
             >
-              <Inventory sx={{ color: '#1976d2' }} />
+              <Inventory sx={{ color: '#45ADE6' }} />
               Basic Information
             </Typography>
             
@@ -818,7 +818,7 @@ const ProductForm = ({ product, onClose }) => {
                     <InputLabel sx={{ 
                       fontSize: '14px',
                       color: '#666',
-                      '&.Mui-focused': { color: '#1976d2' }
+                      '&.Mui-focused': { color: '#45ADE6' }
                     }}>
                       Client
                     </InputLabel>
@@ -836,10 +836,10 @@ const ProductForm = ({ product, onClose }) => {
                           borderBottomColor: '#e0e0e0'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInputBase-input': {
                           fontSize: '16px',
@@ -874,16 +874,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -914,16 +914,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -948,16 +948,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -971,7 +971,7 @@ const ProductForm = ({ product, onClose }) => {
 
               {/* Row 3: Manpower Sub-fields */}
               <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
                   <People sx={{ mr: 1 }} />
                   Manpower Required
                 </Typography>
@@ -993,16 +993,16 @@ const ProductForm = ({ product, onClose }) => {
                           borderBottomColor: '#e0e0e0'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
                           color: '#666',
                           '&.Mui-focused': {
-                            color: '#1976d2'
+                            color: '#45ADE6'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1029,16 +1029,16 @@ const ProductForm = ({ product, onClose }) => {
                           borderBottomColor: '#e0e0e0'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
                           color: '#666',
                           '&.Mui-focused': {
-                            color: '#1976d2'
+                            color: '#45ADE6'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1065,16 +1065,16 @@ const ProductForm = ({ product, onClose }) => {
                           borderBottomColor: '#e0e0e0'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
                           color: '#666',
                           '&.Mui-focused': {
-                            color: '#1976d2'
+                            color: '#45ADE6'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1101,16 +1101,16 @@ const ProductForm = ({ product, onClose }) => {
                           borderBottomColor: '#e0e0e0'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#1976d2'
+                          borderBottomColor: '#45ADE6'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
                           color: '#666',
                           '&.Mui-focused': {
-                            color: '#1976d2'
+                            color: '#45ADE6'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1142,16 +1142,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1175,16 +1175,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1212,16 +1212,16 @@ const ProductForm = ({ product, onClose }) => {
                         borderBottomColor: '#e0e0e0'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#1976d2'
+                        borderBottomColor: '#45ADE6'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
                         color: '#666',
                         '&.Mui-focused': {
-                          color: '#1976d2'
+                          color: '#45ADE6'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1251,12 +1251,12 @@ const ProductForm = ({ product, onClose }) => {
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 600,
               fontSize: '1.1rem'
             }}
           >
-            <Description sx={{ color: '#1976d2' }} />
+            <Description sx={{ color: '#45ADE6' }} />
             Cable Information
           </Typography>
           
@@ -1273,9 +1273,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1291,9 +1291,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1309,9 +1309,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1322,7 +1322,7 @@ const ProductForm = ({ product, onClose }) => {
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <Box sx={{ flex: '1 1 100%', minWidth: '200px' }}>
                 <FormControl fullWidth variant="standard">
-                  <InputLabel sx={{ fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } }}>
+                  <InputLabel sx={{ fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }}>
                     Core Colors (Multiple Select)
                   </InputLabel>
                   <Select
@@ -1340,8 +1340,8 @@ const ProductForm = ({ product, onClose }) => {
                     )}
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   >
@@ -1390,9 +1390,9 @@ const ProductForm = ({ product, onClose }) => {
                     helperText="This custom color will be added to the selected colors"
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   />
@@ -1412,9 +1412,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1429,9 +1429,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1446,9 +1446,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1467,9 +1467,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1484,9 +1484,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1501,9 +1501,9 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#1976d2' } },
+                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1757,8 +1757,8 @@ const ProductForm = ({ product, onClose }) => {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Common Sheath Length Field */}
-            <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid #1976d2' }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid #45ADE6' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
                 <Description sx={{ mr: 1 }} />
                 Common Sheath Length
               </Typography>
@@ -1780,12 +1780,12 @@ const ProductForm = ({ product, onClose }) => {
                     }}
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
                         color: '#666', 
-                        '&.Mui-focused': { color: '#1976d2' } 
+                        '&.Mui-focused': { color: '#45ADE6' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1812,7 +1812,7 @@ const ProductForm = ({ product, onClose }) => {
                           width: 32,
                           height: 32,
                           borderRadius: '50%',
-                          backgroundColor: '#1976d2',
+                          backgroundColor: '#45ADE6',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -1823,7 +1823,7 @@ const ProductForm = ({ product, onClose }) => {
                           {index + 1}
                         </Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#1976d2',
+                          color: '#45ADE6',
                           fontWeight: 600
                         }}>
                           Core {color}
@@ -1842,12 +1842,12 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
                         color: '#666', 
-                        '&.Mui-focused': { color: '#1976d2' } 
+                        '&.Mui-focused': { color: '#45ADE6' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1863,12 +1863,12 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
                         color: '#666', 
-                        '&.Mui-focused': { color: '#1976d2' } 
+                        '&.Mui-focused': { color: '#45ADE6' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1884,12 +1884,12 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
                         color: '#666', 
-                        '&.Mui-focused': { color: '#1976d2' } 
+                        '&.Mui-focused': { color: '#45ADE6' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1905,12 +1905,12 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#1976d2' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#1976d2' },
+                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
                         color: '#666', 
-                        '&.Mui-focused': { color: '#1976d2' } 
+                        '&.Mui-focused': { color: '#45ADE6' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1928,7 +1928,7 @@ const ProductForm = ({ product, onClose }) => {
                   borderRadius: 2,
                   border: '1px solid rgba(33, 150, 243, 0.1)'
                 }}>
-                  <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 500 }}>
                     Progress: {formData.coreColors.filter(isCoreCompleted).length} of {formData.coreColors.length} cores completed
                   </Typography>
                 </Box>

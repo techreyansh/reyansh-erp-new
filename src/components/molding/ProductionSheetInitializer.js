@@ -217,7 +217,7 @@ const ProductionSheetInitializer = ({ onInitialized }) => {
       <Card>
         <CardContent>
           <Box sx={{ textAlign: "center", mb: 4 }}>
-            <FactoryIcon sx={{ fontSize: 64, color: "#1976d2", mb: 2 }} />
+            <FactoryIcon sx={{ fontSize: 64, color: "#45ADE6", mb: 2 }} />
             <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
               Production Management Setup
             </Typography>

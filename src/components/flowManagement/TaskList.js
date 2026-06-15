@@ -1006,7 +1006,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
           <Typography 
             variant="h5" 
             sx={{ 
-              color: '#1976d2',
+              color: '#45ADE6',
               fontWeight: 700,
               mb: 0.5
             }}
@@ -1055,7 +1055,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ color: '#1976d2' }} />
+                <Search sx={{ color: '#45ADE6' }} />
               </InputAdornment>
             ),
           }}
@@ -1063,8 +1063,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             width: '350px',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: '#e3f2fd' },
-              '&:hover fieldset': { borderColor: '#1976d2' },
-              '&.Mui-focused fieldset': { borderColor: '#1976d2' }
+              '&:hover fieldset': { borderColor: '#45ADE6' },
+              '&.Mui-focused fieldset': { borderColor: '#45ADE6' }
             }
           }}
         />
@@ -1144,15 +1144,15 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             <TableRow sx={{ backgroundColor: '#f8fbff' }}>
               {currentStage === 'COMPLETE_O2D' ? (
                 <>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Date of Dispatch</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Customer</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Product/Spec</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Total Length (m)</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Batch Size (pcs)</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>DATE ENTRY</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Total Cable</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Date of Dispatch</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Customer</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Product/Spec</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Total Length (m)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Batch Size (pcs)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>DATE ENTRY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Total Cable</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
                 </>
               ) : (
                 <>
@@ -1170,7 +1170,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                     }
                     
                     return (
-                      <TableCell padding="checkbox" sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>
+                      <TableCell padding="checkbox" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>
                         <Tooltip title="Select batches with same Unique ID to combine (only shown when Store 1 is completed)">
                           <Checkbox
                             indeterminate={false}
@@ -1182,26 +1182,26 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       </TableCell>
                     );
                   })()}
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Unique ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Client</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Product</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Batch</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Unique ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Client</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Product</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Batch</TableCell>
                   {currentStage !== 'RECEIVING_DOCUMENTS' && currentStage !== 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Status</TableCell>
                   )}
                   {currentStage === 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Move History</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Move History</TableCell>
                   )}
                   {currentStage !== 'RECEIVING_DOCUMENTS' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Due Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Due Date</TableCell>
                   )}
                   {currentStage !== 'RECEIVING_DOCUMENTS' && currentStage !== 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Completed Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Completed Date</TableCell>
                   )}
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Dispatch Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Assigned To</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1976d2', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch Date</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Assigned To</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
                 </>
               )}
             </TableRow>
@@ -1274,7 +1274,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           size="small"
                           sx={{
                             backgroundColor: '#e3f2fd',
-                            color: '#1976d2',
+                            color: '#45ADE6',
                             fontWeight: 600,
                             fontSize: '0.75rem',
                             width: 'fit-content'
@@ -1457,7 +1457,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       size="small"
                       sx={{
                         backgroundColor: '#e3f2fd',
-                        color: '#1976d2',
+                        color: '#45ADE6',
                         fontWeight: 600,
                         fontSize: '0.65rem',
                         height: '20px'
@@ -1548,10 +1548,10 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                         sx={{
                           fontSize: '0.7rem',
                           textTransform: 'none',
-                          borderColor: task.moveHistory ? '#1976d2' : '#9e9e9e',
-                          color: task.moveHistory ? '#1976d2' : '#9e9e9e',
+                          borderColor: task.moveHistory ? '#45ADE6' : '#9e9e9e',
+                          color: task.moveHistory ? '#45ADE6' : '#9e9e9e',
                           '&:hover': {
-                            borderColor: task.moveHistory ? '#1565c0' : '#9e9e9e',
+                            borderColor: task.moveHistory ? '#1E7DBE' : '#9e9e9e',
                             backgroundColor: task.moveHistory ? '#e3f2fd' : 'transparent'
                           }
                         }}
@@ -1640,7 +1640,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   <TableCell sx={{ py: 0.5 }}>
                     {task.AssignedTo ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Assignment fontSize="small" sx={{ color: '#1976d2', fontSize: '0.875rem' }} />
+                        <Assignment fontSize="small" sx={{ color: '#45ADE6', fontSize: '0.875rem' }} />
                         <Typography variant="body2" sx={{ color: '#37474f', fontSize: '0.7rem' }}>
                           {task.AssignedTo.split('@')[0]}
                         </Typography>
@@ -1801,10 +1801,10 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                         variant="outlined"
                         onClick={() => setSearchQuery('')}
                         sx={{
-                          borderColor: '#1976d2',
-                          color: '#1976d2',
+                          borderColor: '#45ADE6',
+                          color: '#45ADE6',
                           '&:hover': {
-                            borderColor: '#1565c0',
+                            borderColor: '#1E7DBE',
                             backgroundColor: '#f8fbff'
                           }
                         }}
@@ -2399,13 +2399,13 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       {historyData.map((entry, index) => (
                         <Card key={index} variant="outlined" sx={{ p: 2, backgroundColor: '#fafafa' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                               Entry #{index + 1}
                             </Typography>
                             <Chip 
                               label={entry.date || entry.Date || 'N/A'} 
                               size="small" 
-                              sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
+                              sx={{ backgroundColor: '#e3f2fd', color: '#45ADE6' }}
                             />
                           </Box>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -2413,7 +2413,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                               <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 100 }}>
                                 Quantity:
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 600 }}>
+                              <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 600 }}>
                                 {entry.quantity || entry.Quantity || entry.qty || 0} pcs
                               </Typography>
                             </Box>
@@ -2451,13 +2451,13 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   <Box sx={{ mt: 2 }}>
                     <Card variant="outlined" sx={{ p: 2, backgroundColor: '#fafafa' }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
                           Move History Entry
                         </Typography>
                         <Chip 
                           label={historyData.date || historyData.Date || 'N/A'} 
                           size="small" 
-                          sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
+                          sx={{ backgroundColor: '#e3f2fd', color: '#45ADE6' }}
                         />
                       </Box>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -2465,7 +2465,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 120 }}>
                             Quantity:
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 600 }}>
+                          <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 600 }}>
                             {historyData.quantity || historyData.Quantity || historyData.qty || 0} pcs
                           </Typography>
                         </Box>

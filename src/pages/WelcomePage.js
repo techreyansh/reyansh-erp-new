@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -9,44 +8,78 @@ import {
   CardContent,
   Chip,
   Container,
-  Divider,
   Grid,
+  IconButton,
   Paper,
   Skeleton,
   Stack,
+  Tooltip,
   Typography,
+  alpha,
   useTheme,
 } from "@mui/material";
 import {
+  AccountBalanceWalletOutlined,
   AssignmentTurnedInOutlined,
   BarChartOutlined,
   ChecklistOutlined,
   ContactMailOutlined,
   FactoryOutlined,
+  GroupsOutlined,
   HomeRepairServiceOutlined,
   Inventory2Outlined,
+  LocalShippingOutlined,
   NotificationsActiveOutlined,
+  PaidOutlined,
   ReceiptLongOutlined,
+  RefreshRounded,
   TrendingUpOutlined,
 } from "@mui/icons-material";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionContext";
-import ScrollReveal from "../components/common/ScrollReveal";
 import LoadingScreen from "../components/common/LoadingScreen";
 import AccessDenied from "../components/auth/AccessDenied";
+import { getExecutiveSummary } from "../services/executiveDashboardService";
+import { listMyTasks, isTaskOverdue } from "../services/taskService";
+import { StatCard, Panel, EmptyChart, CHART_COLORS, inrCompact } from "../components/common/kit";
 
-const MotionBox = motion(Box);
+// Modules most relevant to each department — used to surface a person's own
+// workspace first on the role-aware home.
+const DEPT_MODULES = {
+  Sales: ["sales", "crm", "tasks"],
+  CRM: ["crm", "sales", "tasks"],
+  Production: ["production", "inventory", "dispatch", "tasks"],
+  Inventory: ["inventory", "dispatch", "tasks"],
+  Accounts: ["accounts", "reports", "tasks"],
+  Dispatch: ["dispatch", "inventory", "tasks"],
+  HR: ["employees", "tasks", "reports"],
+  Management: ["crm", "sales", "production", "inventory", "dispatch", "reports", "tasks"],
+};
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
 
 function getDisplayName(user) {
   if (user?.name) return user.name;
   const emailName = user?.email?.split("@")?.[0];
   if (!emailName) return "there";
-  return emailName
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+  return emailName.split(/[._-]/).filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
 }
 
 function getGreeting(date) {
@@ -58,382 +91,305 @@ function getGreeting(date) {
 
 function getAccessBucket(permissions) {
   if (permissions.hasFullAccess) return "full";
-  if (
-    permissions.canCreate("tasks") ||
-    permissions.canEdit("tasks") ||
-    permissions.canCreate("employees") ||
-    permissions.canEdit("employees")
-  ) {
-    return "manager";
-  }
+  if (permissions.canCreate("tasks") || permissions.canEdit("tasks") ||
+      permissions.canCreate("employees") || permissions.canEdit("employees")) return "manager";
   return "employee";
 }
 
 const allActions = [
-  {
-    key: "crm",
-    title: "CRM",
-    description: "Leads, customers, follow-ups and sales pipeline.",
-    path: "/crm/leads",
-    icon: ContactMailOutlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "ppc",
-    title: "PPC",
-    description: "Production planning, work orders and dispatch readiness.",
-    path: "/ppc/production-plan",
-    icon: FactoryOutlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "inventory",
-    title: "Inventory",
-    description: "Stock, inward, outward and material availability.",
-    path: "/inventory",
-    icon: Inventory2Outlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "sales",
-    title: "Sales",
-    description: "Sales workflow, quotations and order progress.",
-    path: "/sales-flow",
-    icon: ReceiptLongOutlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "employees",
-    title: "Employee Management",
-    description: "View workforce records, profiles, and department details.",
-    path: "/employee-dashboard",
-    icon: HomeRepairServiceOutlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "employees",
-    title: "Access Management",
-    description: "Assign email access, roles, and module permissions.",
-    path: "/access-management",
-    icon: NotificationsActiveOutlined,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "tasks",
-    title: "Task Scheduler",
-    description: "Assign tasks by department and employee with deadlines.",
-    path: "/task-scheduler",
-    icon: AssignmentTurnedInOutlined,
-    requireCreate: true,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "tasks",
-    title: "Team Tasks",
-    description: "View, filter, edit, and reassign all team tasks.",
-    path: "/team-tasks",
-    icon: AssignmentTurnedInOutlined,
-    requireEdit: true,
-    audience: ["ceo", "manager"],
-  },
-  {
-    key: "tasks",
-    title: "My Tasks",
-    description: "Your assigned tasks — update status when complete.",
-    path: "/my-tasks",
-    icon: ChecklistOutlined,
-    audience: ["ceo", "manager", "employee"],
-  },
-  {
-    key: "tasks",
-    title: "Task Checklist",
-    description: "Today’s assigned tasks, proof submission and status.",
-    path: "/task-checklist",
-    icon: ChecklistOutlined,
-    audience: ["ceo", "manager", "employee"],
-  },
-  {
-    key: "reports",
-    title: "Reports",
-    description: "Operational snapshots and performance summaries.",
-    path: "/ppc/reports",
-    icon: BarChartOutlined,
-    audience: ["ceo", "manager"],
-  },
+  { key: "crm", title: "CRM", description: "Leads, customers, follow-ups and sales pipeline.", path: "/crm/dashboard", icon: ContactMailOutlined },
+  { key: "production", title: "PPC", description: "Production planning, work orders and dispatch readiness.", path: "/ppc/production-plan", icon: FactoryOutlined },
+  { key: "inventory", title: "Inventory", description: "Stock, inward, outward and material availability.", path: "/inventory", icon: Inventory2Outlined },
+  { key: "sales", title: "Sales", description: "Sales workflow, quotations and order progress.", path: "/sales-flow", icon: ReceiptLongOutlined },
+  { key: "dispatch", title: "Dispatch", description: "Plan and track shipments to customers.", path: "/dispatch-management", icon: LocalShippingOutlined },
+  { key: "employees", title: "Employees", description: "Workforce records, profiles and department details.", path: "/employee-dashboard", icon: HomeRepairServiceOutlined },
+  { key: "tasks", title: "Team Tasks", description: "View, filter, edit and reassign all team tasks.", path: "/team-tasks", icon: AssignmentTurnedInOutlined, requireEdit: true },
+  { key: "tasks", title: "My Tasks", description: "Your assigned tasks — update status when complete.", path: "/my-tasks", icon: ChecklistOutlined },
+  { key: "reports", title: "Reports", description: "Operational snapshots and performance summaries.", path: "/ppc/reports", icon: BarChartOutlined },
 ];
-
-function kpisForAccess(bucket) {
-  if (bucket === "full") {
-    return [
-      { label: "Tasks pending", value: "18", hint: "Across teams", icon: AssignmentTurnedInOutlined },
-      { label: "Production status", value: "82%", hint: "Plans on track", icon: FactoryOutlined },
-      { label: "Revenue snapshot", value: "Stable", hint: "Orders moving", icon: TrendingUpOutlined },
-      { label: "Alerts", value: "4", hint: "Need review", icon: NotificationsActiveOutlined },
-    ];
-  }
-  if (bucket === "manager") {
-    return [
-      { label: "Team tasks", value: "12", hint: "Open today", icon: AssignmentTurnedInOutlined },
-      { label: "Pending approvals", value: "5", hint: "Awaiting action", icon: NotificationsActiveOutlined },
-      { label: "Department status", value: "On track", hint: "No major blocker", icon: HomeRepairServiceOutlined },
-      { label: "Completed", value: "9", hint: "This shift", icon: ChecklistOutlined },
-    ];
-  }
-  return [
-    { label: "Today’s tasks", value: "6", hint: "Assigned to you", icon: ChecklistOutlined },
-    { label: "Pending", value: "3", hint: "Need action", icon: AssignmentTurnedInOutlined },
-    { label: "Completed", value: "2", hint: "Submitted/approved", icon: TrendingUpOutlined },
-    { label: "Personal score", value: "86%", hint: "Current compliance", icon: BarChartOutlined },
-  ];
-}
 
 function WelcomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const permissions = usePermissions();
-  const reduceMotion = useReducedMotion();
   const [now, setNow] = useState(() => new Date());
+  const [data, setData] = useState(null);
+  const [myTasks, setMyTasks] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loader = window.setTimeout(() => setLoading(false), 220);
-    const clock = window.setInterval(() => setNow(new Date()), 60000);
-    return () => {
-      window.clearTimeout(loader);
-      window.clearInterval(clock);
-    };
-  }, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   const accessBucket = getAccessBucket(permissions);
+  const showAnalytics = accessBucket !== "employee";
+
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    try {
+      if (showAnalytics) {
+        const summary = await getExecutiveSummary();
+        setData(summary);
+      } else if (user?.email) {
+        // Employee bucket — real task KPIs instead of placeholders.
+        const tasks = await listMyTasks(user.email);
+        setMyTasks(tasks);
+      }
+    } catch (e) {
+      // degrade silently — page still renders quick actions
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [showAnalytics, user]);
+
+  useEffect(() => {
+    load();
+    const clock = window.setInterval(() => setNow(new Date()), 60000);
+    return () => window.clearInterval(clock);
+  }, [load]);
+
   const displayName = getDisplayName(user);
   const roleLabel = permissions.role?.role_name || role || user?.roleCode || "Employee";
-  const actions = allActions.filter((action) => {
-    if (action.requireCreate) return permissions.canCreate?.(action.key);
-    if (action.requireEdit) return permissions.canEdit?.(action.key);
-    return permissions.canView?.(action.key);
-  });
-  const kpis = useMemo(() => kpisForAccess(accessBucket), [accessBucket]);
+  const department = permissions.employee?.department || "";
+  const deptModules = DEPT_MODULES[department] || [];
 
-  if (permissions.loading) {
-    return <LoadingScreen message="Loading dashboard…" />;
-  }
+  // Filter by access, then surface the person's own department modules first.
+  const actions = useMemo(() => {
+    const visible = allActions.filter((a) => {
+      if (a.requireCreate) return permissions.canCreate?.(a.key);
+      if (a.requireEdit) return permissions.canEdit?.(a.key);
+      return permissions.canView?.(a.key);
+    }).map((a) => ({ ...a, primary: deptModules.includes(a.key) }));
+    return visible.sort((x, y) => Number(y.primary) - Number(x.primary));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permissions, department]);
 
-  if (!permissions.authorized || !permissions.employee) {
-    return <AccessDenied />;
-  }
+  // Real task KPIs for the employee bucket.
+  const taskKpis = useMemo(() => {
+    const list = myTasks || [];
+    const today = new Date();
+    const isDone = (t) => String(t.task_status || "").toLowerCase() === "completed";
+    const dueToday = list.filter((t) => t.due_date && isSameDay(new Date(t.due_date), today) && !isDone(t)).length;
+    const pending = list.filter((t) => !isDone(t)).length;
+    const completed = list.filter(isDone).length;
+    const overdue = list.filter((t) => isTaskOverdue(t)).length;
+    return { dueToday, pending, completed, overdue };
+  }, [myTasks]);
 
-  const activities =
-    accessBucket === "employee"
-      ? ["Proof pending for one task", "Checklist generated for today", "Last submission is awaiting review"]
-      : ["Production plan updated", "Task approval queue refreshed", "CRM follow-up due today"];
+  const k = data?.kpis || {};
+  const mtdRevenue = data?.revenueTrend?.length ? data.revenueTrend[data.revenueTrend.length - 1].collected : 0;
 
-  const alerts =
-    accessBucket === "full"
-      ? ["4 operational alerts require review", "2 approvals are pending from teams"]
-      : accessBucket === "manager"
-        ? ["5 approvals pending for your department", "1 overdue follow-up needs attention"]
-        : ["3 tasks pending today", "Submit proof before the due time"];
+  const kpiCards = useMemo(() => {
+    if (showAnalytics) {
+      return [
+        { label: "Revenue (This Month)", value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: "#45ADE6", path: "/dashboard" },
+        { label: "Order Book", value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: "#1E7DBE", path: "/crm/sales-orders" },
+        { label: "Outstanding", value: inrCompact(k.outstanding), icon: AccountBalanceWalletOutlined, accent: "#D97706", path: "/crm/collections" },
+        { label: "Pending Dispatch", value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: "#7C3AED", path: "/dispatch-management" },
+        { label: "Active Leads", value: k.activeLeads ?? 0, sub: `${k.team ?? 0} team`, icon: GroupsOutlined, accent: "#DB2777", path: "/crm/follow-ups" },
+        { label: "Active Clients", value: k.clients ?? 0, sub: `${k.prospects ?? 0} prospects`, icon: ContactMailOutlined, accent: "#059669", path: "/clients" },
+      ];
+    }
+    return [
+      { label: "Due Today", value: taskKpis.dueToday, sub: "Assigned to you", icon: ChecklistOutlined, accent: "#1E7DBE", path: "/my-tasks" },
+      { label: "Pending", value: taskKpis.pending, sub: "Need action", icon: AssignmentTurnedInOutlined, accent: "#D97706", path: "/my-tasks" },
+      { label: "Completed", value: taskKpis.completed, sub: "All time", icon: TrendingUpOutlined, accent: "#059669", path: "/my-tasks" },
+      { label: "Overdue", value: taskKpis.overdue, sub: "Past due date", icon: BarChartOutlined, accent: taskKpis.overdue > 0 ? "#DC2626" : "#7C3AED", path: "/my-tasks" },
+    ];
+  }, [showAnalytics, mtdRevenue, k, taskKpis]);
+
+  if (permissions.loading) return <LoadingScreen message="Loading dashboard…" />;
+  if (!permissions.authorized || !permissions.employee) return <AccessDenied />;
+
+  const ordersByStatus = (data?.ordersByStatus || []).filter((x) => x.value > 0);
+  const dispatchByStatus = (data?.dispatchByStatus || []).filter((x) => x.value > 0);
+  const departments = data?.departments || [];
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 1, sm: 2 }, px: { xs: 0.5, sm: 2 } }}>
-      <Stack spacing={3}>
-        <ScrollReveal y={12}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: { xs: 2.5, md: 3 },
-              overflow: "hidden",
-              position: "relative",
-              bgcolor: "background.paper",
-            }}
-          >
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
-              <Box>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1, flexWrap: "wrap" }}>
-                  <Typography
-                    variant="h4"
-                    component="h1"
-                    sx={{
-                      fontWeight: 700,
-                      letterSpacing: "-0.02em",
-                      fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
-                    }}
-                  >
-                    {getGreeting(now)}, {displayName}
-                  </Typography>
-                  <Chip label={roleLabel} color="primary" size="small" />
-                </Stack>
-                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  Welcome to your ERP command center. Review priorities, then jump into the module you need.
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 6 }}>
+      {/* Hero */}
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.primary.light} 120%)`,
+          color: "#fff",
+          px: { xs: 2, sm: 3 },
+          py: { xs: 3, md: 4 },
+        }}
+      >
+        <Container maxWidth="xl" disableGutters>
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }} gap={2}>
+            <Box>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5, flexWrap: "wrap" }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: "-0.03em", fontSize: { xs: "1.6rem", md: "2rem" } }}>
+                  {getGreeting(now)}, {displayName.split(" ")[0]}
+                </Typography>
+                <Chip label={roleLabel} size="small" sx={{ bgcolor: "rgba(255,255,255,0.22)", color: "#fff", fontWeight: 700 }} />
+              </Stack>
+              <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 560 }}>
+                {showAnalytics
+                  ? "Welcome to your ERP command center. Review priorities, then jump into the module you need."
+                  : `Here's your workspace${department ? ` for ${department}` : ""}. ${taskKpis.pending} task${taskKpis.pending === 1 ? "" : "s"} need your attention${taskKpis.overdue > 0 ? `, ${taskKpis.overdue} overdue` : ""}.`}
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Box sx={{ textAlign: "right" }}>
+                <Typography variant="caption" sx={{ opacity: 0.85, textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.06em", display: "block" }}>
+                  {refreshing ? "Refreshing…" : "Current time"}
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {now.toLocaleString(undefined, { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </Typography>
               </Box>
-
-              <Stack spacing={0.5} sx={{ textAlign: { xs: "left", md: "right" } }}>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.06em" }}>
-                  Current time
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {now.toLocaleString(undefined, {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Typography>
-              </Stack>
+              {showAnalytics && (
+                <Tooltip title="Refresh">
+                  <span>
+                    <IconButton onClick={() => load(true)} disabled={refreshing} sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.18)", "&:hover": { bgcolor: "rgba(255,255,255,0.3)" } }}>
+                      <RefreshRounded />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
             </Stack>
-          </Paper>
-        </ScrollReveal>
+          </Stack>
+        </Container>
+      </Box>
+
+      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: -3 }}>
+        {/* KPI strip */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {kpiCards.map((c) => (
+            <Grid item xs={6} sm={4} md={showAnalytics ? 2 : 3} key={c.label}>
+              <StatCard {...c} loading={loading} onClick={c.path ? () => navigate(c.path) : undefined} />
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Analytics (managers + CEO) */}
+        {showAnalytics && (
+          <>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              <Grid item xs={12} md={7}>
+                <Panel title="Revenue Trend" subtitle="Ordered vs Collected · last 12 months" height={280}>
+                  {data?.revenueTrend?.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={data.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="wOrd" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="wCol" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
+                        <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                        <YAxis tickFormatter={inrCompact} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={66} />
+                        <RTooltip formatter={(v) => inrCompact(v)} />
+                        <Area type="monotone" dataKey="ordered" stroke="#45ADE6" strokeWidth={2.5} fill="url(#wOrd)" name="Ordered" />
+                        <Area type="monotone" dataKey="collected" stroke="#1E7DBE" strokeWidth={2.5} fill="url(#wCol)" name="Collected" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (loading ? <Skeleton variant="rounded" height="100%" /> : <EmptyChart label="No revenue data yet" />)}
+                </Panel>
+              </Grid>
+              <Grid item xs={12} md={5}>
+                <Panel title="Orders by Status" subtitle="Live order pipeline" height={280}>
+                  {ordersByStatus.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={ordersByStatus} dataKey="value" nameKey="name" innerRadius={55} outerRadius={92} paddingAngle={2}>
+                          {ordersByStatus.map((e, i) => <Cell key={e.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        </Pie>
+                        <RTooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (loading ? <Skeleton variant="rounded" height="100%" /> : <EmptyChart label="No orders yet" />)}
+                </Panel>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={12} md={7}>
+                <Panel title="Department Snapshot" subtitle="Activity & workforce across the business" height={260}>
+                  {departments.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={departments.map((d) => ({ name: d.name, value: Number(d.metric) || 0 }))} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <RTooltip cursor={{ fill: alpha(theme.palette.primary.main, 0.06) }} />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={38}>
+                          {departments.map((d, i) => <Cell key={d.key} fill={d.health === "warn" ? "#D97706" : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (loading ? <Skeleton variant="rounded" height="100%" /> : <EmptyChart />)}
+                </Panel>
+              </Grid>
+              <Grid item xs={12} md={5}>
+                <Panel title="Top Customers" subtitle="By order value" height={260}>
+                  {data?.topCustomers?.length ? (
+                    <Stack spacing={1.25} sx={{ height: "100%", overflowY: "auto", pr: 0.5 }}>
+                      {data.topCustomers.map((c, i) => {
+                        const max = data.topCustomers[0]?.value || 1;
+                        return (
+                          <Box key={c.name}>
+                            <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+                              <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: "62%" }}>{i + 1}. {c.name}</Typography>
+                              <Typography variant="body2" fontWeight={700}>{inrCompact(c.value)}</Typography>
+                            </Stack>
+                            <Box sx={{ height: 6, borderRadius: 1, bgcolor: alpha(theme.palette.text.primary, 0.06), overflow: "hidden" }}>
+                              <Box sx={{ height: "100%", width: `${(c.value / max) * 100}%`, borderRadius: 1, bgcolor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  ) : (loading ? <Skeleton variant="rounded" height="100%" /> : <EmptyChart label="No customer revenue yet" />)}
+                </Panel>
+              </Grid>
+            </Grid>
+          </>
+        )}
+
+        {/* Quick Actions */}
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1.5} sx={{ mb: 2 }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>Quick Actions</Typography>
+            <Typography variant="body2" color="text.secondary">Jump into a module in one click.</Typography>
+          </Box>
+          <Stack direction="row" spacing={1}>
+            <Button variant="contained" onClick={() => navigate("/task-checklist")}>Go to Tasks</Button>
+            {showAnalytics && <Button variant="outlined" onClick={() => navigate("/dashboard")}>Open Dashboard</Button>}
+          </Stack>
+        </Stack>
 
         <Grid container spacing={2}>
-          {kpis.map((kpi, index) => {
-            const Icon = kpi.icon;
+          {actions.map((action) => {
+            const Icon = action.icon;
             return (
-              <Grid item xs={12} sm={6} lg={3} key={kpi.label}>
-                <ScrollReveal delay={index * 0.04} y={10}>
-                  <Card variant="outlined" sx={{ height: "100%" }}>
-                    <CardContent sx={{ "&:last-child": { pb: 2 } }}>
-                      {loading ? (
-                        <Stack spacing={1}>
-                          <Skeleton width="45%" />
-                          <Skeleton width="60%" height={34} />
-                          <Skeleton width="55%" />
-                        </Stack>
-                      ) : (
-                        <Stack direction="row" justifyContent="space-between" spacing={2}>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                              {kpi.label}
-                            </Typography>
-                            <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.75 }}>
-                              {kpi.value}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {kpi.hint}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ color: "primary.main", p: 1, borderRadius: 1, bgcolor: "action.hover", height: 44 }}>
-                            <Icon />
-                          </Box>
-                        </Stack>
-                      )}
+              <Grid item xs={6} sm={4} md={3} key={`${action.key}-${action.title}`}>
+                <Card variant="outlined" sx={{ height: "100%", borderColor: action.primary ? "primary.main" : "divider", bgcolor: action.primary ? alpha(theme.palette.primary.main, 0.04) : "background.paper" }}>
+                  <CardActionArea onClick={() => navigate(action.path)} sx={{ height: "100%", alignItems: "stretch" }}>
+                    <CardContent sx={{ height: "100%" }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Box sx={{ width: 42, height: 42, borderRadius: 1.5, display: "flex", alignItems: "center", justifyContent: "center", bgcolor: alpha(theme.palette.primary.main, 0.1), mb: 1.5 }}>
+                          <Icon sx={{ color: "primary.main" }} />
+                        </Box>
+                        {action.primary && <Chip size="small" color="primary" label="Your area" sx={{ height: 20, fontSize: 10, fontWeight: 700 }} />}
+                      </Stack>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{action.title}</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{action.description}</Typography>
                     </CardContent>
-                  </Card>
-                </ScrollReveal>
+                  </CardActionArea>
+                </Card>
               </Grid>
             );
           })}
         </Grid>
-
-        <ScrollReveal y={14}>
-          <Box>
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1.5} sx={{ mb: 2 }}>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  Quick Actions
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Navigate to common ERP modules in one click.
-                </Typography>
-              </Box>
-              <Stack direction="row" spacing={1}>
-                <Button variant="contained" onClick={() => navigate("/task-checklist")}>
-                  Go to Tasks
-                </Button>
-                <Button variant="outlined" onClick={() => navigate("/dashboard")}>
-                  Open Dashboard
-                </Button>
-              </Stack>
-            </Stack>
-
-            <Grid container spacing={2}>
-              {actions.map((action, index) => {
-                const Icon = action.icon;
-                const content = (
-                  <Card variant="outlined" sx={{ height: "100%" }}>
-                    <CardActionArea onClick={() => navigate(action.path)} sx={{ height: "100%", alignItems: "stretch" }}>
-                      <CardContent sx={{ height: "100%", minHeight: 150 }}>
-                        <Stack spacing={1.5} sx={{ height: "100%" }}>
-                          <Box sx={{ color: "primary.main", display: "flex" }}>
-                            <Icon sx={{ fontSize: 30 }} />
-                          </Box>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                              {action.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {action.description}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                );
-
-                return (
-                  <Grid item xs={12} sm={6} lg={4} xl={3} key={action.key}>
-                    {reduceMotion ? (
-                      <ScrollReveal delay={index * 0.04} y={10}>
-                        {content}
-                      </ScrollReveal>
-                    ) : (
-                      <MotionBox
-                        initial={{ opacity: 0, y: 14 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.16 }}
-                        transition={{ duration: 0.32, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                        whileHover={{ y: -2 }}
-                        sx={{ height: "100%" }}
-                      >
-                        {content}
-                      </MotionBox>
-                    )}
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Box>
-        </ScrollReveal>
-
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={7}>
-            <ScrollReveal y={12}>
-              <Paper elevation={2} sx={{ p: 2.5, height: "100%" }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Recent Activity
-                </Typography>
-                <Stack divider={<Divider flexItem />} spacing={1}>
-                  {activities.map((item) => (
-                    <Typography key={item} variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                      {item}
-                    </Typography>
-                  ))}
-                </Stack>
-              </Paper>
-            </ScrollReveal>
-          </Grid>
-          <Grid item xs={12} md={5}>
-            <ScrollReveal y={12} delay={0.04}>
-              <Paper elevation={2} sx={{ p: 2.5, height: "100%" }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Notifications
-                </Typography>
-                <Stack spacing={1}>
-                  {alerts.map((alert) => (
-                    <Alert key={alert} severity={accessBucket === "employee" ? "info" : "warning"} variant="outlined">
-                      {alert}
-                    </Alert>
-                  ))}
-                </Stack>
-              </Paper>
-            </ScrollReveal>
-          </Grid>
-        </Grid>
-      </Stack>
-    </Container>
+      </Container>
+    </Box>
   );
 }
 

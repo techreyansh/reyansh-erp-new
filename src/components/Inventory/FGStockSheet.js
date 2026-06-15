@@ -550,14 +550,14 @@ const FGStockSheet = () => {
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #1976d2;
+            border-bottom: 2px solid #45ADE6;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1976d2;
+            color: #45ADE6;
             margin-bottom: 10px;
           }
           .report-title {
@@ -579,11 +579,11 @@ const FGStockSheet = () => {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid #45ADE6;
           }
           .detail-section h3 {
             margin: 0 0 15px 0;
-            color: #1976d2;
+            color: #45ADE6;
             font-size: 16px;
           }
           .detail-row {
@@ -844,7 +844,7 @@ const FGStockSheet = () => {
               component="h1" 
               sx={{ 
                 fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #1976d2, #64b5f6)',
+                background: 'linear-gradient(45deg, #45ADE6, #64b5f6)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -1047,9 +1047,9 @@ const FGStockSheet = () => {
                   onClick={handleOpenDialog}
                   size="medium"
                   sx={{ 
-                    background: 'linear-gradient(45deg, #1976d2, #64b5f6)',
+                    background: 'linear-gradient(45deg, #45ADE6, #64b5f6)',
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #0d47a1, #1976d2)',
+                      background: 'linear-gradient(45deg, #0d47a1, #45ADE6)',
                     },
                     whiteSpace: 'nowrap'
                   }}
@@ -1416,7 +1416,7 @@ const FGStockSheet = () => {
             variant="h4" 
             sx={{ 
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+              background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -1855,14 +1855,14 @@ const FGStockSheet = () => {
             startIcon={selectedItem ? <SaveIcon /> : <AddIcon />}
             sx={{ 
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+              background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
               color: 'white',
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #0d47a1, #1976d2)',
+                background: 'linear-gradient(135deg, #0d47a1, #45ADE6)',
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },

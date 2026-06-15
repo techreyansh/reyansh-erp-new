@@ -132,7 +132,7 @@ const StockSheetNavigation = () => {
         <Card 
           sx={{ 
             mb: 4, 
-            background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
+            background: 'linear-gradient(135deg, #45ADE6 0%, #45ADE6 100%)',
             color: 'white',
             boxShadow: 6
           }}
@@ -247,7 +247,7 @@ const StockSheetNavigation = () => {
                 },
                 '& .MuiTabs-indicator': {
                   height: 4,
-                  background: 'linear-gradient(45deg, #2196f3, #1976d2)'
+                  background: 'linear-gradient(45deg, #45ADE6, #45ADE6)'
                 }
               }}
             >

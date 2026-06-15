@@ -638,7 +638,7 @@ const ProductionManagement = () => {
             <Grid item xs={12} md={3} key={stage}>
               <Card variant="outlined" sx={{ p: 2, textAlign: "center" }}>
                 <Box sx={{ mb: 1 }}>
-                  {stage === "cutting" && <CutIcon sx={{ fontSize: 32, color: "#1976d2" }} />}
+                  {stage === "cutting" && <CutIcon sx={{ fontSize: 32, color: "#45ADE6" }} />}
                   {stage === "assembly" && <AssemblyIcon sx={{ fontSize: 32, color: "#f57c00" }} />}
                   {stage === "molding" && <MoldingIcon sx={{ fontSize: 32, color: "#388e3c" }} />}
                   {stage === "packing" && <PackingIcon sx={{ fontSize: 32, color: "#7b1fa2" }} />}
@@ -836,7 +836,7 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#667eea',
+                    borderColor: '#1E7DBE',
                   }
                 }}
               >
@@ -875,7 +875,7 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       color: 'white',
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1062,7 +1062,7 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#667eea',
+                    borderColor: '#1E7DBE',
                   }
                 }}
               >
@@ -1101,7 +1101,7 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       color: 'white',
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1215,7 +1215,7 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#667eea',
+                    borderColor: '#1E7DBE',
                   }
                 }}
               >
@@ -1254,7 +1254,7 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                       color: 'white',
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1277,7 +1277,7 @@ const ProductionManagement = () => {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#1976d2" }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#45ADE6" }}>
           🏭 Production Management System
         </Typography>
         <Typography variant="body1" sx={{ color: "#666", mb: 2 }}>
@@ -1626,7 +1626,7 @@ const ProductionManagement = () => {
                               borderColor: 'rgba(102, 126, 234, 0.5)',
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#667eea',
+                              borderColor: '#1E7DBE',
                             }
                           }}
                         >
@@ -1665,7 +1665,7 @@ const ProductionManagement = () => {
                                 boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                               },
                               '&.Mui-selected': {
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                 color: 'white',
                                 fontWeight: 800,
                                 boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

@@ -1645,7 +1645,7 @@ Reyansh International Pvt Ltd`;
                   borderRadius: 4,
                   background: alpha(theme.palette.success.main, 0.1),
                   '& .MuiLinearProgress-bar': {
-                    background: `linear-gradient(90deg, ${theme.palette.success.main}, #42a5f5)`,
+                    background: `linear-gradient(90deg, ${theme.palette.success.main}, #84D2FC)`,
                     borderRadius: 4
                   }
                 }}

@@ -130,7 +130,7 @@ const AttendanceTab = ({ employeeCode, attendance }) => {
         backgroundColor = '#ff9800';
         break;
       case 'half day':
-        backgroundColor = '#2196f3';
+        backgroundColor = '#45ADE6';
         break;
     }
 

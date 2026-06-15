@@ -4,19 +4,19 @@
  * status colors, and chart palettes identically.
  */
 
-/** Standard chart palette — keep all dashboards visually consistent. */
+/** Standard chart palette — brand-led (sky blue + slate navy), then distinct hues. */
 export const CHART_COLORS = [
-  '#0D9488', '#0284C7', '#D97706', '#7C3AED',
-  '#059669', '#DC2626', '#475569', '#DB2777',
+  '#1E7DBE', '#45ADE6', '#2D3D4C', '#84D2FC',
+  '#C0392B', '#81898F', '#0E9F6E', '#7C3AED',
 ];
 
-/** Semantic colors for status / severity. */
+/** Semantic colors for status / severity (brand kit). */
 export const SEMANTIC = {
   success: '#059669',
   warning: '#D97706',
-  critical: '#DC2626',
-  info: '#0284C7',
-  primary: '#0D9488',
+  critical: '#C0392B',
+  info: '#1E7DBE',
+  primary: '#45ADE6',
 };
 
 /** Compact Indian-currency formatting: ₹1.25 Cr / ₹2.45 L / ₹3.4K. */

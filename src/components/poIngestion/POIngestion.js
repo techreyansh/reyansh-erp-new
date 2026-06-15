@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import SalesOrderForm from './POForm';
 import SalesOrderList from './POList';
+import AIPurchaseOrderUpload from './AIPurchaseOrderUpload';
 
 const HOW_IT_WORKS = [
   {
@@ -49,9 +50,29 @@ const SalesOrderIngestion = () => {
   const theme = useTheme();
   const [salesFlowData, setSalesFlowData] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [formKey, setFormKey] = useState(0);
 
   const handleSalesOrderCreated = () => {
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  // AI extracted a PO → feed it into the form's existing prefill path and remount.
+  const handleAIApply = (po) => {
+    if (!po) return;
+    const payload = {
+      salesFlowData: { LogId: po.po_number || 'AI-PO', CompanyName: po.buyer_name || '', leadDetails: {} },
+      newClient: {
+        clientCode: po.buyer_name || '',
+        products: (po.line_items || []).map((li) => ({
+          productCode: li.product_code || '',
+          productName: li.description || '',
+          quantity: Number(li.quantity) || 1,
+          price: Number(li.unit_price) || 0,
+        })),
+      },
+    };
+    try { sessionStorage.setItem('salesFlowForSO', JSON.stringify(payload)); } catch (e) { /* ignore */ }
+    setFormKey((k) => k + 1);
   };
 
   // Refresh the list when returning from a dispatch operation.
@@ -155,9 +176,12 @@ const SalesOrderIngestion = () => {
         </Box>
       </Paper>
 
+      {/* AI PO capture */}
+      <AIPurchaseOrderUpload onApply={handleAIApply} />
+
       {/* Form */}
       <Box sx={{ mb: 3 }}>
-        <SalesOrderForm onSalesOrderCreated={handleSalesOrderCreated} />
+        <SalesOrderForm key={formKey} onSalesOrderCreated={handleSalesOrderCreated} />
       </Box>
 
       {/* List */}

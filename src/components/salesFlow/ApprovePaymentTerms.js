@@ -292,7 +292,7 @@ const ApprovePaymentTerms = () => {
         alignItems="center" 
         minHeight="400px"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
           borderRadius: 3,
           p: 4
         }}
@@ -317,7 +317,7 @@ const ApprovePaymentTerms = () => {
             {/* Enhanced Header */}
             <Card sx={{ 
               mb: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
@@ -465,7 +465,7 @@ const ApprovePaymentTerms = () => {
                 <Table>
                   <TableHead>
                     <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                     }}>
                       <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Customer</TableCell>
@@ -485,7 +485,7 @@ const ApprovePaymentTerms = () => {
                             <Avatar sx={{ 
                               width: 80, 
                               height: 80, 
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                               mb: 2
                             }}>
                               <Payment sx={{ fontSize: 40 }} />
@@ -526,7 +526,7 @@ const ApprovePaymentTerms = () => {
                                   <Avatar sx={{ 
                                     width: 40, 
                                     height: 40, 
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
                                   }}>
                                     {(lead.FullName || lead.CustomerName || 'C').charAt(0)}
                                   </Avatar>
@@ -626,7 +626,7 @@ const ApprovePaymentTerms = () => {
               fullWidth
             >
               <DialogTitle sx={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                 color: 'white'
               }}>
                 <Box display="flex" alignItems="center" gap={2}>

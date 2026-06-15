@@ -257,9 +257,9 @@ const StyledChip = styled(Chip)(({ theme, variant }) => {
         };
       case 'info':
         return {
-          background: `linear-gradient(135deg, #2196F3 0%, #03A9F4 100%)`,
+          background: `linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)`,
           color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#2196F3', 0.3)}`,
+          boxShadow: `0 4px 12px ${alpha('#45ADE6', 0.3)}`,
         };
       default:
         return {
@@ -302,7 +302,7 @@ const AnimatedButton = styled(Button)(({ theme, variant = 'primary' }) => {
     switch (variant) {
       case 'gradient':
         return {
-          background: `linear-gradient(90deg, #1e3a8a 0%, #f97316 100%)`, // Blue to orange gradient
+          background: `linear-gradient(90deg, #1E7DBE 0%, #f97316 100%)`, // Blue to orange gradient
           color: 'white',
           borderRadius: '20px', // More rounded corners
           fontWeight: 700,
@@ -400,7 +400,7 @@ const StatusStepper = ({ currentStatus, onStatusChange }) => {
   const statusSteps = [
     { label: 'Draft', icon: <Edit />, color: '#9E9E9E' },
     { label: 'Pending', icon: <Schedule />, color: '#FF9800' },
-    { label: 'Confirmed', icon: <CheckCircle />, color: '#2196F3' },
+    { label: 'Confirmed', icon: <CheckCircle />, color: '#45ADE6' },
     { label: 'Production', icon: <Assignment />, color: '#9C27B0' },
     { label: 'Ready', icon: <Inventory />, color: '#607D8B' },
     { label: 'Dispatched', icon: <LocalShipping />, color: '#4CAF50' },
@@ -1469,7 +1469,7 @@ const EnhancedClientOrderTakingSheet = () => {
                                     size="small"
                                     sx={{
                                       backgroundColor: '#e3f2fd',
-                                      color: '#1976d2',
+                                      color: '#45ADE6',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
                                       '&:hover': { backgroundColor: '#bbdefb' }
@@ -1482,7 +1482,7 @@ const EnhancedClientOrderTakingSheet = () => {
                                     size="small"
                                     sx={{
                                       backgroundColor: '#e3f2fd',
-                                      color: '#1976d2',
+                                      color: '#45ADE6',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
                                       '&:hover': { backgroundColor: '#bbdefb' }
@@ -1495,7 +1495,7 @@ const EnhancedClientOrderTakingSheet = () => {
                                     size="small"
                                     sx={{
                                       backgroundColor: '#e3f2fd',
-                                      color: '#1976d2',
+                                      color: '#45ADE6',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
                                       '&:hover': { backgroundColor: '#bbdefb' }
@@ -1559,7 +1559,7 @@ const EnhancedClientOrderTakingSheet = () => {
                             borderColor: 'rgba(102, 126, 234, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#667eea',
+                            borderColor: '#1E7DBE',
                           }
                         }}
                       >
@@ -1599,7 +1599,7 @@ const EnhancedClientOrderTakingSheet = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                               color: 'white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',

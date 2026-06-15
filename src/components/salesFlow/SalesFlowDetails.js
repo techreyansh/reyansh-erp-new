@@ -258,7 +258,7 @@ const SalesFlowDetails = () => {
         alignItems="center" 
         minHeight="400px"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
           borderRadius: 3,
           p: 4
         }}
@@ -293,7 +293,7 @@ const SalesFlowDetails = () => {
             {/* Header */}
             <Card sx={{ 
               mb: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
               color: 'white',
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
@@ -352,7 +352,7 @@ const SalesFlowDetails = () => {
             {/* Customer Information */}
             <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ mb: 3, color: '#1976d2', fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600 }}>
                   Customer Information
                 </Typography>
                 <Grid container spacing={3}>
@@ -423,7 +423,7 @@ const SalesFlowDetails = () => {
             {/* Sales Flow Steps Timeline */}
             <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ mb: 3, color: '#1976d2', fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600 }}>
                   Sales Flow Timeline
                 </Typography>
                 
@@ -445,7 +445,7 @@ const SalesFlowDetails = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: '#667eea' }} />
+                          <Search sx={{ color: '#1E7DBE' }} />
                         </InputAdornment>
                       ),
                     }}
@@ -465,7 +465,7 @@ const SalesFlowDetails = () => {
                             height: 40, 
                             background: step.Status === 'completed' 
                               ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
-                              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              : 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                             color: 'white'
                           }}>
                             {getStepIcon(parseInt(step.StepId))}
@@ -557,7 +557,7 @@ const SalesFlowDetails = () => {
                     borderTop: '1px solid rgba(102, 126, 234, 0.1)'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Typography variant="body2" sx={{ color: '#667eea', fontWeight: 600 }}>
+                      <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 600 }}>
                         Steps per page:
                       </Typography>
                       <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -575,7 +575,7 @@ const SalesFlowDetails = () => {
                               borderColor: 'rgba(102, 126, 234, 0.5)',
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#667eea',
+                              borderColor: '#1E7DBE',
                             }
                           }}
                         >
@@ -587,7 +587,7 @@ const SalesFlowDetails = () => {
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <Typography variant="body2" sx={{ color: '#667eea', fontWeight: 600 }}>
+                      <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 600 }}>
                         {page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, filteredSteps.length)} of {filteredSteps.length} steps
                       </Typography>
                       
@@ -614,7 +614,7 @@ const SalesFlowDetails = () => {
                                 boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                               },
                               '&.Mui-selected': {
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
                                 color: 'white',
                                 fontWeight: 800,
                                 boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -636,7 +636,7 @@ const SalesFlowDetails = () => {
             {/* Action Button */}
             <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
                   Ready to Create Sales Order?
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3, color: 'textSecondary' }}>

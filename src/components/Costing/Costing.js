@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -26,14 +26,21 @@ import {
   Tooltip,
   Chip,
   CircularProgress,
-  Pagination
+  Pagination,
+  Stack,
+  alpha,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  PaidOutlined,
+  ReceiptLongOutlined,
+  TrendingUpRounded,
+  CableOutlined,
 } from '@mui/icons-material';
 import costingService from '../../services/costingService';
+import { StatCard } from '../common/kit';
 
 const Costing = () => {
   const [costingEntries, setCostingEntries] = useState([]);
@@ -176,6 +183,29 @@ const Costing = () => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 
+  // Live cost breakdown — recomputes as the user types in the entry form.
+  const liveCost = useMemo(() => {
+    try {
+      return costingService.calculateValues({
+        ...formData,
+        copperRate: settings.copperRate,
+        pvcRate: settings.pvcRate,
+        labourOnWire: settings.labourOnWire,
+      });
+    } catch (e) {
+      return null;
+    }
+  }, [formData, settings]);
+
+  // Default order: newest costing entries first.
+  const sortedEntries = useMemo(() => {
+    return [...costingEntries].sort((a, b) => {
+      const da = new Date(a.Date || a.date || 0).getTime();
+      const db = new Date(b.Date || b.date || 0).getTime();
+      return (db || 0) - (da || 0);
+    });
+  }, [costingEntries]);
+
   const handleSubmit = async () => {
     try {
       // Use incremented values for saving
@@ -261,182 +291,62 @@ const Costing = () => {
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      p: 3
-    }}>
-      {/* Header Section */}
-      <Box sx={{ 
-        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-        borderRadius: 3,
-        p: 4,
-        mb: 4,
-        boxShadow: '0 8px 32px rgba(25, 118, 210, 0.3)',
-        color: 'white'
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ 
-              width: 60, 
-              height: 60, 
-              borderRadius: '50%', 
-              backgroundColor: 'rgba(255,255,255,0.2)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>💰</Typography>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: { xs: 2, md: 3 } }}>
+      {/* Header */}
+      <Paper
+        variant="outlined"
+        sx={{
+          borderRadius: 2.5,
+          p: { xs: 2, md: 2.5 },
+          mb: 3,
+          background: (t) => `linear-gradient(180deg, ${alpha(t.palette.primary.main, 0.06)} 0%, transparent 100%)`,
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: (t) => alpha(t.palette.primary.main, 0.1) }}>
+              <PaidOutlined sx={{ color: 'primary.main' }} />
             </Box>
             <Box>
-              <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-                Costing Management
+              <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+                Costing
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Manage and track all costing calculations and material pricing
+              <Typography variant="body2" color="text.secondary">
+                Cable & cord cost calculations and material rates
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Tooltip title="Settings">
-              <IconButton 
-                onClick={() => setOpenSettings(true)}
-                sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.3)',
-                    transform: 'scale(1.05)'
-                  },
-                  transition: 'all 0.2s ease-in-out'
-                }}
-              >
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Rate settings">
+              <IconButton onClick={() => setOpenSettings(true)} size="small">
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={fetchCostingEntries}
-              disabled={loading}
-              sx={{ 
-                borderColor: 'rgba(255,255,255,0.5)',
-                color: 'white',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)'
-                }
-              }}
-            >
+            <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchCostingEntries} disabled={loading} sx={{ textTransform: 'none' }}>
               Refresh
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenDialog(true)}
-              sx={{ 
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                backdropFilter: 'blur(10px)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                  transform: 'scale(1.02)'
-                },
-                transition: 'all 0.2s ease-in-out'
-              }}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)} sx={{ textTransform: 'none' }}>
               Add New
             </Button>
-          </Box>
+          </Stack>
         </Box>
-      </Box>
+      </Paper>
 
-      {/* Stats Cards */}
-      <Box sx={{ mb: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Paper elevation={3} sx={{ 
-              p: 3, 
-              borderRadius: 3, 
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              textAlign: 'center',
-              transition: 'transform 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)'
-              }
-            }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {costingEntries.length}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Total Entries
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Paper elevation={3} sx={{ 
-              p: 3, 
-              borderRadius: 3, 
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              color: 'white',
-              textAlign: 'center',
-              transition: 'transform 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)'
-              }
-            }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                ₹{settings.copperRate || 0}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Copper Rate/kg
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Paper elevation={3} sx={{ 
-              p: 3, 
-              borderRadius: 3, 
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
-              textAlign: 'center',
-              transition: 'transform 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)'
-              }
-            }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                ₹{settings.pvcRate || 0}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                PVC Rate/kg
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Paper elevation={3} sx={{ 
-              p: 3, 
-              borderRadius: 3, 
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-              color: 'white',
-              textAlign: 'center',
-              transition: 'transform 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)'
-              }
-            }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {settings.labourOnWire || 0}%
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Labour Rate
-              </Typography>
-            </Paper>
-          </Grid>
+      {/* Stats */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Total Entries" value={costingEntries.length} icon={ReceiptLongOutlined} accent="#1E7DBE" />
         </Grid>
-      </Box>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Copper Rate" value={`₹${settings.copperRate || 0}`} sub="per kg" icon={PaidOutlined} accent="#D97706" />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard label="PVC Rate" value={`₹${settings.pvcRate || 0}`} sub="per kg" icon={CableOutlined} accent="#45ADE6" />
+        </Grid>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Labour Rate" value={`${settings.labourOnWire || 0}%`} sub="on wire" icon={TrendingUpRounded} accent="#7C3AED" />
+        </Grid>
+      </Grid>
 
       {/* Settings Dialog */}
       <Dialog 
@@ -453,7 +363,7 @@ const Costing = () => {
         }}
       >
         <DialogTitle sx={{ 
-          backgroundColor: '#1976d2', 
+          backgroundColor: '#45ADE6', 
           color: 'white',
           py: 3,
           px: 4,
@@ -479,7 +389,7 @@ const Costing = () => {
         
         <DialogContent sx={{ p: 4, backgroundColor: '#fafafa' }}>
           <Box sx={{ mb: 3, p: 3, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 3, color: '#1976d2', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
               💰 Material Rates Configuration
             </Typography>
             
@@ -500,7 +410,7 @@ const Costing = () => {
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     }
                   }}
@@ -508,7 +418,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -529,7 +439,7 @@ const Costing = () => {
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     }
                   }}
@@ -537,7 +447,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -558,7 +468,7 @@ const Costing = () => {
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     }
                   }}
@@ -566,7 +476,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -579,10 +489,10 @@ const Costing = () => {
           </Box>
           
           <Box sx={{ p: 3, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1565c0', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#1E7DBE', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
               ℹ️ Information
             </Typography>
-            <Typography variant="body2" color="#1565c0" sx={{ lineHeight: 1.6 }}>
+            <Typography variant="body2" color="#1E7DBE" sx={{ lineHeight: 1.6 }}>
               These rates are used as default values for all new costing entries. Copper rate: ₹700/kg, PVC rate: ₹100/kg, Labour rate: 12%. You can modify them at any time, and the changes will apply to future calculations. Existing entries will retain their original rates.
             </Typography>
           </Box>
@@ -613,9 +523,9 @@ const Costing = () => {
               borderRadius: 2, 
               px: 4,
               py: 1,
-              backgroundColor: '#1976d2',
+              backgroundColor: '#45ADE6',
               '&:hover': {
-                backgroundColor: '#1565c0'
+                backgroundColor: '#1E7DBE'
               }
             }}
           >
@@ -639,7 +549,7 @@ const Costing = () => {
         }}
       >
         <DialogTitle sx={{ 
-          backgroundColor: '#1976d2', 
+          backgroundColor: '#45ADE6', 
           color: 'white',
           py: 3,
           px: 4,
@@ -664,8 +574,50 @@ const Costing = () => {
         </DialogTitle>
         
         <DialogContent sx={{ p: 4, backgroundColor: '#fafafa' }}>
+          {/* Live cost breakdown — updates as you fill the form */}
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3, p: 2, borderRadius: 2.5, position: 'sticky', top: 0, zIndex: 2,
+              border: '1px solid', borderColor: 'divider',
+              background: (t) => `linear-gradient(135deg, ${alpha(t.palette.primary.main, 0.1)} 0%, ${alpha(t.palette.primary.main, 0.03)} 100%)`,
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, letterSpacing: '0.02em' }}>
+                ⚡ Live Cost Breakdown
+              </Typography>
+              <Chip
+                label={`Cord Cost  ₹${(liveCost?.cordCost || 0).toFixed(2)}`}
+                color="primary"
+                sx={{ fontWeight: 800, fontSize: '0.85rem', height: 30 }}
+              />
+            </Stack>
+            <Grid container spacing={1.25}>
+              {[
+                { label: 'Final Copper', value: `${(liveCost?.finalCopper || 0).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'Final PVC', value: `${((liveCost?.finalPVCRound || 0) + (liveCost?.finalPVCFlat || 0)).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'RMC', value: `₹${(liveCost?.rmc || 0).toFixed(2)}`, unit: '/100m' },
+                { label: 'Wire / metre', value: `₹${(liveCost?.costOfWirePerMtr || 0).toFixed(2)}`, unit: 'per m' },
+                { label: 'Wire Cost', value: `₹${(liveCost?.wireCost || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
+                { label: 'Plug + Terminal', value: `₹${((parseFloat(formData.plugCost) || 0) + (parseFloat(formData.terminalAccCost) || 0)).toFixed(2)}`, unit: 'add-ons' },
+              ].map((m) => (
+                <Grid item xs={6} sm={4} md={2} key={m.label}>
+                  <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', height: '100%' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.62rem', display: 'block' }}>
+                      {m.label}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, lineHeight: 1.2 }}>{m.value}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.6rem' }}>{m.unit}</Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+
           <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               📋 Basic Information
             </Typography>
             <Grid container spacing={3}>
@@ -682,7 +634,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -698,7 +650,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -708,7 +660,7 @@ const Costing = () => {
           </Box>
 
           <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               🔧 Technical Specifications
             </Typography>
             <Grid container spacing={3}>
@@ -724,7 +676,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -742,7 +694,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -760,7 +712,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -798,7 +750,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -809,7 +761,7 @@ const Costing = () => {
           </Box>
 
           <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               📏 Dimensions
             </Typography>
             <Grid container spacing={3}>
@@ -824,7 +776,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -841,7 +793,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -858,7 +810,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -868,7 +820,7 @@ const Costing = () => {
           </Box>
 
           <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               💰 Cost & Labor
             </Typography>
             <Grid container spacing={3}>
@@ -885,7 +837,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -902,7 +854,7 @@ const Costing = () => {
                       borderRadius: 2,
                       '& .MuiOutlinedInput-notchedOutline': {
                         '&:hover': {
-                          borderColor: '#1976d2',
+                          borderColor: '#45ADE6',
                         },
                       },
                     }}
@@ -923,7 +875,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -940,7 +892,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -950,7 +902,7 @@ const Costing = () => {
           </Box>
 
           <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
               📝 Additional Information
             </Typography>
             <Grid container spacing={3}>
@@ -966,7 +918,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#1976d2',
+                        borderColor: '#45ADE6',
                       },
                     },
                   }}
@@ -1010,9 +962,9 @@ const Costing = () => {
               borderRadius: 2, 
               px: 4,
               py: 1,
-              backgroundColor: '#1976d2',
+              backgroundColor: '#45ADE6',
               '&:hover': {
-                backgroundColor: '#1565c0'
+                backgroundColor: '#1E7DBE'
               },
               '&:disabled': {
                 backgroundColor: '#ccc',
@@ -1027,29 +979,32 @@ const Costing = () => {
       </Dialog>
 
       {/* Table */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2' }}>
+      <Paper variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 2.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Costing Entries
           </Typography>
           <Button
             variant="outlined"
             onClick={handleInitializeSheet}
             size="small"
-            sx={{ borderRadius: 2 }}
+            sx={{ textTransform: 'none' }}
           >
             Initialize Sheet
           </Button>
         </Box>
-        
-        <TableContainer sx={{ maxHeight: 500, borderRadius: 2, border: '2px solid #e3f2fd', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+
+        <TableContainer sx={{ maxHeight: 520, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1565c0', 
-                  color: 'white',
+                  backgroundColor: '#E2E8F0',
+                  color: '#334155',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100,
                   textAlign: 'center',
@@ -1059,8 +1014,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 90
                 }}>
@@ -1068,8 +1026,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 150
                 }}>
@@ -1077,8 +1038,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1086,8 +1050,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 70
                 }}>
@@ -1095,8 +1062,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1104,8 +1074,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1113,8 +1086,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1122,8 +1098,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1131,8 +1110,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 70
                 }}>
@@ -1140,8 +1122,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 70
                 }}>
@@ -1149,8 +1134,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1158,8 +1146,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1167,8 +1158,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1176,8 +1170,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1185,8 +1182,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1194,8 +1194,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1203,8 +1206,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 90
                 }}>
@@ -1212,8 +1218,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1221,8 +1230,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1230,8 +1242,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1239,8 +1254,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1248,8 +1266,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 90
                 }}>
@@ -1257,8 +1278,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 80
                 }}>
@@ -1266,8 +1290,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 90
                 }}>
@@ -1275,8 +1302,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 120
                 }}>
@@ -1284,8 +1314,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 90
                 }}>
@@ -1293,8 +1326,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1302,8 +1338,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   borderRight: '1px solid #e0e0e0',
                   minWidth: 100
                 }}>
@@ -1311,8 +1350,11 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#1976d2', 
-                  color: 'white',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   minWidth: 120
                 }}>
                   Remarks
@@ -1350,7 +1392,7 @@ const Costing = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                costingEntries
+                sortedEntries
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((entry, index) => (
                   <TableRow 
@@ -1367,7 +1409,7 @@ const Costing = () => {
                   >
                     <TableCell sx={{ 
                       fontWeight: 'bold', 
-                      color: '#1976d2',
+                      color: '#45ADE6',
                       borderRight: '1px solid #e0e0e0',
                       fontFamily: 'monospace',
                       textAlign: 'center'
@@ -1442,7 +1484,7 @@ const Costing = () => {
                       textAlign: 'right', 
                       fontFamily: 'monospace',
                       fontWeight: 'bold',
-                      color: '#1976d2'
+                      color: '#45ADE6'
                     }}>
                       ₹{entry['Bundle Cost']}
                     </TableCell>
@@ -1545,7 +1587,7 @@ const Costing = () => {
                       borderColor: 'rgba(25, 118, 210, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#1976d2',
+                      borderColor: '#45ADE6',
                     }
                   }}
                 >
@@ -1585,7 +1627,7 @@ const Costing = () => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                        background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
                         color: 'white',
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1604,7 +1646,7 @@ const Costing = () => {
         
         {costingEntries.length > 0 && (
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-            <Typography variant="body1" sx={{ fontWeight: 500, color: '#1976d2' }}>
+            <Typography variant="body1" sx={{ fontWeight: 500, color: '#45ADE6' }}>
               📊 Total Entries: <strong>{costingEntries.length}</strong>
             </Typography>
             <Typography variant="body2" color="textSecondary">

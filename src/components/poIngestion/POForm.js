@@ -99,12 +99,12 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
               if (newClient?.products && Array.isArray(newClient.products) && newClient.products.length > 0) {
                 // Use products from newly created client
                 productsToUse = newClient.products.map(product => ({
-                  itemName: 'Product', // Will be populated when product details are fetched
-                  productDesc: 'Product Description',
-                  productCode: product.productCode,
-                  qty: 1,
-                  price: 0,
-                  batchSize: 1,
+                  itemName: product.productName || product.itemName || 'Product',
+                  productDesc: product.productName || 'Product Description',
+                  productCode: product.productCode || '',
+                  qty: Number(product.quantity || product.qty) || 1,
+                  price: Number(product.price) || 0,
+                  batchSize: Number(product.batchSize) || 1,
                   orderType: 'CABLE_ONLY',
                   uniqueId: generateUniqueId()
                 }));

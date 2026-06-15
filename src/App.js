@@ -99,6 +99,7 @@ import ReleasePayment from './components/purchaseFlow/steps/ReleasePayment';
 import Costing from './components/Costing/Costing';
 import SortVendors from './components/purchaseFlow/steps/SortVendors';
 import CableProductionModule from './components/cable/CableProductionModule';
+import CableFloorView from './components/cable/CableFloorView';
 import MoldingProductionModule from './components/molding/MoldingProductionModule';
 import MoldingMainNavigation from './components/molding/MoldingMainNavigation';
 import MoldingDashboardNavigation from './components/molding/MoldingDashboardNavigation';
@@ -113,6 +114,9 @@ const WelcomePage = lazy(() => import("./pages/WelcomePage"));
 const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOExecutiveDashboard"));
 const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
+const CRMImport = lazy(() => import("./components/crm/CRMImport"));
+const AccountabilityScorecard = lazy(() => import("./components/accountability/AccountabilityScorecard"));
+const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
@@ -196,6 +200,11 @@ function AppContent() {
                       <CEOExecutiveDashboard />
                     </CEOOnlyRoute>
                   } />
+                  <Route path="/master-data" element={
+                    <CEOOnlyRoute>
+                      <MasterDataHub />
+                    </CEOOnlyRoute>
+                  } />
                   <Route path="/plant-command" element={
                     <ProtectedRouteGate>
                       <PlantHeadDashboard />
@@ -206,10 +215,20 @@ function AppContent() {
                       <ProductionLogModule />
                     </ProtectedRouteGate>
                   } />
-                  <Route path="/access-management" element={
+                  <Route path="/crm-import" element={
                     <ProtectedRouteGate>
-                      <AccessManagementPage />
+                      <CRMImport />
                     </ProtectedRouteGate>
+                  } />
+                  <Route path="/accountability" element={
+                    <ProtectedRouteGate>
+                      <AccountabilityScorecard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/access-management" element={
+                    <CEOOnlyRoute>
+                      <AccessManagementPage />
+                    </CEOOnlyRoute>
                   } />
                   <Route path="/profile" element={
                     <ProtectedRouteGate>
@@ -303,6 +322,21 @@ function AppContent() {
                   <Route path="/cable-production/production-planning" element={
                     <ProtectedRouteGate>
                       <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/auto-planner" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/job-cards" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-floor" element={
+                    <ProtectedRouteGate>
+                      <CableFloorView />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/cable-production/machine-scheduling" element={

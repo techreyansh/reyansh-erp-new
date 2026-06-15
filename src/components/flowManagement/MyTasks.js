@@ -124,7 +124,7 @@ const MyTasks = () => {
         sx={{
           p: 4,
           mb: 4,
-          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
           color: 'white',
           borderRadius: 3
         }}
