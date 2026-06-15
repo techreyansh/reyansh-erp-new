@@ -2,18 +2,26 @@
 // machine's jobs for today, with a big RUNNING NOW banner. Open via
 // /cable-floor?machine=M1 (the Job Cards "TV" button).
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Typography, Chip, Stack, CircularProgress } from "@mui/material";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { Box, Typography, Chip, Stack, CircularProgress, IconButton, Tooltip } from "@mui/material";
+import { CloseRounded } from "@mui/icons-material";
 import sheetService from "../../services/sheetService";
 import { jobSpecs, DEFAULT_MACHINES } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder } from "../../services/cablePlanner/erpAdapter";
+import { demoScheduleRows, demoCablesByCode, demoOrdersById } from "../../services/cablePlanner/demo";
 
 const num = (v) => { const n = Number(String(v ?? "").replace(/[^0-9.-]/g, "")); return Number.isFinite(n) ? n : 0; };
 const hhmm = (iso) => (iso ? new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "—");
 const rowToJob = (row) => ({ stage: row.stage, plannedM: num(row.quantity), plannedInputM: num(row.inputQuantity), coreIndex: row.coreIndex, coreColor: row.coreColor, coreOfTotal: row.coreOfTotal });
 
 export default function CableFloorView() {
-  const machineId = new URLSearchParams(window.location.search).get("machine") || "M1";
+  const navigate = useNavigate();
+  const params = new URLSearchParams(window.location.search);
+  const machineId = params.get("machine") || "M1";
+  const isDemo = params.get("demo") === "1";
   const machine = DEFAULT_MACHINES.find((m) => m.id === machineId) || DEFAULT_MACHINES[0];
+  const exit = () => { try { window.close(); } catch { /* not a popup */ } navigate("/cable-production/job-cards"); };
   const [jobs, setJobs] = useState([]);
   const [cablesByCode, setCablesByCode] = useState({});
   const [ordersById, setOrdersById] = useState({});
@@ -21,6 +29,17 @@ export default function CableFloorView() {
   const [tick, setTick] = useState(Date.now());
 
   const load = useCallback(async () => {
+    // Demo mode: synthesize today's jobs around `now` (nothing persisted).
+    if (isDemo) {
+      const rows = demoScheduleRows(Date.now())
+        .filter((r) => r.machineId === machine.id)
+        .sort((a, b) => String(a.scheduledStartTime).localeCompare(String(b.scheduledStartTime)));
+      setJobs(rows);
+      setCablesByCode(demoCablesByCode());
+      setOrdersById(demoOrdersById());
+      setLoading(false);
+      return;
+    }
     try {
       const [sch, cp, plans] = await Promise.all([
         sheetService.getSheetData("Machine Schedules"),
@@ -35,7 +54,7 @@ export default function CableFloorView() {
       const ords = {}; (plans || []).map(rowToOrder).forEach((o) => { ords[o.id] = o; });
       setOrdersById(ords);
     } catch { /* keep last good */ } finally { setLoading(false); }
-  }, [machine.id]);
+  }, [machine.id, isDemo]);
 
   useEffect(() => { load(); }, [load]);
   // auto-refresh data every 60s + clock every 30s
@@ -51,14 +70,25 @@ export default function CableFloorView() {
     return now >= s && now <= e && !String(r.status || "").toLowerCase().includes("complet");
   };
 
-  return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "#0b1020", color: "#fff", zIndex: 2000, overflow: "auto", p: { xs: 2, md: 4 } }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography sx={{ fontWeight: 900, fontSize: { xs: 28, md: 44 } }}>{machine.name} <span style={{ opacity: 0.5 }}>· {machine.id}</span></Typography>
-        <Box sx={{ textAlign: "right" }}>
-          <Typography sx={{ fontWeight: 800, fontSize: { xs: 22, md: 34 } }}>{new Date(now).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false })}</Typography>
-          <Typography sx={{ opacity: 0.6 }}>{new Date(now).toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short" })}</Typography>
-        </Box>
+  // Rendered through a portal to <body> so the fixed full-screen overlay escapes
+  // the app shell (whose transformed ancestors would otherwise clip it).
+  return createPortal(
+    <Box sx={{ position: "fixed", inset: 0, bgcolor: "#0b1020", color: "#fff", zIndex: 13000, overflow: "auto", p: { xs: 2, md: 4 }, boxSizing: "border-box" }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ mb: 3 }}>
+        <Typography sx={{ fontWeight: 900, fontSize: { xs: 24, md: 40 }, lineHeight: 1.1 }}>
+          {machine.name} <Box component="span" sx={{ opacity: 0.5 }}>· {machine.id}</Box>
+        </Typography>
+        <Stack direction="row" spacing={2} alignItems="flex-start">
+          <Box sx={{ textAlign: "right" }}>
+            <Typography sx={{ fontWeight: 800, fontSize: { xs: 22, md: 34 }, lineHeight: 1 }}>{new Date(now).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false })}</Typography>
+            <Typography sx={{ opacity: 0.6, fontSize: { xs: 12, md: 14 } }}>{new Date(now).toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short" })}</Typography>
+          </Box>
+          <Tooltip title="Exit floor view">
+            <IconButton onClick={exit} sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.1)", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}>
+              <CloseRounded />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Stack>
 
       {loading ? (
@@ -106,6 +136,7 @@ export default function CableFloorView() {
         </Stack>
       )}
       <Typography sx={{ opacity: 0.35, textAlign: "center", mt: 4, fontSize: 13 }}>Auto-refreshes every 60 seconds · Reyansh ERP Cable Planner</Typography>
-    </Box>
+    </Box>,
+    document.body
   );
 }

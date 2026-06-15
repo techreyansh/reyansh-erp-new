@@ -12,6 +12,7 @@ import {
 import sheetService from "../../services/sheetService";
 import { jobSpecs, DEFAULT_MACHINES } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder } from "../../services/cablePlanner/erpAdapter";
+import { demoScheduleRows, demoCablesByCode, demoOrdersById } from "../../services/cablePlanner/demo";
 
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
 const num = (v) => { const n = Number(String(v ?? "").replace(/[^0-9.-]/g, "")); return Number.isFinite(n) ? n : 0; };
@@ -64,6 +65,15 @@ export default function CableJobCards() {
 
   useEffect(() => { load(); }, [load]);
 
+  const loadDemo = () => {
+    setRows(demoScheduleRows(Date.now()));
+    setCablesByCode(demoCablesByCode());
+    setOrdersById(demoOrdersById());
+    setDate(todayStr());
+    setLoading(false);
+    notify("Loaded demo jobs (in-memory — not saved)", "info");
+  };
+
   const byMachine = useMemo(() => {
     const dayRows = rows.filter((r) => String(r.scheduledStartTime || "").slice(0, 10) === date);
     const map = {};
@@ -112,6 +122,7 @@ export default function CableJobCards() {
           <Typography variant="h6" sx={{ fontWeight: 800 }}>Job Cards</Typography>
           <TextField size="small" type="date" label="Date" InputLabelProps={{ shrink: true }} value={date} onChange={(e) => setDate(e.target.value)} sx={{ width: 170 }} />
           <Box sx={{ flex: 1 }} />
+          <Button size="small" onClick={loadDemo} sx={{ textTransform: "none" }}>Demo data</Button>
           <Button size="small" startIcon={<RefreshRounded />} onClick={load} sx={{ textTransform: "none" }}>Reload</Button>
         </Stack>
       </Paper>
