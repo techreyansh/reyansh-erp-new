@@ -9,6 +9,7 @@ import {
   CheckCircle, Warning, Info, Star, TrendingUp, Group, Search, 
   FilterList, ViewList, ViewModule, Refresh, Download, ExpandMore, ExpandLess
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { getAllClients, addClient, updateClient, deleteClient } from '../../services/clientService';
@@ -68,6 +69,7 @@ const emptyClient = {
 };
 
 const ClientManager = () => {
+  const theme = useTheme();
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [open, setOpen] = useState(false);
@@ -583,7 +585,7 @@ const ClientManager = () => {
           width: 100,
           height: 100,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
+          background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
           opacity: 0.3,
           animation: 'float 6s ease-in-out infinite',
           zIndex: 0
@@ -597,7 +599,7 @@ const ClientManager = () => {
           width: 150,
           height: 150,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #45ADE6, #1E7DBE)',
+          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           opacity: 0.2,
           animation: 'float 8s ease-in-out infinite reverse',
           zIndex: 0
@@ -611,7 +613,7 @@ const ClientManager = () => {
           width: 80,
           height: 80,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
+          background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
           opacity: 0.4,
           animation: 'float 7s ease-in-out infinite',
           zIndex: 0
@@ -625,7 +627,7 @@ const ClientManager = () => {
           width: 120,
           height: 120,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #45ADE6, #1E7DBE)',
+          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           opacity: 0.3,
           animation: 'float 9s ease-in-out infinite reverse',
           zIndex: 0
@@ -639,7 +641,7 @@ const ClientManager = () => {
         sx={{ 
           p: 4, 
           mb: 4, 
-          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
           color: 'white',
           borderRadius: 4,
           position: 'relative',
@@ -695,7 +697,7 @@ const ClientManager = () => {
             sx={{ 
                     fontWeight: 800,
                     textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
+                    background: `linear-gradient(45deg, ${theme.palette.common.white} 30%, ${theme.palette.grey[100]} 90%)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
@@ -734,7 +736,7 @@ const ClientManager = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {clients.length}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -757,7 +759,7 @@ const ClientManager = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {clients.filter(c => c.status === 'Active').length}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -780,7 +782,7 @@ const ClientManager = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {filteredClients.length}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -803,7 +805,7 @@ const ClientManager = () => {
                   }
                 }}
               >
-                <Typography variant="h3" sx={{ fontWeight: 800, color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, color: 'common.white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                   {clients.reduce((sum, c) => sum + (c.totalOrders || 0), 0)}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 600 }}>
@@ -835,7 +837,7 @@ const ClientManager = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               zIndex: 1
             }
         }}
@@ -854,7 +856,7 @@ const ClientManager = () => {
               <Typography 
                   variant="h4" 
                 sx={{ 
-                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -867,7 +869,7 @@ const ClientManager = () => {
               <Typography 
                   variant="body1" 
                 sx={{ 
-                    color: '#6c757d',
+                    color: 'text.secondary',
                     fontWeight: 500
                 }}
               >
@@ -880,9 +882,9 @@ const ClientManager = () => {
                 startIcon={<Add />}
                 onClick={() => handleOpen(null, null)}
                 sx={{
-                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                     '&:hover': { 
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       transform: 'translateY(-2px)',
                       boxShadow: '0 10px 20px rgba(102, 126, 234, 0.3)'
                     },
@@ -903,10 +905,10 @@ const ClientManager = () => {
                 onClick={handleRefresh}
                 disabled={loading}
                 sx={{
-                    borderColor: '#1E7DBE',
-                    color: '#1E7DBE',
+                    borderColor: 'primary.dark',
+                    color: 'primary.dark',
                     '&:hover': { 
-                      borderColor: '#5a6fd8',
+                      borderColor: 'primary.dark',
                       backgroundColor: 'rgba(102, 126, 234, 0.1)',
                       transform: 'translateY(-2px)'
                     },
@@ -942,7 +944,7 @@ const ClientManager = () => {
                 left: 0,
                 right: 0,
                 height: '3px',
-                background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 zIndex: 1
               }
             }}>
@@ -956,7 +958,7 @@ const ClientManager = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: '#1E7DBE' }} />
+                          <Search sx={{ color: 'primary.dark' }} />
                         </InputAdornment>
                       ),
                     }}
@@ -965,8 +967,8 @@ const ClientManager = () => {
                         borderRadius: 2,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                        '&:hover fieldset': { borderColor: '#1E7DBE' },
-                        '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                        '&:hover fieldset': { borderColor: 'primary.dark' },
+                        '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                       }
                     }}
                   />
@@ -1026,7 +1028,7 @@ const ClientManager = () => {
                       <IconButton
                         onClick={() => setViewMode('table')}
                         sx={{
-                          color: viewMode === 'table' ? '#1E7DBE' : '#6c757d',
+                          color: viewMode === 'table' ? 'primary.dark' : 'text.secondary',
                           backgroundColor: viewMode === 'table' ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
                         }}
                       >
@@ -1037,7 +1039,7 @@ const ClientManager = () => {
                       <IconButton
                         onClick={() => setViewMode('card')}
                         sx={{
-                          color: viewMode === 'card' ? '#1E7DBE' : '#6c757d',
+                          color: viewMode === 'card' ? 'primary.dark' : 'text.secondary',
                           backgroundColor: viewMode === 'card' ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
                         }}
                       >
@@ -1047,7 +1049,7 @@ const ClientManager = () => {
                     <Tooltip title="Refresh">
                       <IconButton
                         onClick={() => window.location.reload()}
-                        sx={{ color: '#1E7DBE' }}
+                        sx={{ color: 'primary.dark' }}
                       >
                         <Refresh />
                       </IconButton>
@@ -1063,9 +1065,9 @@ const ClientManager = () => {
               sx={{ 
                 mb: 3,
                   borderRadius: 3,
-                  background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                  border: '1px solid #f44336',
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                  background: `linear-gradient(135deg, ${theme.palette.error.lighter} 0%, ${theme.palette.error.lighter} 100%)`,
+                  border: `1px solid ${theme.palette.error.main}`,
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
             >
               {error}
@@ -1078,7 +1080,7 @@ const ClientManager = () => {
                 justifyContent: 'center', 
                 alignItems: 'center', 
                 minHeight: 200,
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
                 borderRadius: 3
               }}>
                 <Box sx={{ textAlign: 'center' }}>
@@ -1087,7 +1089,7 @@ const ClientManager = () => {
                       width: 60,
                       height: 60,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1097,7 +1099,7 @@ const ClientManager = () => {
                   >
                     <Group sx={{ color: 'white', fontSize: 30 }} />
                   </Box>
-                  <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     Loading clients...
                   </Typography>
                 </Box>
@@ -1122,7 +1124,7 @@ const ClientManager = () => {
                             left: 0,
                             right: 0,
                             height: '3px',
-                            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                            background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                             zIndex: 1
                           }
                         }}
@@ -1130,7 +1132,7 @@ const ClientManager = () => {
                 <Table size="medium">
               <TableHead>
                     <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       '& .MuiTableCell-head': {
                         color: 'white',
                         fontWeight: 800,
@@ -1169,7 +1171,7 @@ const ClientManager = () => {
                                 width: 80,
                                 height: 80,
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                                background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1177,12 +1179,12 @@ const ClientManager = () => {
                                 mb: 2
                               }}
                             >
-                              <Group sx={{ color: '#6c757d', fontSize: 40 }} />
+                              <Group sx={{ color: 'text.secondary', fontSize: 40 }} />
                             </Box>
-                            <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 600, mb: 1 }}>
+                            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 600, mb: 1 }}>
                               No clients found
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#adb5bd' }}>
+                            <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                               Start by adding your first client
                             </Typography>
                           </Box>
@@ -1199,7 +1201,7 @@ const ClientManager = () => {
                               boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                               transition: 'all 0.3s ease',
                               '& .MuiTableCell-root': {
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 600
                               }
                       },
@@ -1213,14 +1215,14 @@ const ClientManager = () => {
                             transition: 'all 0.3s ease'
                           }}
                         >
-                          <TableCell sx={{ fontWeight: 600, color: '#2c3e50' }}>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Business sx={{ color: '#1E7DBE', fontSize: 20 }} />
+                              <Business sx={{ color: 'primary.dark', fontSize: 20 }} />
                               <Box>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {client.clientName}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   {client.businessType || 'No Business Type'}
                                 </Typography>
                               </Box>
@@ -1231,40 +1233,40 @@ const ClientManager = () => {
                         label={client.clientCode}
                         size="small"
                         sx={{
-                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                                 color: 'white',
                                 fontWeight: 600,
                                 fontSize: '0.75rem'
                         }}
                       />
                     </TableCell>
-                          <TableCell sx={{ color: '#2c3e50' }}>
+                          <TableCell sx={{ color: 'text.primary' }}>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#2c3e50' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                 {client.businessType || 'N/A'}
                               </Typography>
                               {client.gstin && (
-                                <Typography variant="caption" sx={{ color: '#059669', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 500 }}>
                                   GST: {client.gstin}
                                 </Typography>
                               )}
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ color: '#2c3e50' }}>
+                          <TableCell sx={{ color: 'text.primary' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <LocationOn sx={{ fontSize: 16, color: '#1E7DBE' }} />
+                              <LocationOn sx={{ fontSize: 16, color: 'primary.dark' }} />
                               <Box>
                       <Typography 
                         variant="body2" 
                         sx={{ 
                                     fontWeight: 600,
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     lineHeight: 1.4
                         }}
                       >
                                   {client.city}, {client.state}
                       </Typography>
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   {client.pincode}
                                 </Typography>
                               </Box>
@@ -1274,22 +1276,22 @@ const ClientManager = () => {
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                               {client.contacts?.slice(0, 2).map((c, i) => (
                           <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <Person fontSize="small" sx={{ color: '#1E7DBE' }} />
-                                  <Typography variant="body2" sx={{ color: '#2c3e50', fontWeight: 600 }}>
+                                  <Person fontSize="small" sx={{ color: 'primary.dark' }} />
+                                  <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
                               {c.name}
                             </Typography>
                                   {c.isPrimary && (
-                                    <Star sx={{ fontSize: 12, color: '#ffc107' }} />
+                                    <Star sx={{ fontSize: 12, color: 'warning.light' }} />
                                   )}
                           </Box>
                         ))}
                               {client.contacts?.length > 2 && (
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   +{client.contacts.length - 2} more
                                 </Typography>
                               )}
                               {client.contacts?.length === 0 && (
-                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   No contacts
                                 </Typography>
                               )}
@@ -1301,18 +1303,18 @@ const ClientManager = () => {
                                 label={client.status || 'Active'}
                             size="small"
                             sx={{
-                                  backgroundColor: client.status === 'Active' ? '#d4edda' : 
-                                                  client.status === 'Inactive' ? '#f8d7da' :
-                                                  client.status === 'Prospect' ? '#d1ecf1' : '#fff3cd',
-                                  color: client.status === 'Active' ? '#155724' : 
-                                        client.status === 'Inactive' ? '#721c24' :
-                                        client.status === 'Prospect' ? '#0c5460' : '#856404',
+                                  backgroundColor: client.status === 'Active' ? 'success.lighter' :
+                                                  client.status === 'Inactive' ? 'error.lighter' :
+                                                  client.status === 'Prospect' ? 'info.lighter' : 'warning.lighter',
+                                  color: client.status === 'Active' ? 'success.dark' :
+                                        client.status === 'Inactive' ? 'error.dark' :
+                                        client.status === 'Prospect' ? 'info.dark' : 'warning.dark',
                                   fontWeight: 600,
                               fontSize: '0.7rem'
                             }}
                           />
                               {client.totalOrders > 0 && (
-                                <Typography variant="caption" sx={{ color: '#475569', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                                   {client.totalOrders} orders
                                 </Typography>
                               )}
@@ -1326,13 +1328,13 @@ const ClientManager = () => {
                                     key={i}
                                     sx={{
                                       fontSize: 16,
-                                      color: i < (client.rating || 0) ? '#ffc107' : '#e9ecef'
+                                      color: i < (client.rating || 0) ? 'warning.light' : 'grey.100'
                                     }}
                                   />
                                 ))}
                               </Box>
                               {client.totalValue > 0 && (
-                                <Typography variant="caption" sx={{ color: '#28a745', fontWeight: 600 }}>
+                                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
                                   ₹{client.totalValue.toLocaleString()}
                                 </Typography>
                               )}
@@ -1344,7 +1346,7 @@ const ClientManager = () => {
                         <IconButton 
                           onClick={() => handleOpen(client, idx)}
                           sx={{ 
-                                    color: '#1E7DBE',
+                                    color: 'primary.dark',
                                     '&:hover': { 
                                       backgroundColor: 'rgba(102, 126, 234, 0.1)',
                                       transform: 'scale(1.1)'
@@ -1359,7 +1361,7 @@ const ClientManager = () => {
                         <IconButton 
                           onClick={() => handleDelete(client)}
                           sx={{ 
-                                    color: '#dc3545',
+                                    color: 'error.main',
                                     '&:hover': { 
                                       backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                       transform: 'scale(1.1)'
@@ -1390,11 +1392,11 @@ const ClientManager = () => {
                           borderRadius: 3,
                           border: '2px dashed rgba(102, 126, 234, 0.3)'
                         }}>
-                          <Business sx={{ fontSize: 64, color: '#cbd5e1', mb: 2 }} />
-                          <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 600, mb: 1 }}>
+                          <Business sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+                          <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 600, mb: 1 }}>
                             No clients found
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                          <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                             {searchTerm || statusFilter !== 'All' 
                               ? 'Try adjusting your search or filter criteria' 
                               : 'Start by adding your first client to the directory'
@@ -1431,8 +1433,8 @@ const ClientManager = () => {
                               right: 0,
                               height: '4px',
                               background: client.status === 'Active' 
-                                ? 'linear-gradient(90deg, #10b981, #059669)' 
-                                : 'linear-gradient(90deg, #f59e0b, #d97706)',
+                                ? `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.success.main})` 
+                                : `linear-gradient(90deg, ${theme.palette.warning.light}, ${theme.palette.warning.main})`,
                               zIndex: 1
                             }
                           }}>
@@ -1442,14 +1444,14 @@ const ClientManager = () => {
                                 <Box sx={{ flex: 1 }}>
                                   <Typography variant="h6" sx={{ 
                                     fontWeight: 700, 
-                                    color: '#1e293b',
+                                    color: 'text.primary',
                                     mb: 0.5,
                                     lineHeight: 1.2
                                   }}>
                                     {client.clientName}
                                   </Typography>
                                   <Typography variant="body2" sx={{ 
-                                    color: '#64748b',
+                                    color: 'text.secondary',
                                     fontWeight: 500
                                   }}>
                                     {client.clientCode}
@@ -1459,8 +1461,8 @@ const ClientManager = () => {
                                   label={client.status}
                                   size="small"
                                   sx={{
-                                    backgroundColor: client.status === 'Active' ? '#dcfce7' : '#fef3c7',
-                                    color: client.status === 'Active' ? '#166534' : '#92400e',
+                                    backgroundColor: client.status === 'Active' ? 'success.lighter' : 'warning.lighter',
+                                    color: client.status === 'Active' ? 'success.dark' : 'warning.dark',
                                     fontWeight: 600,
                                     fontSize: '0.75rem'
                                   }}
@@ -1469,16 +1471,16 @@ const ClientManager = () => {
 
                               {/* Business Info */}
                               <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" sx={{ color: '#64748b', mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                                   <Business sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
                                   {client.businessType || 'Not specified'}
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#64748b', mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                                   <LocationOn sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
                                   {client.city}, {client.state}
                                 </Typography>
                                 {client.contacts && client.contacts.length > 0 && client.contacts[0].email && (
-                                  <Typography variant="body2" sx={{ color: '#64748b', mb: 0.5 }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                                     <Email sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
                                     {client.contacts[0].email}
                                   </Typography>
@@ -1496,18 +1498,18 @@ const ClientManager = () => {
                                 border: '1px solid rgba(102, 126, 234, 0.1)'
                               }}>
                                 <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E7DBE' }}>
+                                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.dark' }}>
                                     {client.totalOrders || 0}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                     Orders
                                   </Typography>
                                 </Box>
                                 <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E7DBE' }}>
+                                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.dark' }}>
                                     ₹{client.totalValue ? (client.totalValue / 100000).toFixed(1) + 'L' : '0'}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                     Value
                                   </Typography>
                                 </Box>
@@ -1518,12 +1520,12 @@ const ClientManager = () => {
                                         key={i} 
                                         sx={{ 
                                           fontSize: 16, 
-                                          color: i < (client.rating || 0) ? '#fbbf24' : '#e5e7eb' 
+                                          color: i < (client.rating || 0) ? 'warning.light' : 'grey.200' 
                                         }} 
                                       />
                                     ))}
                                   </Box>
-                                  <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                     Rating
                                   </Typography>
                                 </Box>
@@ -1547,11 +1549,11 @@ const ClientManager = () => {
                                   onClick={() => handleOpen(client, idx)}
                                   sx={{
                                     flex: 1,
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                                     color: 'white',
                                     fontWeight: 600,
                                     '&:hover': {
-                                      background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                                       transform: 'translateY(-2px)',
                                       boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)'
                                     }
@@ -1564,11 +1566,11 @@ const ClientManager = () => {
                                   startIcon={<Delete />}
                                   onClick={() => handleDelete(client)}
                                   sx={{
-                                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                    background: `linear-gradient(135deg, ${theme.palette.error.light} 0%, ${theme.palette.error.main} 100%)`,
                                     color: 'white',
                                     fontWeight: 600,
                                     '&:hover': {
-                                      background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                                      background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
                                       transform: 'translateY(-2px)',
                                       boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)'
                                     }
@@ -1607,13 +1609,13 @@ const ClientManager = () => {
                     left: 0,
                     right: 0,
                     height: '3px',
-                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                    background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     zIndex: 1
                   }
                 }}>
                   {/* Rows per page selector */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                     </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1631,7 +1633,7 @@ const ClientManager = () => {
                             borderColor: 'rgba(102, 126, 234, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#1E7DBE',
+                            borderColor: 'primary.dark',
                           }
                         }}
                       >
@@ -1646,7 +1648,7 @@ const ClientManager = () => {
 
                   {/* Pagination info and controls */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {startIndex + 1}-{Math.min(endIndex, filteredClients.length)} of {filteredClients.length} clients
                     </Typography>
                     
@@ -1673,7 +1675,7 @@ const ClientManager = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                               color: 'white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1718,7 +1720,7 @@ const ClientManager = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #84D2FC)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
               zIndex: 2
             }
           }
@@ -1726,7 +1728,7 @@ const ClientManager = () => {
       >
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%)',
-          color: '#2c3e50',
+          color: 'text.primary',
           fontWeight: 700,
           fontSize: '1.8rem',
           py: 3,
@@ -1742,7 +1744,7 @@ const ClientManager = () => {
               sx={{
                 p: 2,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                 boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
@@ -1752,10 +1754,10 @@ const ClientManager = () => {
               <Business sx={{ fontSize: 32, color: 'white' }} />
             </Box>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#2c3e50', mb: 0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                 {editIndex !== null ? 'Edit Client Information' : 'Add New Client'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {editIndex !== null ? 'Update client details' : 'Create client profile'}
               </Typography>
             </Box>
@@ -1763,10 +1765,10 @@ const ClientManager = () => {
           <IconButton 
             onClick={handleClose}
             sx={{ 
-              color: '#64748b',
+              color: 'text.secondary',
               '&:hover': { 
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444'
+                color: 'error.main'
               }
             }}
           >
@@ -1781,15 +1783,15 @@ const ClientManager = () => {
             width: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
+            background: theme.palette.grey[100],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: '#c1c1c1',
+            background: theme.palette.grey[400],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            background: '#a8a8a8',
+            background: theme.palette.grey[500],
           }
         }}>
           {error && (
@@ -1798,9 +1800,9 @@ const ClientManager = () => {
               sx={{ 
                 m: 3,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                border: '1px solid #f44336',
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                background: `linear-gradient(135deg, ${theme.palette.error.lighter} 0%, ${theme.palette.error.lighter} 100%)`,
+                border: `1px solid ${theme.palette.error.main}`,
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
             >
               {error}
@@ -1827,20 +1829,20 @@ const ClientManager = () => {
                 },
                 '& .MuiStepConnector-active': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                    background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
                   },
                 },
                 '& .MuiStepConnector-completed': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    background: `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.success.main})`,
                     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                   },
                 },
                 '& .MuiStepConnector-line': {
                   height: 3,
                   border: 0,
-                  backgroundColor: '#e2e8f0',
+                  backgroundColor: 'divider',
                   borderRadius: 1,
                   transition: 'all 0.3s ease'
                 }
@@ -1871,30 +1873,30 @@ const ClientManager = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             background: completed 
-                              ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                              ? `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`
                               : active 
-                              ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
+                              ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
                               : isAccessible
-                              ? 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)'
-                              : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                              ? `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`
+                              : `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.divider} 100%)`,
                             boxShadow: completed || active 
                               ? '0 6px 20px rgba(102, 126, 234, 0.3)' 
                               : isAccessible
                               ? '0 2px 8px rgba(0, 0, 0, 0.1)'
                               : '0 1px 4px rgba(0, 0, 0, 0.05)',
-                            color: completed || active ? 'white' : isAccessible ? '#64748b' : '#94a3b8',
+                            color: completed || active ? 'white' : isAccessible ? 'text.secondary' : 'text.disabled',
                             fontSize: '1.2rem',
                             fontWeight: 700,
                             transition: 'all 0.3s ease',
                             transform: active ? 'scale(1.1)' : 'scale(1)',
                             border: '3px solid',
                             borderColor: completed 
-                              ? '#10b981' 
+                              ? 'success.light' 
                               : active 
-                              ? '#1E7DBE' 
+                              ? 'primary.dark' 
                               : isAccessible
-                              ? '#e2e8f0'
-                              : '#f1f5f9',
+                              ? 'divider'
+                              : 'grey.100',
                             cursor: isAccessible ? 'pointer' : 'not-allowed',
                             opacity: isAccessible ? 1 : 0.6,
                             '&:hover': isAccessible ? {
@@ -1916,25 +1918,25 @@ const ClientManager = () => {
                       '& .MuiStepLabel-label': {
                         fontSize: '0.9rem',
                         fontWeight: 600,
-                        color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
+                        color: activeStep === index ? 'primary.dark' : activeStep > index ? 'success.light' : isStepAccessible(index) ? 'text.secondary' : 'text.disabled',
                         mt: 1,
                         transition: 'all 0.3s ease',
                         cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                         opacity: isStepAccessible(index) ? 1 : 0.6,
                         '&:hover': isStepAccessible(index) ? {
-                          color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : '#1E7DBE',
+                          color: activeStep === index ? 'primary.dark' : activeStep > index ? 'success.light' : 'primary.dark',
                           fontWeight: 700
                         } : {}
                       },
                       '& .MuiStepLabel-active': {
                         '& .MuiStepLabel-label': {
-                          color: '#1E7DBE !important',
+                          color: `${theme.palette.primary.dark} !important`,
                           fontWeight: 700
                         }
                       },
                       '& .MuiStepLabel-completed': {
                         '& .MuiStepLabel-label': {
-                          color: '#10b981 !important',
+                          color: `${theme.palette.success.light} !important`,
                           fontWeight: 600
                         }
                       }
@@ -1949,21 +1951,21 @@ const ClientManager = () => {
             
             {/* Progress indicator */}
             <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
               Step {activeStep + 1} of {steps.length}
             </Typography>
-              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: '#e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                 <Box
                   sx={{
                     height: '100%',
                     width: `${((activeStep + 1) / steps.length) * 100}%`,
-                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                    background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     borderRadius: 2,
                     transition: 'width 0.3s ease'
                   }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 700 }}>
                 {Math.round(((activeStep + 1) / steps.length) * 100)}%
               </Typography>
             </Box>
@@ -2010,7 +2012,7 @@ const ClientManager = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
                         }}
                       >
@@ -2018,13 +2020,13 @@ const ClientManager = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Basic Information
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Client and business details
                         </Typography>
                       </Box>
@@ -2043,23 +2045,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#1E7DBE'
+                              borderBottomColor: 'primary.dark'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#1E7DBE'
+                              borderBottomColor: 'primary.dark'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2077,10 +2079,10 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#6b7280',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
@@ -2090,7 +2092,7 @@ const ClientManager = () => {
                               backgroundColor: 'rgba(102, 126, 234, 0.05)',
                               borderRadius: '4px 4px 0 0',
                               paddingLeft: '8px',
-                              color: '#64748b'
+                              color: 'text.secondary'
                             }
                           }}
                         />
@@ -2098,7 +2100,7 @@ const ClientManager = () => {
                       <Grid item xs={12} sm={6} md={4}>
                         <FormControl fullWidth variant="standard" required sx={{ minWidth: '200px' }}>
                           <InputLabel sx={{ 
-                            color: '#374151', 
+                            color: 'text.secondary', 
                             fontSize: '14px', 
                             fontWeight: 500,
                             whiteSpace: 'nowrap',
@@ -2119,16 +2121,16 @@ const ClientManager = () => {
                                     fontSize: '16px',
                                     fontWeight: 500,
                                     padding: '12px 16px',
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     whiteSpace: 'normal',
                                     wordWrap: 'break-word',
                                     '&:hover': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                                      color: '#1E7DBE'
+                                      color: 'primary.dark'
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.12)',
-                                      color: '#1E7DBE',
+                                      color: 'primary.dark',
                                       fontWeight: 600,
                                       '&:hover': {
                                         backgroundColor: 'rgba(102, 126, 234, 0.16)'
@@ -2140,18 +2142,18 @@ const ClientManager = () => {
                             }}
                             sx={{
                               '& .MuiInput-underline:before': {
-                                borderBottomColor: '#e2e8f0'
+                                borderBottomColor: 'divider'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#1E7DBE'
+                                borderBottomColor: 'primary.dark'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#1E7DBE'
+                                borderBottomColor: 'primary.dark'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
                                 padding: '8px 0',
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 500,
                                 overflow: 'visible',
                                 textOverflow: 'unset',
@@ -2205,7 +2207,7 @@ const ClientManager = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
                         }}
                       >
@@ -2213,13 +2215,13 @@ const ClientManager = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Contact Details
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Address and location information
                         </Typography>
                       </Box>
@@ -2239,23 +2241,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2272,23 +2274,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2305,23 +2307,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2338,23 +2340,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2371,23 +2373,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2404,23 +2406,23 @@ const ClientManager = () => {
                           variant="standard"
                           sx={{
                             '& .MuiInput-underline:before': {
-                              borderBottomColor: '#e2e8f0'
+                              borderBottomColor: 'divider'
                             },
                             '& .MuiInput-underline:after': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                              borderBottomColor: '#10b981'
+                              borderBottomColor: 'success.light'
                             },
                             '& .MuiFormLabel-root': {
-                              color: '#374151',
+                              color: 'text.secondary',
                               fontSize: '14px',
                               fontWeight: 500
                             },
                             '& .MuiInputBase-input': {
                               fontSize: '16px',
                               padding: '8px 0',
-                              color: '#2c3e50',
+                              color: 'text.primary',
                               fontWeight: 500
                             }
                           }}
@@ -2450,7 +2452,7 @@ const ClientManager = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
                         }}
                       >
@@ -2458,13 +2460,13 @@ const ClientManager = () => {
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Business Information
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Legal and business documentation
                         </Typography>
                       </Box>
@@ -2484,8 +2486,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2504,8 +2506,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2521,8 +2523,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2539,8 +2541,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2556,7 +2558,7 @@ const ClientManager = () => {
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="h6" sx={{ 
-                        color: '#1E7DBE', 
+                        color: 'primary.dark', 
                         fontWeight: 700, 
                         display: 'flex',
                         alignItems: 'center',
@@ -2568,7 +2570,7 @@ const ClientManager = () => {
                       <IconButton 
                         onClick={() => setContactSectionCollapsed(!contactSectionCollapsed)}
                         size="small"
-                        sx={{ color: '#1E7DBE' }}
+                        sx={{ color: 'primary.dark' }}
                       >
                         {contactSectionCollapsed ? <ExpandMore /> : <ExpandLess />}
                       </IconButton>
@@ -2587,15 +2589,15 @@ const ClientManager = () => {
                             width: '6px',
                           },
                           '&::-webkit-scrollbar-track': {
-                            background: '#f1f1f1',
+                            background: theme.palette.grey[100],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb': {
-                            background: '#c1c1c1',
+                            background: theme.palette.grey[400],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb:hover': {
-                            background: '#a8a8a8',
+                            background: theme.palette.grey[500],
                           }
                         }}
                       >
@@ -2604,7 +2606,7 @@ const ClientManager = () => {
                           mb: 1.5, 
                           p: 1.5,
                           background: 'rgba(255, 255, 255, 0.8)',
-                          border: c.isPrimary ? '2px solid #1E7DBE' : '1px solid rgba(102, 126, 234, 0.1)',
+                          border: c.isPrimary ? `2px solid ${theme.palette.primary.dark}` : '1px solid rgba(102, 126, 234, 0.1)',
                           borderRadius: 2
                         }}>
                           <Grid container spacing={2} alignItems="center">
@@ -2621,8 +2623,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                           }
                         }}
                       />
@@ -2641,8 +2643,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                           }
                         }}
                       />
@@ -2660,8 +2662,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                           }
                         }}
                       />
@@ -2678,8 +2680,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                           }
                         }}
                       />
@@ -2690,7 +2692,7 @@ const ClientManager = () => {
                                   <IconButton 
                                     onClick={() => setPrimaryContact(idx)}
                                     sx={{ 
-                                      color: c.isPrimary ? '#ffc107' : '#6c757d',
+                                      color: c.isPrimary ? 'warning.light' : 'text.secondary',
                                       '&:hover': { backgroundColor: 'rgba(255, 193, 7, 0.1)' }
                                     }}
                                   >
@@ -2701,9 +2703,9 @@ const ClientManager = () => {
                         onClick={() => removeContact(idx)} 
                         disabled={form.contacts.length === 1}
                         sx={{ 
-                                    color: '#dc3545',
+                                    color: 'error.main',
                                     '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.1)' },
-                                    '&:disabled': { color: '#6c757d' }
+                                    '&:disabled': { color: 'text.secondary' }
                         }}
                       >
                         <Delete fontSize="small" />
@@ -2718,11 +2720,11 @@ const ClientManager = () => {
                   startIcon={<Add />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#1E7DBE',
-                          color: '#1E7DBE',
+                          borderColor: 'primary.dark',
+                          color: 'primary.dark',
                           borderRadius: 2,
                     '&:hover': {
-                            borderColor: '#5a6fd8',
+                            borderColor: 'primary.dark',
                             backgroundColor: 'rgba(102, 126, 234, 0.05)'
                     }
                   }}
@@ -2740,7 +2742,7 @@ const ClientManager = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#1E7DBE', 
+                      color: 'primary.dark', 
                       fontWeight: 700, 
                       mb: 2,
                     display: 'flex',
@@ -2763,8 +2765,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2782,8 +2784,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2800,8 +2802,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2817,8 +2819,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -2834,7 +2836,7 @@ const ClientManager = () => {
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="h6" sx={{ 
-                        color: '#1E7DBE', 
+                        color: 'primary.dark', 
                         fontWeight: 700, 
                         display: 'flex',
                         alignItems: 'center',
@@ -2846,7 +2848,7 @@ const ClientManager = () => {
                       <IconButton 
                         onClick={() => setProductsSectionCollapsed(!productsSectionCollapsed)}
                         size="small"
-                        sx={{ color: '#1E7DBE' }}
+                        sx={{ color: 'primary.dark' }}
                       >
                         {productsSectionCollapsed ? <ExpandMore /> : <ExpandLess />}
                       </IconButton>
@@ -2865,15 +2867,15 @@ const ClientManager = () => {
                             width: '6px',
                           },
                           '&::-webkit-scrollbar-track': {
-                            background: '#f1f1f1',
+                            background: theme.palette.grey[100],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb': {
-                            background: '#c1c1c1',
+                            background: theme.palette.grey[400],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb:hover': {
-                            background: '#a8a8a8',
+                            background: theme.palette.grey[500],
                           }
                         }}
                       >
@@ -2907,7 +2909,7 @@ const ClientManager = () => {
                                       <IconButton
                                         size="small"
                                         onClick={() => regenerateProductCode(idx)}
-                                        sx={{ color: '#1E7DBE' }}
+                                        sx={{ color: 'primary.dark' }}
                                       >
                                         <Refresh fontSize="small" />
                                       </IconButton>
@@ -2918,8 +2920,8 @@ const ClientManager = () => {
                                       size="small"
                                       onClick={() => toggleProductCodeAutoGenerate(idx)}
                                       sx={{ 
-                                        color: productCodeAutoGenerate[idx] ? '#1E7DBE' : '#6c757d',
-                                        '&:hover': { color: '#1E7DBE' }
+                                        color: productCodeAutoGenerate[idx] ? 'primary.dark' : 'text.secondary',
+                                        '&:hover': { color: 'primary.dark' }
                                       }}
                                     >
                                       {productCodeAutoGenerate[idx] ? <CheckCircle fontSize="small" /> : <Edit fontSize="small" />}
@@ -2933,8 +2935,8 @@ const ClientManager = () => {
                           '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' },
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' },
                               '&.Mui-disabled': {
                                 backgroundColor: 'rgba(102, 126, 234, 0.05)',
                                 '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.2)' }
@@ -2957,8 +2959,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                                   }
                                 }}
                               />
@@ -2975,8 +2977,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                                   }
                                 }}
                               />
@@ -2993,8 +2995,8 @@ const ClientManager = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                    '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                    '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                    '&:hover fieldset': { borderColor: 'primary.dark' },
+                                    '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                                   }
                                 }}
                               />
@@ -3004,9 +3006,9 @@ const ClientManager = () => {
                         onClick={() => removeProduct(idx)} 
                         disabled={form.products.length === 1}
                         sx={{ 
-                                  color: '#dc3545',
+                                  color: 'error.main',
                                   '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.1)' },
-                                  '&:disabled': { color: '#6c757d' }
+                                  '&:disabled': { color: 'text.secondary' }
                         }}
                       >
                         <Delete fontSize="small" />
@@ -3020,11 +3022,11 @@ const ClientManager = () => {
                   startIcon={<Add />} 
                   variant="outlined"
                   sx={{
-                          borderColor: '#1E7DBE',
-                          color: '#1E7DBE',
+                          borderColor: 'primary.dark',
+                          color: 'primary.dark',
                           borderRadius: 2,
                     '&:hover': {
-                            borderColor: '#5a6fd8',
+                            borderColor: 'primary.dark',
                             backgroundColor: 'rgba(102, 126, 234, 0.05)'
                     }
                   }}
@@ -3042,7 +3044,7 @@ const ClientManager = () => {
                 <Fade in timeout={500}>
                   <Box>
                     <Typography variant="h6" sx={{ 
-                      color: '#1E7DBE', 
+                      color: 'primary.dark', 
                       fontWeight: 700, 
                       mb: 2,
                       display: 'flex',
@@ -3055,7 +3057,7 @@ const ClientManager = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <FormControl fullWidth variant="standard">
-                          <InputLabel sx={{ color: '#374151', fontSize: '14px', fontWeight: 500 }}>Status</InputLabel>
+                          <InputLabel sx={{ color: 'text.secondary', fontSize: '14px', fontWeight: 500 }}>Status</InputLabel>
                           <Select
                             name="status"
                             value={form.status}
@@ -3070,16 +3072,16 @@ const ClientManager = () => {
                                     fontSize: '16px',
                                     fontWeight: 500,
                                     padding: '12px 16px',
-                                    color: '#2c3e50',
+                                    color: 'text.primary',
                                     whiteSpace: 'normal',
                                     wordWrap: 'break-word',
                                     '&:hover': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                                      color: '#1E7DBE'
+                                      color: 'primary.dark'
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.12)',
-                                      color: '#1E7DBE',
+                                      color: 'primary.dark',
                                       fontWeight: 600,
                                       '&:hover': {
                                         backgroundColor: 'rgba(102, 126, 234, 0.16)'
@@ -3091,18 +3093,18 @@ const ClientManager = () => {
                             }}
                             sx={{
                               '& .MuiInput-underline:before': {
-                                borderBottomColor: '#e2e8f0'
+                                borderBottomColor: 'divider'
                               },
                               '& .MuiInput-underline:after': {
-                                borderBottomColor: '#1E7DBE'
+                                borderBottomColor: 'primary.dark'
                               },
                               '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                borderBottomColor: '#1E7DBE'
+                                borderBottomColor: 'primary.dark'
                               },
                               '& .MuiInputBase-input': {
                                 fontSize: '16px',
                                 padding: '8px 0',
-                                color: '#2c3e50',
+                                color: 'text.primary',
                                 fontWeight: 500,
                                 overflow: 'visible',
                                 textOverflow: 'unset',
@@ -3137,8 +3139,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             },
                             '& .MuiFormLabel-root': {
                               whiteSpace: 'nowrap',
@@ -3161,8 +3163,8 @@ const ClientManager = () => {
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: 2,
                                   '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                                  '&:hover fieldset': { borderColor: '#1E7DBE' },
-                                  '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                                  '&:hover fieldset': { borderColor: 'primary.dark' },
+                                  '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                                 }
                               }}
                             />
@@ -3181,8 +3183,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -3199,8 +3201,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -3218,8 +3220,8 @@ const ClientManager = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '& fieldset': { borderColor: 'rgba(102, 126, 234, 0.3)' },
-                              '&:hover fieldset': { borderColor: '#1E7DBE' },
-                              '&.Mui-focused fieldset': { borderColor: '#1E7DBE' }
+                              '&:hover fieldset': { borderColor: 'primary.dark' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.dark' }
                             }
                           }}
                         />
@@ -3246,7 +3248,7 @@ const ClientManager = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #84D2FC)',
+            background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
           }
         }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -3256,8 +3258,8 @@ const ClientManager = () => {
               variant="outlined"
               startIcon={<Schedule />}
               sx={{
-                borderColor: activeStep === 0 ? '#e2e8f0' : '#1E7DBE',
-                color: activeStep === 0 ? '#94a3b8' : '#1E7DBE',
+                borderColor: activeStep === 0 ? 'divider' : 'primary.dark',
+                color: activeStep === 0 ? 'text.disabled' : 'primary.dark',
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
@@ -3267,14 +3269,14 @@ const ClientManager = () => {
                 minWidth: 120,
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  borderColor: activeStep === 0 ? '#e2e8f0' : '#5a6fd8',
+                  borderColor: activeStep === 0 ? 'divider' : 'primary.dark',
                   backgroundColor: activeStep === 0 ? 'transparent' : 'rgba(102, 126, 234, 0.05)',
                   transform: activeStep === 0 ? 'none' : 'translateY(-2px)',
                   boxShadow: activeStep === 0 ? 'none' : '0 4px 12px rgba(102, 126, 234, 0.2)'
                 },
                 '&:disabled': {
-                  borderColor: '#e2e8f0',
-                  color: '#94a3b8',
+                  borderColor: 'divider',
+                  color: 'text.disabled',
                   backgroundColor: 'transparent'
                 }
               }}
@@ -3299,9 +3301,9 @@ const ClientManager = () => {
                     endIcon={<Schedule />}
                 sx={{
                   background: isCurrentStepCompleted() 
-                    ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                    : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                  color: isCurrentStepCompleted() ? 'white' : '#94a3b8',
+                    ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`,
+                  color: isCurrentStepCompleted() ? 'white' : 'text.disabled',
                   borderRadius: 3,
                   px: 4,
                   py: 1.5,
@@ -3315,13 +3317,13 @@ const ClientManager = () => {
                   transition: 'all 0.3s ease',
                   cursor: isCurrentStepCompleted() ? 'pointer' : 'not-allowed',
                   '&:hover': isCurrentStepCompleted() ? {
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)'
                   } : {},
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                    color: '#94a3b8',
+                    background: `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`,
+                    color: 'text.disabled',
                     cursor: 'not-allowed'
                   }
                 }}
@@ -3333,11 +3335,11 @@ const ClientManager = () => {
             ) : (
               <Button 
                 onClick={handleSubmit} 
-                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Save />} 
+                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: `2px solid ${theme.palette.common.white}`, borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Save />} 
                 variant="contained"
                 disabled={loading}
                 sx={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
                   color: 'white',
                   borderRadius: 3,
                   px: 4,
@@ -3349,12 +3351,12 @@ const ClientManager = () => {
                   boxShadow: '0 6px 20px rgba(16, 185, 129, 0.3)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: loading ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    background: loading ? `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)` : `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                     transform: loading ? 'none' : 'translateY(-2px)',
                     boxShadow: loading ? '0 6px 20px rgba(16, 185, 129, 0.3)' : '0 8px 25px rgba(16, 185, 129, 0.4)'
                   },
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.grey[400]} 0%, ${theme.palette.grey[500]} 100%)`,
                     color: 'white'
                   }
                 }}
@@ -3366,15 +3368,15 @@ const ClientManager = () => {
           
           {/* Progress indicator */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
               Progress: {Math.round(((activeStep + 1) / steps.length) * 100)}%
             </Typography>
-            <Box sx={{ width: 80, height: 6, backgroundColor: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ width: 80, height: 6, backgroundColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
               <Box
                 sx={{
                   height: '100%',
                   width: `${((activeStep + 1) / steps.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                   borderRadius: 3,
                   transition: 'width 0.3s ease'
                 }}
@@ -3387,7 +3389,7 @@ const ClientManager = () => {
             startIcon={<Cancel />}
             variant="text"
             sx={{
-              color: '#6c757d',
+              color: 'text.secondary',
               borderRadius: 3,
               px: 3,
               py: 1.5,
@@ -3398,7 +3400,7 @@ const ClientManager = () => {
               transition: 'all 0.3s ease',
               '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444',
+                color: 'error.main',
                 transform: 'translateY(-1px)',
                 boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
               }

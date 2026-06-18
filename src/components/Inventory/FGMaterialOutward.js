@@ -639,12 +639,12 @@ const FGMaterialOutward = () => {
           <Typography 
             variant="h4" 
             component="h1" 
-        sx={{
+        sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #d32f2f, #ff8a80)',
+              background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.lighter})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             FG Material Outward
           </Typography>
@@ -795,12 +795,12 @@ const FGMaterialOutward = () => {
               startIcon={<AddIcon />}
             onClick={handleOpenDialog}
               size="large"
-              sx={{ 
-                background: 'linear-gradient(45deg, #d32f2f, #ff8a80)',
+              sx={(theme) => ({
+                background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.lighter})`,
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #b71c1c, #d32f2f)',
+                  background: `linear-gradient(45deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                 }
-              }}
+              })}
           >
             Add New Outward Entry
           </Button>
@@ -857,7 +857,7 @@ const FGMaterialOutward = () => {
                             fontWeight: 'bold', 
                             textTransform: 'uppercase',
                             bgcolor: 'error.main',
-                            color: 'white',
+                            color: 'common.white',
                             fontSize: '0.75rem'
                           }}
                     sortDirection={orderBy === col.id ? order : false}
@@ -867,7 +867,7 @@ const FGMaterialOutward = () => {
                         active={orderBy === col.id}
                         direction={orderBy === col.id ? order : "asc"}
                         onClick={() => handleRequestSort(col.id)}
-                              sx={{ color: 'white !important' }}
+                              sx={(theme) => ({ color: `${theme.palette.common.white} !important` })}
                       >
                         {col.label}
                       </TableSortLabel>
@@ -1038,15 +1038,15 @@ const FGMaterialOutward = () => {
           </IconButton>
           <Typography 
             variant="h4" 
-            sx={{ 
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #d32f2f, #f44336)',
+              background: `linear-gradient(135deg, ${theme.palette.error.main}, ${theme.palette.error.main})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
           Add New Outward Entry
           </Typography>
@@ -1390,16 +1390,16 @@ const FGMaterialOutward = () => {
             onClick={handleSubmit} 
             variant="contained" 
             startIcon={<AddIcon />}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #d32f2f, #f44336)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.error.main}, ${theme.palette.error.main})`,
+              color: 'common.white',
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(211, 47, 47, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #b71c1c, #d32f2f)',
+                background: `linear-gradient(135deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                 boxShadow: '0 6px 16px rgba(211, 47, 47, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -1408,7 +1408,7 @@ const FGMaterialOutward = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             Add Entry
           </Button>

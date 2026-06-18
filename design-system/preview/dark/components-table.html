@@ -1,0 +1,40 @@
+<!-- @dsCard group="Components · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data Table · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 20px; }
+  .wrap { background: #2D3D4C; border: 1px solid rgba(226,232,237,0.12); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  th { text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #F2F5F7; background: rgba(30,41,59,0.96); padding: 12px 16px; border-bottom: 1px solid rgba(226,232,237,0.12); }
+  td { font-size: 14px; padding: 12px 16px; border-bottom: 1px solid rgba(226,232,237,0.12); }
+  tr:last-child td { border-bottom: none; }
+  tr.sel td { background: rgba(69,173,230,0.1); }
+  .chip { border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 500; }
+</style>
+</head>
+<body>
+  <h1>Data Table · Dark</h1>
+  <div class="sub">Header on a deeper slate; selected/hover rows tint in translucent primary.</div>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr><th>Order #</th><th>Client</th><th>Product</th><th>Qty</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>RO-1042</td><td>Apex Cables</td><td>3-core flex</td><td>1,200 m</td><td><span class="chip" style="background:rgba(69,173,230,0.18);color:#84D2FC">In production</span></td></tr>
+        <tr class="sel"><td>RO-1041</td><td>Volt Industries</td><td>Power cord</td><td>800 pcs</td><td><span class="chip" style="background:rgba(16,185,129,0.2);color:#6EE7B7">Completed</span></td></tr>
+        <tr><td>RO-1040</td><td>Surya Electric</td><td>Molded plug</td><td>5,000 pcs</td><td><span class="chip" style="background:rgba(251,191,36,0.2);color:#FCD34D">Pending</span></td></tr>
+        <tr><td>RO-1039</td><td>Nova Wires</td><td>2-core flat</td><td>600 m</td><td><span class="chip" style="background:rgba(224,85,72,0.2);color:#EC7468">Delayed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

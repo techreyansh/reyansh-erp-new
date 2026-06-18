@@ -257,14 +257,14 @@ const SalesFlowDetails = () => {
         justifyContent="center" 
         alignItems="center" 
         minHeight="400px"
-        sx={{
-          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+        sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
           borderRadius: 3,
           p: 4
-        }}
+        })}
       >
-        <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
-        <Typography variant="h6" color="white" sx={{ fontWeight: 300 }}>
+        <CircularProgress size={60} sx={{ color: 'common.white', mb: 2 }} />
+        <Typography variant="h6" color="common.white" sx={{ fontWeight: 300 }}>
           Loading Sales Flow Details...
         </Typography>
       </Box>
@@ -282,22 +282,22 @@ const SalesFlowDetails = () => {
   }
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
       py: 3,
-    }}>
+    })}>
       <Container maxWidth="lg" sx={{ mt: 8 }}>
         <Fade in timeout={800}>
           <Box>
             {/* Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 3,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: theme.palette.common.white,
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-            }}>
+            })}>
               <CardContent sx={{ p: 4 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Box>
@@ -322,7 +322,7 @@ const SalesFlowDetails = () => {
                       onClick={handleProceedToPO}
                       sx={{
                         backgroundColor: 'rgba(255,255,255,0.2)',
-                        color: 'white',
+                        color: 'common.white',
                         '&:hover': {
                           backgroundColor: 'rgba(255,255,255,0.3)'
                         }
@@ -333,8 +333,8 @@ const SalesFlowDetails = () => {
                     <Tooltip title="Refresh Data">
                       <IconButton 
                         onClick={loadSalesFlowDetails} 
-                        sx={{ 
-                          color: 'white',
+                        sx={{
+                          color: 'common.white',
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.2)'
@@ -352,7 +352,7 @@ const SalesFlowDetails = () => {
             {/* Customer Information */}
             <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
                   Customer Information
                 </Typography>
                 <Grid container spacing={3}>
@@ -423,7 +423,7 @@ const SalesFlowDetails = () => {
             {/* Sales Flow Steps Timeline */}
             <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
                   Sales Flow Timeline
                 </Typography>
                 
@@ -445,12 +445,12 @@ const SalesFlowDetails = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: '#1E7DBE' }} />
+                          <Search sx={{ color: 'primary.dark' }} />
                         </InputAdornment>
                       ),
                     }}
                   />
-                  <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                     Showing {paginatedSteps.length} of {filteredSteps.length} steps
                   </Typography>
                 </Box>
@@ -460,14 +460,14 @@ const SalesFlowDetails = () => {
                     <Accordion key={`${step.LogId}-${step.StepId}`} sx={{ mb: 2 }}>
                       <AccordionSummary expandIcon={<ExpandMore />}>
                         <Box display="flex" alignItems="center" gap={2} sx={{ width: '100%' }}>
-                          <Avatar sx={{ 
-                            width: 40, 
-                            height: 40, 
-                            background: step.Status === 'completed' 
-                              ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
-                              : 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                            color: 'white'
-                          }}>
+                          <Avatar sx={(theme) => ({
+                            width: 40,
+                            height: 40,
+                            background: step.Status === 'completed'
+                              ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
+                              : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                            color: theme.palette.common.white
+                          })}>
                             {getStepIcon(parseInt(step.StepId))}
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
@@ -528,7 +528,7 @@ const SalesFlowDetails = () => {
                               <Typography variant="subtitle2" color="textSecondary">Comments</Typography>
                               <Box sx={{ mt: 1 }}>
                                 {step.Comments.map((comment, idx) => (
-                                  <Paper key={idx} sx={{ p: 2, mb: 1, backgroundColor: '#f8f9fa' }}>
+                                  <Paper key={idx} sx={{ p: 2, mb: 1, backgroundColor: 'grey.100' }}>
                                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                       {comment.user} - {formatDate(comment.timestamp)}
                                     </Typography>
@@ -557,7 +557,7 @@ const SalesFlowDetails = () => {
                     borderTop: '1px solid rgba(102, 126, 234, 0.1)'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 600 }}>
+                      <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 600 }}>
                         Steps per page:
                       </Typography>
                       <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -567,7 +567,7 @@ const SalesFlowDetails = () => {
                             setRowsPerPage(e.target.value);
                             setPage(0);
                           }}
-                          sx={{
+                          sx={(theme) => ({
                             '& .MuiOutlinedInput-notchedOutline': {
                               borderColor: 'rgba(102, 126, 234, 0.3)',
                             },
@@ -575,9 +575,9 @@ const SalesFlowDetails = () => {
                               borderColor: 'rgba(102, 126, 234, 0.5)',
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#1E7DBE',
+                              borderColor: theme.palette.primary.dark,
                             }
-                          }}
+                          })}
                         >
                           <MenuItem value={3}>3</MenuItem>
                           <MenuItem value={5}>5</MenuItem>
@@ -587,7 +587,7 @@ const SalesFlowDetails = () => {
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 600 }}>
+                      <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 600 }}>
                         {page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, filteredSteps.length)} of {filteredSteps.length} steps
                       </Typography>
                       
@@ -600,7 +600,7 @@ const SalesFlowDetails = () => {
                           size="large"
                           showFirstButton
                           showLastButton
-                          sx={{
+                          sx={(theme) => ({
                             '& .MuiPaginationItem-root': {
                               borderRadius: 3,
                               fontWeight: 700,
@@ -614,8 +614,8 @@ const SalesFlowDetails = () => {
                                 boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                               },
                               '&.Mui-selected': {
-                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                color: 'white',
+                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                color: theme.palette.common.white,
                                 fontWeight: 800,
                                 boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                                 '&:hover': {
@@ -624,7 +624,7 @@ const SalesFlowDetails = () => {
                                 }
                               }
                             }
-                          }}
+                          })}
                         />
                       )}
                     </Box>
@@ -636,7 +636,7 @@ const SalesFlowDetails = () => {
             {/* Action Button */}
             <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
                   Ready to Create Sales Order?
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3, color: 'textSecondary' }}>
@@ -647,19 +647,19 @@ const SalesFlowDetails = () => {
                   size="large"
                   startIcon={<ArrowForward />}
                   onClick={handleProceedToPO}
-                  sx={{
-                    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
-                    color: 'white',
+                  sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                    color: theme.palette.common.white,
                     px: 4,
                     py: 2,
                     fontSize: '1.1rem',
                     fontWeight: 600,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.dark} 100%)`,
                       transform: 'translateY(-2px)',
                       boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
                     }
-                  }}
+                  })}
                 >
                   Proceed to Sales Order Ingestion
                 </Button>

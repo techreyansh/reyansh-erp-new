@@ -294,7 +294,7 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                       bottom: 0,
                       right: 0,
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       '&:hover': { bgcolor: 'primary.dark' }
                     }}
                     size="small"
@@ -316,16 +316,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -350,16 +350,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -390,16 +390,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -422,16 +422,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -453,16 +453,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -482,9 +482,9 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={8}>
                 <FormControl fullWidth required error={!!errors.Department} variant="standard" sx={{ minWidth: '200px' }}>
-                  <InputLabel sx={{ 
-                    color: '#666', 
-                    fontSize: '14px', 
+                  <InputLabel sx={{
+                    color: 'text.secondary',
+                    fontSize: '14px',
                     whiteSpace: 'nowrap',
                     textOverflow: 'unset',
                     overflow: 'visible',
@@ -497,13 +497,13 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                     label="Department *"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInputBase-input': {
                         fontSize: '16px',
@@ -530,16 +530,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -552,9 +552,9 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               
               <Grid item xs={12} md={8}>
                 <FormControl fullWidth variant="standard" sx={{ minWidth: '200px' }}>
-                  <InputLabel sx={{ 
-                    color: '#666', 
-                    fontSize: '14px', 
+                  <InputLabel sx={{
+                    color: 'text.secondary',
+                    fontSize: '14px',
                     whiteSpace: 'nowrap',
                     textOverflow: 'unset',
                     overflow: 'visible',
@@ -567,13 +567,13 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                     label="Employee Type"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInputBase-input': {
                         fontSize: '16px',
@@ -602,16 +602,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -631,16 +631,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -653,9 +653,9 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth variant="standard" sx={{ minWidth: '150px' }}>
-                  <InputLabel sx={{ 
-                    color: '#666', 
-                    fontSize: '14px', 
+                  <InputLabel sx={{
+                    color: 'text.secondary',
+                    fontSize: '14px',
                     whiteSpace: 'nowrap',
                     textOverflow: 'unset',
                     overflow: 'visible',
@@ -668,13 +668,13 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                     label="Status"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#00bcd4'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInputBase-input': {
                         fontSize: '16px',
@@ -705,16 +705,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -739,16 +739,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -774,16 +774,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -808,16 +808,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -843,16 +843,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -880,16 +880,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -917,16 +917,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -968,16 +968,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -1005,16 +1005,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -1038,16 +1038,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -1068,16 +1068,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'unset',
@@ -1101,16 +1101,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -1131,16 +1131,16 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
-                      color: '#666',
+                      color: 'text.secondary',
                       fontSize: '14px'
                     },
                     '& .MuiInputBase-input': {
@@ -1211,17 +1211,17 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
           px: 4,
           position: 'relative'
         }}>
-          <Typography 
-            variant="h4" 
-            sx={{ 
+          <Typography
+            variant="h4"
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.main})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
             {employee ? 'Edit Employee' : 'Add New Employee'}
           </Typography>
@@ -1233,7 +1233,7 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#00bcd4',
+              color: 'primary.main',
               '&:hover': {
                 backgroundColor: 'rgba(0, 188, 212, 0.1)'
               }
@@ -1244,8 +1244,8 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
         </Box>
         <Typography 
           variant="body2" 
-          sx={{ 
-            color: '#666',
+          sx={{
+            color: 'text.secondary',
             textAlign: 'center',
             mt: 1,
             px: 4
@@ -1282,7 +1282,7 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
                         width: 32,
                         height: 32,
                         bgcolor: index <= activeStep ? 'primary.main' : 'grey.300',
-                        color: 'white',
+                        color: 'common.white',
                         fontSize: '0.875rem',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
@@ -1340,13 +1340,14 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
             py: 1.5,
             textTransform: 'none',
             fontWeight: 600,
-            color: '#666',
-            border: '1px solid #e0e0e0',
+            color: 'text.secondary',
+            border: '1px solid',
+            borderColor: 'grey.100',
             backgroundColor: 'transparent',
             minWidth: '120px',
             '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              borderColor: '#00bcd4'
+              borderColor: 'primary.main'
             }
           }}
         >
@@ -1363,13 +1364,14 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               py: 1.5,
               textTransform: 'none',
               fontWeight: 600,
-              color: '#666',
-              border: '1px solid #e0e0e0',
+              color: 'text.secondary',
+              border: '1px solid',
+              borderColor: 'grey.100',
               backgroundColor: 'transparent',
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#00bcd4'
+                borderColor: 'primary.main'
               }
             }}
           >
@@ -1381,7 +1383,7 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
           <Button
             onClick={handleNext}
             disabled={loading}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
               px: 4,
               py: 1.5,
@@ -1389,15 +1391,15 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '120px',
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+              color: 'common.white',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               }
-            }}
+            })}
           >
             Next
           </Button>
@@ -1405,7 +1407,7 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
           <Button
             onClick={handleSave}
             disabled={loading}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
               px: 4,
               py: 1.5,
@@ -1413,21 +1415,21 @@ const EmployeeForm = ({ open, onClose, employee, onSave }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '180px',
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+              color: 'common.white',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
               '&:disabled': {
-                background: '#e0e0e0',
-                color: '#999',
+                background: theme.palette.grey[100],
+                color: theme.palette.text.disabled,
                 boxShadow: 'none',
                 transform: 'none'
               }
-            }}
+            })}
           >
             {employee ? 'UPDATE EMPLOYEE' : 'CREATE EMPLOYEE'}
           </Button>

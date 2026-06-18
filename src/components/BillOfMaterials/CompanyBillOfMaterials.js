@@ -1244,32 +1244,32 @@ const CompanyBillOfMaterials = () => {
           <title>Bill of Material - ${bomWithArrays.productDescription || 'N/A'}</title>
           <style>
             @page { size: A4 portrait; margin: 1in; }
-            body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"; color: #0f172a; }
+            body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"; color: ${theme.palette.text.primary}; }
             .container { max-width: 794px; margin: 0 auto; }
             .mb-6 { margin-bottom: 1.5rem; }
             .p-6 { padding: 1.5rem; }
             .p-4 { padding: 1rem; }
-            .card { border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); }
+            .card { border: 1px solid ${theme.palette.grey[200]}; border-radius: 12px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); }
             .title { text-align: center; }
             .title h1 { font-size: 20px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
             .title h2 { font-size: 16px; font-weight: 600; }
-            .title p { font-size: 12px; color: #475569; }
+            .title p { font-size: 12px; color: ${theme.palette.text.secondary}; }
             .grid { display: grid; gap: 1.5rem; }
             .grid-2 { grid-template-columns: 1fr 1fr; }
             @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
             .row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
-            .row .k { color: #475569; }
+            .row .k { color: ${theme.palette.text.secondary}; }
             .row .v { font-weight: 600; }
             table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            thead th { background: #1E7DBE; color: #fff; padding: 8px; border: 1px solid #1b3a7a; }
-            tbody td { padding: 8px; border: 1px solid #cbd5e1; }
-            tbody tr:nth-child(even) { background: #f8fafc; }
+            thead th { background: ${theme.palette.primary.dark}; color: ${theme.palette.common.white}; padding: 8px; border: 1px solid ${theme.palette.primary.dark}; }
+            tbody td { padding: 8px; border: 1px solid ${theme.palette.grey[300]}; }
+            tbody tr:nth-child(even) { background: ${theme.palette.grey[50]}; }
             .sign-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
             @media (max-width: 768px) { .sign-grid { grid-template-columns: repeat(2, 1fr); } }
-            .sign { text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; }
-            .sign .label { font-size: 12px; font-weight: 700; color: #1E7DBE; margin-bottom: 8px; }
-            .sign .line { height: 40px; border-bottom: 2px solid #64748b; margin-bottom: 6px; }
-            .sign .hint { font-size: 10px; color: #64748b; }
+            .sign { text-align: center; border: 2px solid ${theme.palette.grey[200]}; border-radius: 12px; padding: 12px; background: ${theme.palette.grey[50]}; }
+            .sign .label { font-size: 12px; font-weight: 700; color: ${theme.palette.primary.dark}; margin-bottom: 8px; }
+            .sign .line { height: 40px; border-bottom: 2px solid ${theme.palette.grey[500]}; margin-bottom: 6px; }
+            .sign .hint { font-size: 10px; color: ${theme.palette.grey[500]}; }
           </style>
         </head>
         <body>
@@ -1585,7 +1585,7 @@ const CompanyBillOfMaterials = () => {
             component="h1" 
             sx={{ 
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
+              background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
@@ -1699,9 +1699,9 @@ const CompanyBillOfMaterials = () => {
                   onClick={handleOpenDialog}
                   disabled={loading}
                   sx={{
-                    background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #001a5c, #1E7DBE)',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     }
                   }}
                 >
@@ -1762,7 +1762,7 @@ const CompanyBillOfMaterials = () => {
                         fontWeight: 'bold', 
                         textTransform: 'uppercase',
                         bgcolor: 'primary.main',
-                        color: 'white',
+                        color: 'common.white',
                         fontSize: '0.75rem'
                       }}
                       sortDirection={orderBy === col.id ? order : false}
@@ -1772,7 +1772,7 @@ const CompanyBillOfMaterials = () => {
                           active={orderBy === col.id}
                           direction={orderBy === col.id ? order : "asc"}
                           onClick={() => handleRequestSort(col.id)}
-                          sx={{ color: 'white !important' }}
+                          sx={{ color: theme.palette.common.white + ' !important' }}
                         >
                           {col.label}
                         </TableSortLabel>
@@ -1793,12 +1793,12 @@ const CompanyBillOfMaterials = () => {
                         '&:hover': { bgcolor: 'action.selected' },
                         transition: 'background-color 0.2s',
                         ...(highlightProductCode && bom.productCode === highlightProductCode ? {
-                          boxShadow: 'inset 0 0 0 2px #ff9800'
+                          boxShadow: `inset 0 0 0 2px ${theme.palette.warning.main}`
                         } : {})
                       }}
                     >
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1E7DBE' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.dark' }}>
                           {bom.id || 'N/A'}
                         </Typography>
                       </TableCell>
@@ -1950,7 +1950,7 @@ const CompanyBillOfMaterials = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #f59e0b)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.warning.main})`,
               zIndex: 2
             }
           }
@@ -1958,7 +1958,7 @@ const CompanyBillOfMaterials = () => {
       >
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(76, 108, 183, 0.05) 100%)',
-          color: '#2c3e50',
+          color: 'text.primary',
           fontWeight: 700,
           fontSize: '1.8rem',
           py: 3,
@@ -1974,31 +1974,31 @@ const CompanyBillOfMaterials = () => {
               sx={{
                 p: 2,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                 boxShadow: '0 8px 20px rgba(30, 58, 138, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <BomIcon sx={{ fontSize: 32, color: 'white' }} />
+              <BomIcon sx={{ fontSize: 32, color: 'common.white' }} />
             </Box>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#2c3e50', mb: 0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                 {selectedBom ? 'Edit Bill of Material' : formData.originalId ? 'Quick Add - New Bill of Material' : 'Create New Bill of Material'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {selectedBom ? 'Update BOM specifications' : formData.originalId ? 'Auto-filled from BOM ' + formData.originalId + ' - Edit any details as needed' : 'Create comprehensive BOM entry'}
               </Typography>
             </Box>
           </Box>
-          <IconButton 
+          <IconButton
             onClick={handleCloseDialog}
-            sx={{ 
-              color: '#64748b',
-              '&:hover': { 
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444'
+                color: 'error.main'
               }
             }}
           >
@@ -2014,15 +2014,15 @@ const CompanyBillOfMaterials = () => {
             width: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
+            background: theme.palette.grey[100],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: '#c1c1c1',
+            background: theme.palette.grey[300],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            background: '#a8a8a8',
+            background: theme.palette.grey[400],
           }
         }}>
           {validationError && (
@@ -2031,9 +2031,10 @@ const CompanyBillOfMaterials = () => {
               sx={{ 
                 m: 3,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                border: '1px solid #f44336',
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                background: `linear-gradient(135deg, ${theme.palette.error.lighter} 0%, ${theme.palette.error.lighter} 100%)`,
+                border: '1px solid',
+                borderColor: 'error.main',
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
             >
               {validationError}
@@ -2060,13 +2061,13 @@ const CompanyBillOfMaterials = () => {
                 },
                   '& .MuiStepConnector-active': {
                     '& .MuiStepConnector-line': {
-                      background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                      background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                       boxShadow: '0 2px 8px rgba(30, 58, 138, 0.3)'
                     },
                   },
                 '& .MuiStepConnector-completed': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    background: `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.success.main})`,
                     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                   },
                 },
@@ -2110,31 +2111,31 @@ const CompanyBillOfMaterials = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              background: completed 
-                                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                : active 
-                                ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
+                              background: completed
+                                ? `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`
+                                : active
+                                ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
                                 : isAccessible
-                                ? 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)'
-                                : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-                              boxShadow: completed || active 
-                                ? '0 6px 20px rgba(30, 58, 138, 0.3)' 
+                                ? `linear-gradient(135deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`
+                                : `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.grey[200]} 100%)`,
+                              boxShadow: completed || active
+                                ? '0 6px 20px rgba(30, 58, 138, 0.3)'
                                 : isAccessible
                                 ? '0 2px 8px rgba(0, 0, 0, 0.1)'
                                 : '0 1px 4px rgba(0, 0, 0, 0.05)',
-                              color: completed || active ? 'white' : isAccessible ? '#64748b' : '#94a3b8',
+                              color: completed || active ? 'white' : isAccessible ? theme.palette.text.secondary : theme.palette.text.disabled,
                               fontSize: '1.2rem',
                               fontWeight: 700,
                               transition: 'all 0.3s ease',
                               transform: active ? 'scale(1.1)' : 'scale(1)',
                               border: '3px solid',
-                              borderColor: completed 
-                                ? '#10b981' 
-                                : active 
-                                ? '#1E7DBE' 
+                              borderColor: completed
+                                ? theme.palette.success.main
+                                : active
+                                ? theme.palette.primary.dark
                                 : isAccessible
-                                ? '#e2e8f0'
-                                : '#f1f5f9',
+                                ? theme.palette.grey[200]
+                                : theme.palette.grey[100],
                               cursor: isAccessible ? 'pointer' : 'not-allowed',
                               opacity: isAccessible ? 1 : 0.6,
                               '&:hover': isAccessible ? {
@@ -2156,25 +2157,25 @@ const CompanyBillOfMaterials = () => {
                         '& .MuiStepLabel-label': {
                           fontSize: '0.9rem',
                           fontWeight: 600,
-                          color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : isStepAccessible(index) ? '#64748b' : '#94a3b8',
+                          color: activeStep === index ? theme.palette.primary.dark : activeStep > index ? theme.palette.success.main : isStepAccessible(index) ? theme.palette.text.secondary : theme.palette.text.disabled,
                           mt: 1,
                           transition: 'all 0.3s ease',
                           cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                           opacity: isStepAccessible(index) ? 1 : 0.6,
                           '&:hover': isStepAccessible(index) ? {
-                            color: activeStep === index ? '#1E7DBE' : activeStep > index ? '#10b981' : '#1E7DBE',
+                            color: activeStep === index ? theme.palette.primary.dark : activeStep > index ? theme.palette.success.main : theme.palette.primary.dark,
                             fontWeight: 700
                           } : {}
                         },
                         '& .MuiStepLabel-active': {
                           '& .MuiStepLabel-label': {
-                            color: '#1E7DBE !important',
+                            color: theme.palette.primary.dark + ' !important',
                             fontWeight: 700
                           }
                         },
                         '& .MuiStepLabel-completed': {
                           '& .MuiStepLabel-label': {
-                            color: '#10b981 !important',
+                            color: theme.palette.success.main + ' !important',
                             fontWeight: 600
                           }
                         }
@@ -2190,7 +2191,7 @@ const CompanyBillOfMaterials = () => {
             
             {/* Progress indicator */}
             <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+              <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
                 {(() => {
                   const bomCategory = selectedBom ? (selectedBom.category || selectedBom.bomCategory) : null;
                   let totalSteps = steps.length;
@@ -2201,7 +2202,7 @@ const CompanyBillOfMaterials = () => {
                   return `Step ${activeStep + 1} of ${totalSteps}`;
                 })()}
               </Typography>
-              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: '#e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ flexGrow: 1, height: 4, backgroundColor: 'grey.200', borderRadius: 2, overflow: 'hidden' }}>
                 <Box
                   sx={{
                     height: '100%',
@@ -2210,13 +2211,13 @@ const CompanyBillOfMaterials = () => {
                       const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
                       return ((activeStep + 1) / totalSteps) * 100;
                     })()}%`,
-                    background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                    background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     borderRadius: 2,
                     transition: 'width 0.3s ease'
                   }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ color: '#1E7DBE', fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 700 }}>
                 {(() => {
                   const bomCategory = selectedBom ? (selectedBom.category || selectedBom.bomCategory) : null;
                   const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
@@ -2267,21 +2268,21 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
-                        <CompanyIcon sx={{ fontSize: 28, color: 'white' }} />
+                        <CompanyIcon sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Header Information
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Company and document details
                         </Typography>
                       </Box>
@@ -2310,9 +2311,9 @@ const CompanyBillOfMaterials = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        style: { 
+                        style: {
                           fontWeight: 'bold',
-                          color: '#1E7DBE'
+                          color: theme.palette.primary.dark
                         }
                       }}
                       helperText="Auto-generated unique identifier"
@@ -2372,11 +2373,11 @@ const CompanyBillOfMaterials = () => {
                   mb: 3,
                   background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(245, 124, 0, 0.05) 100%)',
                   border: '1px solid rgba(255, 152, 0, 0.3)',
-                  '& .MuiAlert-icon': { color: '#ff9800' }
+                  '& .MuiAlert-icon': { color: 'warning.main' }
                 }}
                 icon={<QuickAddIcon />}
               >
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#ff9800', mb: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 1 }}>
                   🚀 Quick Add Mode Active
                 </Typography>
                 <Typography variant="body2">
@@ -2409,21 +2410,21 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
-                        <DescriptionIcon sx={{ fontSize: 28, color: 'white' }} />
+                        <DescriptionIcon sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Product Specifications
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Detailed product specifications and dimensions
                         </Typography>
                       </Box>
@@ -2610,21 +2611,21 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
-                        <ScheduleIcon sx={{ fontSize: 28, color: 'white' }} />
+                        <ScheduleIcon sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Production Planning
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Production planning and process specifications
                         </Typography>
                       </Box>
@@ -2740,21 +2741,21 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
-                        <CableIcon sx={{ fontSize: 28, color: 'white' }} />
+                        <CableIcon sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Cable Materials
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Cable process materials and specifications
                         </Typography>
                       </Box>
@@ -2807,12 +2808,12 @@ const CompanyBillOfMaterials = () => {
                           <Table size="small">
                             <TableHead>
                               <TableRow sx={{ bgcolor: 'success.main' }}>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Sno.</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem', minWidth: '300px' }}>Raw Material</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Units</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Qty/Pc</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Total Qty</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem', width: 120 }}>Actions</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Sno.</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem', minWidth: '300px' }}>Raw Material</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Units</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Qty/Pc</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Total Qty</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem', width: 120 }}>Actions</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -2969,21 +2970,21 @@ const CompanyBillOfMaterials = () => {
                         sx={{
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(30, 58, 138, 0.3)'
                         }}
                       >
-                        <MouldingIcon sx={{ fontSize: 28, color: 'white' }} />
+                        <MouldingIcon sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#2c3e50', 
+                          color: 'text.primary', 
                           fontWeight: 700, 
                           mb: 0.5
                         }}>
                           Moulding Materials
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                           Moulding process materials and specifications
                         </Typography>
                       </Box>
@@ -3003,12 +3004,12 @@ const CompanyBillOfMaterials = () => {
                           <Table size="small">
                             <TableHead>
                               <TableRow sx={{ bgcolor: 'secondary.main' }}>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Sno.</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem', minWidth: '300px' }}>Raw Material</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Units</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Qty/Pc</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>Total Qty</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem', width: 120 }}>Actions</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Sno.</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem', minWidth: '300px' }}>Raw Material</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Units</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Qty/Pc</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem' }}>Total Qty</TableCell>
+                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold', fontSize: '0.75rem', width: 120 }}>Actions</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -3157,7 +3158,7 @@ const CompanyBillOfMaterials = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #1E7DBE, #45ADE6, #f59e0b)',
+            background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.warning.main})`,
           }
         }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -3167,8 +3168,8 @@ const CompanyBillOfMaterials = () => {
               variant="outlined"
               startIcon={<ScheduleIcon />}
               sx={{
-                borderColor: activeStep === 0 ? '#e2e8f0' : '#1E7DBE',
-                color: activeStep === 0 ? '#94a3b8' : '#1E7DBE',
+                borderColor: activeStep === 0 ? theme.palette.grey[200] : theme.palette.primary.dark,
+                color: activeStep === 0 ? theme.palette.text.disabled : theme.palette.primary.dark,
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
@@ -3178,14 +3179,14 @@ const CompanyBillOfMaterials = () => {
                 minWidth: 120,
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  borderColor: activeStep === 0 ? '#e2e8f0' : '#001a5c',
+                  borderColor: activeStep === 0 ? theme.palette.grey[200] : theme.palette.primary.dark,
                   backgroundColor: activeStep === 0 ? 'transparent' : 'rgba(30, 58, 138, 0.05)',
                   transform: activeStep === 0 ? 'none' : 'translateY(-2px)',
                   boxShadow: activeStep === 0 ? 'none' : '0 4px 12px rgba(30, 58, 138, 0.2)'
                 },
                 '&:disabled': {
-                  borderColor: '#e2e8f0',
-                  color: '#94a3b8',
+                  borderColor: theme.palette.grey[200],
+                  color: theme.palette.text.disabled,
                   backgroundColor: 'transparent'
                 }
               }}
@@ -3199,10 +3200,10 @@ const CompanyBillOfMaterials = () => {
                 variant="contained"
                 endIcon={<ScheduleIcon />}
                 sx={{
-                  background: isCurrentStepCompleted() 
-                    ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                    : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                  color: isCurrentStepCompleted() ? 'white' : '#94a3b8',
+                  background: isCurrentStepCompleted()
+                    ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`,
+                  color: isCurrentStepCompleted() ? 'white' : theme.palette.text.disabled,
                   borderRadius: 3,
                   px: 4,
                   py: 1.5,
@@ -3210,19 +3211,19 @@ const CompanyBillOfMaterials = () => {
                   textTransform: 'none',
                   fontSize: '1rem',
                   minWidth: 140,
-                  boxShadow: isCurrentStepCompleted() 
+                  boxShadow: isCurrentStepCompleted()
                     ? '0 6px 20px rgba(30, 58, 138, 0.3)'
                     : '0 2px 8px rgba(0, 0, 0, 0.1)',
                   transition: 'all 0.3s ease',
                   cursor: isCurrentStepCompleted() ? 'pointer' : 'not-allowed',
                   '&:hover': isCurrentStepCompleted() ? {
-                    background: 'linear-gradient(135deg, #001a5c 0%, #1E7DBE 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 25px rgba(30, 58, 138, 0.4)'
                   } : {},
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                    color: '#94a3b8',
+                    background: `linear-gradient(135deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`,
+                    color: theme.palette.text.disabled,
                     cursor: 'not-allowed'
                   }
                 }}
@@ -3232,12 +3233,12 @@ const CompanyBillOfMaterials = () => {
             ) : (
               <Button 
                 onClick={handleSubmit}
-                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <SaveIcon />}
+                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: '2px solid', borderColor: 'common.white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <SaveIcon />}
                 variant="contained"
                 disabled={loading}
                 sx={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: 'white',
+                  background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
+                  color: 'common.white',
                   borderRadius: 3,
                   px: 4,
                   py: 1.5,
@@ -3248,13 +3249,13 @@ const CompanyBillOfMaterials = () => {
                   boxShadow: '0 6px 20px rgba(16, 185, 129, 0.3)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: loading ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    background: loading ? `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)` : `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                     transform: loading ? 'none' : 'translateY(-2px)',
                     boxShadow: loading ? '0 6px 20px rgba(16, 185, 129, 0.3)' : '0 8px 25px rgba(16, 185, 129, 0.4)'
                   },
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
-                    color: 'white'
+                    background: `linear-gradient(135deg, ${theme.palette.grey[400]} 0%, ${theme.palette.grey[500]} 100%)`,
+                    color: 'common.white'
                   }
                 }}
               >
@@ -3265,14 +3266,14 @@ const CompanyBillOfMaterials = () => {
           
           {/* Progress indicator */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
               Progress: {(() => {
                 const bomCategory = selectedBom ? (selectedBom.category || selectedBom.bomCategory) : null;
                 const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
                 return Math.round(((activeStep + 1) / totalSteps) * 100);
               })()}%
             </Typography>
-            <Box sx={{ width: 80, height: 6, backgroundColor: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ width: 80, height: 6, backgroundColor: 'grey.200', borderRadius: 3, overflow: 'hidden' }}>
               <Box
                 sx={{
                   height: '100%',
@@ -3281,7 +3282,7 @@ const CompanyBillOfMaterials = () => {
                     const totalSteps = selectedBom && bomCategory ? steps.length - 1 : steps.length;
                     return ((activeStep + 1) / totalSteps) * 100;
                   })()}%`,
-                  background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                   borderRadius: 3,
                   transition: 'width 0.3s ease'
                 }}
@@ -3294,7 +3295,7 @@ const CompanyBillOfMaterials = () => {
             startIcon={<CancelIcon />}
             variant="text"
             sx={{
-              color: '#6c757d',
+              color: 'text.secondary',
               borderRadius: 3,
               px: 3,
               py: 1.5,
@@ -3305,7 +3306,7 @@ const CompanyBillOfMaterials = () => {
               transition: 'all 0.3s ease',
               '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444',
+                color: 'error.main',
                 transform: 'translateY(-1px)',
                 boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
               }
@@ -3354,7 +3355,7 @@ const CompanyBillOfMaterials = () => {
           </Stack>
         </DialogTitle>
         
-        <DialogContent sx={{ p: 3, bgcolor: '#f8fafc' }}>
+        <DialogContent sx={{ p: 3, bgcolor: 'grey.50' }}>
           {selectedBomDetails && (
             <Box sx={{ maxWidth: '100%', mx: 'auto' }}>
               <Grid container spacing={3}>
@@ -3364,7 +3365,7 @@ const CompanyBillOfMaterials = () => {
                     variant="outlined" 
                     sx={{ 
                       bgcolor: 'primary.main', 
-                      color: 'white', 
+                      color: 'common.white', 
                       p: 3, 
                       textAlign: 'center',
                       borderRadius: 2,
@@ -3397,8 +3398,8 @@ const CompanyBillOfMaterials = () => {
                       height: '100%',
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3470,8 +3471,8 @@ const CompanyBillOfMaterials = () => {
                       height: '100%',
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3529,8 +3530,8 @@ const CompanyBillOfMaterials = () => {
                       p: 3,
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3546,9 +3547,9 @@ const CompanyBillOfMaterials = () => {
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Core PVC:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -3562,9 +3563,9 @@ const CompanyBillOfMaterials = () => {
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Sheath PVC Inner:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -3578,9 +3579,9 @@ const CompanyBillOfMaterials = () => {
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>No. of Cores:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -3594,9 +3595,9 @@ const CompanyBillOfMaterials = () => {
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Red, Black:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -3610,9 +3611,9 @@ const CompanyBillOfMaterials = () => {
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Sheath PVC Outer:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -3623,9 +3624,9 @@ const CompanyBillOfMaterials = () => {
                       <Grid item xs={12} sm={6} md={9}>
                         <Box sx={{ 
                           p: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           borderRadius: 1,
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid', borderColor: 'divider'
                         }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>Printing:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary', wordBreak: 'break-word' }}>
@@ -3645,8 +3646,8 @@ const CompanyBillOfMaterials = () => {
                       p: 3,
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3657,75 +3658,75 @@ const CompanyBillOfMaterials = () => {
                     </Stack>
                     
                     {selectedBomDetails.cableMaterials && Array.isArray(selectedBomDetails.cableMaterials) && selectedBomDetails.cableMaterials.length > 0 ? (
-                      <TableContainer sx={{ borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                      <TableContainer sx={{ borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
                         <Table size="small">
                           <TableHead>
                             <TableRow>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>S.No.</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)'
                               }}>Process</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)'
                               }}>Material Type</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Units</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Qty/Pc</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Total Qty</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Issue</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 textAlign: 'center'
                               }}>Return</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
                             {selectedBomDetails.cableMaterials.map((material, index) => (
-                              <TableRow key={index} sx={{ '&:nth-of-type(odd)': { bgcolor: '#f8fafc' } }}>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{index + 1}</TableCell>
-                                <TableCell sx={{ borderRight: '1px solid #e2e8f0' }}>{material?.process || material?.rawMaterial || 'Cable Production'}</TableCell>
-                                <TableCell sx={{ borderRight: '1px solid #e2e8f0' }}>{material?.cableMaterial || material?.itemName || material?.materialType || material?.rawMaterial || 'N/A'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.units || 'Mtr'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.qtyPerPc || material?.quantityPerPiece || '1'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.totalQty || material?.totalQuantity || selectedBomDetails.length || 'N/A'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}></TableCell>
+                              <TableRow key={index} sx={{ '&:nth-of-type(odd)': { bgcolor: 'grey.50' } }}>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{index + 1}</TableCell>
+                                <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.process || material?.rawMaterial || 'Cable Production'}</TableCell>
+                                <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.cableMaterial || material?.itemName || material?.materialType || material?.rawMaterial || 'N/A'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.units || 'Mtr'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.qtyPerPc || material?.quantityPerPiece || '1'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.totalQty || material?.totalQuantity || selectedBomDetails.length || 'N/A'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}></TableCell>
                                 <TableCell sx={{ textAlign: 'center' }}></TableCell>
                               </TableRow>
                             ))}
@@ -3736,9 +3737,9 @@ const CompanyBillOfMaterials = () => {
                       <Box sx={{ 
                         p: 4, 
                         textAlign: 'center', 
-                        bgcolor: '#f8fafc', 
+                        bgcolor: 'grey.50', 
                         borderRadius: 2,
-                        border: '1px solid #e2e8f0'
+                        border: '1px solid', borderColor: 'divider'
                       }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           No cable materials data available. This BOM may need to be updated with material specifications.
@@ -3759,8 +3760,8 @@ const CompanyBillOfMaterials = () => {
                       p: 3,
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3771,75 +3772,75 @@ const CompanyBillOfMaterials = () => {
                     </Stack>
                     
                     {selectedBomDetails.mouldingMaterials && Array.isArray(selectedBomDetails.mouldingMaterials) && selectedBomDetails.mouldingMaterials.length > 0 ? (
-                      <TableContainer sx={{ borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                      <TableContainer sx={{ borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
                         <Table size="small">
                           <TableHead>
                             <TableRow>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>S.No.</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)'
                               }}>Process</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)'
                               }}>Material Type</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Units</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Qty/Pc</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Total Qty</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 textAlign: 'center'
                               }}>Issue</TableCell>
                               <TableCell sx={{ 
                                 fontWeight: 'bold', 
                                 bgcolor: 'primary.main', 
-                                color: 'white',
+                                color: 'common.white',
                                 textAlign: 'center'
                               }}>Return</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
                             {selectedBomDetails.mouldingMaterials.map((material, index) => (
-                              <TableRow key={index} sx={{ '&:nth-of-type(odd)': { bgcolor: '#f8fafc' } }}>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{index + 1}</TableCell>
-                                <TableCell sx={{ borderRight: '1px solid #e2e8f0' }}>{material?.process || material?.itemName || material?.materialType || 'Moulding'}</TableCell>
-                                <TableCell sx={{ borderRight: '1px solid #e2e8f0' }}>{material?.materialType || material?.itemName || material?.rawMaterial || 'N/A'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.units || 'Pcs'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.qtyPerPc || material?.quantityPerPiece || '1'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>{material?.totalQty || material?.totalQuantity || selectedBomDetails.plan || 'N/A'}</TableCell>
-                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}></TableCell>
+                              <TableRow key={index} sx={{ '&:nth-of-type(odd)': { bgcolor: 'grey.50' } }}>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{index + 1}</TableCell>
+                                <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.process || material?.itemName || material?.materialType || 'Moulding'}</TableCell>
+                                <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.materialType || material?.itemName || material?.rawMaterial || 'N/A'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.units || 'Pcs'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.qtyPerPc || material?.quantityPerPiece || '1'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}>{material?.totalQty || material?.totalQuantity || selectedBomDetails.plan || 'N/A'}</TableCell>
+                                <TableCell sx={{ textAlign: 'center', borderRight: '1px solid', borderRightColor: 'divider' }}></TableCell>
                                 <TableCell sx={{ textAlign: 'center' }}></TableCell>
                               </TableRow>
                             ))}
@@ -3850,9 +3851,9 @@ const CompanyBillOfMaterials = () => {
                       <Box sx={{ 
                         p: 4, 
                         textAlign: 'center', 
-                        bgcolor: '#f8fafc', 
+                        bgcolor: 'grey.50', 
                         borderRadius: 2,
-                        border: '1px solid #e2e8f0'
+                        border: '1px solid', borderColor: 'divider'
                       }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           No moulding materials data available. This BOM may need to be updated with moulding specifications.
@@ -3873,8 +3874,8 @@ const CompanyBillOfMaterials = () => {
                       p: 3,
                       borderRadius: 2,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      bgcolor: 'white',
-                      border: '1px solid #e2e8f0'
+                      bgcolor: 'background.paper',
+                      border: '1px solid', borderColor: 'divider'
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -3887,10 +3888,10 @@ const CompanyBillOfMaterials = () => {
                       <Grid item xs={12} sm={6} md={3}>
                         <Box sx={{ 
                           textAlign: 'center', 
-                          border: '2px solid #e2e8f0', 
+                          border: '2px solid', borderColor: 'divider', 
                           p: 3, 
                           borderRadius: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             borderColor: 'primary.main',
@@ -3898,17 +3899,17 @@ const CompanyBillOfMaterials = () => {
                           }
                         }}>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>CABLE PRODUCTION</Typography>
-                          <Box sx={{ height: 50, borderBottom: '2px solid #64748b', mb: 1 }}></Box>
+                          <Box sx={{ height: 50, borderBottom: '2px solid', borderBottomColor: 'grey.500', mb: 1 }}></Box>
                           <Typography variant="caption" color="text.secondary">SIGNATURE</Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={3}>
                         <Box sx={{ 
                           textAlign: 'center', 
-                          border: '2px solid #e2e8f0', 
+                          border: '2px solid', borderColor: 'divider', 
                           p: 3, 
                           borderRadius: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             borderColor: 'primary.main',
@@ -3916,17 +3917,17 @@ const CompanyBillOfMaterials = () => {
                           }
                         }}>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>CUTTING</Typography>
-                          <Box sx={{ height: 50, borderBottom: '2px solid #64748b', mb: 1 }}></Box>
+                          <Box sx={{ height: 50, borderBottom: '2px solid', borderBottomColor: 'grey.500', mb: 1 }}></Box>
                           <Typography variant="caption" color="text.secondary">SIGNATURE</Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={3}>
                         <Box sx={{ 
                           textAlign: 'center', 
-                          border: '2px solid #e2e8f0', 
+                          border: '2px solid', borderColor: 'divider', 
                           p: 3, 
                           borderRadius: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             borderColor: 'primary.main',
@@ -3934,17 +3935,17 @@ const CompanyBillOfMaterials = () => {
                           }
                         }}>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>ASSEMBLY</Typography>
-                          <Box sx={{ height: 50, borderBottom: '2px solid #64748b', mb: 1 }}></Box>
+                          <Box sx={{ height: 50, borderBottom: '2px solid', borderBottomColor: 'grey.500', mb: 1 }}></Box>
                           <Typography variant="caption" color="text.secondary">SIGNATURE</Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={3}>
                         <Box sx={{ 
                           textAlign: 'center', 
-                          border: '2px solid #e2e8f0', 
+                          border: '2px solid', borderColor: 'divider', 
                           p: 3, 
                           borderRadius: 2,
-                          bgcolor: '#f8fafc',
+                          bgcolor: 'grey.50',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             borderColor: 'primary.main',
@@ -3952,7 +3953,7 @@ const CompanyBillOfMaterials = () => {
                           }
                         }}>
                           <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>PACKING</Typography>
-                          <Box sx={{ height: 50, borderBottom: '2px solid #64748b', mb: 1 }}></Box>
+                          <Box sx={{ height: 50, borderBottom: '2px solid', borderBottomColor: 'grey.500', mb: 1 }}></Box>
                           <Typography variant="caption" color="text.secondary">SIGNATURE</Typography>
                         </Box>
                       </Grid>
@@ -3964,7 +3965,7 @@ const CompanyBillOfMaterials = () => {
           )}
         </DialogContent>
         
-        <DialogActions sx={{ px: 3, pb: 3, bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0', gap: 2 }}>
+        <DialogActions sx={{ px: 3, pb: 3, bgcolor: 'grey.50', borderTop: '1px solid', borderTopColor: 'divider', gap: 2 }}>
           <Button 
             onClick={() => setOpenViewDetailsDialog(false)}
             variant="outlined"
@@ -3974,7 +3975,7 @@ const CompanyBillOfMaterials = () => {
               px: 3,
               py: 1,
               fontWeight: 500,
-              borderColor: '#e2e8f0',
+              borderColor: 'divider',
               color: 'text.secondary',
               '&:hover': {
                 borderColor: 'primary.main',

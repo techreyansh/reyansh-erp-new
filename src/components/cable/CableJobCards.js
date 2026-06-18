@@ -14,7 +14,7 @@ import { jobSpecs, DEFAULT_MACHINES } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder } from "../../services/cablePlanner/erpAdapter";
 import { demoScheduleRows, demoCablesByCode, demoOrdersById } from "../../services/cablePlanner/demo";
 
-const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
+const stageColor = (theme) => ({ bunching: theme.palette.primary.main, core: theme.palette.primary.main, laying: theme.palette.warning.main, sheathing: theme.palette.success.main });
 const num = (v) => { const n = Number(String(v ?? "").replace(/[^0-9.-]/g, "")); return Number.isFinite(n) ? n : 0; };
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const hhmm = (iso) => (iso ? new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "—");
@@ -152,7 +152,7 @@ export default function CableJobCards() {
                       const spec = jobSpecs(rowToJob(row), cable, order);
                       const done = String(row.status || "").toLowerCase().includes("complet");
                       return (
-                        <Paper key={row.scheduleId} variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderLeft: `4px solid ${STAGE_COLOR[row.stage]}` }}>
+                        <Paper key={row.scheduleId} variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderLeft: `4px solid ${stageColor(theme)[row.stage]}` }}>
                           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
                             <Typography sx={{ fontWeight: 700 }}>{spec.title}</Typography>
                             <Chip size="small" label={row.status || "Scheduled"} color={done ? "success" : "default"} />

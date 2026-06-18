@@ -131,7 +131,7 @@ const MachineScheduling = () => {
     bunching: {
       name: "Bunching Machine",
       icon: <BunchingIcon />,
-      color: "#45ADE6",
+      color: theme.palette.primary.main,
       machines: ["BM-001"],
       capacity: 5000, // meters per hour
       setupTime: 1.0,
@@ -140,7 +140,7 @@ const MachineScheduling = () => {
     extruder: {
       name: "Extruder Machine", 
       icon: <ExtruderIcon />,
-      color: "#ff9800",
+      color: theme.palette.warning.main,
       machines: ["EXT-001"],
       capacity: 10800, // 180 m/min => m/hr
       setupTime: 1.0,
@@ -149,7 +149,7 @@ const MachineScheduling = () => {
     laying: {
       name: "Laying Machine",
       icon: <LayingIcon />,
-      color: "#4caf50",
+      color: theme.palette.success.main,
       machines: ["LAY-001"],
       capacity: 5000, // meters per hour
       setupTime: 0.5,
@@ -158,7 +158,7 @@ const MachineScheduling = () => {
     final_extruder: {
       name: "Final Extruder",
       icon: <ExtruderIcon />,
-      color: "#9c27b0",
+      color: theme.palette.primary.main,
       machines: ["FEXT-001"],
       capacity: 3000, // 50 m/min => m/hr
       setupTime: 1.0,

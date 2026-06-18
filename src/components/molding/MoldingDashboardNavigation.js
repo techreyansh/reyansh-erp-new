@@ -177,7 +177,7 @@ const MoldingDashboardNavigation = () => {
           elevation={0}
           sx={{
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+            background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`,
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden',
             position: "relative",

@@ -1,0 +1,38 @@
+<!-- @dsCard group="Dashboard Widgets · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KPI Stat Cards · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi { background: #2D3D4C; border: 1px solid rgba(226,232,237,0.12); border-radius: 8px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.32); position: relative; overflow: hidden; }
+  .kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .kpi.p::before { background: #45ADE6; }
+  .kpi.s::before { background: #34D399; }
+  .kpi.w::before { background: #FBBF24; }
+  .kpi.e::before { background: #E05548; }
+  .kpi .label { font-size: 12px; color: #A9B2BA; font-weight: 600; }
+  .kpi .value { font-family: "Montserrat"; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; margin: 8px 0 4px; }
+  .delta { font-size: 12px; font-weight: 600; }
+  .up { color: #34D399; }
+  .down { color: #EC7468; }
+</style>
+</head>
+<body>
+  <h1>KPI Stat Cards · Dark</h1>
+  <div class="sub">Tiles on paper with brightened accent rails; trend deltas use dark-mode semantic text.</div>
+  <div class="grid">
+    <div class="kpi p"><div class="label">Open orders</div><div class="value">42</div><div class="delta up">▲ 8% vs last week</div></div>
+    <div class="kpi s"><div class="label">Dispatched today</div><div class="value">17</div><div class="delta up">▲ 3 on target</div></div>
+    <div class="kpi w"><div class="label">QC holds</div><div class="value">5</div><div class="delta down">▲ 2 needs review</div></div>
+    <div class="kpi e"><div class="label">Overdue</div><div class="value">3</div><div class="delta down">▼ 1 since Mon</div></div>
+  </div>
+</body>
+</html>

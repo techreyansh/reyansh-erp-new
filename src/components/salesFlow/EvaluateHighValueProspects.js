@@ -189,19 +189,19 @@ const EvaluateHighValueProspects = () => {
   };
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)',
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.info.lighter} 100%)`,
       py: 3
-    }}>
+    })}>
       <Container maxWidth="xl">
         <Fade in timeout={800}>
           <Box>
             {/* Enhanced Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 4,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: 'common.white',
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
               position: 'relative',
@@ -218,15 +218,15 @@ const EvaluateHighValueProspects = () => {
                 background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
                 opacity: 0.3
               }
-            }}>
+            })}>
               <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap={3}>
                     <Tooltip title="Back to Sales Flow">
                       <IconButton
                         onClick={() => navigate('/sales-flow')}
-                        sx={{ 
-                          color: 'white',
+                        sx={{
+                          color: 'common.white',
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -240,11 +240,11 @@ const EvaluateHighValueProspects = () => {
                     </Tooltip>
                     
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Box sx={{
+                      <Box sx={(theme) => ({
                         width: 60,
                         height: 60,
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -258,23 +258,23 @@ const EvaluateHighValueProspects = () => {
                           right: -2,
                           bottom: -2,
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #1E7DBE, #45ADE6, #84D2FC)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                           zIndex: -1,
                           opacity: 0.7
                         }
-                      }}>
-                        <Assessment sx={{ fontSize: 28, color: 'white' }} />
+                      })}>
+                        <Assessment sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
-                        <Typography variant="h3" sx={{ 
+                        <Typography variant="h3" sx={(theme) => ({
                           fontWeight: 800,
-                          background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.common.white} 0%, ${theme.palette.common.white} 100%)`,
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           textShadow: '0 4px 8px rgba(0,0,0,0.1)',
                           mb: 1
-                        }}>
+                        })}>
                           Evaluate High Value Prospects
                         </Typography>
                         <Typography variant="h6" sx={{ 
@@ -299,8 +299,8 @@ const EvaluateHighValueProspects = () => {
                     border: '1px solid rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <WorkspacePremium sx={{ color: '#84D2FC', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                    <WorkspacePremium sx={{ color: 'primary.light', fontSize: 20 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'common.white' }}>
                       Step 3
                     </Typography>
                   </Box>
@@ -309,27 +309,27 @@ const EvaluateHighValueProspects = () => {
             </Card>
 
             {/* Leads Table */}
-            <Card sx={{ 
+            <Card sx={{
               mb: 4,
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
               overflow: 'hidden',
-              background: 'white',
+              backgroundColor: 'background.paper',
               maxWidth: '1400px',
               mx: 'auto'
             }}>
               <CardContent sx={{ p: 4 }}>
                 <Box display="flex" alignItems="center" gap={2} mb={4}>
-                  <Avatar sx={{ 
-                    width: 48, 
-                    height: 48, 
-                    background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                  <Avatar sx={(theme) => ({
+                    width: 48,
+                    height: 48,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                     boxShadow: '0 4px 16px rgba(79, 172, 254, 0.3)'
-                  }}>
+                  })}>
                     <TrendingUp sx={{ fontSize: 24 }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
                       Prospects for Evaluation
                     </Typography>
                     <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -381,14 +381,14 @@ const EvaluateHighValueProspects = () => {
                             onClick={() => setSelectedLead(lead)}
                           >
                             <TableCell>
-                              <Chip 
-                                label={lead.LogId} 
+                              <Chip
+                                label={lead.LogId}
                                 size="small"
-                                sx={{ 
-                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                  color: 'white',
+                                sx={(theme) => ({
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                  color: 'common.white',
                                   fontWeight: 600
-                                }}
+                                })}
                               />
                             </TableCell>
                             <TableCell>
@@ -436,11 +436,11 @@ const EvaluateHighValueProspects = () => {
                                             key={index}
                                             label={displayLabel} 
                                             size="small"
-                                            sx={{ 
-                                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                              color: 'white',
+                                            sx={(theme) => ({
+                                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                              color: 'common.white',
                                               fontSize: '0.7rem'
-                                            }}
+                                            })}
                                           />
                                         );
                                       });
@@ -452,11 +452,11 @@ const EvaluateHighValueProspects = () => {
                                         <Chip 
                                           label={displayLabel} 
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     }
@@ -490,11 +490,11 @@ const EvaluateHighValueProspects = () => {
                                           key={index}
                                           label={displayLabel} 
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     });
@@ -514,11 +514,11 @@ const EvaluateHighValueProspects = () => {
                                         <Chip 
                                           label={`+${productCodes.length - 2} more`}
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     }
@@ -552,21 +552,21 @@ const EvaluateHighValueProspects = () => {
                               <Chip 
                                 label={lead.CustomerType || 'N/A'} 
                                 size="small"
-                                sx={{ 
-                                  background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                                  color: 'white'
-                                }}
+                                sx={(theme) => ({
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                                  color: 'common.white'
+                                })}
                               />
                             </TableCell>
-                            
+
                             <TableCell>
-                              <Chip 
-                                label={lead.Status || 'New'} 
+                              <Chip
+                                label={lead.Status || 'New'}
                                 size="small"
-                                sx={{ 
-                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                  color: 'white'
-                                }}
+                                sx={(theme) => ({
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                  color: 'common.white'
+                                })}
                               />
                             </TableCell>
                             
@@ -578,8 +578,8 @@ const EvaluateHighValueProspects = () => {
                                     e.stopPropagation();
                                     handleViewDetails(lead);
                                   }}
-                                  sx={{ 
-                                    color: '#1E7DBE',
+                                  sx={{
+                                    color: 'primary.dark',
                                     '&:hover': {
                                       backgroundColor: 'rgba(102, 126, 234, 0.1)'
                                     }
@@ -600,26 +600,26 @@ const EvaluateHighValueProspects = () => {
 
             {/* Evaluation Form */}
             {selectedLead && (
-              <Card sx={{ 
+              <Card sx={{
                 borderRadius: 3,
                 boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
                 overflow: 'hidden',
-                background: 'white',
+                backgroundColor: 'background.paper',
                 maxWidth: '1400px',
                 mx: 'auto'
               }}>
                 <CardContent sx={{ p: 4 }}>
                   <Box display="flex" alignItems="center" gap={2} mb={4}>
-                    <Avatar sx={{ 
-                      width: 48, 
-                      height: 48, 
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    <Avatar sx={(theme) => ({
+                      width: 48,
+                      height: 48,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       boxShadow: '0 4px 16px rgba(67, 233, 123, 0.3)'
-                    }}>
+                    })}>
                       <Assessment sx={{ fontSize: 24 }} />
                     </Avatar>
                     <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
                         Evaluate Prospect: {selectedLead.FullName}
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -641,32 +641,32 @@ const EvaluateHighValueProspects = () => {
                             sx={{
                               borderRadius: 2,
                               '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#e0e0e0'
+                                borderColor: 'grey.100'
                               },
                               '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#1E7DBE'
+                                borderColor: 'primary.dark'
                               },
                               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#1E7DBE',
+                                borderColor: 'primary.dark',
                                 borderWidth: 2
                               }
                             }}
                           >
                             <MenuItem value="High Value">
                               <Box display="flex" alignItems="center" gap={1}>
-                                <PriorityHigh sx={{ fontSize: 16, color: '#d32f2f' }} />
+                                <PriorityHigh sx={{ fontSize: 16, color: 'error.main' }} />
                                 High Value
                               </Box>
                             </MenuItem>
                             <MenuItem value="Medium Value">
                               <Box display="flex" alignItems="center" gap={1}>
-                                <PriorityHigh sx={{ fontSize: 16, color: '#ed6c02' }} />
+                                <PriorityHigh sx={{ fontSize: 16, color: 'warning.main' }} />
                                 Medium Value
                               </Box>
                             </MenuItem>
                             <MenuItem value="Low Value">
                               <Box display="flex" alignItems="center" gap={1}>
-                                <PriorityHigh sx={{ fontSize: 16, color: '#2e7d32' }} />
+                                <PriorityHigh sx={{ fontSize: 16, color: 'success.main' }} />
                                 Low Value
                               </Box>
                             </MenuItem>
@@ -693,10 +693,10 @@ const EvaluateHighValueProspects = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
                               '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#1E7DBE'
+                                borderColor: 'primary.dark'
                               },
                               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#1E7DBE',
+                                borderColor: 'primary.dark',
                                 borderWidth: 2
                               }
                             }
@@ -708,12 +708,12 @@ const EvaluateHighValueProspects = () => {
                         <Divider sx={{ my: 3 }} />
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Box display="flex" alignItems="center" gap={2}>
-                            <Avatar sx={{ 
-                              width: 40, 
-                              height: 40, 
-                              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                            <Avatar sx={(theme) => ({
+                              width: 40,
+                              height: 40,
+                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                               boxShadow: '0 4px 16px rgba(67, 233, 123, 0.3)'
-                            }}>
+                            })}>
                               <Assessment sx={{ fontSize: 20 }} />
                             </Avatar>
                             <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, mr: 2 }}>
@@ -734,10 +734,10 @@ const EvaluateHighValueProspects = () => {
                                 borderRadius: 2,
                                 px: 4,
                                 py: 1.5,
-                                borderColor: '#1E7DBE',
-                                color: '#1E7DBE',
+                                borderColor: 'primary.dark',
+                                color: 'primary.dark',
                                 '&:hover': {
-                                  borderColor: '#45ADE6',
+                                  borderColor: 'primary.main',
                                   backgroundColor: 'rgba(102, 126, 234, 0.04)'
                                 }
                               }}
@@ -749,9 +749,9 @@ const EvaluateHighValueProspects = () => {
                               variant="contained"
                               startIcon={loading ? <CircularProgress size={20} /> : <AutoAwesome />}
                               disabled={loading}
-                              sx={{
-                                background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                                color: 'white',
+                              sx={(theme) => ({
+                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                                color: 'common.white',
                                 fontWeight: 700,
                                 px: 5,
                                 py: 1.5,
@@ -761,9 +761,9 @@ const EvaluateHighValueProspects = () => {
                                 '&:hover': {
                                   transform: 'translateY(-2px)',
                                   boxShadow: '0 12px 40px rgba(250, 112, 154, 0.6)',
-                                  background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)'
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
                                 }
-                              }}
+                              })}
                             >
                               {loading ? 'Evaluating...' : 'Complete Evaluation'}
                             </Button>
@@ -785,7 +785,7 @@ const EvaluateHighValueProspects = () => {
             >
               <DialogTitle>
                 <Box display="flex" alignItems="center" gap={2}>
-                  <Person sx={{ color: '#1E7DBE' }} />
+                  <Person sx={{ color: 'primary.dark' }} />
                   <Typography variant="h6">Lead Details</Typography>
                 </Box>
               </DialogTitle>
@@ -794,14 +794,14 @@ const EvaluateHighValueProspects = () => {
                   <Grid container spacing={3}>
                                          {/* Basic Information */}
                      <Grid item xs={12}>
-                       <Box sx={{ 
-                         p: 2, 
-                         mb: 3, 
-                         background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                       <Box sx={(theme) => ({
+                         p: 2,
+                         mb: 3,
+                         background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                          borderRadius: 2,
-                         color: 'white'
-                       }}>
-                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'white' }}>
+                         color: 'common.white'
+                       })}>
+                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'common.white' }}>
                            Basic Information
                          </Typography>
                        </Box>
@@ -845,15 +845,15 @@ const EvaluateHighValueProspects = () => {
 
                                          {/* Lead Details */}
                      <Grid item xs={12}>
-                       <Box sx={{ 
-                         p: 2, 
-                         mb: 3, 
+                       <Box sx={(theme) => ({
+                         p: 2,
+                         mb: 3,
                          ml: 2,
-                         background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                          borderRadius: 2,
-                         color: 'white'
-                       }}>
-                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'white' }}>
+                         color: 'common.white'
+                       })}>
+                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'common.white' }}>
                            Lead Details
                          </Typography>
                        </Box>
@@ -875,11 +875,11 @@ const EvaluateHighValueProspects = () => {
                       <Chip 
                         label={selectedLead.CustomerType || 'N/A'} 
                         size="small"
-                        sx={{ 
-                          background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                          color: 'white',
+                        sx={(theme) => ({
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                          color: 'common.white',
                           mb: 2
-                        }}
+                        })}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -906,11 +906,11 @@ const EvaluateHighValueProspects = () => {
                       <Chip 
                         label={selectedLead.Status || 'New'} 
                         size="small"
-                        sx={{ 
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                          color: 'white',
+                        sx={(theme) => ({
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: 'common.white',
                           mb: 2
-                        }}
+                        })}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -936,10 +936,10 @@ const EvaluateHighValueProspects = () => {
                                     key={index}
                                     label={displayLabel} 
                                     size="small"
-                                    sx={{ 
-                                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                      color: 'white'
-                                    }}
+                                    sx={(theme) => ({
+                                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                      color: 'common.white'
+                                    })}
                                   />
                                 );
                               });
@@ -952,10 +952,10 @@ const EvaluateHighValueProspects = () => {
                                 <Chip 
                                   label={displayLabel} 
                                   size="small"
-                                  sx={{ 
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                    color: 'white'
-                                  }}
+                                  sx={(theme) => ({
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                    color: 'common.white'
+                                  })}
                                 />
                               );
                             }
@@ -990,10 +990,10 @@ const EvaluateHighValueProspects = () => {
                                   key={index}
                                   label={displayLabel} 
                                   size="small"
-                                  sx={{ 
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                    color: 'white'
-                                  }}
+                                  sx={(theme) => ({
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                    color: 'common.white'
+                                  })}
                                 />
                               );
                             });
@@ -1004,15 +1004,15 @@ const EvaluateHighValueProspects = () => {
                                                               {/* Notes */}
                                                               
                      <Grid item xs={12}>
-                       <Box sx={{ 
-                         p: 2, 
-                         mb: 3, 
+                       <Box sx={(theme) => ({
+                         p: 2,
+                         mb: 3,
                          ml: 2,
-                         background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                          borderRadius: 2,
-                         color: 'white'
-                       }}>
-                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'white' }}>
+                         color: 'common.white'
+                       })}>
+                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'common.white' }}>
                            Notes
                          </Typography>
                        </Box>
@@ -1023,11 +1023,12 @@ const EvaluateHighValueProspects = () => {
                        <Typography variant="subtitle2" color="text.secondary">Notes</Typography>
                        <Paper 
                          elevation={0} 
-                         sx={{ 
-                           p: 2, 
-                           mb: 2, 
-                           backgroundColor: '#f8f9fa',
-                           border: '1px solid #e9ecef',
+                         sx={{
+                           p: 2,
+                           mb: 2,
+                           backgroundColor: 'grey.100',
+                           border: '1px solid',
+                           borderColor: 'grey.100',
                            borderRadius: 2
                          }}
                        >
@@ -1039,15 +1040,15 @@ const EvaluateHighValueProspects = () => {
 
                      {/* Timestamps */}
                      <Grid item xs={12}>
-                       <Box sx={{ 
-                         p: 2, 
-                         mb: 3, 
+                       <Box sx={(theme) => ({
+                         p: 2,
+                         mb: 3,
                          ml: 2,
-                         background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                         background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                          borderRadius: 2,
-                         color: 'white'
-                       }}>
-                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'white' }}>
+                         color: 'common.white'
+                       })}>
+                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, color: 'common.white' }}>
                            Timestamps
                          </Typography>
                        </Box>

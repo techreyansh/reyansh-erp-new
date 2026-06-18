@@ -656,8 +656,8 @@ const VendorManagement = () => {
       overflow: 'hidden'
     }}>
       {/* Management Header */}
-      <Box sx={{
-        background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+      <Box sx={(theme) => ({
+        background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
         color: 'white',
         py: 3,
         px: 4,
@@ -666,7 +666,7 @@ const VendorManagement = () => {
         top: 0,
         zIndex: 10,
         borderBottom: '4px solid rgba(255, 255, 255, 0.2)'
-      }}>
+      })}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box
             sx={{
@@ -720,70 +720,70 @@ const VendorManagement = () => {
       
       {/* Floating Color Bubbles */}
       <Box
-        sx={{
+        sx={(theme) => ({
           position: 'absolute',
           top: '10%',
           left: '10%',
           width: 100,
           height: 100,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #fb923c, #f97316)',
+          background: `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
           opacity: 0.3,
           animation: 'float 6s ease-in-out infinite',
           zIndex: 0
-        }}
+        })}
       />
       <Box
-        sx={{
+        sx={(theme) => ({
           position: 'absolute',
           top: '20%',
           right: '15%',
           width: 150,
           height: 150,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #f97316, #fb923c)',
+          background: `linear-gradient(45deg, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
           opacity: 0.2,
           animation: 'float 8s ease-in-out infinite reverse',
           zIndex: 0
-        }}
+        })}
       />
       <Box
-        sx={{
+        sx={(theme) => ({
           position: 'absolute',
           bottom: '20%',
           left: '20%',
           width: 80,
           height: 80,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #fb923c, #f97316)',
+          background: `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
           opacity: 0.4,
           animation: 'float 7s ease-in-out infinite',
           zIndex: 0
-        }}
+        })}
       />
       <Box
-        sx={{
+        sx={(theme) => ({
           position: 'absolute',
           bottom: '10%',
           right: '10%',
           width: 120,
           height: 120,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #f97316, #fb923c)',
+          background: `linear-gradient(45deg, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
           opacity: 0.3,
           animation: 'float 9s ease-in-out infinite reverse',
           zIndex: 0
-        }}
+        })}
       />
       
       {/* Header */}
         <Fade in timeout={800}>
       <Paper 
         elevation={0}
-        sx={{ 
-          p: 4, 
-          mb: 4, 
-          background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+        sx={(theme) => ({
+          p: 4,
+          mb: 4,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
           color: 'white',
           borderRadius: 4,
           position: 'relative',
@@ -792,7 +792,7 @@ const VendorManagement = () => {
           zIndex: 1,
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.2)'
-        }}
+        })}
       >
         <Box
           sx={{
@@ -836,14 +836,14 @@ const VendorManagement = () => {
           <Typography 
             variant="h3" 
             gutterBottom 
-            sx={{ 
+            sx={(theme) => ({
                     fontWeight: 800,
                     textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
+                    background: `linear-gradient(45deg, ${theme.palette.common.white} 30%, ${theme.palette.grey[100]} 90%)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
-            }}
+            })}
           >
                     Vendor Management
                   </Typography>
@@ -963,7 +963,7 @@ const VendorManagement = () => {
       <Zoom in timeout={1000}>
       <Card 
         elevation={0}
-        sx={{ 
+        sx={(theme) => ({
             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%)',
             backdropFilter: 'blur(30px)',
             borderRadius: 4,
@@ -979,10 +979,10 @@ const VendorManagement = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #1E7DBE, #45ADE6)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               zIndex: 1
             }
-        }}
+        })}
       >
         <CardContent sx={{ p: 4 }}>
           {/* Header Section */}
@@ -997,14 +997,14 @@ const VendorManagement = () => {
                         <Box>
               <Typography 
                   variant="h4" 
-                sx={{ 
-                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     fontWeight: 800,
                     mb: 1
-                  }}
+                  })}
                 >
                   Vendor Directory
                           </Typography>
@@ -1023,10 +1023,10 @@ const VendorManagement = () => {
                 variant="contained" 
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenDialog(null, null)}
-                sx={{
-                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
-                    '&:hover': { 
-                      background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${theme.palette.warning.dark} 0%, ${theme.palette.warning.dark} 100%)`,
                       transform: 'translateY(-2px)',
                       boxShadow: '0 10px 20px rgba(251, 146, 60, 0.3)'
                     },
@@ -1037,7 +1037,7 @@ const VendorManagement = () => {
                     fontSize: '1rem',
                     textTransform: 'none',
                     transition: 'all 0.3s ease'
-                  }}
+                  })}
                 >
                   Add New Vendor
               </Button>
@@ -1069,9 +1069,9 @@ const VendorManagement = () => {
           </Box>
 
             {/* Search and Filter Controls */}
-            <Box sx={{ 
-              mb: 3, 
-              p: 3, 
+            <Box sx={(theme) => ({
+              mb: 3,
+              p: 3,
               background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
               borderRadius: 3,
               border: '2px solid rgba(255, 255, 255, 0.3)',
@@ -1086,10 +1086,10 @@ const VendorManagement = () => {
                 left: 0,
                 right: 0,
                 height: '3px',
-                background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                 zIndex: 1
               }
-            }}>
+            })}>
               <Grid container spacing={3} alignItems="center">
                     <Grid item xs={12} md={4}>
                       <TextField
@@ -1207,41 +1207,41 @@ const VendorManagement = () => {
           {error && (
             <Alert 
               severity="error" 
-              sx={{ 
+              sx={(theme) => ({
                 mb: 3,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.error.lighter} 0%, ${theme.palette.error.lighter} 100%)`,
                 border: 1,
                 borderColor: 'error.main',
                 '& .MuiAlert-icon': { color: 'error.main' }
-              }}
+              })}
             >
               {error}
             </Alert>
           )}
 
           {loading ? (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
+              <Box sx={(theme) => ({
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 minHeight: 200,
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.grey[100]} 100%)`,
                 borderRadius: 3
-              }}>
+              })}>
                 <Box sx={{ textAlign: 'center' }}>
                   <Box
-                    sx={{
+                    sx={(theme) => ({
                       width: 60,
                       height: 60,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       mb: 2,
                       animation: 'pulse 2s infinite'
-                    }}
+                    })}
                   >
                     <Business sx={{ color: 'white', fontSize: 30 }} />
             </Box>
@@ -1254,7 +1254,7 @@ const VendorManagement = () => {
               <>
                   <TableContainer 
                     component={Paper} 
-                    sx={{ 
+                    sx={(theme) => ({
                           borderRadius: 3,
                           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
                           backdropFilter: 'blur(20px)',
@@ -1270,15 +1270,15 @@ const VendorManagement = () => {
                             left: 0,
                             right: 0,
                             height: '3px',
-                            background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                            background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                             zIndex: 1
                           }
-                        }}
+                        })}
                       >
                 <Table size="medium" sx={{ minWidth: 1200 }}>
                     <TableHead>
-                    <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                    <TableRow sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                       '& .MuiTableCell-head': {
                         color: 'white',
                         fontWeight: 800,
@@ -1296,7 +1296,7 @@ const VendorManagement = () => {
                           background: 'rgba(255, 255, 255, 0.3)'
                         }
                       }
-                    }}>
+                    })}>
                       <TableCell sx={{ minWidth: 180 }}>Vendor Name</TableCell>
                       <TableCell sx={{ minWidth: 100 }}>Code</TableCell>
                       <TableCell sx={{ minWidth: 140 }}>Business Type</TableCell>
@@ -1314,17 +1314,17 @@ const VendorManagement = () => {
                         <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                             <Box sx={{ textAlign: 'center' }}>
                             <Box
-                              sx={{
+                              sx={(theme) => ({
                                 width: 80,
                                 height: 80,
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                                background: `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.grey[100]} 100%)`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 mx: 'auto',
                                 mb: 2
-                              }}
+                              })}
                             >
                               <Business sx={{ color: 'text.secondary', fontSize: 40 }} />
                             </Box>
@@ -1379,12 +1379,12 @@ const VendorManagement = () => {
                       <Chip
                         label={vendor.vendorCode || 'N/A'}
                         size="small"
-                        sx={{
-                                background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                        sx={(theme) => ({
+                                background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                                 color: 'white',
                                 fontWeight: 600,
                                 fontSize: '0.75rem'
-                        }}
+                        })}
                       />
                             </TableCell>
                           <TableCell sx={{ color: 'text.primary', minWidth: 140, maxWidth: 180 }}>
@@ -1557,10 +1557,10 @@ const VendorManagement = () => {
               
               {/* Enhanced Pagination Controls */}
               {filteredVendors.length > 0 && (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+              <Box sx={(theme) => ({
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                   mt: 3,
                   p: 3,
                   background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
@@ -1577,10 +1577,10 @@ const VendorManagement = () => {
                     left: 0,
                     right: 0,
                     height: '3px',
-                    background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                    background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                     zIndex: 1
                   }
-                }}>
+                })}>
                   {/* Rows per page selector */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
@@ -1629,7 +1629,7 @@ const VendorManagement = () => {
                     size="large"
                     showFirstButton
                     showLastButton
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiPaginationItem-root': {
                             borderRadius: 3,
                             fontWeight: 700,
@@ -1643,7 +1643,7 @@ const VendorManagement = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                              background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                               color: 'white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
@@ -1653,7 +1653,7 @@ const VendorManagement = () => {
                               }
                             }
                           }
-                        }}
+                        })}
                   />
                 )}
               </Box>
@@ -1674,7 +1674,7 @@ const VendorManagement = () => {
         maxWidth="lg" 
         fullWidth
         PaperProps={{
-          sx: {
+          sx: (theme) => ({
             borderRadius: 4,
             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
             backdropFilter: 'blur(20px)',
@@ -1690,10 +1690,10 @@ const VendorManagement = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #fb923c, #f97316, #fb923c)',
+              background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
               zIndex: 2
             }
-          }
+          })
         }}
       >
         <DialogTitle sx={{ 
@@ -1711,15 +1711,15 @@ const VendorManagement = () => {
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box
-              sx={{
+              sx={(theme) => ({
                 p: 2,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                 boxShadow: '0 8px 20px rgba(251, 146, 60, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
-              }}
+              })}
             >
               <Business sx={{ fontSize: 32, color: 'white' }} />
           </Box>
@@ -1746,36 +1746,36 @@ const VendorManagement = () => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ 
-          p: 0, 
+        <DialogContent sx={(theme) => ({
+          p: 0,
           overflow: 'auto',
           maxHeight: '70vh',
           '&::-webkit-scrollbar': {
             width: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
+            background: theme.palette.grey[100],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: '#c1c1c1',
+            background: theme.palette.grey[400],
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            background: '#a8a8a8',
+            background: theme.palette.grey[500],
           }
-        }}>
+        })}>
           {error && (
             <Alert 
               severity="error" 
-              sx={{ 
+              sx={(theme) => ({
                 m: 3,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.error.lighter} 0%, ${theme.palette.error.lighter} 100%)`,
                 border: 1,
                 borderColor: 'error.main',
                 '& .MuiAlert-icon': { color: 'error.main' }
-              }}
+              })}
             >
               {error}
             </Alert>
@@ -1793,7 +1793,7 @@ const VendorManagement = () => {
             <Stepper 
               activeStep={activeStep} 
               alternativeLabel
-              sx={{
+              sx={(theme) => ({
                 '& .MuiStepConnector-root': {
                   top: 22,
                   left: 'calc(-50% + 16px)',
@@ -1801,13 +1801,13 @@ const VendorManagement = () => {
                 },
                 '& .MuiStepConnector-active': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                    background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                     boxShadow: '0 2px 8px rgba(251, 146, 60, 0.3)'
                   },
                 },
                 '& .MuiStepConnector-completed': {
                   '& .MuiStepConnector-line': {
-                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.main})`,
                     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                   },
                 },
@@ -1818,7 +1818,7 @@ const VendorManagement = () => {
                   borderRadius: 1,
                   transition: 'all 0.3s ease'
                 }
-              }}
+              })}
             >
               {steps.map((label, index) => (
                 <Step key={label}>
@@ -1837,20 +1837,20 @@ const VendorManagement = () => {
                       const isAccessible = isStepAccessible(index);
                       return (
                         <Box
-                          sx={{
+                          sx={(theme) => ({
                             width: 44,
                             height: 44,
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: completed 
-                              ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                              : active 
-                              ? 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)'
+                            background: completed
+                              ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`
+                              : active
+                              ? `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`
                               : isAccessible
-                              ? 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)'
-                              : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                              ? `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`
+                              : `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.divider} 100%)`,
                             boxShadow: completed || active 
                               ? '0 6px 20px rgba(251, 146, 60, 0.3)' 
                               : isAccessible
@@ -1875,7 +1875,7 @@ const VendorManagement = () => {
                               transform: 'scale(1.15)',
                               boxShadow: '0 8px 25px rgba(251, 146, 60, 0.4)'
                             } : {}
-                          }}
+                          })}
                         >
                         {completed ? (
                           <CheckCircle sx={{ fontSize: 20 }} />
@@ -1885,7 +1885,7 @@ const VendorManagement = () => {
                       </Box>
                       );
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       cursor: isStepAccessible(index) ? 'pointer' : 'not-allowed',
                       '& .MuiStepLabel-label': {
                         fontSize: '0.9rem',
@@ -1902,17 +1902,17 @@ const VendorManagement = () => {
                       },
                       '& .MuiStepLabel-active': {
                         '& .MuiStepLabel-label': {
-                          color: '#fb923c !important',
+                          color: `${theme.palette.warning.main} !important`,
                           fontWeight: 700
                         }
                       },
                       '& .MuiStepLabel-completed': {
                         '& .MuiStepLabel-label': {
-                          color: '#10b981 !important',
+                          color: `${theme.palette.success.main} !important`,
                           fontWeight: 600
                         }
                       }
-                    }}
+                    })}
                   >
                     {label}
                   </StepLabel>
@@ -1928,13 +1928,13 @@ const VendorManagement = () => {
             </Typography>
               <Box sx={{ flexGrow: 1, height: 4, backgroundColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                 <Box
-                  sx={{
+                  sx={(theme) => ({
                     height: '100%',
                     width: `${((activeStep + 1) / steps.length) * 100}%`,
-                    background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                    background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                     borderRadius: 2,
                     transition: 'width 0.3s ease'
-                  }}
+                  })}
                 />
               </Box>
               <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 700 }}>
@@ -1981,12 +1981,12 @@ const VendorManagement = () => {
                       gap: 2
                     }}>
                       <Box
-                        sx={{
+                        sx={(theme) => ({
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
                           boxShadow: '0 4px 12px rgba(251, 146, 60, 0.3)'
-                        }}
+                        })}
                       >
                         <Business sx={{ fontSize: 28, color: 'white' }} />
                       </Box>
@@ -2168,12 +2168,12 @@ const VendorManagement = () => {
                       gap: 2
                     }}>
                       <Box
-                        sx={{
+                        sx={(theme) => ({
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-                        }}
+                        })}
                       >
                         <LocationOn sx={{ fontSize: 28, color: 'white' }} />
                       </Box>
@@ -2413,12 +2413,12 @@ const VendorManagement = () => {
                       gap: 2
                     }}>
                       <Box
-                        sx={{
+                        sx={(theme) => ({
                           p: 2,
                           borderRadius: 2,
-                          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.main} 100%)`,
                           boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
-                        }}
+                        })}
                       >
                         <AccountBalance sx={{ fontSize: 28, color: 'white' }} />
                       </Box>
@@ -2533,8 +2533,8 @@ const VendorManagement = () => {
                       </Typography>
                     <Paper 
                         elevation={0}
-                        sx={{ 
-                          p: 2, 
+                        sx={(theme) => ({
+                          p: 2,
                           background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.05) 0%, rgba(249, 115, 22, 0.05) 100%)',
                           border: '1px solid rgba(251, 146, 60, 0.2)',
                           borderRadius: 2,
@@ -2544,26 +2544,26 @@ const VendorManagement = () => {
                             width: '6px',
                           },
                           '&::-webkit-scrollbar-track': {
-                            background: '#f1f1f1',
+                            background: theme.palette.grey[100],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb': {
-                            background: '#c1c1c1',
+                            background: theme.palette.grey[400],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb:hover': {
-                            background: '#a8a8a8',
+                            background: theme.palette.grey[500],
                           }
-                        }}
+                        })}
                       >
                 {form.contacts.map((c, idx) => (
-                        <Card key={idx} sx={{ 
-                          mb: 1.5, 
+                        <Card key={idx} sx={(theme) => ({
+                          mb: 1.5,
                           p: 1.5,
                           background: 'rgba(255, 255, 255, 0.8)',
-                          border: c.isPrimary ? '2px solid #fb923c' : '1px solid rgba(251, 146, 60, 0.1)',
+                          border: c.isPrimary ? `2px solid ${theme.palette.warning.main}` : '1px solid rgba(251, 146, 60, 0.1)',
                           borderRadius: 2
-                        }}>
+                        })}>
                           <Grid container spacing={2} alignItems="center">
                             <Grid item xs={12} sm={3}>
                               <TextField
@@ -2708,8 +2708,8 @@ const VendorManagement = () => {
                       </Typography>
                     <Paper 
                         elevation={0}
-                        sx={{ 
-                          p: 2, 
+                        sx={(theme) => ({
+                          p: 2,
                           background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.05) 0%, rgba(249, 115, 22, 0.05) 100%)',
                           border: '1px solid rgba(251, 146, 60, 0.2)',
                           borderRadius: 2,
@@ -2719,17 +2719,17 @@ const VendorManagement = () => {
                             width: '6px',
                           },
                           '&::-webkit-scrollbar-track': {
-                            background: '#f1f1f1',
+                            background: theme.palette.grey[100],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb': {
-                            background: '#c1c1c1',
+                            background: theme.palette.grey[400],
                             borderRadius: '3px',
                           },
                           '&::-webkit-scrollbar-thumb:hover': {
-                            background: '#a8a8a8',
+                            background: theme.palette.grey[500],
                           }
-                        }}
+                        })}
                       >
                 {form.products.map((p, idx) => (
                         <Card key={idx} sx={{ 
@@ -3091,8 +3091,8 @@ const VendorManagement = () => {
             </LocalizationProvider>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ 
-          p: 4, 
+        <DialogActions sx={(theme) => ({
+          p: 4,
           background: 'linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)',
           borderTop: '1px solid rgba(251, 146, 60, 0.1)',
           display: 'flex',
@@ -3106,9 +3106,9 @@ const VendorManagement = () => {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, #fb923c, #f97316, #fb923c)',
+            background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
           }
-        }}>
+        })}>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button 
               disabled={activeStep === 0}
@@ -3157,10 +3157,10 @@ const VendorManagement = () => {
                     disabled={!isCurrentStepCompleted()}
                     variant="contained"
                     endIcon={<Schedule />}
-                sx={{
-                  background: isCurrentStepCompleted() 
-                    ? 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)'
-                    : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
+                sx={(theme) => ({
+                  background: isCurrentStepCompleted()
+                    ? `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`,
                   color: isCurrentStepCompleted() ? 'white' : 'text.secondary',
                   borderRadius: 3,
                   px: 4,
@@ -3169,22 +3169,22 @@ const VendorManagement = () => {
                   textTransform: 'none',
                   fontSize: '1rem',
                   minWidth: 140,
-                  boxShadow: isCurrentStepCompleted() 
+                  boxShadow: isCurrentStepCompleted()
                     ? '0 6px 20px rgba(251, 146, 60, 0.3)'
                     : '0 2px 8px rgba(0, 0, 0, 0.1)',
                   transition: 'all 0.3s ease',
                   cursor: isCurrentStepCompleted() ? 'pointer' : 'not-allowed',
                   '&:hover': isCurrentStepCompleted() ? {
-                    background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.warning.dark} 0%, ${theme.palette.warning.dark} 100%)`,
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 25px rgba(251, 146, 60, 0.4)'
                   } : {},
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.divider} 0%, ${theme.palette.grey[300]} 100%)`,
                     color: 'text.secondary',
                     cursor: 'not-allowed'
                   }
-                }}
+                })}
               >
                 Next Step
             </Button>
@@ -3193,11 +3193,11 @@ const VendorManagement = () => {
             ) : (
               <Button 
                 onClick={handleSave} 
-                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Save />} 
+                startIcon={loading ? <Box sx={{ width: 16, height: 16, border: '2px solid', borderColor: 'common.white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Save />}
                 variant="contained"
                 disabled={loading}
-                sx={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`,
                   color: 'white',
                   borderRadius: 3,
                   px: 4,
@@ -3209,15 +3209,15 @@ const VendorManagement = () => {
                   boxShadow: '0 6px 20px rgba(16, 185, 129, 0.3)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: loading ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    background: loading ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)` : `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                     transform: loading ? 'none' : 'translateY(-2px)',
                     boxShadow: loading ? '0 6px 20px rgba(16, 185, 129, 0.3)' : '0 8px 25px rgba(16, 185, 129, 0.4)'
                   },
                   '&:disabled': {
-                    background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.text.disabled} 0%, ${theme.palette.text.secondary} 100%)`,
                     color: 'white'
                   }
-                }}
+                })}
               >
                 {loading ? 'Saving...' : (editIndex !== null ? 'Update Vendor' : 'Create Vendor')}
             </Button>
@@ -3231,13 +3231,13 @@ const VendorManagement = () => {
             </Typography>
             <Box sx={{ width: 80, height: 6, backgroundColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
               <Box
-                sx={{
+                sx={(theme) => ({
                   height: '100%',
                   width: `${((activeStep + 1) / steps.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                  background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
                   borderRadius: 3,
                   transition: 'width 0.3s ease'
-                }}
+                })}
               />
             </Box>
           </Box>

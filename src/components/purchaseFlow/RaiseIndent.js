@@ -507,9 +507,9 @@ const RaiseIndent = () => {
   }, [allIndents.length]);
 
   return (
-    <Box sx={{ 
-      p: 3, 
-      background: `linear-gradient(135deg, #f1f8f4 0%, #e8f5e9 50%, #c8e6c9 100%)`,
+    <Box sx={(theme) => ({
+      p: 3,
+      background: `linear-gradient(135deg, ${theme.palette.success.lighter} 0%, ${theme.palette.success.lighter} 50%, ${theme.palette.success.light} 100%)`,
       minHeight: '100vh',
       position: 'relative',
       '&::before': {
@@ -524,7 +524,7 @@ const RaiseIndent = () => {
                      radial-gradient(circle at 40% 40%, rgba(200, 230, 201, 0.05) 0%, transparent 50%)`,
         pointerEvents: 'none'
       }
-    }}>
+    })}>
       {/* Header Section */}
       <Box sx={{ mb: 4, textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <Typography 
@@ -568,10 +568,10 @@ const RaiseIndent = () => {
       )}
       
       {/* Form Section */}
-      <Card 
-        elevation={0} 
-        sx={{ 
-          mb: 4, 
+      <Card
+        elevation={0}
+        sx={(theme) => ({
+          mb: 4,
           borderRadius: 4,
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(20px)',
@@ -586,9 +586,9 @@ const RaiseIndent = () => {
             left: 0,
             right: 0,
             height: '4px',
-            background: `linear-gradient(90deg, #81c784, #a5d6a7)`
+            background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.light})`
           }
-        }}
+        })}
       >
         <CardHeader
           avatar={
@@ -619,12 +619,12 @@ const RaiseIndent = () => {
         />
         <CardContent sx={{ p: 4 }}>
           {indents.map((indent, index) => (
-            <Paper 
-              key={index} 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
-                mb: 3, 
+            <Paper
+              key={index}
+              elevation={0}
+              sx={(theme) => ({
+                p: 3,
+                mb: 3,
                 borderRadius: 3,
                 border: '1px solid rgba(74, 144, 226, 0.15)',
                 background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 255, 0.9) 100%)`,
@@ -638,9 +638,9 @@ const RaiseIndent = () => {
                   left: 0,
                   width: '4px',
                   height: '100%',
-                  background: `linear-gradient(180deg, #4a90e2, #9b59b6)`
+                  background: `linear-gradient(180deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
                 },
-              }}
+              })}
             >
               <Typography variant="h6" sx={{ 
                 mb: 3, 
@@ -650,13 +650,13 @@ const RaiseIndent = () => {
                 alignItems: 'center',
                 gap: 1
               }}>
-                <Box sx={{ 
-                  width: 8, 
-                  height: 8, 
-                  borderRadius: '50%', 
-                  background: `linear-gradient(45deg, #4a90e2, #9b59b6)`,
+                <Box sx={(theme) => ({
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                   boxShadow: '0 2px 8px rgba(74, 144, 226, 0.3)'
-                }} />
+                })} />
                 Item {index + 1}
               </Typography>
               <Grid container spacing={3}>
@@ -777,15 +777,15 @@ const RaiseIndent = () => {
             >
               Add Item
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={handleSubmit}
               disabled={!validationStatus.isValid}
-              sx={{ 
+              sx={(theme) => ({
                 borderRadius: 3,
                 px: 4,
                 py: 1.5,
-                background: ` #9b59b6`,
+                background: theme.palette.primary.main,
                 boxShadow: '0 8px 25px rgba(74, 144, 226, 0.3)',
                 fontWeight: 600,
                 textTransform: 'none',
@@ -796,7 +796,7 @@ const RaiseIndent = () => {
                   boxShadow: 'none',
                   color: 'rgba(108, 117, 125, 0.5)'
                 }
-              }}
+              })}
             >
               Submit Indent
             </Button>
@@ -805,9 +805,9 @@ const RaiseIndent = () => {
       </Card>
 
       {/* Table Section */}
-      <Card 
-        elevation={0} 
-        sx={{ 
+      <Card
+        elevation={0}
+        sx={(theme) => ({
           mt: 10,
           borderRadius: 4,
           background: 'rgba(255, 255, 255, 0.95)',
@@ -823,9 +823,9 @@ const RaiseIndent = () => {
             left: 0,
             right: 0,
             height: '4px',
-            background: `linear-gradient(90deg, #9b59b6, #4a90e2)`
+            background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
           }
-        }}
+        })}
       >
         <CardHeader
           avatar={
@@ -1205,7 +1205,7 @@ const RaiseIndent = () => {
         </DialogTitle>
         <DialogContent sx={{ p: 4 }}>
           <Typography variant="body1" sx={{ mb: 2, color: 'text.primary', fontWeight: 500 }}>
-            Are you sure you want to delete indent <strong style={{ color: '#e91e63' }}>#{indentToDelete}</strong>?
+            Are you sure you want to delete indent <strong style={{ color: theme.palette.error.main }}>#{indentToDelete}</strong>?
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
             This action cannot be undone. All items and associated data will be permanently removed.
@@ -1231,17 +1231,17 @@ const RaiseIndent = () => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleDeleteConfirm}
-            variant="contained" 
-            sx={{ 
-              borderRadius: 3, 
+            variant="contained"
+            sx={(theme) => ({
+              borderRadius: 3,
               px: 4,
-              background: `linear-gradient(45deg, #e91e63, #ffb6c1)`,
+              background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
               fontWeight: 600,
               textTransform: 'none',
               boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
-            }}
+            })}
           >
             Delete
           </Button>

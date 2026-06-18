@@ -152,10 +152,10 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
         } 
       }}
     >
-      <DialogTitle 
-        sx={{ 
-          backgroundColor: '#45ADE6',
-          color: 'white',
+      <DialogTitle
+        sx={{
+          backgroundColor: 'primary.main',
+          color: 'common.white',
           py: 2,
           px: 3,
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
@@ -192,13 +192,14 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
-        sx={{ 
-          px: { xs: 2, sm: 3 }, 
-          borderBottom: '1px solid #e2e8f0',
-          backgroundColor: '#f8fafc',
+        sx={{
+          px: { xs: 2, sm: 3 },
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: 'grey.100',
           minHeight: 56,
           '& .MuiTabs-indicator': {
-            backgroundColor: '#45ADE6',
+            backgroundColor: 'primary.main',
             height: 2,
             borderRadius: '2px 2px 0 0'
           },
@@ -212,18 +213,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           label="Details" 
           iconPosition="start"
           sx={{
-            color: '#64748b',
+            color: 'text.secondary',
             fontWeight: 500,
             textTransform: 'none',
             padding: '12px 20px',
             minHeight: 56,
             fontSize: '0.875rem',
-            '&.Mui-selected': { 
-              color: '#45ADE6',
+            '&.Mui-selected': {
+              color: 'primary.main',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#45ADE6',
+              color: 'primary.main',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -233,18 +234,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           label="Flow Progress" 
           iconPosition="start"
           sx={{
-            color: '#64748b',
+            color: 'text.secondary',
             fontWeight: 500,
             textTransform: 'none',
             padding: '12px 20px',
             minHeight: 56,
             fontSize: '0.875rem',
-            '&.Mui-selected': { 
-              color: '#45ADE6',
+            '&.Mui-selected': {
+              color: 'primary.main',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#45ADE6',
+              color: 'primary.main',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -255,18 +256,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             label="Cable Production" 
             iconPosition="start"
             sx={{
-              color: '#64748b',
+              color: 'text.secondary',
               fontWeight: 500,
               textTransform: 'none',
               padding: '12px 20px',
               minHeight: 56,
               fontSize: '0.875rem',
-              '&.Mui-selected': { 
-                color: '#45ADE6',
+              '&.Mui-selected': {
+                color: 'primary.main',
                 fontWeight: 600
               },
               '&:hover': {
-                color: '#45ADE6',
+                color: 'primary.main',
                 backgroundColor: 'rgba(25, 118, 210, 0.04)'
               }
             }}
@@ -277,18 +278,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           label="History" 
           iconPosition="start"
           sx={{
-            color: '#64748b',
+            color: 'text.secondary',
             fontWeight: 500,
             textTransform: 'none',
             padding: '12px 20px',
             minHeight: 56,
             fontSize: '0.875rem',
-            '&.Mui-selected': { 
-              color: '#45ADE6',
+            '&.Mui-selected': {
+              color: 'primary.main',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#45ADE6',
+              color: 'primary.main',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -298,18 +299,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           label="Analytics" 
           iconPosition="start"
           sx={{
-            color: '#64748b',
+            color: 'text.secondary',
             fontWeight: 500,
             textTransform: 'none',
             padding: '12px 20px',
             minHeight: 56,
             fontSize: '0.875rem',
-            '&.Mui-selected': { 
-              color: '#45ADE6',
+            '&.Mui-selected': {
+              color: 'primary.main',
               fontWeight: 600
             },
             '&:hover': {
-              color: '#45ADE6',
+              color: 'primary.main',
               backgroundColor: 'rgba(25, 118, 210, 0.04)'
             }
           }}
@@ -325,7 +326,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
         {loadingSheetData && (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
             <CircularProgress size={40} />
-            <Typography variant="body2" sx={{ ml: 2, color: '#64748b' }}>
+            <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
               Loading data from sheets...
             </Typography>
           </Box>
@@ -334,16 +335,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           <>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -353,15 +355,15 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Client Code
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6', fontSize: '1rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '1rem' }}>
                     {task.ClientCode}
                   </Typography>
                   {sheetData?.client?.clientName && (
-                    <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', mt: 0.5, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', mt: 0.5, display: 'block' }}>
                       {sheetData.client.clientName}
                     </Typography>
                   )}
@@ -369,16 +371,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -388,15 +391,15 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Product Code
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6', fontSize: '1rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '1rem' }}>
                     {task.ProductCode}
                   </Typography>
                   {sheetData?.product?.productName && (
-                    <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', mt: 0.5, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', mt: 0.5, display: 'block' }}>
                       {sheetData.product.productName}
                     </Typography>
                   )}
@@ -404,16 +407,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -423,27 +427,28 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     PO Name
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 500, color: '#1e293b', fontSize: '0.95rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.primary', fontSize: '0.95rem' }}>
                     {task.Name || 'N/A'}
                   </Typography>
                 </Box>
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -453,27 +458,28 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Quantity
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#059669', fontSize: '1rem' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main', fontSize: '1rem' }}>
                     {task.Quantity?.toLocaleString() || '0'}
                   </Typography>
                 </Box>
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -483,17 +489,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Order Type
                   </Typography>
                   <Chip 
                     label={task.OrderType === 'CABLE_ONLY' ? 'Cable Only' : 'Power Cord'}
                     size="small"
-                    sx={{ 
+                    sx={{
                       fontWeight: 600,
-                      backgroundColor: task.OrderType === 'CABLE_ONLY' ? '#ede9fe' : '#dbeafe',
-                      color: task.OrderType === 'CABLE_ONLY' ? '#7c3aed' : '#1e40af',
+                      backgroundColor: task.OrderType === 'CABLE_ONLY' ? 'primary.light' : 'info.lighter',
+                      color: task.OrderType === 'CABLE_ONLY' ? 'primary.main' : 'primary.main',
                       height: 24,
                       fontSize: '0.75rem'
                     }}
@@ -502,18 +508,19 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: isOverdue(task.DueDate) ? '1px solid #fee2e2' : '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: isOverdue(task.DueDate) ? 'error.lighter' : 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
-                    boxShadow: isOverdue(task.DueDate) 
-                      ? '0 4px 12px rgba(220, 38, 38, 0.12)' 
+                    boxShadow: isOverdue(task.DueDate)
+                      ? '0 4px 12px rgba(220, 38, 38, 0.12)'
                       : '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: isOverdue(task.DueDate) ? '#dc2626' : '#45ADE6'
+                    borderColor: isOverdue(task.DueDate) ? 'error.main' : 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -523,14 +530,14 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Due Date
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 600, 
-                      color: isOverdue(task.DueDate) ? '#dc2626' : '#1e293b', 
+                    <Typography variant="h6" sx={{
+                      fontWeight: 600,
+                      color: isOverdue(task.DueDate) ? 'error.main' : 'text.primary',
                       fontSize: '0.95rem'
                     }}>
                       {formatDate(task.DueDate)}
@@ -539,13 +546,13 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                       <Chip 
                         label="OVERDUE" 
                         size="small" 
-                        sx={{ 
-                          fontWeight: 600, 
+                        sx={{
+                          fontWeight: 600,
                           height: 22,
                           fontSize: '0.7rem',
-                          backgroundColor: '#fee2e2',
-                          color: '#dc2626'
-                        }} 
+                          backgroundColor: 'error.lighter',
+                          color: 'error.main'
+                        }}
                       />
                     )}
                   </Box>
@@ -553,16 +560,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -572,27 +580,28 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Created By
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 500, color: '#475569', fontSize: '0.9rem' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary', fontSize: '0.9rem' }}>
                     {task.CreatedBy?.split('@')[0] || task.CreatedBy || 'N/A'}
                   </Typography>
                 </Box>
               </Grid>
               
               <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ 
-                  p: 2.5, 
-                  borderRadius: 2, 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e8eaf6',
+                <Box sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
-                    borderColor: '#45ADE6'
+                    borderColor: 'primary.main'
                   }
                 }}>
                   <Typography variant="caption" sx={{ 
@@ -602,11 +611,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: '#64748b'
+                    color: 'text.secondary'
                   }}>
                     Assigned To
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 500, color: '#475569', fontSize: '0.9rem' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary', fontSize: '0.9rem' }}>
                     {task.AssignedTo?.split('@')[0] || task.AssignedTo || 'Unassigned'}
                   </Typography>
                 </Box>
@@ -626,16 +635,16 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                       '&:hover': {
                         transform: 'translateY(-2px)',
                         boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                        borderColor: '#3b82f6',
+                        borderColor: 'primary.main',
                         backgroundColor: 'rgba(255, 255, 255, 1)'
                       }
                     }}
                   >
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-                      <Description sx={{ fontSize: 16, mr: 1, color: '#45ADE6' }} />
+                      <Description sx={{ fontSize: 16, mr: 1, color: 'primary.main' }} />
                       Description
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500, color: '#37474f', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                       {task.Description}
                     </Typography>
                   </Paper>
@@ -656,13 +665,13 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                       '&:hover': {
                         transform: 'translateY(-2px)',
                         boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                        borderColor: '#3b82f6',
+                        borderColor: 'primary.main',
                         backgroundColor: 'rgba(255, 255, 255, 1)'
                       }
                     }}
                   >
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-                      <Description sx={{ fontSize: 16, mr: 1, color: '#45ADE6' }} />
+                      <Description sx={{ fontSize: 16, mr: 1, color: 'primary.main' }} />
                       PO Document
                     </Typography>
                     <Button
@@ -694,14 +703,14 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                       '&:hover': {
                         transform: 'translateY(-2px)',
                         boxShadow: '0 12px 24px rgba(76, 175, 80, 0.2)',
-                        borderColor: '#4caf50',
+                        borderColor: 'success.main',
                         backgroundColor: 'rgba(76, 175, 80, 0.08)'
                       }
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <LocalShipping sx={{ fontSize: 20, color: '#4caf50' }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4caf50', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                      <LocalShipping sx={{ fontSize: 20, color: 'success.main' }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                         Production Timeline (Backward Planning)
                       </Typography>
                     </Box>
@@ -773,34 +782,37 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                               justifyContent: 'space-between',
                               alignItems: 'center',
                               p: 1.5,
-                              backgroundColor: task.Status === stageInfo.status 
-                                ? '#fff3e0'
+                              backgroundColor: task.Status === stageInfo.status
+                                ? 'warning.lighter'
                                 : index === orderedDates.length - 1
-                                ? '#e8f5e9'
-                                : '#f8fbff',
+                                ? 'success.lighter'
+                                : 'grey.50',
                               borderRadius: 1,
                               border: task.Status === stageInfo.status
-                                ? '2px solid #ff9800'
+                                ? '2px solid'
+                                : '1px solid',
+                              borderColor: task.Status === stageInfo.status
+                                ? 'warning.main'
                                 : index === orderedDates.length - 1
-                                ? '1px solid #4caf50'
-                                : '1px solid #e3f2fd',
+                                ? 'success.main'
+                                : 'info.lighter',
                               transition: 'all 0.2s ease'
                             }}
                           >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                               {task.Status === stageInfo.status && (
-                                <PlayArrow sx={{ color: '#ff9800', fontSize: 20 }} />
+                                <PlayArrow sx={{ color: 'warning.main', fontSize: 20 }} />
                               )}
                               <Chip
                                 label={stageInfo.label}
                                 size="small"
                                 sx={{
                                   backgroundColor: task.Status === stageInfo.status
-                                    ? '#ff9800'
+                                    ? 'warning.main'
                                     : index === orderedDates.length - 1
-                                    ? '#4caf50'
-                                    : '#45ADE6',
-                                  color: 'white',
+                                    ? 'success.main'
+                                    : 'primary.main',
+                                  color: 'common.white',
                                   fontWeight: 600,
                                   minWidth: 45,
                                   fontSize: '0.75rem'
@@ -811,10 +823,10 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                                 sx={{
                                   fontWeight: task.Status === stageInfo.status ? 700 : 500,
                                   color: task.Status === stageInfo.status
-                                    ? '#e65100'
+                                    ? 'warning.main'
                                     : index === orderedDates.length - 1
-                                    ? '#2e7d32'
-                                    : '#37474f',
+                                    ? 'success.main'
+                                    : 'text.primary',
                                   fontSize: { xs: '0.85rem', sm: '0.9rem' }
                                 }}
                               >
@@ -827,20 +839,20 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                                 fontFamily: 'monospace',
                                 fontSize: { xs: '0.8rem', sm: '0.85rem' },
                                 fontWeight: 600,
-                                color: displayDate === 'N/A' 
-                                  ? '#94a3b8'
+                                color: displayDate === 'N/A'
+                                  ? 'text.disabled'
                                   : task.Status === stageInfo.status
-                                  ? '#e65100'
+                                  ? 'warning.main'
                                   : index === orderedDates.length - 1
-                                  ? '#2e7d32'
-                                  : '#45ADE6',
+                                  ? 'success.main'
+                                  : 'primary.main',
                                 backgroundColor: displayDate === 'N/A'
-                                  ? '#f1f5f9'
+                                  ? 'grey.100'
                                   : task.Status === stageInfo.status
-                                  ? 'white'
+                                  ? 'common.white'
                                   : index === orderedDates.length - 1
-                                  ? 'white'
-                                  : '#e3f2fd',
+                                  ? 'common.white'
+                                  : 'info.lighter',
                                 px: 1.5,
                                 py: 0.5,
                                 borderRadius: 1,
@@ -874,17 +886,17 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   '&:hover': {
                     transform: 'translateY(-2px)',
                     boxShadow: '0 12px 24px rgba(76, 175, 80, 0.2)',
-                    borderColor: '#4caf50',
+                    borderColor: 'success.main',
                     backgroundColor: 'rgba(76, 175, 80, 0.12)'
                   }
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <CheckCircle sx={{ color: '#4caf50', fontSize: 24 }} />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: '#2e7d32', 
+                  <CheckCircle sx={{ color: 'success.main', fontSize: 24 }} />
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: 'success.main',
                       fontWeight: 600,
                       fontSize: { xs: '1.1rem', sm: '1.25rem' }
                     }}
@@ -898,7 +910,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600 }}>
                       Completed Date
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500, color: '#2e7d32' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, color: 'success.main' }}>
                       {task.CompletionDate ? formatDate(task.CompletionDate) : 'Date not recorded'}
                     </Typography>
                   </Grid>
@@ -906,7 +918,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                     <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600 }}>
                       Completed By
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500, color: '#2e7d32' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, color: 'success.main' }}>
                       {task.AssignedTo || 'Unknown'}
                     </Typography>
                   </Grid>
@@ -929,15 +941,15 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                   '&:hover': {
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                    borderColor: '#45ADE6',
+                    borderColor: 'primary.main',
                     backgroundColor: 'rgba(25, 118, 210, 0.05)'
                   }
                 }}
               >
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: '#3b82f6', 
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: 'primary.main',
                     fontWeight: 600, 
                     mb: 2,
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
@@ -968,11 +980,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                             startIcon={<Upload />}
                             size="small"
                             sx={{
-                              borderColor: '#3b82f6',
-                              color: '#3b82f6',
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
                               '&:hover': {
-                                borderColor: '#1E7DBE',
-                                backgroundColor: '#f8fbff'
+                                borderColor: 'primary.dark',
+                                backgroundColor: 'grey.50'
                               },
                               width: { xs: '100%', sm: 'auto' }
                             }}
@@ -981,7 +993,7 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                           </Button>
                         </label>
                         {file && (
-                          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#45ADE6' }}>
+                          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'primary.main' }}>
                             Selected: {file.name}
                           </Typography>
                         )}
@@ -995,8 +1007,8 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
                         onClick={handleAdvance}
                         size="small"
                         sx={{
-                          backgroundColor: '#4caf50',
-                          '&:hover': { backgroundColor: '#2e7d32' },
+                          backgroundColor: 'success.main',
+                          '&:hover': { backgroundColor: 'success.dark' },
                           width: { xs: '100%', sm: 'auto' }
                         }}
                       >
@@ -1022,18 +1034,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
                 boxShadow: '0 8px 20px rgba(25, 118, 210, 0.12)',
-                borderColor: '#45ADE6'
+                borderColor: 'primary.main'
               }
             }}
           >
-            <Timeline sx={{ fontSize: 48, color: '#45ADE6', mb: 2 }} />
-            <Typography variant="h5" sx={{ color: '#45ADE6', fontWeight: 600, mb: 1 }}>
+            <Timeline sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h5" sx={{ color: 'primary.main', fontWeight: 600, mb: 1 }}>
               Flow Progress
             </Typography>
-            <Typography variant="h6" sx={{ color: '#546e7a', fontWeight: 500, mb: 2 }}>
+            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 500, mb: 2 }}>
               Coming Soon
             </Typography>
-            <Typography variant="body1" sx={{ color: '#78909c', opacity: 0.8 }}>
+            <Typography variant="body1" sx={{ color: 'text.disabled', opacity: 0.8 }}>
               This feature is currently under development and will be available soon.
             </Typography>
           </Paper>
@@ -1051,13 +1063,13 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
                 boxShadow: '0 12px 24px rgba(59, 130, 246, 0.12)',
-                borderColor: '#3b82f6'
+                borderColor: 'primary.main'
               }
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Analytics sx={{ fontSize: 32, color: '#3b82f6' }} />
-              <Typography variant="h5" sx={{ color: '#3b82f6', fontWeight: 600 }}>
+              <Analytics sx={{ fontSize: 32, color: 'primary.main' }} />
+              <Typography variant="h5" sx={{ color: 'primary.main', fontWeight: 600 }}>
                 Task Analytics
               </Typography>
             </Box>
@@ -1065,11 +1077,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6} md={3}>
                 <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                  <Speed sx={{ fontSize: 32, color: '#3b82f6', mb: 1 }} />
-                  <Typography variant="h6" sx={{ color: '#1e40af', fontWeight: 600 }}>
+                  <Speed sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
+                  <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
                     {task.Status === 'COMPLETED' ? '100%' : '75%'}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Progress
                   </Typography>
                 </Paper>
@@ -1077,11 +1089,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               
               <Grid item xs={12} sm={6} md={3}>
                 <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                  <TrendingUp sx={{ fontSize: 32, color: '#10b981', mb: 1 }} />
-                  <Typography variant="h6" sx={{ color: '#047857', fontWeight: 600 }}>
+                  <TrendingUp sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
+                  <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
                     {task.Quantity || 0}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Quantity
                   </Typography>
                 </Paper>
@@ -1089,11 +1101,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               
               <Grid item xs={12} sm={6} md={3}>
                 <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-                  <Schedule sx={{ fontSize: 32, color: '#f59e0b', mb: 1 }} />
-                  <Typography variant="h6" sx={{ color: '#d97706', fontWeight: 600 }}>
+                  <Schedule sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
+                  <Typography variant="h6" sx={{ color: 'warning.main', fontWeight: 600 }}>
                     {task.DueDate ? new Date(task.DueDate).toLocaleDateString() : 'N/A'}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Due Date
                   </Typography>
                 </Paper>
@@ -1101,11 +1113,11 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               
               <Grid item xs={12} sm={6} md={3}>
                 <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
-                  <Assessment sx={{ fontSize: 32, color: '#8b5cf6', mb: 1 }} />
-                  <Typography variant="h6" sx={{ color: '#7c3aed', fontWeight: 600 }}>
+                  <Assessment sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
+                  <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
                     {task.Status}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Status
                   </Typography>
                 </Paper>
@@ -1113,19 +1125,19 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
             </Grid>
             
             <Box sx={{ mt: 3, p: 2, backgroundColor: 'rgba(248, 250, 252, 0.8)', borderRadius: 2 }}>
-              <Typography variant="h6" sx={{ color: '#1e40af', fontWeight: 600, mb: 2 }}>
+              <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2 }}>
                 Performance Metrics
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                 • Task created: {task.CreatedDate ? new Date(task.CreatedDate).toLocaleDateString() : 'N/A'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                 • Assigned to: {task.AssignedTo || 'Unassigned'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                 • Client: {task.ClientCode}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b' }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 • Product: {task.ProductCode}
               </Typography>
             </Box>
@@ -1143,18 +1155,18 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
                 boxShadow: '0 12px 24px rgba(59, 130, 246, 0.12)',
-                borderColor: '#3b82f6'
+                borderColor: 'primary.main'
               }
             }}
           >
-            <Timeline sx={{ fontSize: 48, color: '#3b82f6', mb: 2 }} />
-            <Typography variant="h5" sx={{ color: '#3b82f6', fontWeight: 600, mb: 1 }}>
+            <Timeline sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h5" sx={{ color: 'primary.main', fontWeight: 600, mb: 1 }}>
               History
             </Typography>
-            <Typography variant="h6" sx={{ color: '#546e7a', fontWeight: 500, mb: 2 }}>
+            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 500, mb: 2 }}>
               Coming Soon
             </Typography>
-            <Typography variant="body1" sx={{ color: '#78909c', opacity: 0.8 }}>
+            <Typography variant="body1" sx={{ color: 'text.disabled', opacity: 0.8 }}>
               This feature is currently under development and will be available soon.
             </Typography>
           </Paper>
@@ -1173,13 +1185,13 @@ const TaskDetail = ({ task, open, onClose, onAdvance, auditLog = [] }) => {
           size="medium"
           sx={{
             borderColor: 'rgba(25, 118, 210, 0.5)',
-                    color: '#3b82f6',
+            color: 'primary.main',
             borderRadius: 2,
             fontWeight: 600,
             textTransform: 'none',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
-              borderColor: '#45ADE6',
+              borderColor: 'primary.main',
               backgroundColor: 'rgba(59, 130, 246, 0.08)',
               transform: 'translateY(-1px)',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)'

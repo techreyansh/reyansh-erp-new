@@ -395,7 +395,7 @@ const CableDashboard = () => {
           elevation={0}
           sx={{
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+            background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`,
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden',
             position: "relative",
@@ -679,16 +679,16 @@ const CableProductionModule = () => {
           <Box sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
             <Fade in timeout={800}>
               <Stack direction={{ xs: "column", md: "row" }} alignItems="center" spacing={4}>
-                <Box 
-                  sx={{ 
-                    p: 3, 
-                    borderRadius: 3, 
-                    backgroundColor: alpha("#ffffff", 0.15),
+                <Box
+                  sx={{
+                    p: 3,
+                    borderRadius: 3,
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
                     backdropFilter: "blur(20px)",
-                    border: `1px solid ${alpha("#ffffff", 0.2)}`,
+                    border: `1px solid ${alpha(theme.palette.common.white, 0.2)}`,
                   }}
                 >
-                  <CableIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "#ffffff" }} />
+                  <CableIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "common.white" }} />
                 </Box>
                 
                 <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
@@ -723,13 +723,13 @@ const CableProductionModule = () => {
                       <Chip 
                         key={index}
                         label={feature} 
-                        sx={{ 
-                          backgroundColor: alpha("#ffffff", 0.2), 
-                          color: "#ffffff",
+                        sx={{
+                          backgroundColor: alpha(theme.palette.common.white, 0.2),
+                          color: "common.white",
                           fontWeight: 600,
                           backdropFilter: "blur(10px)",
-                          border: `1px solid ${alpha("#ffffff", 0.3)}`,
-                        }} 
+                          border: `1px solid ${alpha(theme.palette.common.white, 0.3)}`,
+                        }}
                       />
                     ))}
                   </Stack>
@@ -741,14 +741,14 @@ const CableProductionModule = () => {
         
         {/* Enhanced Tabs - Sticky Navigation */}
         <Box 
-          sx={{ 
-            backgroundColor: alpha("#000000", 0.1), 
+          sx={{
+            backgroundColor: alpha(theme.palette.common.black, 0.1),
             backdropFilter: "blur(10px)",
             position: "sticky",
             top: 64, // Account for main header
             zIndex: 200,
             borderBottom: "1px solid",
-            borderColor: alpha("#ffffff", 0.2),
+            borderColor: alpha(theme.palette.common.white, 0.2),
           }}
         >
           <Container maxWidth={false} sx={{ px: { xs: 2, md: 3 } }}>
@@ -757,26 +757,26 @@ const CableProductionModule = () => {
               onChange={handleTabChange}
               variant="scrollable"
               scrollButtons="auto"
-              sx={{ 
+              sx={{
                 minHeight: 80,
                 '& .MuiTab-root': {
                   minHeight: 80,
-                  color: alpha("#ffffff", 0.8),
+                  color: alpha(theme.palette.common.white, 0.8),
                   fontWeight: 600,
                   textTransform: "none",
                   fontSize: "0.95rem",
                   px: 3,
                   py: 2,
                   '&.Mui-selected': {
-                    color: "#ffffff",
-                    backgroundColor: alpha("#ffffff", 0.15),
+                    color: theme.palette.common.white,
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
                   },
                   '&:hover': {
-                    backgroundColor: alpha("#ffffff", 0.08),
+                    backgroundColor: alpha(theme.palette.common.white, 0.08),
                   },
                 },
                 '& .MuiTabs-indicator': {
-                  backgroundColor: "#ffffff",
+                  backgroundColor: theme.palette.common.white,
                   height: 3,
                   borderRadius: "3px 3px 0 0",
                 },

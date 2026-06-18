@@ -96,7 +96,7 @@ const SalesFlowLayout = () => {
         elevation={0}
         sx={{ 
           background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
-          color: "white",
+          color: theme.palette.common.white,
           borderRadius: 0,
           position: "relative",
           overflow: "hidden",
@@ -123,12 +123,12 @@ const SalesFlowLayout = () => {
                   sx={{ 
                     p: 3, 
                     borderRadius: 3, 
-                    backgroundColor: alpha("#ffffff", 0.15),
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
                     backdropFilter: "blur(20px)",
-                    border: `1px solid ${alpha("#ffffff", 0.2)}`,
+                    border: `1px solid ${alpha(theme.palette.common.white, 0.2)}`,
                   }}
                 >
-                  <SalesIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "#ffffff" }} />
+                  <SalesIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: theme.palette.common.white }} />
                 </Box>
                 
                 <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
@@ -164,11 +164,11 @@ const SalesFlowLayout = () => {
                         key={index}
                         label={feature} 
                         sx={{ 
-                          backgroundColor: alpha("#ffffff", 0.2), 
-                          color: "#ffffff",
+                          backgroundColor: alpha(theme.palette.common.white, 0.2),
+                          color: theme.palette.common.white,
                           fontWeight: 600,
                           backdropFilter: "blur(10px)",
-                          border: `1px solid ${alpha("#ffffff", 0.3)}`,
+                          border: `1px solid ${alpha(theme.palette.common.white, 0.3)}`,
                         }} 
                       />
                     ))}
@@ -182,13 +182,13 @@ const SalesFlowLayout = () => {
         {/* Enhanced Tabs - Sticky Navigation */}
         <Box 
           sx={{ 
-            backgroundColor: alpha("#000000", 0.1), 
+            backgroundColor: alpha(theme.palette.common.black, 0.1),
             backdropFilter: "blur(10px)",
             position: "sticky",
             top: 64,
             zIndex: 200,
             borderBottom: "1px solid",
-            borderColor: alpha("#ffffff", 0.2),
+            borderColor: alpha(theme.palette.common.white, 0.2),
           }}
         >
           <Container maxWidth={false} sx={{ px: { xs: 2, md: 3 } }}>
@@ -206,22 +206,22 @@ const SalesFlowLayout = () => {
                 minHeight: 80,
                 '& .MuiTab-root': {
                   minHeight: 80,
-                  color: alpha("#ffffff", 0.8),
+                  color: alpha(theme.palette.common.white, 0.8),
                   fontWeight: 600,
                   textTransform: "none",
                   fontSize: "0.95rem",
                   px: 3,
                   py: 2,
                   '&.Mui-selected': {
-                    color: "#ffffff",
-                    backgroundColor: alpha("#ffffff", 0.15),
+                    color: theme.palette.common.white,
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
                   },
                   '&:hover': {
-                    backgroundColor: alpha("#ffffff", 0.08),
+                    backgroundColor: alpha(theme.palette.common.white, 0.08),
                   },
                 },
                 '& .MuiTabs-indicator': {
-                  backgroundColor: "#ffffff",
+                  backgroundColor: theme.palette.common.white,
                   height: 3,
                   borderRadius: "3px 3px 0 0",
                 },

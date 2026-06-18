@@ -464,7 +464,7 @@ const CableCuttingPlanSelector = ({ onPlanGenerated }) => {
         elevation={0}
         sx={{
           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-          color: "white",
+          color: "common.white",
           borderRadius: 3,
           mb: 3,
           overflow: "hidden",
@@ -488,7 +488,7 @@ const CableCuttingPlanSelector = ({ onPlanGenerated }) => {
               sx={{
                 p: 2,
                 borderRadius: 2,
-                backgroundColor: alpha("#ffffff", 0.15),
+                backgroundColor: alpha(theme.palette.common.white, 0.15),
                 backdropFilter: "blur(10px)"
               }}
             >
@@ -808,7 +808,8 @@ const CableCuttingPlanSelector = ({ onPlanGenerated }) => {
                                                color === 'Blue' ? '#0000FF' :
                                                color === 'Black' ? '#000000' :
                                                color === 'Grey' ? '#808080' : '#808080',
-                                border: "1px solid #ccc",
+                                border: "1px solid",
+                                borderColor: "divider",
                               }}
                             />
                             <Box sx={{ flex: 1 }}>
@@ -863,7 +864,8 @@ const CableCuttingPlanSelector = ({ onPlanGenerated }) => {
                                                    step.color === 'Blue' ? '#0000FF' :
                                                    step.color === 'Black' ? '#000000' :
                                                    step.color === 'Grey' ? '#808080' : '#808080',
-                                    border: "1px solid #ccc",
+                                    border: "1px solid",
+                                    borderColor: "divider",
                                   }}
                                 />
                                 <Typography variant="body2">{step.color}</Typography>

@@ -367,8 +367,8 @@ const ClientDashboard = () => {
                 onClick={fetchDashboardData}
                 disabled={loading}
                 variant="outlined"
-                sx={{ 
-                  bgcolor: 'white',
+                sx={{
+                  bgcolor: 'background.paper',
                   color: 'primary.main',
                   border: 1,
                   borderColor: 'divider',
@@ -377,8 +377,8 @@ const ClientDashboard = () => {
                   minWidth: 120,
                   height: 48,
                   boxShadow: theme.shadows[2],
-                  '&:hover': { 
-                    bgcolor: alpha('#fff', 0.9),
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.common.white, 0.9),
                     transform: 'translateY(-1px)',
                     boxShadow: theme.shadows[4]
                   },
@@ -432,7 +432,7 @@ const ClientDashboard = () => {
                 right: 0,
                 width: 100,
                 height: 100,
-                background: alpha('#fff', 0.1),
+                background: alpha(theme.palette.common.white, 0.1),
                 borderRadius: '50%',
                 transform: 'translate(30px, -30px)'
               }} />
@@ -447,10 +447,10 @@ const ClientDashboard = () => {
                   </Typography>
                 </Box>
                   <Avatar sx={{ 
-                    bgcolor: alpha('#fff', 0.2), 
+                    bgcolor: alpha(theme.palette.common.white, 0.2), 
                     width: 48, 
                     height: 48,
-                    border: `2px solid ${alpha('#fff', 0.3)}`
+                    border: `2px solid ${alpha(theme.palette.common.white, 0.3)}`
                   }}>
                     <OrderIcon sx={{ fontSize: 24 }} />
                   </Avatar>
@@ -461,9 +461,9 @@ const ClientDashboard = () => {
                   sx={{ 
                     height: 4, 
                     borderRadius: 2,
-                    backgroundColor: alpha('#fff', 0.2),
+                    backgroundColor: alpha(theme.palette.common.white, 0.2),
                     '& .MuiLinearProgress-bar': {
-                      backgroundColor: '#fff',
+                      backgroundColor: theme.palette.common.white,
                       borderRadius: 2
                     }
                   }} 
@@ -493,7 +493,7 @@ const ClientDashboard = () => {
                 right: 0,
                 width: 100,
                 height: 100,
-                background: alpha('#fff', 0.1),
+                background: alpha(theme.palette.common.white, 0.1),
                 borderRadius: '50%',
                 transform: 'translate(30px, -30px)'
               }} />
@@ -508,10 +508,10 @@ const ClientDashboard = () => {
                   </Typography>
                 </Box>
                   <Avatar sx={{ 
-                    bgcolor: alpha('#fff', 0.2), 
+                    bgcolor: alpha(theme.palette.common.white, 0.2), 
                     width: 48, 
                     height: 48,
-                    border: `2px solid ${alpha('#fff', 0.3)}`
+                    border: `2px solid ${alpha(theme.palette.common.white, 0.3)}`
                   }}>
                     <MoneyIcon sx={{ fontSize: 24 }} />
                   </Avatar>
@@ -547,7 +547,7 @@ const ClientDashboard = () => {
                 right: 0,
                 width: 100,
                 height: 100,
-                background: alpha('#fff', 0.1),
+                background: alpha(theme.palette.common.white, 0.1),
                 borderRadius: '50%',
                 transform: 'translate(30px, -30px)'
               }} />
@@ -562,10 +562,10 @@ const ClientDashboard = () => {
                   </Typography>
                 </Box>
                   <Avatar sx={{ 
-                    bgcolor: alpha('#fff', 0.2), 
+                    bgcolor: alpha(theme.palette.common.white, 0.2), 
                     width: 48, 
                     height: 48,
-                    border: `2px solid ${alpha('#fff', 0.3)}`
+                    border: `2px solid ${alpha(theme.palette.common.white, 0.3)}`
                   }}>
                     <AssignmentIcon sx={{ fontSize: 24 }} />
                   </Avatar>
@@ -601,7 +601,7 @@ const ClientDashboard = () => {
                 right: 0,
                 width: 100,
                 height: 100,
-                background: alpha('#fff', 0.1),
+                background: alpha(theme.palette.common.white, 0.1),
                 borderRadius: '50%',
                 transform: 'translate(30px, -30px)'
               }} />
@@ -617,10 +617,10 @@ const ClientDashboard = () => {
                 </Box>
                   <Badge badgeContent={animatedUnread} color="error">
                     <Avatar sx={{ 
-                      bgcolor: alpha('#fff', 0.2), 
+                      bgcolor: alpha(theme.palette.common.white, 0.2), 
                       width: 48, 
                       height: 48,
-                      border: `2px solid ${alpha('#fff', 0.3)}`
+                      border: `2px solid ${alpha(theme.palette.common.white, 0.3)}`
                     }}>
                       <NotificationIcon sx={{ fontSize: 24 }} />
                     </Avatar>
@@ -631,7 +631,7 @@ const ClientDashboard = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    bgcolor: animatedUnread > 0 ? '#ff4444' : '#4caf50',
+                    bgcolor: animatedUnread > 0 ? 'error.main' : 'success.main',
                     animation: animatedUnread > 0 ? 'pulse 2s infinite' : 'none'
                   }} />
                   <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 500 }}>
@@ -906,22 +906,22 @@ const ClientDashboard = () => {
 
         {/* Payments Tab */}
         <TabPanel value={activeTab} index={1}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
             Payments
           </Typography>
           {dashboardData.payments.length === 0 ? (
             <Alert severity="info">No payments found for the selected client.</Alert>
           ) : (
-            <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e3f2fd' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'info.lighter' }}>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Payment ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Order ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Amount</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Method</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Status</TableCell>
+                  <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Payment ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Order ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Method</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -956,22 +956,22 @@ const ClientDashboard = () => {
 
         {/* Quotations Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
             Quotations
           </Typography>
           {dashboardData.quotations.length === 0 ? (
             <Alert severity="info">No quotations found for the selected client.</Alert>
           ) : (
-            <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e3f2fd' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'info.lighter' }}>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Quotation ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Quotation No.</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Issue Date</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Valid Until</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Amount</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6' }}>Status</TableCell>
+                  <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Quotation ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Quotation No.</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Issue Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Valid Until</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -1006,7 +1006,7 @@ const ClientDashboard = () => {
 
         {/* Messages Tab */}
         <TabPanel value={activeTab} index={3}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
             Message Center
           </Typography>
           <Alert severity="info" sx={{ mb: 3 }}>
@@ -1016,7 +1016,7 @@ const ClientDashboard = () => {
 
         {/* Notifications Tab */}
         <TabPanel value={activeTab} index={4}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#45ADE6' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
             Notifications
           </Typography>
           {dashboardData.notifications.length === 0 ? (
@@ -1027,15 +1027,15 @@ const ClientDashboard = () => {
                 .slice(notesPage * notesRows, notesPage * notesRows + notesRows)
                 .map((notification) => (
                 <Grid item xs={12} key={notification.id}>
-                  <Card sx={{ 
-                    borderRadius: 2, 
-                    border: notification.read ? '1px solid #e3f2fd' : '2px solid #45ADE6',
-                    backgroundColor: notification.read ? 'inherit' : '#f8fbff'
-                  }}>
+                  <Card sx={(theme) => ({
+                    borderRadius: 2,
+                    border: notification.read ? `1px solid ${theme.palette.info.lighter}` : `2px solid ${theme.palette.primary.main}`,
+                    backgroundColor: notification.read ? 'inherit' : theme.palette.grey[50]
+                  })}>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'primary.main' }}>
                             {notification.type}
                           </Typography>
                           <Typography variant="body2" sx={{ mt: 1 }}>

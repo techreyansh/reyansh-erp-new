@@ -1,0 +1,58 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brand Colors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background: #F2F5F7;
+    color: #2D3D4C;
+    padding: 28px;
+  }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin-top: 4px; margin-bottom: 22px; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin-bottom: 10px; }
+  .swatch {
+    border-radius: 8px;
+    height: 84px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 12px;
+    border: 1px solid #E2E8ED;
+    box-shadow: 0 2px 4px rgba(15,23,42,0.04);
+  }
+  .swatch .name { font-size: 12px; font-weight: 600; }
+  .swatch .hex { font-size: 11px; font-family: ui-monospace, monospace; opacity: 0.85; }
+  .on-dark .name, .on-dark .hex { color: #fff; }
+  .on-light .name, .on-light .hex { color: #2D3D4C; }
+</style>
+</head>
+<body>
+  <h1>Brand Colors</h1>
+  <div class="sub">Primary (sky blue) &amp; Secondary (slate) — the two pillars of the ERP UI.</div>
+
+  <div class="label">Primary</div>
+  <div class="row">
+    <div class="swatch on-light" style="background:#84D2FC"><span class="name">light</span><span class="hex">#84D2FC</span></div>
+    <div class="swatch on-dark" style="background:#45ADE6"><span class="name">main</span><span class="hex">#45ADE6</span></div>
+    <div class="swatch on-dark" style="background:#1E7DBE"><span class="name">dark</span><span class="hex">#1E7DBE</span></div>
+    <div class="swatch on-dark" style="background:#155E8C"><span class="name">info.dark</span><span class="hex">#155E8C</span></div>
+  </div>
+
+  <div class="label">Secondary</div>
+  <div class="row">
+    <div class="swatch on-dark" style="background:#3A4B5C"><span class="name">light</span><span class="hex">#3A4B5C</span></div>
+    <div class="swatch on-dark" style="background:#2D3D4C"><span class="name">main</span><span class="hex">#2D3D4C</span></div>
+    <div class="swatch on-dark" style="background:#1E2B38"><span class="name">dark</span><span class="hex">#1E2B38</span></div>
+    <div class="swatch on-dark" style="background:#0F172A"><span class="name">grey.900</span><span class="hex">#0F172A</span></div>
+  </div>
+</body>
+</html>

@@ -817,9 +817,9 @@ Reyansh International Pvt Ltd`;
   };
 
   return (
-    <Box sx={{ 
-      p: 4, 
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+    <Box sx={{
+      p: 4,
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
       minHeight: '100vh'
     }}>
       {/* Header with Stats */}
@@ -1253,7 +1253,7 @@ Reyansh International Pvt Ltd`;
                             sx={{ 
                               background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                               '&:hover': {
-                                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                                background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                               }
                             }}
                           >
@@ -1268,17 +1268,17 @@ Reyansh International Pvt Ltd`;
                             onClick={() => handleCompleteStep(po)}
                                   disabled={!emailSent[po.POId]}
                             sx={{ 
-                                    background: emailSent[po.POId] 
-                                      ? 'linear-gradient(135deg, #4caf50, #66bb6a)' 
-                                      : 'linear-gradient(135deg, #9e9e9e, #757575)',
+                                    background: emailSent[po.POId]
+                                      ? `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`
+                                      : `linear-gradient(135deg, ${theme.palette.text.disabled}, ${theme.palette.text.secondary})`,
                               color: 'white',
                               '&:hover': {
                                       background: emailSent[po.POId]
-                                        ? 'linear-gradient(135deg, #66bb6a, #81c784)'
-                                        : 'linear-gradient(135deg, #757575, #616161)'
+                                        ? `linear-gradient(135deg, ${theme.palette.success.light}, ${theme.palette.success.main})`
+                                        : `linear-gradient(135deg, ${theme.palette.text.secondary}, ${theme.palette.text.disabled})`
                                     },
                                     '&.Mui-disabled': {
-                                      background: 'linear-gradient(135deg, #9e9e9e, #757575)',
+                                      background: `linear-gradient(135deg, ${theme.palette.text.disabled}, ${theme.palette.text.secondary})`,
                                       color: 'white'
                                     }
                                   }}
@@ -1314,7 +1314,7 @@ Reyansh International Pvt Ltd`;
                           background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                           color: 'white',
                           '&:hover': {
-                            background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                            background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                           }
                         }
                       }
@@ -1493,7 +1493,7 @@ Reyansh International Pvt Ltd`;
                 background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                 px: 3,
                 '&:hover': {
-                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                 }
               }}
             >
@@ -1560,13 +1560,13 @@ Reyansh International Pvt Ltd`;
                   width: 100, 
                   height: 100, 
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
+                  background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   mx: 'auto',
                   mb: 3,
-                  boxShadow: '0 4px 20px rgba(76, 175, 80, 0.4)'
+                  boxShadow: `0 4px 20px ${alpha(theme.palette.success.main, 0.4)}`
                 }}>
                   <CheckCircleIcon sx={{ fontSize: 60, color: 'white' }} />
                 </Box>
@@ -1645,7 +1645,7 @@ Reyansh International Pvt Ltd`;
                   borderRadius: 4,
                   background: alpha(theme.palette.success.main, 0.1),
                   '& .MuiLinearProgress-bar': {
-                    background: `linear-gradient(90deg, ${theme.palette.success.main}, #84D2FC)`,
+                    background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.primary.light})`,
                     borderRadius: 4
                   }
                 }}
@@ -1664,7 +1664,7 @@ Reyansh International Pvt Ltd`;
                 px: 4,
                 py: 1.5,
                 '&:hover': {
-                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                  background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                 }
               }}
             >

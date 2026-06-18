@@ -740,16 +740,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
   const summaryCards = (
     <Grid container spacing={3} sx={{ mb: 3 }}>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={(theme) => ({
           height: '100%',
-          background: 'linear-gradient(135deg, #e3f2fd 0%, #e8f5e8 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.info.lighter} 0%, ${theme.palette.success.lighter} 100%)`,
           border: '1px solid rgba(25, 118, 210, 0.1)',
           '&:hover': {
             transform: 'translateY(-2px)',
             transition: 'transform 0.3s ease-in-out',
             boxShadow: '0 4px 20px rgba(25, 118, 210, 0.1)'
           }
-        }}>
+        })}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ 
@@ -773,16 +773,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={(theme) => ({
           height: '100%',
-          background: 'linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.light} 100%)`,
           border: '1px solid rgba(156, 39, 176, 0.1)',
           '&:hover': {
             transform: 'translateY(-2px)',
             transition: 'transform 0.3s ease-in-out',
             boxShadow: '0 4px 20px rgba(156, 39, 176, 0.1)'
           }
-        }}>
+        })}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ 
@@ -806,16 +806,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={(theme) => ({
           height: '100%',
-          background: 'linear-gradient(135deg, #e0f2f1 0%, #e8f5e8 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.success.lighter} 0%, ${theme.palette.success.lighter} 100%)`,
           border: '1px solid rgba(76, 175, 80, 0.1)',
           '&:hover': {
             transform: 'translateY(-2px)',
             transition: 'transform 0.3s ease-in-out',
             boxShadow: '0 4px 20px rgba(76, 175, 80, 0.1)'
           }
-        }}>
+        })}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ 
@@ -839,16 +839,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={(theme) => ({
           height: '100%',
-          background: 'linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.warning.lighter} 0%, ${theme.palette.primary.light} 100%)`,
           border: '1px solid rgba(255, 152, 0, 0.1)',
           '&:hover': {
             transform: 'translateY(-2px)',
             transition: 'transform 0.3s ease-in-out',
             boxShadow: '0 4px 20px rgba(255, 152, 0, 0.1)'
           }
-        }}>
+        })}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ 
@@ -885,16 +885,16 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         </Typography>
         
         {/* Welcome Section */}
-        <Paper sx={{ 
-          p: 4, 
-          mb: 3, 
-          background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
+        <Paper sx={(theme) => ({
+          p: 4,
+          mb: 3,
+          background: `linear-gradient(135deg, ${theme.palette.info.lighter} 0%, ${theme.palette.primary.light} 100%)`,
           color: 'primary.main',
           borderRadius: 3,
           position: 'relative',
           overflow: 'hidden',
           border: '1px solid rgba(25, 118, 210, 0.1)'
-        }}>
+        })}>
           <Box
             sx={{
               position: 'absolute',

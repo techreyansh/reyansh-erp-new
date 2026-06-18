@@ -6,8 +6,6 @@ import { Box, Typography } from '@mui/material';
  * Used during auth check. Respects prefers-reduced-motion.
  */
 const LOGO_SRC = process.env.PUBLIC_URL + '/reyansh-logo.png';
-const BRAND_COLOR = '#26ACEC';
-const TEXT_COLOR = '#202834';
 
 const FullScreenLogoLoader = () => {
   const [imgError, setImgError] = useState(false);
@@ -21,7 +19,7 @@ const FullScreenLogoLoader = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'background.paper',
         zIndex: 9999,
       }}
       aria-live="polite"
@@ -55,7 +53,7 @@ const FullScreenLogoLoader = () => {
               variant="h5"
               sx={{
                 fontWeight: 700,
-                color: TEXT_COLOR,
+                color: 'text.primary',
                 letterSpacing: '-0.02em',
               }}
             >
@@ -65,7 +63,7 @@ const FullScreenLogoLoader = () => {
               variant="caption"
               sx={{
                 display: 'block',
-                color: '#64748B',
+                color: 'text.secondary',
                 fontWeight: 500,
                 letterSpacing: '0.04em',
                 mt: 0.5,

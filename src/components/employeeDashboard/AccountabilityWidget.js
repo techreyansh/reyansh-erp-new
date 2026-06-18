@@ -6,12 +6,12 @@ import {
 import {
   ShieldOutlined, EventAvailableOutlined, ArrowForwardOutlined, FiberManualRecord,
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import {
   getScorecardByEmail, getMyOpenActions, subscribeScorecard,
 } from '../../services/accountabilityService';
 
-const BAND = { GREEN: '#059669', AMBER: '#D97706', RED: '#C0392B' };
 const BAND_LABEL = { GREEN: 'On track', AMBER: 'Watch', RED: 'At risk' };
 
 /**
@@ -20,6 +20,12 @@ const BAND_LABEL = { GREEN: 'On track', AMBER: 'Watch', RED: 'At risk' };
  * and surfaces their open action items. Editing KPIs anywhere updates this live.
  */
 const AccountabilityWidget = ({ email }) => {
+  const theme = useTheme();
+  const BAND = {
+    GREEN: theme.palette.success.main,
+    AMBER: theme.palette.warning.main,
+    RED: theme.palette.error.main,
+  };
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [actions, setActions] = useState([]);
@@ -66,7 +72,7 @@ const AccountabilityWidget = ({ email }) => {
   const sc = data?.registered ? data.scorecard : null;
   const score = sc?.final_score_pct;
   const band = sc?.band;
-  const color = BAND[band] || '#81898F';
+  const color = BAND[band] || theme.palette.text.secondary;
 
   return (
     <Card sx={{ height: '100%', borderTop: `4px solid ${color}` }}>
@@ -79,8 +85,8 @@ const AccountabilityWidget = ({ email }) => {
             <Tooltip title="Live — updates the moment your scorecard changes">
               <Chip
                 size="small" icon={<FiberManualRecord sx={{ fontSize: '10px !important' }} />} label="Live"
-                sx={{ height: 22, fontWeight: 700, color: '#059669', bgcolor: alpha('#059669', 0.12),
-                      '& .MuiChip-icon': { color: '#059669' } }}
+                sx={(theme) => ({ height: 22, fontWeight: 700, color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.12),
+                      '& .MuiChip-icon': { color: theme.palette.success.main } })}
               />
             </Tooltip>
           )}

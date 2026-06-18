@@ -217,7 +217,7 @@ const ProductionSheetInitializer = ({ onInitialized }) => {
       <Card>
         <CardContent>
           <Box sx={{ textAlign: "center", mb: 4 }}>
-            <FactoryIcon sx={{ fontSize: 64, color: "#45ADE6", mb: 2 }} />
+            <FactoryIcon sx={{ fontSize: 64, color: "primary.main", mb: 2 }} />
             <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
               Production Management Setup
             </Typography>
@@ -252,7 +252,7 @@ const ProductionSheetInitializer = ({ onInitialized }) => {
           </Typography>
           <List>
             {requiredSheets.map((sheet, index) => (
-              <ListItem key={sheet.name} sx={{ border: "1px solid #e0e0e0", borderRadius: 1, mb: 1 }}>
+              <ListItem key={sheet.name} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, mb: 1 }}>
                 <ListItemIcon>
                   {results[sheet.name] ? (
                     results[sheet.name].success ? (

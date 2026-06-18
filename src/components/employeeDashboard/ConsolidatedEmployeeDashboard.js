@@ -464,11 +464,11 @@ const ConsolidatedEmployeeDashboard = () => {
                 startIcon={<AddIcon />}
                 onClick={handleAddEmployee}
                 sx={{
-                  bgcolor: 'white',
+                  bgcolor: 'common.white',
                   color: 'primary.main',
                   fontWeight: 600,
                   '&:hover': {
-                    bgcolor: alpha('#fff', 0.9),
+                    bgcolor: alpha(theme.palette.common.white, 0.9),
                     transform: 'translateY(-2px)'
                   },
                   transition: 'all 0.3s ease'
@@ -637,7 +637,7 @@ const ConsolidatedEmployeeDashboard = () => {
               border: '1px solid rgba(102, 126, 234, 0.1)'
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   Rows per page:
                 </Typography>
                 <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -647,7 +647,7 @@ const ConsolidatedEmployeeDashboard = () => {
                       setRowsPerPage(e.target.value);
                       setPage(0);
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(102, 126, 234, 0.3)',
                       },
@@ -655,9 +655,9 @@ const ConsolidatedEmployeeDashboard = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#1E7DBE',
+                        borderColor: theme.palette.primary.dark,
                       }
-                    }}
+                    })}
                   >
                     <MenuItem value={6}>6</MenuItem>
                     <MenuItem value={12}>12</MenuItem>
@@ -668,7 +668,7 @@ const ConsolidatedEmployeeDashboard = () => {
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, filteredEmployees.length)} of {filteredEmployees.length} employees
                 </Typography>
                 
@@ -681,7 +681,7 @@ const ConsolidatedEmployeeDashboard = () => {
                     size="large"
                     showFirstButton
                     showLastButton
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiPaginationItem-root': {
                         borderRadius: 3,
                         fontWeight: 700,
@@ -695,8 +695,8 @@ const ConsolidatedEmployeeDashboard = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                          color: 'white',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.common.white,
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                           '&:hover': {
@@ -705,7 +705,7 @@ const ConsolidatedEmployeeDashboard = () => {
                           }
                         }
                       }
-                    }}
+                    })}
                   />
                 )}
               </Box>
@@ -754,7 +754,7 @@ const ConsolidatedEmployeeDashboard = () => {
                       bgcolor: 'primary.main',
                       fontSize: '2rem',
                       border: 4,
-                      borderColor: 'white',
+                      borderColor: 'common.white',
                       boxShadow: theme.shadows[4]
                     }}
                   >
@@ -789,20 +789,20 @@ const ConsolidatedEmployeeDashboard = () => {
                   <IconButton
                     onClick={handleRefresh}
                     disabled={refreshing}
-                    sx={{ 
-                      bgcolor: 'white',
+                    sx={{
+                      bgcolor: 'common.white',
                       boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha('#fff', 0.9) }
+                      '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.9) }
                     }}
                   >
                     <RefreshIcon />
                   </IconButton>
                   <IconButton
                     onClick={() => handleEditEmployee(selectedEmployee)}
-                    sx={{ 
-                      bgcolor: 'white',
+                    sx={{
+                      bgcolor: 'common.white',
                       boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha('#fff', 0.9) }
+                      '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.9) }
                     }}
                   >
                     <EditIcon />

@@ -1868,7 +1868,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -1878,15 +1878,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
                   {opportunityForm.opportunityId ? 'Edit Opportunity' : 'Add New Opportunity'}
                 </Typography>
@@ -1905,7 +1905,7 @@ const CRMManagement = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Basic Information Section */}
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                 <Business sx={{ fontSize: 20 }} />
                 Basic Information
               </Typography>
@@ -1927,13 +1927,13 @@ const CRMManagement = () => {
                           ...params.InputProps,
                             startAdornment: <People color="action" sx={{ mr: 1 }} />
                           }}
-                          sx={{
-                            '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                            '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                          sx={(theme) => ({
+                            '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                            '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                            '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                             '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                        }}
+                        })}
                       />
                     )}
                   />
@@ -1949,13 +1949,13 @@ const CRMManagement = () => {
                     InputProps={{
                         startAdornment: <Title color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      sx={(theme) => ({
+                        '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                        '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                      }}
+                      })}
                     />
                   </Box>
                 </Box>
@@ -1971,20 +1971,20 @@ const CRMManagement = () => {
                     InputProps={{
                       startAdornment: <Description color="action" sx={{ mr: 1, alignSelf: 'flex-start', mt: 1.5 }} />
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiInputBase-root': { alignItems: 'flex-start' },
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }
-                    }}
+                      '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                      '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } }
+                    })}
                   />
                 </Box>
             </Box>
 
             {/* Opportunity Details Section */}
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                 <TrendingUp sx={{ fontSize: 20 }} />
                 Opportunity Details
               </Typography>
@@ -2001,13 +2001,13 @@ const CRMManagement = () => {
                     InputProps={{
                         startAdornment: <AttachMoney color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      sx={(theme) => ({
+                        '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                        '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                      }}
+                      })}
                     />
                   </Box>
                   <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -2052,13 +2052,13 @@ const CRMManagement = () => {
                     InputProps={{
                         startAdornment: <Percent color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      sx={(theme) => ({
+                        '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                        '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                      }}
+                      })}
                     />
                   </Box>
                   <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -2074,10 +2074,10 @@ const CRMManagement = () => {
                             startAdornment: <CalendarToday color="action" sx={{ mr: 1 }} />
                           },
                           sx: {
-                            '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                            '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                            '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                            '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                            '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                            '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                            '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                             '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                         }
                       } 
@@ -2095,13 +2095,13 @@ const CRMManagement = () => {
                     InputProps={{
                         startAdornment: <LocationOn color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      sx={(theme) => ({
+                        '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                        '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                      }}
+                      })}
                     />
                   </Box>
                   <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -2115,13 +2115,13 @@ const CRMManagement = () => {
                     InputProps={{
                         startAdornment: <PersonIcon color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      sx={(theme) => ({
+                        '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                        '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
-                      }}
+                      })}
                     />
                   </Box>
                 </Box>
@@ -2129,7 +2129,7 @@ const CRMManagement = () => {
 
             {/* Additional Information Section */}
             <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                 <Note sx={{ fontSize: 20 }} />
                 Additional Information
               </Typography>
@@ -2146,13 +2146,13 @@ const CRMManagement = () => {
                     InputProps={{
                       startAdornment: <Note color="action" sx={{ mr: 1, alignSelf: 'flex-start', mt: 1.5 }} />
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiInputBase-root': { alignItems: 'flex-start' },
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }
-                    }}
+                      '& .MuiInput-underline:before': { borderBottomColor: theme.palette.grey[100] },
+                      '& .MuiInput-underline:after': { borderBottomColor: theme.palette.primary.main },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: theme.palette.primary.main },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: theme.palette.text.secondary, '&.Mui-focused': { color: theme.palette.primary.main } }
+                    })}
                   />
                 </Box>
               </Box>
@@ -2179,8 +2179,8 @@ const CRMManagement = () => {
               startIcon={opportunityForm.opportunityId ? <CheckIcon /> : <Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               {opportunityForm.opportunityId ? 'Update Opportunity' : 'Create Opportunity'}
@@ -2230,7 +2230,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2240,15 +2240,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
                   Add New Activity
                 </Typography>
@@ -2478,8 +2478,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Create Activity
@@ -2527,7 +2527,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2537,15 +2537,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
                   Add New Task
                 </Typography>
@@ -2702,8 +2702,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Create Task
@@ -2751,7 +2751,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2761,15 +2761,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
                   Log Interaction
                 </Typography>
@@ -2929,8 +2929,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Log Interaction
@@ -2976,7 +2976,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -2986,15 +2986,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
                   Add New Note
                 </Typography>
@@ -3113,8 +3113,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Create Note
@@ -3156,7 +3156,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3166,15 +3166,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               Note Details
             </Typography>
@@ -3212,7 +3212,7 @@ const CRMManagement = () => {
 
                 {/* Note Content */}
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                     <Note sx={{ fontSize: 20 }} />
                     Content
                   </Typography>
@@ -3233,7 +3233,7 @@ const CRMManagement = () => {
 
                 {/* Note Metadata */}
                 <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                     <Business sx={{ fontSize: 20 }} />
                     Information
                   </Typography>
@@ -3288,7 +3288,7 @@ const CRMManagement = () => {
                 {/* Tags if available */}
                 {selectedNote.tags && selectedNote.tags.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: '#45ADE6' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
                       <Category sx={{ fontSize: 20 }} />
                       Tags
                     </Typography>
@@ -3318,8 +3318,8 @@ const CRMManagement = () => {
               startIcon={<CloseIcon />}
               size="large"
               sx={{ 
-                bgcolor: '#45ADE6',
-                '&:hover': { bgcolor: '#1E7DBE' }
+                bgcolor: 'primary.main',
+                '&:hover': { bgcolor: 'primary.dark' }
               }}
             >
               Close
@@ -3365,7 +3365,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3375,15 +3375,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               Add New Order
             </Typography>
@@ -3528,8 +3528,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Create Order
@@ -3577,7 +3577,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3587,15 +3587,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               Log Call
             </Typography>
@@ -3768,8 +3768,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Log Call
@@ -3817,7 +3817,7 @@ const CRMManagement = () => {
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#45ADE6',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(25, 118, 210, 0.1)'
                 }
@@ -3827,15 +3827,15 @@ const CRMManagement = () => {
             </IconButton>
             <Typography 
               variant="h4" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               Record Payment
             </Typography>
@@ -4002,8 +4002,8 @@ const CRMManagement = () => {
               startIcon={<Folder />}
               size="large"
               sx={{ 
-                bgcolor: '#4caf50',
-                '&:hover': { bgcolor: '#2e7d32' }
+                bgcolor: 'success.main',
+                '&:hover': { bgcolor: 'success.dark' }
               }}
             >
               Record Payment

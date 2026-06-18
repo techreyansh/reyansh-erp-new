@@ -41,9 +41,11 @@ import {
   PolarRadiusAxis,
   Radar
 } from 'recharts';
+import { useTheme } from '@mui/material/styles';
 import employeeService from '../../services/employeeService';
 
 const PerformanceTab = ({ employeeCode, performance }) => {
+  const theme = useTheme();
   const [performanceMetrics, setPerformanceMetrics] = useState([]);
   const [timeRange, setTimeRange] = useState('6months');
   const [loading, setLoading] = useState(false);
@@ -216,16 +218,16 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                       <Line 
                         type="monotone" 
                         dataKey="score" 
-                        stroke="#45ADE6" 
+                        stroke={theme.palette.primary.main}
                         strokeWidth={3}
-                        dot={{ fill: '#45ADE6', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: theme.palette.primary.main, strokeWidth: 2, r: 4 }}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="target" 
-                        stroke="#ff9800" 
+                      <Line
+                        type="monotone"
+                        dataKey="target"
+                        stroke={theme.palette.warning.main}
                         strokeDasharray="5 5"
-                        dot={{ fill: '#ff9800', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: theme.palette.warning.main, strokeWidth: 2, r: 4 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -267,8 +269,8 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                     <Radar
                       name="Score"
                       dataKey="score"
-                      stroke="#45ADE6"
-                      fill="#45ADE6"
+                      stroke={theme.palette.primary.main}
+                      fill={theme.palette.primary.main}
                       fillOpacity={0.3}
                       strokeWidth={2}
                     />

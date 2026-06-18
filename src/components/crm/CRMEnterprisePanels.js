@@ -18,6 +18,7 @@ import {
   Typography
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import EnterpriseToolbar from "../advanced/EnterpriseToolbar";
 import { calculateLeadScore, calculateQuotationPrice } from "../../utils/calculations/erpCalculations";
 import { exportToCsv } from "../../utils/calculations/exportCsv";
@@ -34,6 +35,7 @@ const CRMEnterprisePanels = ({
   updateEnterpriseRecords,
   setRole
 }) => {
+  const theme = useTheme();
   const [search, setSearch] = useState("");
   const [viewName, setViewName] = useState("");
   const [selectedEntity, setSelectedEntity] = useState(leads[0]?.id || "");
@@ -220,7 +222,14 @@ const CRMEnterprisePanels = ({
               }}
             >
               {filteredTimeline.map((event) => {
-                const tc = { Call: "#1E7DBE", Meeting: "#45ADE6", Status: "#D97706", Email: "#7C3AED", Note: "#81898F", Order: "#059669" }[event.type] || "#81898F";
+                const tc = {
+                  Call: theme.palette.primary.dark,
+                  Meeting: theme.palette.primary.main,
+                  Status: theme.palette.warning.main,
+                  Email: theme.palette.primary.main,
+                  Note: theme.palette.text.secondary,
+                  Order: theme.palette.success.main
+                }[event.type] || theme.palette.text.secondary;
                 return (
                   <Box key={event.id} sx={{ position: "relative", pb: 2 }}>
                     <Box

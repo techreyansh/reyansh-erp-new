@@ -213,19 +213,19 @@ const StandardsAndCompliance = () => {
   };
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)',
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.info.lighter} 100%)`,
       py: 3
-    }}>
+    })}>
       <Container maxWidth="xl">
         <Fade in timeout={800}>
           <Box>
             {/* Enhanced Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 4,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: 'common.white',
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
               position: 'relative',
@@ -242,15 +242,15 @@ const StandardsAndCompliance = () => {
                 background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
                 opacity: 0.3
               }
-            }}>
+            })}>
               <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap={3}>
                     <Tooltip title="Back to Sales Flow">
                       <IconButton
                         onClick={() => navigate('/sales-flow')}
-                        sx={{ 
-                          color: 'white',
+                        sx={{
+                          color: 'common.white',
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -264,11 +264,11 @@ const StandardsAndCompliance = () => {
                     </Tooltip>
                     
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Box sx={{
+                      <Box sx={(theme) => ({
                         width: 60,
                         height: 60,
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -282,23 +282,23 @@ const StandardsAndCompliance = () => {
                           right: -2,
                           bottom: -2,
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #1E7DBE, #45ADE6, #84D2FC)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                           zIndex: -1,
                           opacity: 0.7
                         }
-                      }}>
-                        <Security sx={{ fontSize: 28, color: 'white' }} />
+                      })}>
+                        <Security sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
-                        <Typography variant="h3" sx={{ 
+                        <Typography variant="h3" sx={(theme) => ({
                           fontWeight: 800,
-                          background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.common.white} 0%, ${theme.palette.grey[100]} 100%)`,
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           textShadow: '0 4px 8px rgba(0,0,0,0.1)',
                           mb: 1
-                        }}>
+                        })}>
                           Standards and Compliance
                         </Typography>
                         <Typography variant="h6" sx={{ 
@@ -323,8 +323,8 @@ const StandardsAndCompliance = () => {
                     border: '1px solid rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <VerifiedUser sx={{ color: '#84D2FC', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                    <VerifiedUser sx={{ color: 'primary.light', fontSize: 20 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'common.white' }}>
                       Step 5
                     </Typography>
                   </Box>
@@ -333,27 +333,27 @@ const StandardsAndCompliance = () => {
             </Card>
 
             {/* Leads Table */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
               overflow: 'hidden',
-              background: 'white',
+              background: theme.palette.background.paper,
               maxWidth: '1400px',
               mx: 'auto',
               mb: 4
-            }}>
+            })}>
               <CardContent sx={{ p: 4 }}>
                 <Box display="flex" alignItems="center" gap={2} mb={4}>
-                  <Avatar sx={{ 
-                    width: 48, 
-                    height: 48, 
-                    background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                  <Avatar sx={(theme) => ({
+                    width: 48,
+                    height: 48,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                     boxShadow: '0 4px 16px rgba(79, 172, 254, 0.3)'
-                  }}>
+                  })}>
                     <Assessment sx={{ fontSize: 24 }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
                       Prospects Requiring Standards and Compliance Check
                     </Typography>
                     <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -379,17 +379,17 @@ const StandardsAndCompliance = () => {
                   <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)' }}>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Enquiry Number</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Customer Name</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Company</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Email</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Mobile</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Products Interested</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Requirement</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Priority</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Status</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Actions</TableCell>
+                        <TableRow sx={(theme) => ({ background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)` })}>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Enquiry Number</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Customer Name</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Company</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Email</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Mobile</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Products Interested</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Requirement</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Priority</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Status</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 600 }}>Actions</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -404,14 +404,14 @@ const StandardsAndCompliance = () => {
                             }}
                           >
                             <TableCell>
-                              <Chip 
-                                label={lead.LogId} 
+                              <Chip
+                                label={lead.LogId}
                                 size="small"
-                                sx={{ 
-                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                  color: 'white',
+                                sx={(theme) => ({
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                  color: 'common.white',
                                   fontWeight: 600
-                                }}
+                                })}
                               />
                             </TableCell>
                             <TableCell>
@@ -455,15 +455,15 @@ const StandardsAndCompliance = () => {
                                         const product = products.find(p => p.value === productCode);
                                         const displayLabel = product ? product.label : productCode;
                                         return (
-                                          <Chip 
+                                          <Chip
                                             key={index}
-                                            label={displayLabel} 
+                                            label={displayLabel}
                                             size="small"
-                                            sx={{ 
-                                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                              color: 'white',
+                                            sx={(theme) => ({
+                                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                              color: 'common.white',
                                               fontSize: '0.7rem'
-                                            }}
+                                            })}
                                           />
                                         );
                                       });
@@ -472,14 +472,14 @@ const StandardsAndCompliance = () => {
                                       const product = products.find(p => p.value === lead.ProductsInterested);
                                       const displayLabel = product ? product.label : lead.ProductsInterested;
                                       return (
-                                        <Chip 
-                                          label={displayLabel} 
+                                        <Chip
+                                          label={displayLabel}
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     }
@@ -509,15 +509,15 @@ const StandardsAndCompliance = () => {
                                       const product = products.find(p => p.value === productCode);
                                       const displayLabel = product ? product.label : productCode;
                                       return (
-                                        <Chip 
+                                        <Chip
                                           key={index}
-                                          label={displayLabel} 
+                                          label={displayLabel}
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     });
@@ -534,14 +534,14 @@ const StandardsAndCompliance = () => {
                                     
                                     if (Array.isArray(productCodes) && productCodes.length > 2) {
                                       return (
-                                        <Chip 
+                                        <Chip
                                           label={`+${productCodes.length - 2} more`}
                                           size="small"
-                                          sx={{ 
-                                            background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                                            color: 'white',
+                                          sx={(theme) => ({
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                                            color: 'common.white',
                                             fontSize: '0.7rem'
-                                          }}
+                                          })}
                                         />
                                       );
                                     }
@@ -585,9 +585,9 @@ const StandardsAndCompliance = () => {
                                       document.getElementById('compliance-assessment-section').scrollIntoView({ behavior: 'smooth' });
                                     }, 100);
                                   }}
-                                  sx={{
-                                    background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-                                    color: 'white',
+                                  sx={(theme) => ({
+                                    background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                                    color: 'common.white',
                                     fontWeight: 600,
                                     px: 3,
                                     py: 1,
@@ -598,7 +598,7 @@ const StandardsAndCompliance = () => {
                                       transform: 'translateY(-2px)',
                                       boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
                                     }
-                                  }}
+                                  })}
                                 >
                                   Assess
                                 </Button>
@@ -606,8 +606,8 @@ const StandardsAndCompliance = () => {
                                   <IconButton
                                     size="small"
                                     onClick={() => handleViewDetails(lead)}
-                                    sx={{ 
-                                      color: '#1E7DBE',
+                                    sx={{
+                                      color: 'primary.dark',
                                       '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.1)' }
                                     }}
                                   >
@@ -618,8 +618,8 @@ const StandardsAndCompliance = () => {
                                   <IconButton
                                     size="small"
                                     onClick={() => handleSendMail(lead.EmailId || lead.Email)}
-                                    sx={{ 
-                                      color: '#4caf50',
+                                    sx={{
+                                      color: 'success.main',
                                       '&:hover': { backgroundColor: 'rgba(76, 175, 80, 0.1)' }
                                     }}
                                   >
@@ -641,27 +641,27 @@ const StandardsAndCompliance = () => {
             {selectedLead && (
               <Card 
                 id="compliance-assessment-section"
-                sx={{ 
+                sx={(theme) => ({
                   borderRadius: 3,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
                   overflow: 'hidden',
-                  background: 'white',
+                  background: theme.palette.background.paper,
                   maxWidth: '1400px',
                   mx: 'auto'
-                }}
+                })}
               >
                 <CardContent sx={{ p: 4 }}>
                   <Box display="flex" alignItems="center" gap={2} mb={4}>
-                    <Avatar sx={{ 
-                      width: 48, 
-                      height: 48, 
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    <Avatar sx={(theme) => ({
+                      width: 48,
+                      height: 48,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       boxShadow: '0 4px 16px rgba(67, 233, 123, 0.3)'
-                    }}>
+                    })}>
                       <GppGood sx={{ fontSize: 24 }} />
                     </Avatar>
                     <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#2e7d32', mb: 0.5 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main', mb: 0.5 }}>
                         Standards and Compliance Assessment for {selectedLead.CustomerName || selectedLead.FullName}
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -700,17 +700,17 @@ const StandardsAndCompliance = () => {
                               checked={complianceStatus}
                               onChange={(e) => setComplianceStatus(e.target.checked)}
                               color="success"
-                              sx={{
+                              sx={(theme) => ({
                                 '& .MuiSwitch-switchBase.Mui-checked': {
-                                  color: '#4caf50',
+                                  color: theme.palette.success.main,
                                   '&:hover': {
                                     backgroundColor: 'rgba(76, 175, 80, 0.08)',
                                   },
                                 },
                                 '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                  backgroundColor: '#4caf50',
+                                  backgroundColor: theme.palette.success.main,
                                 },
-                              }}
+                              })}
                             />
                           }
                           label={
@@ -774,18 +774,18 @@ const StandardsAndCompliance = () => {
                             <Notes sx={{ mr: 1, color: 'text.secondary', mt: 1, alignSelf: 'flex-start' }} />
                           )
                         }}
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
                             '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#1E7DBE'
+                              borderColor: theme.palette.primary.dark
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#1E7DBE',
+                              borderColor: theme.palette.primary.dark,
                               borderWidth: 2
                             }
                           }
-                        }}
+                        })}
                       />
                     </Grid>
 
@@ -793,12 +793,12 @@ const StandardsAndCompliance = () => {
                       <Divider sx={{ my: 3 }} />
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Box display="flex" alignItems="center" gap={2}>
-                          <Avatar sx={{ 
-                            width: 40, 
-                            height: 40, 
-                            background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                          <Avatar sx={(theme) => ({
+                            width: 40,
+                            height: 40,
+                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                             boxShadow: '0 4px 16px rgba(67, 233, 123, 0.3)'
-                          }}>
+                          })}>
                             <Schedule sx={{ fontSize: 20 }} />
                           </Avatar>
                           <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
@@ -819,10 +819,10 @@ const StandardsAndCompliance = () => {
                               borderRadius: 2,
                               px: 4,
                               py: 1.5,
-                              borderColor: '#1E7DBE',
-                              color: '#1E7DBE',
+                              borderColor: 'primary.dark',
+                              color: 'primary.dark',
                               '&:hover': {
-                                borderColor: '#45ADE6',
+                                borderColor: 'primary.main',
                                 backgroundColor: 'rgba(102, 126, 234, 0.04)'
                               }
                             }}
@@ -834,9 +834,9 @@ const StandardsAndCompliance = () => {
                             variant="contained"
                             startIcon={loading ? <CircularProgress size={20} /> : <AutoAwesome />}
                             disabled={loading || !complianceNotes.trim()}
-                            sx={{
-                              background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                              color: 'white',
+                            sx={(theme) => ({
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                              color: 'common.white',
                               fontWeight: 700,
                               px: 5,
                               py: 1.5,
@@ -846,9 +846,9 @@ const StandardsAndCompliance = () => {
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 12px 40px rgba(250, 112, 154, 0.6)',
-                                background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)'
+                                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
                               }
-                            }}
+                            })}
                           >
                             {loading ? 'Processing...' : 'Complete Standards and Compliance Check'}
                           </Button>
@@ -867,13 +867,13 @@ const StandardsAndCompliance = () => {
               maxWidth="md"
               fullWidth
             >
-              <DialogTitle sx={{ 
-                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                color: 'white',
+              <DialogTitle sx={(theme) => ({
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                color: 'common.white',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2
-              }}>
+              })}>
                 <Person />
                 Prospect Details
               </DialogTitle>
@@ -918,13 +918,13 @@ const StandardsAndCompliance = () => {
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <Typography variant="subtitle2" color="text.secondary">Customer Type</Typography>
-                      <Chip 
-                        label={selectedLead.CustomerType || 'N/A'} 
-                        sx={{ 
-                          background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                          color: 'white',
+                      <Chip
+                        label={selectedLead.CustomerType || 'N/A'}
+                        sx={(theme) => ({
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: 'common.white',
                           fontWeight: 600
-                        }}
+                        })}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -952,14 +952,14 @@ const StandardsAndCompliance = () => {
                                 const displayLabel = product ? product.label : productCode;
                                 
                                 return (
-                                  <Chip 
+                                  <Chip
                                     key={index}
-                                    label={displayLabel} 
+                                    label={displayLabel}
                                     size="small"
-                                    sx={{ 
-                                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                      color: 'white'
-                                    }}
+                                    sx={(theme) => ({
+                                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                      color: 'common.white'
+                                    })}
                                   />
                                 );
                               });
@@ -967,15 +967,15 @@ const StandardsAndCompliance = () => {
                               // If it's not an array, treat it as a single product code
                               const product = products.find(p => p.value === selectedLead.ProductsInterested);
                               const displayLabel = product ? product.label : selectedLead.ProductsInterested;
-                              
+
                               return (
-                                <Chip 
-                                  label={displayLabel} 
+                                <Chip
+                                  label={displayLabel}
                                   size="small"
-                                  sx={{ 
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                    color: 'white'
-                                  }}
+                                  sx={(theme) => ({
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                    color: 'common.white'
+                                  })}
                                 />
                               );
                             }
@@ -1006,14 +1006,14 @@ const StandardsAndCompliance = () => {
                               const displayLabel = product ? product.label : productCode;
                               
                               return (
-                                <Chip 
+                                <Chip
                                   key={index}
-                                  label={displayLabel} 
+                                  label={displayLabel}
                                   size="small"
-                                  sx={{ 
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                    color: 'white'
-                                  }}
+                                  sx={(theme) => ({
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                    color: 'common.white'
+                                  })}
                                 />
                               );
                             });
@@ -1070,10 +1070,10 @@ const StandardsAndCompliance = () => {
                     }, 100);
                   }}
                   variant="contained"
-                  sx={{
-                    background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                    color: 'white'
-                  }}
+                  sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                    color: 'common.white'
+                  })}
                 >
                   Proceed with this Prospect
                 </Button>

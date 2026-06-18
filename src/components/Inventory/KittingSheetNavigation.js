@@ -146,13 +146,13 @@ const KittingSheetNavigation = () => {
 
       {/* Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #607d8b 0%, #455a64 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -164,7 +164,7 @@ const KittingSheetNavigation = () => {
                 <IconButton
                   onClick={() => navigate('/inventory/bill-of-materials')}
                   sx={{
-                    color: 'white',
+                    color: 'common.white',
                     bgcolor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
                       bgcolor: 'rgba(255,255,255,0.2)',
@@ -234,7 +234,7 @@ const KittingSheetNavigation = () => {
               onChange={handleTabChange}
               variant={isMobile ? "scrollable" : "fullWidth"}
               scrollButtons="auto"
-              sx={{
+              sx={(theme) => ({
                 px: 3,
                 '& .MuiTab-root': {
                   minHeight: 72,
@@ -245,9 +245,9 @@ const KittingSheetNavigation = () => {
                 },
                 '& .MuiTabs-indicator': {
                   height: 4,
-                  background: 'linear-gradient(45deg, #607d8b, #455a64)'
+                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
                 }
-              }}
+              })}
             >
               {tabs.map((tab, index) => (
                 <Tab

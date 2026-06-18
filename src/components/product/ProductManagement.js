@@ -249,27 +249,27 @@ const StyledChip = styled(Chip)(({ theme, variant }) => {
     switch (variant) {
       case 'success':
         return {
-          background: `linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#4CAF50', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`,
         };
       case 'warning':
         return {
-          background: `linear-gradient(135deg, #FF9800 0%, #FFC107 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#FF9800', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.warning.main, 0.3)}`,
         };
       case 'error':
         return {
-          background: `linear-gradient(135deg, #F44336 0%, #E91E63 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#F44336', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.error.main, 0.3)}`,
         };
       case 'info':
         return {
-          background: `linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#45ADE6', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
         };
       default:
         return {
@@ -1067,7 +1067,7 @@ const ProductManagement = () => {
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     Packing Line: {selectedProduct.packingLineManpower || 0}
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, color: '#45ADE6' }}>
+                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
                     Total: {parseInt(selectedProduct.assemblyLineManpower || 0) + parseInt(selectedProduct.cableCuttingManpower || 0) + parseInt(selectedProduct.moldingMachineManpower || 0) + parseInt(selectedProduct.packingLineManpower || 0)}
                   </Typography>
                 </Grid>

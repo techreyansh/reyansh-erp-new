@@ -232,28 +232,28 @@ const ApproveStrategicDeals = () => {
   };
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'white',
+      background: theme.palette.background.paper,
       py: 3,
-    }}>
+    })}>
       <Container maxWidth="xl">
         <Fade in timeout={800}>
           <Box>
             {/* Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 3,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: theme.palette.common.white,
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-            }}>
+            })}>
               <CardContent sx={{ p: 4 }}>
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <IconButton 
+                  <IconButton
                     onClick={() => navigate('/sales-flow')}
-                    sx={{ 
-                      color: 'white',
+                    sx={{
+                      color: 'common.white',
                       backgroundColor: 'rgba(255,255,255,0.1)',
                       '&:hover': {
                         backgroundColor: 'rgba(255,255,255,0.2)'
@@ -262,12 +262,12 @@ const ApproveStrategicDeals = () => {
                   >
                     <ArrowBack />
                   </IconButton>
-                  <Avatar sx={{ 
-                    width: 60, 
-                    height: 60, 
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  <Avatar sx={(theme) => ({
+                    width: 60,
+                    height: 60,
+                    background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.main} 100%)`,
                     boxShadow: '0 4px 16px rgba(251, 191, 36, 0.3)'
-                  }}>
+                  })}>
                     <AccountBalance sx={{ fontSize: 30 }} />
                   </Avatar>
                   <Box>
@@ -292,7 +292,7 @@ const ApproveStrategicDeals = () => {
             {/* Loading State */}
             {loading && (
               <Box display="flex" justifyContent="center" my={4}>
-                <CircularProgress size={60} sx={{ color: 'white' }} />
+                <CircularProgress size={60} sx={{ color: 'primary.main' }} />
               </Box>
             )}
 
@@ -308,16 +308,16 @@ const ApproveStrategicDeals = () => {
                   <TableContainer>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ 
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                        }}>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Log ID</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Customer</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Company</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Sample Status</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Quotation Amount</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Priority</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 700 }}>Actions</TableCell>
+                        <TableRow sx={(theme) => ({
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                        })}>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Log ID</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Customer</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Company</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Sample Status</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Quotation Amount</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Priority</TableCell>
+                          <TableCell sx={{ color: 'common.white', fontWeight: 700 }}>Actions</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -325,12 +325,12 @@ const ApproveStrategicDeals = () => {
                           <TableRow>
                             <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
                               <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                                <Avatar sx={{ 
-                                  width: 80, 
-                                  height: 80, 
-                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                                <Avatar sx={(theme) => ({
+                                  width: 80,
+                                  height: 80,
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                                   mb: 2
-                                }}>
+                                })}>
                                   <AccountBalance sx={{ fontSize: 40 }} />
                                 </Avatar>
                                 <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 500 }}>
@@ -363,12 +363,12 @@ const ApproveStrategicDeals = () => {
                                 </TableCell>
                                 <TableCell>
                                   <Box display="flex" alignItems="center" gap={1}>
-                                    <Avatar sx={{ 
-                                      width: 32, 
-                                      height: 32, 
-                                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                                    <Avatar sx={(theme) => ({
+                                      width: 32,
+                                      height: 32,
+                                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                                       fontSize: '0.875rem'
-                                    }}>
+                                    })}>
                                       {lead.CustomerName?.charAt(0)}
                                     </Avatar>
                                     <Box>
@@ -413,9 +413,9 @@ const ApproveStrategicDeals = () => {
                                     size="small"
                                     startIcon={<Visibility />}
                                     onClick={() => handleViewDetails(lead)}
-                                    sx={{ 
-                                      background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
-                                      color: 'white',
+                                    sx={(theme) => ({
+                                      background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`,
+                                      color: theme.palette.common.white,
                                       fontWeight: 600,
                                       px: 3,
                                       py: 1,
@@ -426,7 +426,7 @@ const ApproveStrategicDeals = () => {
                                         transform: 'translateY(-2px)',
                                         boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
                                       }
-                                    }}
+                                    })}
                                   >
                                     Review
                                   </Button>
@@ -444,28 +444,28 @@ const ApproveStrategicDeals = () => {
 
             {/* Approval Form */}
             {selectedLead && (
-              <Card sx={{ 
+              <Card sx={(theme) => ({
                 borderRadius: 3,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
-              }}>
+                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`
+              })}>
                 <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#1E7DBE' }}>
+                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'primary.dark' }}>
                     Strategic Deal Approval Form
                   </Typography>
                   
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="h6" sx={{ mb: 2, color: '#374151' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: 'text.primary' }}>
                         Deal Details
                       </Typography>
                       <Box display="flex" flexDirection="column" gap={2}>
                         <Box display="flex" alignItems="center" gap={2}>
-                          <Avatar sx={{ 
-                            width: 40, 
-                            height: 40, 
-                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                          }}>
+                          <Avatar sx={(theme) => ({
+                            width: 40,
+                            height: 40,
+                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                          })}>
                             <Person sx={{ fontSize: 20 }} />
                           </Avatar>
                           <Box>
@@ -479,11 +479,11 @@ const ApproveStrategicDeals = () => {
                         </Box>
                         
                         <Box display="flex" alignItems="center" gap={2}>
-                          <Avatar sx={{ 
-                            width: 40, 
-                            height: 40, 
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                          }}>
+                          <Avatar sx={(theme) => ({
+                            width: 40,
+                            height: 40,
+                            background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`
+                          })}>
                             <MonetizationOn sx={{ fontSize: 20 }} />
                           </Avatar>
                           <Box>
@@ -497,11 +497,11 @@ const ApproveStrategicDeals = () => {
                         </Box>
                         
                         <Box display="flex" alignItems="center" gap={2}>
-                          <Avatar sx={{ 
-                            width: 40, 
-                            height: 40, 
-                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                          }}>
+                          <Avatar sx={(theme) => ({
+                            width: 40,
+                            height: 40,
+                            background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.main} 100%)`
+                          })}>
                             <CheckCircle sx={{ fontSize: 20 }} />
                           </Avatar>
                           <Box>
@@ -517,7 +517,7 @@ const ApproveStrategicDeals = () => {
                     </Grid>
                     
                     <Grid item xs={12} md={6}>
-                      <Typography variant="h6" sx={{ mb: 2, color: '#374151' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: 'text.primary' }}>
                         Strategic Deal Decision
                       </Typography>
                       
@@ -561,12 +561,12 @@ const ApproveStrategicDeals = () => {
                     <Divider sx={{ my: 3 }} />
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <Box display="flex" alignItems="center" gap={2}>
-                        <Avatar sx={{ 
-                          width: 40, 
-                          height: 40, 
-                          background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                        <Avatar sx={(theme) => ({
+                          width: 40,
+                          height: 40,
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                           boxShadow: '0 4px 16px rgba(67, 233, 123, 0.3)'
-                        }}>
+                        })}>
                           <Schedule sx={{ fontSize: 20 }} />
                         </Avatar>
                         <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
@@ -587,10 +587,10 @@ const ApproveStrategicDeals = () => {
                             borderRadius: 2,
                             px: 4,
                             py: 1.5,
-                            borderColor: '#1E7DBE',
-                            color: '#1E7DBE',
+                            borderColor: 'primary.dark',
+                            color: 'primary.dark',
                             '&:hover': {
-                              borderColor: '#45ADE6',
+                              borderColor: 'primary.main',
                               backgroundColor: 'rgba(102, 126, 234, 0.04)'
                             }
                           }}
@@ -602,11 +602,11 @@ const ApproveStrategicDeals = () => {
                           variant="contained"
                           startIcon={loading ? <CircularProgress size={20} /> : <AutoAwesome />}
                           disabled={loading || !strategicDealNotes.trim()}
-                          sx={{
-                            background: strategicDealApprovalStatus === 'Approved' 
-                              ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                              : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            color: 'white',
+                          sx={(theme) => ({
+                            background: strategicDealApprovalStatus === 'Approved'
+                              ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`
+                              : `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.main} 100%)`,
+                            color: theme.palette.common.white,
                             fontWeight: 700,
                             px: 5,
                             py: 1.5,
@@ -621,7 +621,7 @@ const ApproveStrategicDeals = () => {
                                 ? '0 12px 40px rgba(16, 185, 129, 0.6)'
                                 : '0 12px 40px rgba(239, 68, 68, 0.6)'
                             }
-                          }}
+                          })}
                         >
                           {loading ? 'Processing...' : `${strategicDealApprovalStatus} Strategic Deal`}
                         </Button>

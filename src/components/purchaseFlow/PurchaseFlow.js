@@ -68,8 +68,7 @@ import WhatsAppButton from '../common/WhatsAppButton';
 import whatsappMessageService from '../../services/whatsappMessageService';
 import RaiseIndent from './RaiseIndent';
 
-// Common color for all 21 Purchase Flow steps
-const PURCHASE_FLOW_STEP_COLOR = "#4caf50";
+// Common color for all 21 Purchase Flow steps comes from theme.palette.success.main
 
 // Debug logging
 // Dashboard Component
@@ -352,7 +351,7 @@ const PurchaseDashboard = () => {
           elevation={0}
           sx={{
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+            background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`,
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden',
             position: "relative",
@@ -424,27 +423,27 @@ const PurchaseDashboard = () => {
               },
             }}>
               {[
-                { step: 1, label: "Raise Indent", color: PURCHASE_FLOW_STEP_COLOR, description: "Store Manager raises purchase request", assignedTo: "Store Manager", tat: "Same day" },
-                { step: 2, label: "Approve Indent", color: PURCHASE_FLOW_STEP_COLOR, description: "Process Coordinator reviews and approves", assignedTo: "Process Coordinator", tat: "Same day" },
-                { step: 3, label: "Float RFQ", color: PURCHASE_FLOW_STEP_COLOR, description: "Purchase Executive sends quotation requests", assignedTo: "Purchase Executive", tat: "1 day" },
-                { step: 4, label: "Follow-up Quotations", color: PURCHASE_FLOW_STEP_COLOR, description: "Follow-up with vendors for quotes", assignedTo: "Purchase Executive", tat: "2 days" },
-                { step: 5, label: "Comparative Statement", color: PURCHASE_FLOW_STEP_COLOR, description: "Prepare vendor comparison analysis", assignedTo: "Purchase Executive", tat: "1 day" },
-                { step: 6, label: "Approve Quotation", color: PURCHASE_FLOW_STEP_COLOR, description: "Management approves selected vendor", assignedTo: "Management / HOD", tat: "1 day" },
-                { step: 7, label: "Request Sample", color: PURCHASE_FLOW_STEP_COLOR, description: "Request and follow-up for material samples", assignedTo: "Purchase Executive", tat: "3 days" },
-                { step: 8, label: "Inspect Sample", color: PURCHASE_FLOW_STEP_COLOR, description: "QC Manager inspects sample quality", assignedTo: "QC Manager", tat: "1 day" },
-                { step: 9, label: "Sort Vendors", color: PURCHASE_FLOW_STEP_COLOR, description: "Final vendor selection and ranking", assignedTo: "Purchase Executive", tat: "Same day" },
-                { step: 10, label: "Place PO", color: PURCHASE_FLOW_STEP_COLOR, description: "Issue purchase order to selected vendor", assignedTo: "Purchase Executive", tat: "Same day" },
-                { step: 11, label: "Follow-up Delivery", color: PURCHASE_FLOW_STEP_COLOR, description: "Track and follow-up material delivery", assignedTo: "Purchase Executive", tat: "As per PO" },
-                { step: 12, label: "Receive Material", color: PURCHASE_FLOW_STEP_COLOR, description: "Store Manager receives and inspects material", assignedTo: "Store Manager", tat: "1 day" },
-                { step: 13, label: "Material Approval", color: PURCHASE_FLOW_STEP_COLOR, description: "QC Manager approves received material", assignedTo: "QC Manager", tat: "Same day" },
-                { step: 14, label: "Rejection Decision", color: PURCHASE_FLOW_STEP_COLOR, description: "Purchase Executive decides on rejected material", assignedTo: "Purchase Executive", tat: "1 day" },
-                { step: 15, label: "Return Material", color: PURCHASE_FLOW_STEP_COLOR, description: "Store Manager returns rejected material", assignedTo: "Store Manager", tat: "1 day" },
-                { step: 16, label: "Resend Material", color: PURCHASE_FLOW_STEP_COLOR, description: "Purchase Executive arranges replacement", assignedTo: "Purchase Executive", tat: "3-5 days" },
-                { step: 17, label: "Generate GRN", color: PURCHASE_FLOW_STEP_COLOR, description: "Store Manager generates goods receipt note", assignedTo: "Store Manager", tat: "Same day" },
-                { step: 18, label: "Final GRN", color: PURCHASE_FLOW_STEP_COLOR, description: "Complete goods receipt documentation", assignedTo: "Store Manager", tat: "Same day" },
-                { step: 19, label: "Submit Invoice", color: PURCHASE_FLOW_STEP_COLOR, description: "Purchase Executive submits invoice to accounts", assignedTo: "Purchase Executive", tat: "1 day" },
-                { step: 20, label: "Schedule Payment", color: PURCHASE_FLOW_STEP_COLOR, description: "Accounts Executive schedules payment", assignedTo: "Accounts Executive", tat: "As per credit" },
-                { step: 21, label: "Release Payment", color: PURCHASE_FLOW_STEP_COLOR, description: "Accounts Executive approves and releases payment", assignedTo: "Accounts Executive", tat: "On/before due" },
+                { step: 1, label: "Raise Indent", color: theme.palette.success.main, description: "Store Manager raises purchase request", assignedTo: "Store Manager", tat: "Same day" },
+                { step: 2, label: "Approve Indent", color: theme.palette.success.main, description: "Process Coordinator reviews and approves", assignedTo: "Process Coordinator", tat: "Same day" },
+                { step: 3, label: "Float RFQ", color: theme.palette.success.main, description: "Purchase Executive sends quotation requests", assignedTo: "Purchase Executive", tat: "1 day" },
+                { step: 4, label: "Follow-up Quotations", color: theme.palette.success.main, description: "Follow-up with vendors for quotes", assignedTo: "Purchase Executive", tat: "2 days" },
+                { step: 5, label: "Comparative Statement", color: theme.palette.success.main, description: "Prepare vendor comparison analysis", assignedTo: "Purchase Executive", tat: "1 day" },
+                { step: 6, label: "Approve Quotation", color: theme.palette.success.main, description: "Management approves selected vendor", assignedTo: "Management / HOD", tat: "1 day" },
+                { step: 7, label: "Request Sample", color: theme.palette.success.main, description: "Request and follow-up for material samples", assignedTo: "Purchase Executive", tat: "3 days" },
+                { step: 8, label: "Inspect Sample", color: theme.palette.success.main, description: "QC Manager inspects sample quality", assignedTo: "QC Manager", tat: "1 day" },
+                { step: 9, label: "Sort Vendors", color: theme.palette.success.main, description: "Final vendor selection and ranking", assignedTo: "Purchase Executive", tat: "Same day" },
+                { step: 10, label: "Place PO", color: theme.palette.success.main, description: "Issue purchase order to selected vendor", assignedTo: "Purchase Executive", tat: "Same day" },
+                { step: 11, label: "Follow-up Delivery", color: theme.palette.success.main, description: "Track and follow-up material delivery", assignedTo: "Purchase Executive", tat: "As per PO" },
+                { step: 12, label: "Receive Material", color: theme.palette.success.main, description: "Store Manager receives and inspects material", assignedTo: "Store Manager", tat: "1 day" },
+                { step: 13, label: "Material Approval", color: theme.palette.success.main, description: "QC Manager approves received material", assignedTo: "QC Manager", tat: "Same day" },
+                { step: 14, label: "Rejection Decision", color: theme.palette.success.main, description: "Purchase Executive decides on rejected material", assignedTo: "Purchase Executive", tat: "1 day" },
+                { step: 15, label: "Return Material", color: theme.palette.success.main, description: "Store Manager returns rejected material", assignedTo: "Store Manager", tat: "1 day" },
+                { step: 16, label: "Resend Material", color: theme.palette.success.main, description: "Purchase Executive arranges replacement", assignedTo: "Purchase Executive", tat: "3-5 days" },
+                { step: 17, label: "Generate GRN", color: theme.palette.success.main, description: "Store Manager generates goods receipt note", assignedTo: "Store Manager", tat: "Same day" },
+                { step: 18, label: "Final GRN", color: theme.palette.success.main, description: "Complete goods receipt documentation", assignedTo: "Store Manager", tat: "Same day" },
+                { step: 19, label: "Submit Invoice", color: theme.palette.success.main, description: "Purchase Executive submits invoice to accounts", assignedTo: "Purchase Executive", tat: "1 day" },
+                { step: 20, label: "Schedule Payment", color: theme.palette.success.main, description: "Accounts Executive schedules payment", assignedTo: "Accounts Executive", tat: "As per credit" },
+                { step: 21, label: "Release Payment", color: theme.palette.success.main, description: "Accounts Executive approves and releases payment", assignedTo: "Accounts Executive", tat: "On/before due" },
               ].map((process, index) => (
                 <Stack key={index} direction="column" alignItems="center" spacing={2}>
                   <Box 
@@ -462,7 +461,7 @@ const PurchaseDashboard = () => {
                         display: "flex", 
                         alignItems: "center", 
                         justifyContent: "center",
-                        color: "white",
+                        color: "common.white",
                         boxShadow: `0 8px 32px ${alpha(process.color, 0.3)}`,
                         border: `3px solid ${alpha(process.color, 0.2)}`,
                         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -1196,17 +1195,17 @@ const PurchaseFlow = () => {
             <>
               {/* Section Header */}
               <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ 
-                  width: 48, 
-                  height: 48, 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, #4caf50, #388e3c)',
+                <Box sx={(theme) => ({
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
-                }}>
-                  <AssignmentIcon sx={{ color: 'white', fontSize: 24 }} />
+                })}>
+                  <AssignmentIcon sx={{ color: 'common.white', fontSize: 24 }} />
                 </Box>
                 <Box>
                   <Typography variant="h5" sx={{ 
@@ -1285,43 +1284,43 @@ const PurchaseFlow = () => {
                 }}>
                 <Table size="medium">
                   <TableHead>
-                    <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
+                    <TableRow sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                       '& th': {
                         borderBottom: 2, borderBottomColor: 'success.dark'
                       }
-                    }}>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                    })}>
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Indent No.</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Details</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Status</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Created At</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
@@ -1391,25 +1390,25 @@ const PurchaseFlow = () => {
                               </IconButton>
                             </TableCell>
                             <TableCell sx={{ borderBottom: '1px solid rgba(76, 175, 80, 0.1)' }}>
-                              <Chip 
-                                label={indent.Status} 
-                                color={getStatusColor(indent.Status)} 
+                              <Chip
+                                label={indent.Status}
+                                color={getStatusColor(indent.Status)}
                                 size="medium"
-                                sx={{ 
+                                sx={(theme) => ({
                                   fontWeight: 600,
                                   borderRadius: 2,
                                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                   background: `linear-gradient(135deg, ${
-                                    getStatusColor(indent.Status) === 'success' ? '#4caf50' :
-                                    getStatusColor(indent.Status) === 'warning' ? '#ff9800' :
-                                    getStatusColor(indent.Status) === 'error' ? '#f44336' : '#4caf50'
+                                    getStatusColor(indent.Status) === 'success' ? theme.palette.success.main :
+                                    getStatusColor(indent.Status) === 'warning' ? theme.palette.warning.main :
+                                    getStatusColor(indent.Status) === 'error' ? theme.palette.error.main : theme.palette.success.main
                                   }, ${
-                                    getStatusColor(indent.Status) === 'success' ? '#66bb6a' :
-                                    getStatusColor(indent.Status) === 'warning' ? '#ffb74d' :
-                                    getStatusColor(indent.Status) === 'error' ? '#ef5350' : '#66bb6a'
+                                    getStatusColor(indent.Status) === 'success' ? theme.palette.success.light :
+                                    getStatusColor(indent.Status) === 'warning' ? theme.palette.warning.light :
+                                    getStatusColor(indent.Status) === 'error' ? theme.palette.error.light : theme.palette.success.light
                                   })`,
-                                  color: 'white'
-                                }} 
+                                  color: 'common.white'
+                                })}
                               />
                             </TableCell>
                             <TableCell sx={{ 
@@ -1457,9 +1456,9 @@ const PurchaseFlow = () => {
                                       size="medium"
                                       disabled={!canTakeAction}
                                       onClick={() => handleTakeAction(indent)}
-                                      sx={{ 
-                                        background: canTakeAction ? 'linear-gradient(135deg, #4caf50, #388e3c)' : 'rgba(0,0,0,0.12)',
-                                        color: canTakeAction ? 'white' : 'rgba(0,0,0,0.38)',
+                                      sx={(theme) => ({
+                                        background: canTakeAction ? `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})` : 'rgba(0,0,0,0.12)',
+                                        color: canTakeAction ? 'common.white' : 'rgba(0,0,0,0.38)',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         borderRadius: 2,
@@ -1467,11 +1466,11 @@ const PurchaseFlow = () => {
                                         minWidth: 180,
                                         boxShadow: canTakeAction ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none',
                                         '&:hover': {
-                                          background: canTakeAction ? 'linear-gradient(135deg, #388e3c, #2e7d32)' : 'rgba(0,0,0,0.12)',
+                                          background: canTakeAction ? `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})` : 'rgba(0,0,0,0.12)',
                                           boxShadow: canTakeAction ? '0 6px 20px rgba(107, 114, 128, 0.4)' : 'none',
                                           transform: canTakeAction ? 'translateY(-1px)' : 'none'
                                         }
-                                      }}
+                                      })}
                                     >
                                       {getActionText(indent)}
                                     </Button>
@@ -1490,7 +1489,7 @@ const PurchaseFlow = () => {
                                 }}>
                                   <Typography variant="h6" sx={{ 
                                     mb: 3, 
-                                    color: 'black', 
+                                    color: 'text.primary',
                                     fontWeight: 600,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1549,16 +1548,16 @@ const PurchaseFlow = () => {
                                               {item.item}
                                             </TableCell>
                                             <TableCell>
-                                              <Chip 
-                                                label={item.quantity} 
-                                                size="small" 
-                                                sx={{ 
+                                              <Chip
+                                                label={item.quantity}
+                                                size="small"
+                                                sx={(theme) => ({
                                                   borderRadius: 2,
-                                                  background: 'linear-gradient(135deg, #4caf50, #388e3c)',
-                                                  color: 'white',
+                                                  background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+                                                  color: 'common.white',
                                                   fontWeight: 600,
                                                   boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
-                                                }}
+                                                })}
                                               />
                                             </TableCell>
                                             <TableCell>
@@ -1587,7 +1586,7 @@ const PurchaseFlow = () => {
                                   
                                   <Typography variant="h6" sx={{ 
                                     mb: 3, 
-                                    color: 'black', 
+                                    color: 'text.primary',
                                     fontWeight: 600,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1645,23 +1644,23 @@ const PurchaseFlow = () => {
                                                       <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary', flex: 1 }}>
                                                         {step.Action || step.action}
                                                       </Typography>
-                                                      <Chip 
-                                                        label={step.Status || step.status} 
+                                                      <Chip
+                                                        label={step.Status || step.status}
                                                         size="small"
-                                                        sx={{ 
+                                                        sx={(theme) => ({
                                                           borderRadius: 2,
                                                           background: `linear-gradient(135deg, ${
-                                                            (step.Status || step.status) === 'completed' ? '#4caf50' :
-                                                            (step.Status || step.status) === 'in_progress' ? '#ff9800' :
-                                                            (step.Status || step.status) === 'pending' ? '#4caf50' : '#9e9e9e'
+                                                            (step.Status || step.status) === 'completed' ? theme.palette.success.main :
+                                                            (step.Status || step.status) === 'in_progress' ? theme.palette.warning.main :
+                                                            (step.Status || step.status) === 'pending' ? theme.palette.success.main : theme.palette.text.disabled
                                                           }, ${
-                                                            (step.Status || step.status) === 'completed' ? '#66bb6a' :
-                                                            (step.Status || step.status) === 'in_progress' ? '#ffb74d' :
-                                                            (step.Status || step.status) === 'pending' ? '#66bb6a' : '#bdbdbd'
+                                                            (step.Status || step.status) === 'completed' ? theme.palette.success.light :
+                                                            (step.Status || step.status) === 'in_progress' ? theme.palette.warning.light :
+                                                            (step.Status || step.status) === 'pending' ? theme.palette.success.light : theme.palette.grey[400]
                                                           })`,
-                                                          color: 'white',
+                                                          color: 'common.white',
                                                           fontWeight: 600
-                                                        }}
+                                                        })}
                                                       />
                                                     </Box>
                                                   }
@@ -1851,7 +1850,7 @@ const PurchaseFlow = () => {
                         size="large"
                         showFirstButton
                         showLastButton
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiPaginationItem-root': {
                             borderRadius: 3,
                             fontWeight: 700,
@@ -1865,8 +1864,8 @@ const PurchaseFlow = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                              color: 'white',
+                              background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                              color: 'common.white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                               '&:hover': {
@@ -1875,7 +1874,7 @@ const PurchaseFlow = () => {
                               }
                             }
                           }
-                        }}
+                        })}
                       />
                     )}
                   </Box>
@@ -1951,43 +1950,43 @@ const PurchaseFlow = () => {
               }}>
                 <Table size="medium">
                   <TableHead>
-                    <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
+                    <TableRow sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                       '& th': {
                         borderBottom: 2, borderBottomColor: 'success.dark'
                       }
-                    }}>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                    })}>
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>PO ID</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Details</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Status</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
                       }}>Created At</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 700, 
-                        color: 'white',
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'common.white',
                         fontSize: '0.95rem',
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase'
@@ -2029,25 +2028,25 @@ const PurchaseFlow = () => {
                             </IconButton>
                           </TableCell>
                           <TableCell sx={{ borderBottom: '1px solid rgba(76, 175, 80, 0.1)' }}>
-                            <Chip 
-                              label={po.Status} 
-                              color={getStatusColor(po.Status)} 
+                            <Chip
+                              label={po.Status}
+                              color={getStatusColor(po.Status)}
                               size="medium"
-                              sx={{ 
+                              sx={(theme) => ({
                                 fontWeight: 600,
                                 borderRadius: 2,
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                 background: `linear-gradient(135deg, ${
-                                  getStatusColor(po.Status) === 'success' ? '#4caf50' :
-                                  getStatusColor(po.Status) === 'warning' ? '#ff9800' :
-                                  getStatusColor(po.Status) === 'error' ? '#f44336' : '#4caf50'
+                                  getStatusColor(po.Status) === 'success' ? theme.palette.success.main :
+                                  getStatusColor(po.Status) === 'warning' ? theme.palette.warning.main :
+                                  getStatusColor(po.Status) === 'error' ? theme.palette.error.main : theme.palette.success.main
                                 }, ${
-                                  getStatusColor(po.Status) === 'success' ? '#66bb6a' :
-                                  getStatusColor(po.Status) === 'warning' ? '#ffb74d' :
-                                  getStatusColor(po.Status) === 'error' ? '#ef5350' : '#66bb6a'
+                                  getStatusColor(po.Status) === 'success' ? theme.palette.success.light :
+                                  getStatusColor(po.Status) === 'warning' ? theme.palette.warning.light :
+                                  getStatusColor(po.Status) === 'error' ? theme.palette.error.light : theme.palette.success.light
                                 })`,
-                                color: 'white'
-                              }} 
+                                color: 'common.white'
+                              })}
                             />
                           </TableCell>
                           <TableCell sx={{ 
@@ -2096,9 +2095,9 @@ const PurchaseFlow = () => {
                                       size="medium"
                                       disabled={!canTakeAction}
                                       onClick={() => handlePOAction(po)}
-                                      sx={{ 
-                                        background: canTakeAction ? 'linear-gradient(135deg, #4caf50, #388e3c)' : 'rgba(0,0,0,0.12)',
-                                        color: canTakeAction ? 'white' : 'rgba(0,0,0,0.38)',
+                                      sx={(theme) => ({
+                                        background: canTakeAction ? `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})` : 'rgba(0,0,0,0.12)',
+                                        color: canTakeAction ? 'common.white' : 'rgba(0,0,0,0.38)',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         borderRadius: 2,
@@ -2106,11 +2105,11 @@ const PurchaseFlow = () => {
                                         minWidth: 180,
                                         boxShadow: canTakeAction ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none',
                                         '&:hover': {
-                                          background: canTakeAction ? 'linear-gradient(135deg, #388e3c, #2e7d32)' : 'rgba(0,0,0,0.12)',
+                                          background: canTakeAction ? `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})` : 'rgba(0,0,0,0.12)',
                                           boxShadow: canTakeAction ? '0 6px 20px rgba(107, 114, 128, 0.4)' : 'none',
                                           transform: canTakeAction ? 'translateY(-1px)' : 'none'
                                         }
-                                      }}
+                                      })}
                                     >
                                       {getPOActionText(po)}
                                     </Button>
@@ -2129,7 +2128,7 @@ const PurchaseFlow = () => {
                               }}>
                                 <Typography variant="h6" sx={{ 
                                   mb: 3, 
-                                  color: 'black', 
+                                  color: 'text.primary',
                                   fontWeight: 600,
                                   display: 'flex',
                                   alignItems: 'center',
@@ -2190,7 +2189,7 @@ const PurchaseFlow = () => {
                                 
                                 <Typography variant="h6" sx={{ 
                                   mb: 3, 
-                                  color: 'black', 
+                                  color: 'text.primary',
                                   fontWeight: 600,
                                   display: 'flex',
                                   alignItems: 'center',
@@ -2251,16 +2250,16 @@ const PurchaseFlow = () => {
                                             {item.itemName}
                                           </TableCell>
                                           <TableCell>
-                                            <Chip 
-                                              label={item.quantity} 
-                                              size="small" 
-                                              sx={{ 
+                                            <Chip
+                                              label={item.quantity}
+                                              size="small"
+                                              sx={(theme) => ({
                                                 borderRadius: 2,
-                                                background: 'linear-gradient(135deg, #4caf50, #388e3c)',
-                                                color: 'white',
+                                                background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+                                                color: 'common.white',
                                                 fontWeight: 600,
                                                 boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
-                                              }}
+                                              })}
                                             />
                                           </TableCell>
                                           <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
@@ -2295,7 +2294,7 @@ const PurchaseFlow = () => {
                                 
                                 <Typography variant="h6" sx={{ 
                                   mb: 3, 
-                                  color: 'black', 
+                                  color: 'text.primary',
                                   fontWeight: 600,
                                   display: 'flex',
                                   alignItems: 'center',
@@ -2417,7 +2416,7 @@ const PurchaseFlow = () => {
                         size="large"
                         showFirstButton
                         showLastButton
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiPaginationItem-root': {
                             borderRadius: 3,
                             fontWeight: 700,
@@ -2431,8 +2430,8 @@ const PurchaseFlow = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                              color: 'white',
+                              background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                              color: 'common.white',
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                               '&:hover': {
@@ -2441,7 +2440,7 @@ const PurchaseFlow = () => {
                               }
                             }
                           }
-                        }}
+                        })}
                       />
                     )}
                   </Box>

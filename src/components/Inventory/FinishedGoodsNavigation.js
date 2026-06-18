@@ -65,13 +65,13 @@ const FinishedGoodsNavigation = () => {
 
       {/* Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -84,7 +84,7 @@ const FinishedGoodsNavigation = () => {
                 <IconButton
                   onClick={() => navigate('/inventory')}
                   sx={{
-                    color: 'white',
+                    color: 'common.white',
                     bgcolor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
                       bgcolor: 'rgba(255,255,255,0.2)',
@@ -136,7 +136,7 @@ const FinishedGoodsNavigation = () => {
                 <IconButton
                   onClick={() => navigate('/inventory/stock-sheet/fg-material-inward')}
                   sx={{
-                    color: 'white',
+                    color: 'common.white',
                     bgcolor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
                       bgcolor: 'rgba(255,255,255,0.2)',

@@ -1,0 +1,51 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neutrals &amp; Surfaces</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin-top: 4px; margin-bottom: 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin: 0 0 10px; }
+  .scale { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-bottom: 22px; }
+  .g { border-radius: 6px; height: 56px; border: 1px solid #E2E8ED; display: flex; align-items: flex-end; padding: 6px; font-size: 10px; font-family: ui-monospace, monospace; }
+  .tokens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .token { border: 1px solid #E2E8ED; border-radius: 8px; overflow: hidden; background: #fff; }
+  .token .bar { height: 44px; }
+  .token .meta { padding: 8px 10px; font-size: 12px; }
+  .token .meta b { display: block; }
+  .token .meta span { color: #81898F; font-family: ui-monospace, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+  <h1>Neutrals &amp; Surfaces</h1>
+  <div class="sub">Slate-based grey ramp (50→900) plus the core surface and text tokens.</div>
+
+  <div class="label">Grey scale</div>
+  <div class="scale">
+    <div class="g" style="background:#F8FAFC">50</div>
+    <div class="g" style="background:#F1F5F9">100</div>
+    <div class="g" style="background:#E2E8F0">200</div>
+    <div class="g" style="background:#CBD5E1">300</div>
+    <div class="g" style="background:#94A3B8;color:#fff">400</div>
+    <div class="g" style="background:#64748B;color:#fff">500</div>
+    <div class="g" style="background:#475569;color:#fff">600</div>
+    <div class="g" style="background:#334155;color:#fff">700</div>
+    <div class="g" style="background:#1E293B;color:#fff">800</div>
+    <div class="g" style="background:#0F172A;color:#fff">900</div>
+  </div>
+
+  <div class="label">Surfaces &amp; text</div>
+  <div class="tokens">
+    <div class="token"><div class="bar" style="background:#F2F5F7"></div><div class="meta"><b>background.default</b><span>#F2F5F7</span></div></div>
+    <div class="token"><div class="bar" style="background:#FFFFFF;border-bottom:1px solid #E2E8ED"></div><div class="meta"><b>background.paper</b><span>#FFFFFF</span></div></div>
+    <div class="token"><div class="bar" style="background:#2D3D4C"></div><div class="meta"><b>text.primary</b><span>#2D3D4C</span></div></div>
+    <div class="token"><div class="bar" style="background:#81898F"></div><div class="meta"><b>text.secondary</b><span>#81898F</span></div></div>
+  </div>
+</body>
+</html>

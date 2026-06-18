@@ -1,0 +1,47 @@
+<!-- @dsCard group="Foundations · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Semantic Colors · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .col .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #A9B2BA; margin-bottom: 10px; }
+  .chip-main { border-radius: 8px; height: 64px; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; color: #0B1A24; box-shadow: 0 2px 8px rgba(0,0,0,0.35); font-weight: 600; }
+  .chip-main .hex { font-size: 11px; font-family: ui-monospace, monospace; opacity: 0.9; }
+  .chip-soft { border-radius: 8px; height: 40px; margin-top: 8px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <h1>Semantic Colors · Dark</h1>
+  <div class="sub">Brightened mains for legibility on dark; soft tints become low-alpha overlays.</div>
+  <div class="grid">
+    <div class="col">
+      <div class="label">Success</div>
+      <div class="chip-main" style="background:#34D399"><span>main</span><span class="hex">#34D399</span></div>
+      <div class="chip-soft" style="background:rgba(16,185,129,0.2);color:#6EE7B7">soft · 20%</div>
+    </div>
+    <div class="col">
+      <div class="label">Error</div>
+      <div class="chip-main" style="background:#E05548;color:#fff"><span>main</span><span class="hex">#E05548</span></div>
+      <div class="chip-soft" style="background:rgba(224,85,72,0.2);color:#EC7468">soft · 20%</div>
+    </div>
+    <div class="col">
+      <div class="label">Warning</div>
+      <div class="chip-main" style="background:#FBBF24"><span>main</span><span class="hex">#FBBF24</span></div>
+      <div class="chip-soft" style="background:rgba(251,191,36,0.2);color:#FCD34D">soft · 20%</div>
+    </div>
+    <div class="col">
+      <div class="label">Info</div>
+      <div class="chip-main" style="background:#45ADE6"><span>main</span><span class="hex">#45ADE6</span></div>
+      <div class="chip-soft" style="background:rgba(69,173,230,0.18);color:#84D2FC">soft · 18%</div>
+    </div>
+  </div>
+</body>
+</html>

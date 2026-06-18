@@ -536,7 +536,7 @@ const AdvancedEmployeeDashboard = () => {
           sx={{
             p: { xs: 2.5, sm: 3.5 },
             borderRadius: 3,
-            color: '#fff',
+            color: 'common.white',
             position: 'relative',
             overflow: 'hidden',
             background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 135%)`,
@@ -565,12 +565,12 @@ const AdvancedEmployeeDashboard = () => {
                   <Chip
                     icon={<WorkIcon sx={{ color: 'inherit !important' }} />}
                     label={selectedEmployee?.Department || rbacEmployee?.department || 'N/A'}
-                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'common.white', fontWeight: 600 }}
                   />
                   <Chip
                     icon={<PersonIcon sx={{ color: 'inherit !important' }} />}
                     label={selectedEmployee?.Designation || role?.role_name || 'N/A'}
-                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'common.white', fontWeight: 600 }}
                   />
                 </Stack>
               )}
@@ -582,14 +582,14 @@ const AdvancedEmployeeDashboard = () => {
                 startIcon={<AddIcon />}
                 onClick={handleAddEmployee}
                 sx={{
-                  bgcolor: '#fff',
+                  bgcolor: 'background.paper',
                   color: 'primary.main',
                   fontWeight: 700,
                   borderRadius: 2,
                   px: 3,
                   whiteSpace: 'nowrap',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
-                  '&:hover': { bgcolor: '#fff', transform: 'translateY(-2px)', boxShadow: '0 10px 26px rgba(0,0,0,0.24)' },
+                  '&:hover': { bgcolor: 'background.paper', transform: 'translateY(-2px)', boxShadow: '0 10px 26px rgba(0,0,0,0.24)' },
                   transition: 'all 0.25s ease',
                 }}
               >
@@ -605,10 +605,10 @@ const AdvancedEmployeeDashboard = () => {
         const stats = getWorkforceStats();
         const dist = getDepartmentDistribution();
         const statCards = [
-          { label: 'Total Employees', value: stats.total, icon: GroupIcon, accent: '#45ADE6' },
-          { label: 'Active', value: stats.active, icon: PersonIcon, accent: '#059669' },
-          { label: 'Departments', value: stats.departments, icon: WorkIcon, accent: '#1E7DBE' },
-          { label: 'Full-time', value: stats.fullTime, icon: StarIcon, accent: '#7C3AED' },
+          { label: 'Total Employees', value: stats.total, icon: GroupIcon, accent: theme.palette.primary.main },
+          { label: 'Active', value: stats.active, icon: PersonIcon, accent: theme.palette.success.main },
+          { label: 'Departments', value: stats.departments, icon: WorkIcon, accent: theme.palette.primary.dark },
+          { label: 'Full-time', value: stats.fullTime, icon: StarIcon, accent: DEPT_COLORS[3] },
         ];
         return (
           <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr', lg: '1.6fr 1fr' } }}>
@@ -627,7 +627,7 @@ const AdvancedEmployeeDashboard = () => {
                             {s.value}
                           </Typography>
                         </Box>
-                        <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${s.accent}1a`, color: s.accent, display: 'flex' }}>
+                        <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(s.accent, 0.1), color: s.accent, display: 'flex' }}>
                           <Icon />
                         </Box>
                       </Stack>
@@ -918,7 +918,7 @@ const AdvancedEmployeeDashboard = () => {
                       bgcolor: 'primary.main',
                       fontSize: '2rem',
                       border: 4,
-                      borderColor: 'white',
+                      borderColor: 'common.white',
                       boxShadow: theme.shadows[4]
                     }}
                   >
@@ -953,20 +953,20 @@ const AdvancedEmployeeDashboard = () => {
                   <IconButton
                     onClick={handleRefresh}
                     disabled={refreshing}
-                    sx={{ 
-                      bgcolor: 'white',
+                    sx={{
+                      bgcolor: 'background.paper',
                       boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha('#fff', 0.9) }
+                      '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
                     }}
                   >
                     <RefreshIcon />
                   </IconButton>
                   <IconButton
                     onClick={() => alert('Settings coming soon!')}
-                    sx={{ 
-                      bgcolor: 'white',
+                    sx={{
+                      bgcolor: 'background.paper',
                       boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha('#fff', 0.9) }
+                      '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
                     }}
                   >
                     <SettingsIcon />

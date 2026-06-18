@@ -30,6 +30,7 @@ import {
   DateRange as DateRangeIcon,
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -37,6 +38,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 const localizer = momentLocalizer(moment);
 
 const AttendanceTab = ({ employeeCode, attendance }) => {
+  const theme = useTheme();
   const [viewMode, setViewMode] = useState('table');
   const [timeRange, setTimeRange] = useState('month');
   const [page, setPage] = useState(0);
@@ -115,22 +117,22 @@ const AttendanceTab = ({ employeeCode, attendance }) => {
 
   const eventStyleGetter = (event) => {
     const status = event.resource.Status?.toLowerCase();
-    let backgroundColor = '#3174ad';
-    
+    let backgroundColor = theme.palette.primary.main;
+
     switch (status) {
       case 'present':
       case 'clocked in':
       case 'clocked out':
-        backgroundColor = '#4caf50';
+        backgroundColor = theme.palette.success.main;
         break;
       case 'absent':
-        backgroundColor = '#f44336';
+        backgroundColor = theme.palette.error.main;
         break;
       case 'late':
-        backgroundColor = '#ff9800';
+        backgroundColor = theme.palette.warning.main;
         break;
       case 'half day':
-        backgroundColor = '#45ADE6';
+        backgroundColor = theme.palette.primary.main;
         break;
     }
 
@@ -139,7 +141,7 @@ const AttendanceTab = ({ employeeCode, attendance }) => {
         backgroundColor,
         borderRadius: '5px',
         opacity: 0.8,
-        color: 'white',
+        color: theme.palette.common.white,
         border: '0px',
         display: 'block'
       }
@@ -462,7 +464,7 @@ const AttendanceTab = ({ employeeCode, attendance }) => {
                 components={{
                   event: ({ event }) => (
                     <Box sx={{ p: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: 'white', fontWeight: 500 }}>
+                      <Typography variant="caption" sx={{ color: 'common.white', fontWeight: 500 }}>
                         {event.title}
                       </Typography>
                     </Box>

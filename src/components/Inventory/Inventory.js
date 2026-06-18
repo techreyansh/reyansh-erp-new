@@ -96,14 +96,14 @@ const Inventory = () => {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Fade in timeout={800}>
-          <Card 
-            sx={{ 
-              p: 6, 
+          <Card
+            sx={(theme) => ({
+              p: 6,
               textAlign: 'center',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.warning.main} 100%)`,
+              color: theme.palette.common.white,
               boxShadow: 6
-            }}
+            })}
           >
             <Avatar 
               sx={{ 
@@ -172,7 +172,7 @@ const Inventory = () => {
                   onChange={handleFGTabChange}
                   variant={isMobile ? "scrollable" : "fullWidth"}
                   scrollButtons="auto"
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiTab-root': {
                       minHeight: 64,
                       textTransform: 'none',
@@ -181,9 +181,9 @@ const Inventory = () => {
                     },
                     '& .MuiTabs-indicator': {
                       height: 3,
-                      background: 'linear-gradient(45deg, #9c27b0, #e1bee7)'
+                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`
                     }
-                  }}
+                  })}
                 >
                   {fgTabs.map((tab, index) => (
                     <Tab
@@ -219,13 +219,13 @@ const Inventory = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Enhanced Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -274,15 +274,15 @@ const Inventory = () => {
                     icon={<AdminIcon />}
                     label={userRole}
                     variant="outlined"
-                    sx={{ 
-                      color: 'white', 
+                    sx={{
+                      color: 'common.white',
                       borderColor: 'rgba(255,255,255,0.5)',
-                      '& .MuiChip-icon': { color: 'white' }
+                      '& .MuiChip-icon': { color: 'common.white' }
                     }}
                   />
                 </Tooltip>
                 <Tooltip title="System Status">
-                  <IconButton sx={{ color: 'white' }}>
+                  <IconButton sx={{ color: 'common.white' }}>
                     <Badge badgeContent={6} color="error">
                       <AnalyticsIcon />
                     </Badge>
@@ -312,7 +312,7 @@ const Inventory = () => {
               onChange={handleTabChange}
               variant={isMobile ? "scrollable" : "fullWidth"}
               scrollButtons="auto"
-              sx={{
+              sx={(theme) => ({
                 px: 3,
                 '& .MuiTab-root': {
                   minHeight: 72,
@@ -323,9 +323,9 @@ const Inventory = () => {
                 },
                 '& .MuiTabs-indicator': {
                   height: 4,
-                  background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)'
+                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
                 }
-              }}
+              })}
             >
               {mainTabs.map((tab, index) => (
                 <Tab
@@ -354,10 +354,10 @@ const Inventory = () => {
         <Fade in timeout={1000}>
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {[
-              { label: "Total Stock Items", value: "1,247", icon: <StorageIcon />, color: "#45ADE6" },
-              { label: "Critical Stock", value: "23", icon: <TrendingUpIcon />, color: "#f44336" },
-              { label: "Inward Today", value: "45", icon: <InwardIcon />, color: "#4caf50" },
-              { label: "Outward Today", value: "38", icon: <OutwardIcon />, color: "#ff9800" }
+              { label: "Total Stock Items", value: "1,247", icon: <StorageIcon />, color: theme.palette.primary.main },
+              { label: "Critical Stock", value: "23", icon: <TrendingUpIcon />, color: theme.palette.error.main },
+              { label: "Inward Today", value: "45", icon: <InwardIcon />, color: theme.palette.success.main },
+              { label: "Outward Today", value: "38", icon: <OutwardIcon />, color: theme.palette.warning.main }
             ].map((stat, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <Card 

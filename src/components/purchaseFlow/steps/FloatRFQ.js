@@ -227,11 +227,11 @@ const FloatRFQ = () => {
   );
 
   return (
-    <Box sx={{
+    <Box sx={(theme) => ({
       p: 3,
-      background: `linear-gradient(135deg, #f1f8f4 0%, #e8f5e9 50%, #c8e6c9 100%)`,
+      background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.04)} 0%, ${theme.palette.success.lighter} 50%, ${alpha(theme.palette.success.main, 0.2)} 100%)`,
       minHeight: '100vh',
-    }}>
+    })}>
       <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.success.main, mb: 4, textAlign: 'center', letterSpacing: '-0.5px' }}>
         Float RFQ - Indents Ready for RFQ
       </Typography>

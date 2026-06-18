@@ -1013,18 +1013,18 @@ const StockManagement = () => {
           body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            color: #333;
+            color: ${theme.palette.text.primary};
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid #45ADE6;
+            border-bottom: 2px solid ${theme.palette.primary.main};
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #45ADE6;
+            color: ${theme.palette.primary.main};
             margin-bottom: 10px;
           }
           .report-title {
@@ -1043,14 +1043,14 @@ const StockManagement = () => {
             margin-bottom: 30px;
           }
           .detail-section {
-            background-color: #f8f9fa;
+            background-color: ${theme.palette.grey[100]};
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #45ADE6;
+            border-left: 4px solid ${theme.palette.primary.main};
           }
           .detail-section h3 {
             margin: 0 0 15px 0;
-            color: #45ADE6;
+            color: ${theme.palette.primary.main};
             font-size: 16px;
           }
           .detail-row {
@@ -1065,7 +1065,7 @@ const StockManagement = () => {
             color: #555;
           }
           .detail-value {
-            color: #333;
+            color: ${theme.palette.text.primary};
           }
           .status-badge {
             display: inline-block;
@@ -1153,7 +1153,7 @@ const StockManagement = () => {
         ${item["item specifications"] ? `
           <div class="detail-section" style="grid-column: 1 / -1;">
             <h3>Item Specifications</h3>
-            <div style="padding: 10px; background-color: #f8f9fa; border-radius: 4px; white-space: pre-wrap;">
+            <div style="padding: 10px; background-color: ${theme.palette.grey[100]}; border-radius: 4px; white-space: pre-wrap;">
               ${item["item specifications"]}
             </div>
           </div>
@@ -1495,12 +1495,12 @@ const StockManagement = () => {
             <Typography 
               variant="h4" 
               component="h1" 
-          sx={{
+          sx={(theme) => ({
                 fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #45ADE6, #90caf9)',
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-              }}
+              })}
             >
               Stock Management
             </Typography>
@@ -1591,12 +1591,12 @@ const StockManagement = () => {
                   onClick={handleOpenDialog}
                   startIcon={<AddIcon />}
                   size="large"
-          sx={{
-                    background: 'linear-gradient(45deg, #45ADE6, #90caf9)',
+          sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #1E7DBE, #45ADE6)',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     }
-                  }}
+                  })}
                 >
                   Add New Item
                 </Button>
@@ -1606,12 +1606,12 @@ const StockManagement = () => {
                   onClick={() => navigate('/inventory/stock-sheet/material-inward')}
                   startIcon={<AddIcon />}
                   size="large"
-                  sx={{
-                    background: 'linear-gradient(45deg, #4caf50, #81c784)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #388e3c, #4caf50)',
+                      background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                     }
-                  }}
+                  })}
                 >
                   Material Inward
                 </Button>
@@ -1621,12 +1621,12 @@ const StockManagement = () => {
                   onClick={() => navigate('/inventory/stock-sheet/material-outward')}
                   startIcon={<RemoveIcon />}
                   size="large"
-                  sx={{
-                    background: 'linear-gradient(45deg, #f44336, #ef5350)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #d32f2f, #f44336)',
+                      background: `linear-gradient(45deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                     }
-                  }}
+                  })}
                 >
                   Material Issue
                 </Button>
@@ -1776,7 +1776,7 @@ const StockManagement = () => {
               justifyContent: 'space-between',
               boxShadow: 2
             }}>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'white' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'common.white' }}>
                 {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
               </Typography>
               <Stack direction="row" spacing={2}>
@@ -1784,10 +1784,10 @@ const StockManagement = () => {
                   variant="outlined"
                   onClick={() => setSelectedItems([])}
                   sx={{ 
-                    color: 'white', 
-                    borderColor: 'white',
+                    color: 'common.white', 
+                    borderColor: 'common.white',
                     '&:hover': { 
-                      borderColor: 'white', 
+                      borderColor: 'common.white', 
                       bgcolor: 'rgba(255, 255, 255, 0.1)' 
                     }
                   }}
@@ -1799,7 +1799,7 @@ const StockManagement = () => {
                   startIcon={<ShoppingCartIcon />}
                   onClick={handleBulkRaiseIndent}
                   sx={{ 
-                    bgcolor: 'white', 
+                    bgcolor: 'common.white', 
                     color: 'primary.main',
                     '&:hover': { 
                       bgcolor: 'rgba(255, 255, 255, 0.9)' 
@@ -1820,7 +1820,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     <Checkbox
@@ -1828,9 +1828,9 @@ const StockManagement = () => {
                       checked={isAllSelected}
                       onChange={handleSelectAll}
                       sx={{ 
-                        color: 'white',
-                        '&.Mui-checked': { color: 'white' },
-                        '&.MuiCheckbox-indeterminate': { color: 'white' }
+                        color: 'common.white',
+                        '&.Mui-checked': { color: 'common.white' },
+                        '&.MuiCheckbox-indeterminate': { color: 'common.white' }
                       }}
                     />
                   </TableCell>
@@ -1838,7 +1838,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     <TableSortLabel
@@ -1854,7 +1854,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                       <TableSortLabel
@@ -1870,7 +1870,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     Status
@@ -1879,7 +1879,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     Location & Unit
@@ -1888,7 +1888,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     Last Updated
@@ -1897,7 +1897,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     Vendor Info
@@ -1906,7 +1906,7 @@ const StockManagement = () => {
                     fontWeight: 'bold', 
                     textTransform: 'uppercase',
                     bgcolor: 'primary.main',
-                    color: 'white',
+                    color: 'common.white',
                     fontSize: '0.75rem'
                   }}>
                     Actions
@@ -2047,10 +2047,10 @@ const StockManagement = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleRaiseIndent(item)}
-                                  sx={{ 
-                                    color: '#ff9800',
-                                    '&:hover': { 
-                                      backgroundColor: 'rgba(255, 152, 0, 0.1)' 
+                                  sx={{
+                                    color: 'warning.main',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(255, 152, 0, 0.1)'
                                     }
                                   }}
                                 >
@@ -2109,10 +2109,10 @@ const StockManagement = () => {
                             }));
                             navigate('/inventory/stock-sheet/material-inward');
                           }}
-                          sx={{ 
-                            color: '#4caf50',
-                            '&:hover': { 
-                              backgroundColor: 'rgba(76, 175, 80, 0.1)' 
+                          sx={{
+                            color: 'success.main',
+                            '&:hover': {
+                              backgroundColor: 'rgba(76, 175, 80, 0.1)'
                             }
                           }}
                         >
@@ -2133,10 +2133,10 @@ const StockManagement = () => {
                             }));
                             navigate('/inventory/stock-sheet/material-outward');
                           }}
-                          sx={{ 
-                            color: '#f44336',
-                            '&:hover': { 
-                              backgroundColor: 'rgba(244, 67, 54, 0.1)' 
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'rgba(244, 67, 54, 0.1)'
                             }
                           }}
                         >
@@ -2251,7 +2251,7 @@ const StockManagement = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#00bcd4',
+              color: 'primary.main',
               '&:hover': {
                 backgroundColor: 'rgba(0, 188, 212, 0.1)'
               }
@@ -2261,15 +2261,15 @@ const StockManagement = () => {
           </IconButton>
           <Typography 
             variant="h4" 
-            sx={{ 
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
             {selectedItem ? "Edit Inventory Item" : "Add New Inventory Item"}
           </Typography>
@@ -2305,19 +2305,19 @@ const StockManagement = () => {
                   helperText={!selectedItem ? "Code will be auto-generated" : "Code cannot be changed"}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2341,19 +2341,19 @@ const StockManagement = () => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2392,19 +2392,19 @@ const StockManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#00bcd4'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -2444,19 +2444,19 @@ const StockManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#00bcd4'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -2496,19 +2496,19 @@ const StockManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#00bcd4'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -2558,19 +2558,19 @@ const StockManagement = () => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#00bcd4'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#00bcd4'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -2598,7 +2598,7 @@ const StockManagement = () => {
               <Box sx={{ flex: '1 1 100%', minWidth: '100%' }}>
                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                   <VendorIcon color="primary" />
-                  <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 'bold' }}>
+                  <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                     Vendor Management
                   </Typography>
                   <Button
@@ -2613,7 +2613,7 @@ const StockManagement = () => {
                 </Stack>
                 
                 {formData.vendorDetails.length === 0 && (
-                  <Card sx={{ p: 3, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+                  <Card sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.100' }}>
                     <Typography variant="body2" color="text.secondary">
                       No vendors assigned. Click "Add Vendor" to add vendors for this item.
                     </Typography>
@@ -2621,7 +2621,7 @@ const StockManagement = () => {
                 )}
                 
                 {formData.vendorDetails.map((vendor, index) => (
-                  <Card key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0' }}>
+                  <Card key={index} sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'grey.100' }}>
                     <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
                         Vendor {index + 1}
@@ -2760,19 +2760,19 @@ const StockManagement = () => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2796,19 +2796,19 @@ const StockManagement = () => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2830,19 +2830,19 @@ const StockManagement = () => {
                   variant="standard"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2864,19 +2864,19 @@ const StockManagement = () => {
                   placeholder=""
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: 'primary.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#00bcd4'
+                        color: 'primary.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2900,19 +2900,19 @@ const StockManagement = () => {
                 variant="standard"
                 sx={{
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: 'grey.100'
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: 'primary.main'
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: 'primary.main'
                   },
                   '& .MuiFormLabel-root': {
                     fontSize: '14px',
-                    color: '#666',
+                    color: 'text.secondary',
                     '&.Mui-focused': {
-                      color: '#00bcd4'
+                      color: 'primary.main'
                     }
                   },
                   '& .MuiInputBase-input': {
@@ -2932,15 +2932,16 @@ const StockManagement = () => {
             startIcon={<CancelIcon />}
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: '1px solid',
+              borderColor: 'grey.100',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#00bcd4'
+                borderColor: 'primary.main'
               }
             }}
           >
@@ -2951,16 +2952,16 @@ const StockManagement = () => {
             variant="contained"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+              color: 'common.white',
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.dark})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -2969,7 +2970,7 @@ const StockManagement = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             {selectedItem ? "Update Item" : loading ? "Saving..." : "Create Item"}
           </Button>
@@ -3155,17 +3156,17 @@ const StockManagement = () => {
           >
             <Stack direction="row" alignItems="center" spacing={2} sx={{ flexGrow: 1 }}>
               <Avatar sx={{ 
-                bgcolor: '#45ADE6', 
+                bgcolor: 'primary.main', 
                 width: { xs: 40, md: 48 }, 
                 height: { xs: 40, md: 48 },
                 boxShadow: 2
               }}>
-                <ViewIcon sx={{ color: 'white' }} />
+                <ViewIcon sx={{ color: 'common.white' }} />
               </Avatar>
               <Box>
                 <Typography variant="h6" sx={{ 
                   fontWeight: 700, 
-                  color: '#45ADE6',
+                  color: 'primary.main',
                   fontSize: { xs: '1.1rem', md: '1.25rem' },
                   fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                 }}>
@@ -3188,15 +3189,15 @@ const StockManagement = () => {
           {selectedItemDetails && (
             <Box>
               {/* Company Header */}
-              <Card sx={{ 
-                background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)', 
-                color: 'white', 
-                p: { xs: 2, md: 3 }, 
+              <Card sx={(theme) => ({
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                color: 'common.white',
+                p: { xs: 2, md: 3 },
                 textAlign: 'center',
                 borderRadius: 3,
                 boxShadow: 4,
                 mb: 3
-              }}>
+              })}>
                 <Typography variant="h5" sx={{ 
                   fontWeight: 700, 
                   mb: 1, 
@@ -3242,10 +3243,10 @@ const StockManagement = () => {
                     }
                   }}>
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                      <AssignmentIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
+                      <AssignmentIcon sx={{ color: 'primary.main', fontSize: 24 }} />
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600, 
-                        color: '#45ADE6',
+                        color: 'primary.main',
                         fontSize: '1.1rem'
                       }}>
                         Item Information
@@ -3254,67 +3255,67 @@ const StockManagement = () => {
                     <Stack spacing={2.5}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏷️</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>🏷️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Item Code:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.itemCode || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📦</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📦</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Item Name:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.itemName || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏷️</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>🏷️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Category:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.category || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏭</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>🏭</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Make:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.make || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>⚖️</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>⚖️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Unit:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.unit || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📍</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📍</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Location:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.location || 'N/A'}
                         </Typography>
                       </Box>
@@ -3337,10 +3338,10 @@ const StockManagement = () => {
                     }
                   }}>
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                      <StorageIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
+                      <StorageIcon sx={{ color: 'primary.main', fontSize: 24 }} />
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600, 
-                        color: '#45ADE6',
+                        color: 'primary.main',
                         fontSize: '1.1rem'
                       }}>
                         Stock Levels
@@ -3349,7 +3350,7 @@ const StockManagement = () => {
                     <Stack spacing={2.5}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📊</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📊</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Current Stock:
                           </Typography>
@@ -3357,7 +3358,7 @@ const StockManagement = () => {
                         <Stack direction="row" alignItems="center" spacing={1}>
                           <Typography variant="h6" sx={{ 
                             fontWeight: 700, 
-                            color: '#45ADE6',
+                            color: 'primary.main',
                             fontSize: '1.3rem'
                           }}>
                             {selectedItemDetails.currentStock || '0'}
@@ -3367,7 +3368,7 @@ const StockManagement = () => {
                               width: 8, 
                               height: 8, 
                               borderRadius: '50%', 
-                              bgcolor: '#4caf50',
+                              bgcolor: 'success.main',
                               boxShadow: '0 0 6px rgba(76, 175, 80, 0.5)'
                             }} />
                           ) : (
@@ -3375,7 +3376,7 @@ const StockManagement = () => {
                               width: 8, 
                               height: 8, 
                               borderRadius: '50%', 
-                              bgcolor: '#f44336',
+                              bgcolor: 'error.main',
                               boxShadow: '0 0 6px rgba(244, 67, 54, 0.5)'
                             }} />
                           )}
@@ -3383,49 +3384,49 @@ const StockManagement = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📉</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📉</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Minimum Level:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.minLevel || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📈</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📈</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Maximum Level:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.maxLevel || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>⚠️</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>⚠️</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Reorder Point:
                           </Typography>
                         </Stack>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {selectedItemDetails.reorderPoint || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>✅</Typography>
+                          <Typography sx={{ color: 'primary.main', fontSize: 16 }}>✅</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                             Status:
                           </Typography>
                         </Stack>
                         <Stack direction="row" alignItems="center" spacing={1}>
                           {selectedItemDetails.currentStock > (selectedItemDetails.minLevel || 0) ? (
-                            <CheckIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                            <CheckIcon sx={{ color: 'success.main', fontSize: 20 }} />
                           ) : (
-                            <ErrorIcon sx={{ color: '#f44336', fontSize: 20 }} />
+                            <ErrorIcon sx={{ color: 'error.main', fontSize: 20 }} />
                           )}
                           <Chip 
                             label={getStockStatus(selectedItemDetails).label} 
@@ -3433,15 +3434,15 @@ const StockManagement = () => {
                             size="small"
                             sx={{
                               fontWeight: 600,
-                              color: 'white',
+                              color: 'common.white',
                               '&.MuiChip-colorSuccess': {
-                                bgcolor: '#4caf50'
+                                bgcolor: 'success.main'
                               },
                               '&.MuiChip-colorError': {
-                                bgcolor: '#f44336'
+                                bgcolor: 'error.main'
                               },
                               '&.MuiChip-colorWarning': {
-                                bgcolor: '#ff9800'
+                                bgcolor: 'warning.main'
                               }
                             }}
                           />
@@ -3469,10 +3470,10 @@ const StockManagement = () => {
                           }
                         }}>
                           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                            <VendorIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
+                            <VendorIcon sx={{ color: 'primary.main', fontSize: 24 }} />
                             <Typography variant="h6" sx={{ 
                               fontWeight: 600, 
-                              color: '#45ADE6',
+                              color: 'primary.main',
                               fontSize: '1.1rem'
                             }}>
                               Vendor Information
@@ -3482,12 +3483,12 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>🏢</Typography>
+                                  <Typography sx={{ color: 'primary.main', fontSize: 16 }}>🏢</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Vendor Code:
                                   </Typography>
                                 </Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                   {vendorData.vendorCode || 'N/A'}
                                 </Typography>
                               </Box>
@@ -3495,12 +3496,12 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>👤</Typography>
+                                  <Typography sx={{ color: 'primary.main', fontSize: 16 }}>👤</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Vendor Name:
                                   </Typography>
                                 </Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                   {vendorData.vendorName || 'N/A'}
                                 </Typography>
                               </Box>
@@ -3508,12 +3509,12 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📞</Typography>
+                                  <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📞</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Contact Person:
                                   </Typography>
                                 </Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                   {vendorData.vendorContact || 'N/A'}
                                 </Typography>
                               </Box>
@@ -3521,12 +3522,12 @@ const StockManagement = () => {
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography sx={{ color: '#45ADE6', fontSize: 16 }}>📧</Typography>
+                                  <Typography sx={{ color: 'primary.main', fontSize: 16 }}>📧</Typography>
                                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
                                     Email:
                                   </Typography>
                                 </Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#333' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                   {vendorData.vendorEmail || 'N/A'}
                                 </Typography>
                               </Box>
@@ -3554,10 +3555,10 @@ const StockManagement = () => {
                       }
                     }}>
                       <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                        <InfoIcon sx={{ color: '#45ADE6', fontSize: 24 }} />
+                        <InfoIcon sx={{ color: 'primary.main', fontSize: 24 }} />
                         <Typography variant="h6" sx={{ 
                           fontWeight: 600, 
-                          color: '#45ADE6',
+                          color: 'primary.main',
                           fontSize: '1.1rem'
                         }}>
                           Item Specifications
@@ -3603,16 +3604,17 @@ const StockManagement = () => {
             startIcon={<CloseIcon />}
             size={isMobile ? "medium" : "large"}
             sx={{
-              border: '2px solid #e0e0e0',
-              color: '#666',
+              border: '2px solid',
+              borderColor: 'grey.100',
+              color: 'text.secondary',
               borderRadius: 2,
               px: { xs: 2, md: 3 },
               py: 1,
               fontWeight: 600,
               '&:hover': {
-                borderColor: '#45ADE6',
+                borderColor: 'primary.main',
                 backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                color: '#45ADE6'
+                color: 'primary.main'
               }
             }}
           >
@@ -3624,15 +3626,15 @@ const StockManagement = () => {
             startIcon={<PrintIcon />}
             size={isMobile ? "medium" : "large"}
             sx={{ 
-              bgcolor: '#45ADE6',
-              color: 'white',
+              bgcolor: 'primary.main',
+              color: 'common.white',
               borderRadius: 2,
               px: { xs: 2, md: 3 },
               py: 1,
               fontWeight: 600,
               boxShadow: 2,
               '&:hover': { 
-                bgcolor: '#1E7DBE',
+                bgcolor: 'primary.dark',
                 transform: 'translateY(-1px)',
                 boxShadow: 4
               }
@@ -3651,14 +3653,14 @@ const StockManagement = () => {
         fullWidth
         fullScreen={isMobile}
       >
-        <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
-          color: 'white',
+        <DialogTitle sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+          color: 'common.white',
           display: 'flex',
           alignItems: 'center',
           gap: 2,
           py: 3
-        }}>
+        })}>
           <QuickAddIcon sx={{ fontSize: 28 }} />
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
@@ -3675,11 +3677,11 @@ const StockManagement = () => {
             <Grid container spacing={3}>
               {/* New Item Form - Full Width */}
               <Grid item xs={12}>
-                <Card sx={{ height: '100%', border: '2px solid #4caf50' }}>
+                <Card sx={{ height: '100%', border: '2px solid', borderColor: 'success.main' }}>
                   <CardContent>
                     <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
                       <QuickAddIcon color="success" />
-                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main' }}>
                         New Item Details
                       </Typography>
                     </Stack>
@@ -3815,7 +3817,7 @@ const StockManagement = () => {
                         <Box sx={{ mt: 3 }}>
                           <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                             <VendorIcon color="primary" />
-                            <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 'bold' }}>
+                            <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                               Vendor Management
                             </Typography>
                             <Button
@@ -3841,7 +3843,7 @@ const StockManagement = () => {
                           </Stack>
                           
                           {(!quickAddItem.vendorDetails || quickAddItem.vendorDetails.length === 0) && (
-                            <Card sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+                            <Card sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
                               <Typography variant="body2" color="text.secondary">
                                 No vendors assigned. Click "Add Vendor" to add vendors for this item.
                               </Typography>
@@ -3849,7 +3851,7 @@ const StockManagement = () => {
                           )}
                           
                           {quickAddItem.vendorDetails && quickAddItem.vendorDetails.map((vendor, index) => (
-                            <Card key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0' }}>
+                            <Card key={index} sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'grey.100' }}>
                               <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                                 <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
                                   Vendor {index + 1}
@@ -4010,8 +4012,8 @@ const StockManagement = () => {
             startIcon={<SaveIcon />}
             size="large"
             sx={{ 
-              bgcolor: '#4caf50',
-              '&:hover': { bgcolor: '#2e7d32' }
+              bgcolor: 'success.main',
+              '&:hover': { bgcolor: 'success.dark' }
             }}
             disabled={loading}
           >

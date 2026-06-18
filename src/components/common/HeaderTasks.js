@@ -661,20 +661,20 @@ const HeaderTasks = () => {
         <IconButton
           color="inherit"
           onClick={handleClick}
-          sx={{ 
+          sx={(theme) => ({
             ml: 1,
-            color: "#6b7280",
-            "&:hover": { 
-              backgroundColor: "#f3f4f6",
-              color: "#374151"
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              backgroundColor: theme.palette.grey[100],
+              color: theme.palette.text.primary
             }
-          }}
+          })}
         >
           <Badge badgeContent={getTaskCount()} color="error">
-            <Notifications sx={{ color: "#6b7280" ,"&:hover": { 
-              backgroundColor: "#f3f4f6",
-              color: "#374151"
-            }}} />
+            <Notifications sx={(theme) => ({ color: theme.palette.text.secondary ,"&:hover": {
+              backgroundColor: theme.palette.grey[100],
+              color: theme.palette.text.primary
+            }})} />
           </Badge>
         </IconButton>
       </Tooltip>

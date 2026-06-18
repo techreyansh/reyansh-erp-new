@@ -1,0 +1,54 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buttons</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin: 0 0 12px; }
+  .group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 22px; }
+  .btn { font-family: "Inter"; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; border-radius: 8px; padding: 10px 20px; border: none; cursor: pointer; transition: all .18s; }
+  .contained { background: #45ADE6; color: #fff; }
+  .contained.sec { background: #2D3D4C; }
+  .contained.err { background: #C0392B; }
+  .outlined { background: #fff; color: #1E7DBE; border: 1.5px solid #45ADE6; }
+  .text { background: transparent; color: #1E7DBE; padding: 10px 12px; }
+  .sm { padding: 6px 14px; font-size: 13px; }
+  .lg { padding: 12px 26px; font-size: 15px; }
+  .disabled { background: #E2E8F0; color: #AAB2B8; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <h1>Buttons</h1>
+  <div class="sub">Radius 8 · no uppercase · 600 weight. Lift + glow on hover (scale 1.02).</div>
+
+  <div class="label">Variants</div>
+  <div class="group">
+    <button class="btn contained">Create order</button>
+    <button class="btn contained sec">Secondary</button>
+    <button class="btn outlined">Outlined</button>
+    <button class="btn text">Text action</button>
+    <button class="btn contained err">Delete</button>
+  </div>
+
+  <div class="label">Sizes</div>
+  <div class="group">
+    <button class="btn contained sm">Small</button>
+    <button class="btn contained">Medium</button>
+    <button class="btn contained lg">Large</button>
+  </div>
+
+  <div class="label">States</div>
+  <div class="group">
+    <button class="btn contained">Default</button>
+    <button class="btn contained" style="box-shadow:0 4px 12px rgba(69,173,230,0.25);transform:scale(1.02)">Hover</button>
+    <button class="btn disabled">Disabled</button>
+  </div>
+</body>
+</html>

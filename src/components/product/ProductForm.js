@@ -774,8 +774,9 @@ const ProductForm = ({ product, onClose }) => {
       {/* Basic Information Section */}
       <Card sx={{ 
         mb: 3,
-        background: '#f8f9fa',
-        border: '1px solid #e0e0e0',
+        background: 'grey.100',
+        border: '1px solid',
+        borderColor: 'grey.100',
         borderRadius: 2
       }}>
         <CardContent sx={{ p: 4 }}>
@@ -785,7 +786,7 @@ const ProductForm = ({ product, onClose }) => {
               sx={{ 
                 mb: 3,
                 borderRadius: 2,
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
               icon={<ErrorIcon />}
             >
@@ -801,12 +802,12 @@ const ProductForm = ({ product, onClose }) => {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: 1,
-                color: '#45ADE6',
+                color: 'primary.main',
                 fontWeight: 600,
                 fontSize: '1.1rem'
               }}
             >
-              <Inventory sx={{ color: '#45ADE6' }} />
+              <Inventory sx={{ color: 'primary.main' }} />
               Basic Information
             </Typography>
             
@@ -817,8 +818,8 @@ const ProductForm = ({ product, onClose }) => {
                   <FormControl fullWidth required variant="standard">
                     <InputLabel sx={{ 
                       fontSize: '14px',
-                      color: '#666',
-                      '&.Mui-focused': { color: '#45ADE6' }
+                      color: 'text.secondary',
+                      '&.Mui-focused': { color: 'primary.main' }
                     }}>
                       Client
                     </InputLabel>
@@ -833,13 +834,13 @@ const ProductForm = ({ product, onClose }) => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInputBase-input': {
                           fontSize: '16px',
@@ -867,23 +868,23 @@ const ProductForm = ({ product, onClose }) => {
                     required
                     variant="standard"
                     InputProps={{
-                      startAdornment: <Inventory sx={{ mr: 1, color: '#666' }} />,
+                      startAdornment: <Inventory sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -907,23 +908,23 @@ const ProductForm = ({ product, onClose }) => {
                     required
                     variant="standard"
                     InputProps={{
-                      startAdornment: <Description sx={{ mr: 1, color: '#666' }} />,
+                      startAdornment: <Description sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -945,19 +946,19 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -970,8 +971,8 @@ const ProductForm = ({ product, onClose }) => {
               </Box>
 
               {/* Row 3: Manpower Sub-fields */}
-              <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.100', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+                <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
                   <People sx={{ mr: 1 }} />
                   Manpower Required
                 </Typography>
@@ -990,19 +991,19 @@ const ProductForm = ({ product, onClose }) => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#45ADE6'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1026,19 +1027,19 @@ const ProductForm = ({ product, onClose }) => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#45ADE6'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1062,19 +1063,19 @@ const ProductForm = ({ product, onClose }) => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#45ADE6'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1098,19 +1099,19 @@ const ProductForm = ({ product, onClose }) => {
                       }}
                       sx={{
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: 'grey.100'
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#45ADE6'
+                          borderBottomColor: 'primary.main'
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: 'text.secondary',
                           '&.Mui-focused': {
-                            color: '#45ADE6'
+                            color: 'primary.main'
                           }
                         },
                         '& .MuiInputBase-input': {
@@ -1121,7 +1122,7 @@ const ProductForm = ({ product, onClose }) => {
                     />
                   </Box>
                 </Box>
-                <Typography variant="body2" sx={{ mt: 1, color: '#666', fontStyle: 'italic' }}>
+                <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary', fontStyle: 'italic' }}>
                   Total Manpower: {parseInt(formData.assemblyLineManpower || 0) + parseInt(formData.cableCuttingManpower || 0) + parseInt(formData.moldingMachineManpower || 0) + parseInt(formData.packingLineManpower || 0)}
                 </Typography>
               </Box>
@@ -1139,19 +1140,19 @@ const ProductForm = ({ product, onClose }) => {
                     placeholder="e.g., 100"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1172,19 +1173,19 @@ const ProductForm = ({ product, onClose }) => {
                     placeholder="e.g., 1500"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1209,19 +1210,19 @@ const ProductForm = ({ product, onClose }) => {
                     placeholder="e.g., Power Cords, Cables, etc."
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#45ADE6'
+                        borderBottomColor: 'primary.main'
                       },
                       '& .MuiFormLabel-root': {
                         fontSize: '14px',
-                        color: '#666',
+                        color: 'text.secondary',
                         '&.Mui-focused': {
-                          color: '#45ADE6'
+                          color: 'primary.main'
                         }
                       },
                       '& .MuiInputBase-input': {
@@ -1251,12 +1252,12 @@ const ProductForm = ({ product, onClose }) => {
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#45ADE6',
+              color: 'primary.main',
               fontWeight: 600,
               fontSize: '1.1rem'
             }}
           >
-            <Description sx={{ color: '#45ADE6' }} />
+            <Description sx={{ color: 'primary.main' }} />
             Cable Information
           </Typography>
           
@@ -1272,10 +1273,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1290,10 +1291,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1308,10 +1309,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1322,7 +1323,7 @@ const ProductForm = ({ product, onClose }) => {
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <Box sx={{ flex: '1 1 100%', minWidth: '200px' }}>
                 <FormControl fullWidth variant="standard">
-                  <InputLabel sx={{ fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } }}>
+                  <InputLabel sx={{ fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } }}>
                     Core Colors (Multiple Select)
                   </InputLabel>
                   <Select
@@ -1339,9 +1340,9 @@ const ProductForm = ({ product, onClose }) => {
                       </Box>
                     )}
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   >
@@ -1354,7 +1355,7 @@ const ProductForm = ({ product, onClose }) => {
                   </Select>
                   {formData.numberOfCore && parseInt(formData.numberOfCore) > 0 && (
                     <Typography variant="caption" sx={{ 
-                      color: '#666', 
+                      color: 'text.secondary', 
                       mt: 0.5, 
                       display: 'block',
                       fontStyle: 'italic'
@@ -1364,7 +1365,7 @@ const ProductForm = ({ product, onClose }) => {
                   )}
                   {(!formData.numberOfCore || parseInt(formData.numberOfCore) === 0) && (
                     <Typography variant="caption" sx={{ 
-                      color: '#f44336', 
+                      color: 'error.main', 
                       mt: 0.5, 
                       display: 'block',
                       fontStyle: 'italic'
@@ -1389,10 +1390,10 @@ const ProductForm = ({ product, onClose }) => {
                     placeholder="Enter custom core color"
                     helperText="This custom color will be added to the selected colors"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   />
@@ -1411,10 +1412,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1428,10 +1429,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1445,10 +1446,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1466,10 +1467,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1483,10 +1484,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1500,10 +1501,10 @@ const ProductForm = ({ product, onClose }) => {
                   fullWidth
                   variant="standard"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#45ADE6' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'primary.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1528,12 +1529,12 @@ const ProductForm = ({ product, onClose }) => {
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#4caf50',
+              color: 'success.main',
               fontWeight: 600,
               fontSize: '1.1rem'
             }}
           >
-            <Inventory sx={{ color: '#4caf50' }} />
+            <Inventory sx={{ color: 'success.main' }} />
             Product Specifications
           </Typography>
           
@@ -1550,10 +1551,10 @@ const ProductForm = ({ product, onClose }) => {
                   placeholder="e.g., 1.5"
                   InputProps={{ endAdornment: 'meters' }}
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#4caf50' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#4caf50' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#4caf50' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'success.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'success.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'success.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1568,10 +1569,10 @@ const ProductForm = ({ product, onClose }) => {
                   variant="standard"
                   placeholder="e.g., Black, White, Grey"
                   sx={{
-                    '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                    '& .MuiInput-underline:after': { borderBottomColor: '#4caf50' },
-                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#4caf50' },
-                    '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#4caf50' } },
+                    '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                    '& .MuiInput-underline:after': { borderBottomColor: 'success.main' },
+                    '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'success.main' },
+                    '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'success.main' } },
                     '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                   }}
                 />
@@ -1596,12 +1597,12 @@ const ProductForm = ({ product, onClose }) => {
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#ff9800',
+              color: 'warning.main',
               fontWeight: 600,
               fontSize: '1.1rem'
             }}
           >
-            <Add sx={{ color: '#ff9800' }} />
+            <Add sx={{ color: 'warning.main' }} />
             Moulding Information
           </Typography>
           
@@ -1611,7 +1612,7 @@ const ProductForm = ({ product, onClose }) => {
             sx={{ 
               mb: 2, 
               fontWeight: 600,
-              color: '#ff9800'
+              color: 'warning.main'
             }}
           >
             Side A
@@ -1633,10 +1634,10 @@ const ProductForm = ({ product, onClose }) => {
                       variant="standard"
                       placeholder="Type or select product type"
                       sx={{
-                        '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                        '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
-                        '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } },
+                        '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                        '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
+                        '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } },
                         '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                       }}
                     />
@@ -1657,7 +1658,7 @@ const ProductForm = ({ product, onClose }) => {
               </Box>
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                 <FormControl fullWidth variant="standard">
-                  <InputLabel sx={{ fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } }}>
+                  <InputLabel sx={{ fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } }}>
                     Type of Mould
                   </InputLabel>
                   <Select
@@ -1665,9 +1666,9 @@ const ProductForm = ({ product, onClose }) => {
                     value={formData.typeOfMould}
                     onChange={handleChange}
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   >
@@ -1687,10 +1688,10 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     placeholder="Enter custom mould type"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   />
@@ -1698,7 +1699,7 @@ const ProductForm = ({ product, onClose }) => {
               )}
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                 <FormControl fullWidth variant="standard">
-                  <InputLabel sx={{ fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } }}>
+                  <InputLabel sx={{ fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } }}>
                     Pin Type
                   </InputLabel>
                   <Select
@@ -1706,9 +1707,9 @@ const ProductForm = ({ product, onClose }) => {
                     value={formData.pinType}
                     onChange={handleChange}
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   >
@@ -1732,10 +1733,10 @@ const ProductForm = ({ product, onClose }) => {
                     variant="standard"
                     placeholder="Enter custom pin type"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   />
@@ -1750,19 +1751,19 @@ const ProductForm = ({ product, onClose }) => {
             sx={{ 
               mb: 2, 
               fontWeight: 600,
-              color: '#ff9800'
+              color: 'warning.main'
             }}
           >
             Side B
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Common Sheath Length Field */}
-            <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid #45ADE6' }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid', borderColor: 'primary.main' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
                 <Description sx={{ mr: 1 }} />
                 Common Sheath Length
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2, color: '#666', fontStyle: 'italic' }}>
+              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontStyle: 'italic' }}>
                 Enter a value here to automatically apply it to all core sheath length fields
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -1779,13 +1780,13 @@ const ProductForm = ({ product, onClose }) => {
                       inputProps: { min: 0, step: 0.1 }
                     }}
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
-                        color: '#666', 
-                        '&.Mui-focused': { color: '#45ADE6' } 
+                        color: 'text.secondary', 
+                        '&.Mui-focused': { color: 'primary.main' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1800,8 +1801,9 @@ const ProductForm = ({ product, onClose }) => {
                 {formData.coreColors.map((color, index) => {
                         return (
                     <Box key={color} sx={{ 
-                      p: 3, 
-                      border: '2px solid #e0e0e0',
+                      p: 3,
+                      border: '2px solid',
+                      borderColor: 'grey.100',
                       borderRadius: 2,
                       backgroundColor: 'rgba(240, 240, 240, 0.3)',
                       transition: 'all 0.3s ease'
@@ -1812,18 +1814,18 @@ const ProductForm = ({ product, onClose }) => {
                           width: 32,
                           height: 32,
                           borderRadius: '50%',
-                          backgroundColor: '#45ADE6',
+                          backgroundColor: 'primary.main',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: 'white',
+                          color: 'common.white',
                           fontWeight: 'bold',
                           fontSize: '14px'
                         }}>
                           {index + 1}
                         </Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#45ADE6',
+                          color: 'primary.main',
                           fontWeight: 600
                         }}>
                           Core {color}
@@ -1841,13 +1843,13 @@ const ProductForm = ({ product, onClose }) => {
                     fullWidth
                     variant="standard"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
-                        color: '#666', 
-                        '&.Mui-focused': { color: '#45ADE6' } 
+                        color: 'text.secondary', 
+                        '&.Mui-focused': { color: 'primary.main' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1862,13 +1864,13 @@ const ProductForm = ({ product, onClose }) => {
                     fullWidth
                     variant="standard"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
-                        color: '#666', 
-                        '&.Mui-focused': { color: '#45ADE6' } 
+                        color: 'text.secondary', 
+                        '&.Mui-focused': { color: 'primary.main' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1883,13 +1885,13 @@ const ProductForm = ({ product, onClose }) => {
                     fullWidth
                     variant="standard"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
-                        color: '#666', 
-                        '&.Mui-focused': { color: '#45ADE6' } 
+                        color: 'text.secondary', 
+                        '&.Mui-focused': { color: 'primary.main' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1904,13 +1906,13 @@ const ProductForm = ({ product, onClose }) => {
                     fullWidth
                     variant="standard"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#45ADE6' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#45ADE6' },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'primary.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'primary.main' },
                       '& .MuiFormLabel-root': { 
                         fontSize: '14px', 
-                        color: '#666', 
-                        '&.Mui-focused': { color: '#45ADE6' } 
+                        color: 'text.secondary', 
+                        '&.Mui-focused': { color: 'primary.main' } 
                       },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
@@ -1928,20 +1930,21 @@ const ProductForm = ({ product, onClose }) => {
                   borderRadius: 2,
                   border: '1px solid rgba(33, 150, 243, 0.1)'
                 }}>
-                  <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>
                     Progress: {formData.coreColors.filter(isCoreCompleted).length} of {formData.coreColors.length} cores completed
                   </Typography>
                 </Box>
               </Box>
             ) : (
               <Box sx={{ 
-                p: 3, 
-                border: '2px dashed #e0e0e0',
+                p: 3,
+                border: '2px dashed',
+                borderColor: 'grey.100',
                 borderRadius: 2,
                 textAlign: 'center',
                 backgroundColor: 'rgba(240, 240, 240, 0.3)'
               }}>
-                <Typography variant="body1" sx={{ color: '#666' }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   Please select core colors first to configure core specifications
                 </Typography>
               </Box>
@@ -1954,14 +1957,14 @@ const ProductForm = ({ product, onClose }) => {
                     <Checkbox
                       checked={formData.grommetPresent}
                       onChange={(e) => setFormData(prev => ({ ...prev, grommetPresent: e.target.checked }))}
-                      sx={{ color: '#ff9800', '&.Mui-checked': { color: '#ff9800' } }}
+                      sx={{ color: 'warning.main', '&.Mui-checked': { color: 'warning.main' } }}
                     />
                   }
                   label="Grommet Present"
                   sx={{ 
                     '& .MuiFormControlLabel-label': { 
                       fontSize: '16px', 
-                      color: '#666',
+                      color: 'text.secondary',
                       fontWeight: 500
                     } 
                   }}
@@ -1977,10 +1980,10 @@ const ProductForm = ({ product, onClose }) => {
                     fullWidth
                     variant="standard"
                     sx={{
-                      '& .MuiInput-underline:before': { borderBottomColor: '#e0e0e0' },
-                      '& .MuiInput-underline:after': { borderBottomColor: '#ff9800' },
-                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#ff9800' },
-                      '& .MuiFormLabel-root': { fontSize: '14px', color: '#666', '&.Mui-focused': { color: '#ff9800' } },
+                      '& .MuiInput-underline:before': { borderBottomColor: 'grey.100' },
+                      '& .MuiInput-underline:after': { borderBottomColor: 'warning.main' },
+                      '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'warning.main' },
+                      '& .MuiFormLabel-root': { fontSize: '14px', color: 'text.secondary', '&.Mui-focused': { color: 'warning.main' } },
                       '& .MuiInputBase-input': { fontSize: '16px', padding: '8px 0' }
                     }}
                   />
@@ -2005,12 +2008,12 @@ const ProductForm = ({ product, onClose }) => {
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#4caf50',
+              color: 'success.main',
               fontWeight: 600,
               fontSize: '1.1rem'
             }}
           >
-            <Inventory sx={{ color: '#4caf50' }} />
+            <Inventory sx={{ color: 'success.main' }} />
             Inventory Management
           </Typography>
           
@@ -2031,19 +2034,19 @@ const ProductForm = ({ product, onClose }) => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2067,19 +2070,19 @@ const ProductForm = ({ product, onClose }) => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2107,19 +2110,19 @@ const ProductForm = ({ product, onClose }) => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2143,19 +2146,19 @@ const ProductForm = ({ product, onClose }) => {
                   }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2180,19 +2183,19 @@ const ProductForm = ({ product, onClose }) => {
                   placeholder="e.g., pieces, kg, meters"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2213,19 +2216,19 @@ const ProductForm = ({ product, onClose }) => {
                   placeholder="e.g., Warehouse A, Shelf B1"
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2251,19 +2254,19 @@ const ProductForm = ({ product, onClose }) => {
                   InputLabelProps={{ shrink: true }}
                   sx={{
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: 'grey.100'
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: 'success.main'
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: 'text.secondary',
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: 'success.main'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -2277,8 +2280,8 @@ const ProductForm = ({ product, onClose }) => {
                 <FormControl fullWidth variant="standard">
                   <InputLabel sx={{ 
                     fontSize: '14px',
-                    color: '#666',
-                    '&.Mui-focused': { color: '#4caf50' }
+                    color: 'text.secondary',
+                    '&.Mui-focused': { color: 'success.main' }
                   }}>
                     Status
                   </InputLabel>
@@ -2289,13 +2292,13 @@ const ProductForm = ({ product, onClose }) => {
                     label="Status"
                     sx={{
                       '& .MuiInput-underline:before': {
-                        borderBottomColor: '#e0e0e0'
+                        borderBottomColor: 'grey.100'
                       },
                       '& .MuiInput-underline:after': {
-                        borderBottomColor: '#4caf50'
+                        borderBottomColor: 'success.main'
                       },
                       '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                        borderBottomColor: '#4caf50'
+                        borderBottomColor: 'success.main'
                       },
                       '& .MuiInputBase-input': {
                         fontSize: '16px',
@@ -2435,7 +2438,7 @@ const ProductForm = ({ product, onClose }) => {
                 fontSize: '1.1rem',
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.8) 0%, rgba(76, 175, 80, 0.9) 100%)',
-                color: 'white',
+                color: 'common.white',
                 boxShadow: '0 2px 10px rgba(76, 175, 80, 0.2)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.9) 0%, rgba(76, 175, 80, 1) 100%)',
@@ -2465,7 +2468,7 @@ const ProductForm = ({ product, onClose }) => {
           sx={{ 
             width: "100%",
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#2e7d32' }
+            '& .MuiAlert-icon': { color: 'success.main' }
           }}
           icon={<CheckCircle />}
         >

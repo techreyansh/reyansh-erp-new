@@ -183,20 +183,20 @@ const EmployeeDashboard = () => {
       {selectedEmployee && (
         <Box>
           {/* Employee Header */}
-          <Paper sx={{ 
-            p: 3, 
-            mb: 3, 
-            background: `linear-gradient(135deg, ${alpha('#1E7DBE', 0.08)} 0%, ${alpha('#45ADE6', 0.12)} 100%)`,
+          <Paper sx={(theme) => ({
+            p: 3,
+            mb: 3,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.08)} 0%, ${alpha(theme.palette.primary.main, 0.12)} 100%)`,
             color: 'primary.main',
-            border: `1px solid ${alpha('#1E7DBE', 0.2)}`
-          }}>
+            border: `1px solid ${alpha(theme.palette.primary.dark, 0.2)}`
+          })}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 <Avatar
                   sx={{ 
                     width: 80, 
                     height: 80, 
-                    bgcolor: 'white',
+                    bgcolor: 'background.paper',
                     color: 'primary.main',
                     fontSize: '2rem'
                   }}
@@ -224,7 +224,7 @@ const EmployeeDashboard = () => {
                       label={selectedEmployee.EmployeeType || 'Full-time'}
                       variant="outlined"
                       size="small"
-                      sx={{ color: 'primary.main', borderColor: alpha('primary.main', 0.3) }}
+                      sx={(theme) => ({ color: 'primary.main', borderColor: alpha(theme.palette.primary.main, 0.3) })}
                     />
                   </Box>
                 </Box>

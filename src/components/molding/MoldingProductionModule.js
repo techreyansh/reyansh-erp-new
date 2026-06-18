@@ -191,7 +191,7 @@ const MoldingDashboard = () => {
           elevation={0}
           sx={{
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+            background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`,
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden',
             position: "relative",
@@ -461,7 +461,7 @@ const MoldingProductionModule = () => {
                     border: `1px solid ${alpha("#ffffff", 0.2)}`,
                   }}
                 >
-                  <MoldIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "#ffffff" }} />
+                  <MoldIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: "common.white" }} />
                 </Box>
                 
                 <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
@@ -496,9 +496,9 @@ const MoldingProductionModule = () => {
                       <Chip 
                         key={index}
                         label={feature} 
-                        sx={{ 
-                          backgroundColor: alpha("#ffffff", 0.2), 
-                          color: "#ffffff",
+                        sx={{
+                          backgroundColor: alpha("#ffffff", 0.2),
+                          color: "common.white",
                           fontWeight: 600,
                           backdropFilter: "blur(10px)",
                           border: `1px solid ${alpha("#ffffff", 0.3)}`,
@@ -530,7 +530,7 @@ const MoldingProductionModule = () => {
               onChange={handleTabChange}
               variant="scrollable"
               scrollButtons="auto"
-              sx={{ 
+              sx={(theme) => ({
                 minHeight: 80,
                 '& .MuiTab-root': {
                   minHeight: 80,
@@ -541,7 +541,7 @@ const MoldingProductionModule = () => {
                   px: 3,
                   py: 2,
                   '&.Mui-selected': {
-                    color: "#ffffff",
+                    color: theme.palette.common.white,
                     backgroundColor: alpha("#ffffff", 0.15),
                   },
                   '&:hover': {
@@ -549,11 +549,11 @@ const MoldingProductionModule = () => {
                   },
                 },
                 '& .MuiTabs-indicator': {
-                  backgroundColor: "#ffffff",
+                  backgroundColor: theme.palette.common.white,
                   height: 3,
                   borderRadius: "3px 3px 0 0",
                 },
-              }}
+              })}
             >
               {tabComponents.map((tab, index) => (
                 <Tab

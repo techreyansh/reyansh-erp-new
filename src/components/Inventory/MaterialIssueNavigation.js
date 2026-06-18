@@ -145,13 +145,13 @@ const MaterialIssueNavigation = () => {
 
       {/* Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -164,7 +164,7 @@ const MaterialIssueNavigation = () => {
                 <IconButton
                   onClick={() => navigate('/inventory/stock-sheet')}
                   sx={{
-                    color: 'white',
+                    color: 'common.white',
                     bgcolor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
                       bgcolor: 'rgba(255,255,255,0.2)',
@@ -216,7 +216,7 @@ const MaterialIssueNavigation = () => {
                 <IconButton
                   onClick={() => navigate('/inventory/stock-sheet/fg-material-inward')}
                   sx={{
-                    color: 'white',
+                    color: 'common.white',
                     bgcolor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
                       bgcolor: 'rgba(255,255,255,0.2)',
@@ -252,7 +252,7 @@ const MaterialIssueNavigation = () => {
               onChange={handleTabChange}
               variant={isMobile ? "scrollable" : "fullWidth"}
               scrollButtons="auto"
-              sx={{
+              sx={(theme) => ({
                 px: 3,
                 '& .MuiTab-root': {
                   minHeight: 72,
@@ -263,9 +263,9 @@ const MaterialIssueNavigation = () => {
                 },
                 '& .MuiTabs-indicator': {
                   height: 4,
-                  background: 'linear-gradient(45deg, #f44336, #d32f2f)'
+                  background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.dark})`
                 }
-              }}
+              })}
             >
               {tabs.map((tab, index) => (
                 <Tab

@@ -84,11 +84,11 @@ class ErrorBoundary extends React.Component {
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Paper 
             elevation={3}
-            sx={{ 
-              p: 4, 
+            sx={(theme) => ({
+              p: 4,
               textAlign: 'center',
-              background: 'linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%)'
-            }}
+              background: `linear-gradient(135deg, ${theme.palette.grey[100]} 0%, ${theme.palette.background.paper} 100%)`
+            })}
           >
             <ErrorIcon 
               sx={{ 

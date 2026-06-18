@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Form Inputs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+  .input { width: 100%; border-radius: 8px; padding: 11px 13px; font-size: 14px; font-family: "Inter"; background: #fff; border: 1.5px solid #CBD5E1; color: #2D3D4C; }
+  .input.focus { border: 2px solid #45ADE6; box-shadow: 0 0 0 3px rgba(69,173,230,0.12); padding: 10px 12px; }
+  .input.error { border: 2px solid #C0392B; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); padding: 10px 12px; }
+  .hint { font-size: 11px; margin-top: 6px; color: #81898F; }
+  .hint.err { color: #C0392B; }
+  .placeholder { color: #AAB2B8; }
+</style>
+</head>
+<body>
+  <h1>Form Inputs</h1>
+  <div class="sub">Outlined text fields · radius 8. Primary ring on focus, error ring on invalid.</div>
+  <div class="grid">
+    <div class="field">
+      <label>Client name</label>
+      <div class="input">Reyansh International</div>
+      <div class="hint">Default · rest state</div>
+    </div>
+    <div class="field">
+      <label>Order quantity</label>
+      <div class="input focus">1200</div>
+      <div class="hint">Focused · primary ring</div>
+    </div>
+    <div class="field">
+      <label>GST number</label>
+      <div class="input error">29ABCDE</div>
+      <div class="hint err">Invalid GSTIN — must be 15 characters</div>
+    </div>
+    <div class="field">
+      <label>Dispatch date</label>
+      <div class="input"><span class="placeholder">dd / mm / yyyy</span></div>
+      <div class="hint">Empty · placeholder</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -227,8 +227,8 @@ const StatusDateDemo = () => {
               <Typography variant="body2" paragraph>
                 <strong>Enhanced Status Storage Format:</strong>
               </Typography>
-              <Box component="pre" sx={{ 
-                backgroundColor: '#f5f5f5', 
+              <Box component="pre" sx={{
+                backgroundColor: 'grey.100',
                 p: 2, 
                 borderRadius: 1, 
                 fontSize: '0.875rem',

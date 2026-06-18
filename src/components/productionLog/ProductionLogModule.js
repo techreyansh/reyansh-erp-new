@@ -226,10 +226,10 @@ const ProductionLogModule = () => {
         {extraction && (
           <>
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent="#1E7DBE" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Total Target" value={Math.round(totalTarget).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#7C3AED" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent="#45ADE6" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Achievement" value={`${achievementPct}%`} icon={AutoAwesomeOutlined} accent={achievementPct >= 90 ? '#059669' : achievementPct >= 70 ? '#D97706' : '#DC2626'} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Rows extracted" value={entries.length} sub="line × hour" icon={TableChartOutlined} accent={theme.palette.primary.dark} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Total Target" value={Math.round(totalTarget).toLocaleString('en-IN')} icon={GridOnOutlined} accent={theme.palette.primary.main} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Total Achieved" value={Math.round(totalAchieved).toLocaleString('en-IN')} icon={GridOnOutlined} accent={theme.palette.primary.main} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Achievement" value={`${achievementPct}%`} icon={AutoAwesomeOutlined} accent={achievementPct >= 90 ? theme.palette.success.main : achievementPct >= 70 ? theme.palette.warning.main : theme.palette.error.main} /></Grid>
             </Grid>
 
             {extraction.warnings?.length > 0 && (
@@ -271,7 +271,7 @@ const ProductionLogModule = () => {
                           <TableCell>{e.target}</TableCell>
                           <TableCell sx={{ color: behind ? 'error.main' : 'success.main', fontWeight: 700 }}>{e.achieved}</TableCell>
                           <TableCell>{e.downtime_minutes || ''}</TableCell>
-                          <TableCell>{e.reason ? <Chip size="small" label={e.reason} sx={{ fontWeight: 600, bgcolor: alpha('#DC2626', 0.1), color: '#DC2626' }} /> : ''}</TableCell>
+                          <TableCell>{e.reason ? <Chip size="small" label={e.reason} sx={{ fontWeight: 600, bgcolor: alpha(theme.palette.error.main, 0.1), color: 'error.main' }} /> : ''}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -302,8 +302,8 @@ const ProductionLogModule = () => {
                   <Typography variant="overline" fontWeight={800}>Root causes</Typography>
                   <Stack spacing={1} sx={{ mt: 1 }}>
                     {analysis.root_causes.map((rc, i) => (
-                      <Paper key={i} variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderLeft: '4px solid #DC2626' }}>
-                        <Typography variant="subtitle2" fontWeight={700}>{rc.title} {rc.lost_units ? <Chip size="small" label={`-${Math.round(rc.lost_units)} units`} sx={{ ml: 0.5, height: 18, fontWeight: 700, bgcolor: alpha('#DC2626', 0.1), color: '#DC2626' }} /> : null}</Typography>
+                      <Paper key={i} variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderLeft: '4px solid', borderLeftColor: 'error.main' }}>
+                        <Typography variant="subtitle2" fontWeight={700}>{rc.title} {rc.lost_units ? <Chip size="small" label={`-${Math.round(rc.lost_units)} units`} sx={{ ml: 0.5, height: 18, fontWeight: 700, bgcolor: alpha(theme.palette.error.main, 0.1), color: 'error.main' }} /> : null}</Typography>
                         <Typography variant="caption" color="text.secondary">{rc.line_no} {rc.time_slot} — {rc.detail}</Typography>
                       </Paper>
                     ))}

@@ -609,12 +609,12 @@ const FGToBilling = () => {
             <Typography
               variant="h4"
               component="h1"
-              sx={{
+              sx={(theme) => ({
                 fontWeight: "bold",
-                background: "linear-gradient(45deg, #4caf50, #81c784)",
+                background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-              }}
+              })}
             >
               FG to Billing System
             </Typography>
@@ -675,12 +675,12 @@ const FGToBilling = () => {
                 startIcon={<AddIcon />}
                 onClick={handleCreateBill}
                 size="medium"
-                sx={{
-                  background: "linear-gradient(45deg, #4caf50, #81c784)",
+                sx={(theme) => ({
+                  background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                   "&:hover": {
-                    background: "linear-gradient(45deg, #388e3c, #4caf50)",
+                    background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                   },
-                }}
+                })}
               >
                 Create New Bill
               </Button>
@@ -750,7 +750,7 @@ const FGToBilling = () => {
                             fontWeight: "bold",
                             textTransform: "uppercase",
                             bgcolor: "primary.main",
-                            color: "white",
+                            color: "common.white",
                             fontSize: "0.75rem",
                           }}
                         >
@@ -1168,12 +1168,12 @@ const FGToBilling = () => {
             onClick={handleSaveBill}
             variant="contained"
             disabled={loading || !selectedClient || billItems.length === 0}
-            sx={{
-              background: "linear-gradient(45deg, #4caf50, #81c784)",
+            sx={(theme) => ({
+              background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
               "&:hover": {
-                background: "linear-gradient(45deg, #388e3c, #4caf50)",
+                background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
               },
-            }}
+            })}
           >
             {loading ? <CircularProgress size={24} /> : "Create Bill"}
           </Button>

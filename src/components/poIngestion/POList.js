@@ -859,7 +859,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
                     size="large"
                     showFirstButton
                     showLastButton
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiPaginationItem-root': {
                         borderRadius: 3,
                         fontWeight: 700,
@@ -873,8 +873,8 @@ const SalesOrderList = ({ refreshTrigger }) => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
-                          color: 'white',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                          color: theme.palette.common.white,
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                           '&:hover': {
@@ -883,7 +883,7 @@ const SalesOrderList = ({ refreshTrigger }) => {
                           }
                         }
                       }
-                    }}
+                    })}
                   />
                 )}
               </Box>

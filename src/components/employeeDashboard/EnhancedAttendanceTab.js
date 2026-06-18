@@ -475,18 +475,18 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{
+              sx={(theme) => ({
                 '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                  color: '#546e7a',
+                  color: theme.palette.text.secondary,
                   fontWeight: 500
                 },
                 '& .MuiTablePagination-select': {
-                  borderColor: '#e3f2fd',
+                  borderColor: theme.palette.info.lighter,
                   '&:focus': {
-                    borderColor: '#45ADE6'
+                    borderColor: theme.palette.primary.main
                   }
                 }
-              }}
+              })}
             />
           </CardContent>
         </Card>
@@ -578,28 +578,28 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
             px: 4,
             position: 'relative'
           }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
+            <Typography
+              variant="h4"
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.main})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               {editingRecord ? 'Edit Attendance' : 'Mark Attendance'}
             </Typography>
-            <IconButton 
+            <IconButton
               onClick={() => setAttendanceFormOpen(false)}
-              sx={{ 
+              sx={{
                 position: 'absolute',
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#00bcd4',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(0, 188, 212, 0.1)'
                 }
@@ -630,30 +630,30 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 InputLabelProps={{ shrink: true }}
                 required
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   flex: '1 1 200px',
                   minWidth: '200px',
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiFormLabel-root': {
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     fontSize: '14px'
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
-              
-              <FormControl 
+
+              <FormControl
                 variant="standard" 
                 required
                 sx={{ 
@@ -661,26 +661,26 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                   minWidth: '200px'
                 }}
               >
-                <InputLabel sx={{ color: '#666', fontSize: '14px' }}>Status *</InputLabel>
+                <InputLabel sx={{ color: 'text.secondary', fontSize: '14px' }}>Status *</InputLabel>
                 <Select
                   value={attendanceForm.Status}
                   onChange={(e) => setAttendanceForm(prev => ({ ...prev, Status: e.target.value }))}
                   label="Status *"
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 >
                   {statusOptions.map(option => (
                     <MenuItem key={option.value} value={option.value}>
@@ -702,27 +702,27 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 InputLabelProps={{ shrink: true }}
                 disabled={attendanceForm.Status === 'Absent' || attendanceForm.Status === 'Leave'}
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   flex: '1 1 200px',
                   minWidth: '200px',
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiFormLabel-root': {
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     fontSize: '14px'
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
               
               <TextField
@@ -734,27 +734,27 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 InputLabelProps={{ shrink: true }}
                 disabled={attendanceForm.Status === 'Absent' || attendanceForm.Status === 'Leave'}
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   flex: '1 1 200px',
                   minWidth: '200px',
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiFormLabel-root': {
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     fontSize: '14px'
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
             </Box>
             
@@ -770,27 +770,27 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 }}
                 disabled
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   flex: '1 1 200px',
                   minWidth: '200px',
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiFormLabel-root': {
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     fontSize: '14px'
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
               
               <TextField
@@ -799,27 +799,27 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
                 value={attendanceForm.Remarks}
                 onChange={(e) => setAttendanceForm(prev => ({ ...prev, Remarks: e.target.value }))}
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   flex: '1 1 200px',
                   minWidth: '200px',
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#00bcd4'
+                    borderBottomColor: theme.palette.primary.main
                   },
                   '& .MuiFormLabel-root': {
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     fontSize: '14px'
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
             </Box>
             
@@ -833,25 +833,25 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
               onChange={(e) => setAttendanceForm(prev => ({ ...prev, Notes: e.target.value }))}
               placeholder="Any additional notes about this attendance record..."
               variant="standard"
-              sx={{
+              sx={(theme) => ({
                 '& .MuiInput-underline:before': {
-                  borderBottomColor: '#e0e0e0'
+                  borderBottomColor: theme.palette.divider
                 },
                 '& .MuiInput-underline:after': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiFormLabel-root': {
-                  color: '#666',
+                  color: theme.palette.text.secondary,
                   fontSize: '14px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '16px',
                   padding: '8px 0'
                 }
-              }}
+              })}
             />
           </Box>
         </DialogContent>
@@ -867,19 +867,20 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
         }}>
           <Button 
             onClick={() => setAttendanceFormOpen(false)} 
-            sx={{ 
+            sx={{
               borderRadius: 3,
               px: 4,
               py: 1.5,
               textTransform: 'none',
               fontWeight: 600,
-              color: '#666',
-              border: '1px solid #e0e0e0',
+              color: 'text.secondary',
+              border: '1px solid',
+              borderColor: 'divider',
               backgroundColor: 'transparent',
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#00bcd4'
+                borderColor: 'primary.main'
               }
             }}
           >
@@ -888,7 +889,7 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
           <Button 
             onClick={handleSaveRecord}
             disabled={!attendanceForm.Date || !attendanceForm.Status}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
               px: 4,
               py: 1.5,
@@ -896,21 +897,21 @@ const EnhancedAttendanceTab = ({ employeeCode, onUpdate }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '180px',
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.main})`,
+              color: theme.palette.common.white,
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
               '&:disabled': {
-                background: '#e0e0e0',
-                color: '#999',
+                background: theme.palette.divider,
+                color: theme.palette.text.disabled,
                 boxShadow: 'none',
                 transform: 'none'
               }
-            }}
+            })}
           >
             {editingRecord ? 'UPDATE RECORD' : 'SAVE RECORD'}
           </Button>
