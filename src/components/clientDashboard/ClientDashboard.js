@@ -516,12 +516,6 @@ const ClientDashboard = () => {
                     <MoneyIcon sx={{ fontSize: 24 }} />
                   </Avatar>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <TrendingUp sx={{ fontSize: 16, opacity: 0.8 }} />
-                  <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 500 }}>
-                    +12% from last month
-                  </Typography>
-              </Box>
             </CardContent>
           </Card>
           </Grow>
@@ -570,12 +564,6 @@ const ClientDashboard = () => {
                     <AssignmentIcon sx={{ fontSize: 24 }} />
                   </Avatar>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CalendarIcon sx={{ fontSize: 16, opacity: 0.8 }} />
-                  <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 500 }}>
-                    3 pending approval
-                  </Typography>
-              </Box>
             </CardContent>
           </Card>
           </Grow>
@@ -1100,20 +1088,6 @@ const ClientDashboard = () => {
                   <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                     Total Orders
                   </Typography>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={75} 
-                    sx={{ 
-                      mt: 2, 
-                      height: 6, 
-                      borderRadius: 3,
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: theme.palette.primary.main,
-                        borderRadius: 3
-                      }
-                    }} 
-                  />
                 </CardContent>
               </Card>
             </Grid>
@@ -1129,25 +1103,11 @@ const ClientDashboard = () => {
                 <CardContent sx={{ textAlign: 'center', py: 3 }}>
                   <PieChartIcon sx={{ fontSize: 40, color: theme.palette.success.main, mb: 1 }} />
                   <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.success.main, mb: 0.5 }}>
-                    85%
+                    —
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                     Completion Rate
                   </Typography>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={85} 
-                    sx={{ 
-                      mt: 2, 
-                      height: 6, 
-                      borderRadius: 3,
-                      backgroundColor: alpha(theme.palette.success.main, 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: theme.palette.success.main,
-                        borderRadius: 3
-                      }
-                    }} 
-                  />
                 </CardContent>
               </Card>
             </Grid>
@@ -1168,12 +1128,6 @@ const ClientDashboard = () => {
                   <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                     Revenue (Lakhs)
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 1 }}>
-                    <TrendingUp sx={{ fontSize: 16, color: theme.palette.success.main }} />
-                    <Typography variant="caption" sx={{ color: theme.palette.success.main, fontWeight: 600 }}>
-                      +15.3%
-                    </Typography>
-                  </Box>
                 </CardContent>
               </Card>
             </Grid>
@@ -1189,25 +1143,11 @@ const ClientDashboard = () => {
                 <CardContent sx={{ textAlign: 'center', py: 3 }}>
                   <TimelineIcon sx={{ fontSize: 40, color: theme.palette.info.main, mb: 1 }} />
                   <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.info.main, mb: 0.5 }}>
-                    12
+                    —
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                     Avg. Days to Complete
                   </Typography>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={60} 
-                    sx={{ 
-                      mt: 2, 
-                      height: 6, 
-                      borderRadius: 3,
-                      backgroundColor: alpha(theme.palette.info.main, 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: theme.palette.info.main,
-                        borderRadius: 3
-                      }
-                    }} 
-                  />
                 </CardContent>
               </Card>
             </Grid>

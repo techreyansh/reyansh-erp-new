@@ -283,9 +283,7 @@ const Inventory = () => {
                 </Tooltip>
                 <Tooltip title="System Status">
                   <IconButton sx={{ color: 'common.white' }}>
-                    <Badge badgeContent={6} color="error">
-                      <AnalyticsIcon />
-                    </Badge>
+                    <AnalyticsIcon />
                   </IconButton>
                 </Tooltip>
               </Stack>
@@ -349,49 +347,9 @@ const Inventory = () => {
         </Card>
       </Zoom>
 
-      {/* Quick Stats Overview */}
-      {selectedTab === 0 && (
-        <Fade in timeout={1000}>
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            {[
-              { label: "Total Stock Items", value: "1,247", icon: <StorageIcon />, color: theme.palette.primary.main },
-              { label: "Critical Stock", value: "23", icon: <TrendingUpIcon />, color: theme.palette.error.main },
-              { label: "Inward Today", value: "45", icon: <InwardIcon />, color: theme.palette.success.main },
-              { label: "Outward Today", value: "38", icon: <OutwardIcon />, color: theme.palette.warning.main }
-            ].map((stat, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card 
-                  sx={{ 
-                    background: `linear-gradient(135deg, ${stat.color}20 0%, ${stat.color}10 100%)`,
-                    border: `1px solid ${stat.color}30`,
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4
-                    }
-                  }}
-                >
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Avatar sx={{ bgcolor: stat.color, width: 48, height: 48 }}>
-                        {stat.icon}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h4" sx={{ fontWeight: 'bold', color: stat.color }}>
-                          {stat.value}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {stat.label}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Fade>
-      )}
+      {/* Quick Stats Overview hidden: these were fabricated static figures
+          (Total Stock Items / Critical Stock / Inward Today / Outward Today)
+          not backed by live data. Restore once wired to inventoryService. */}
 
       {/* Tab Content */}
       <Fade in timeout={1200} key={selectedTab}>
