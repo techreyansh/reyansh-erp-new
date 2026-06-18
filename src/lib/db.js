@@ -37,7 +37,18 @@ export const TABLE_NAMES = {
   'Material Issue': 'material_issue_data',
   BOM: 'company_bom_data',
   'Kitting Sheet': 'company_material_issue_data',
+  'Company Material Issues': 'company_material_issue_data',
   'Finished Goods': 'finished_goods',
+
+  // Molding / production masters (physical tables verified present in prod)
+  'Power Cord Master': 'power_cord_master',
+  'Production Monitoring': 'production_monitoring',
+  'Machine Status Log': 'machine_status_log',
+  'Mold Compatibility Matrix': 'mold_compatibility_matrix',
+
+  // Costing (physical table is costing_data, not "costing")
+  Costing: 'costing_data',
+  costing: 'costing_data',
 
   // Dispatches
   Dispatches: 'dispatches',

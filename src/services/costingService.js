@@ -44,7 +44,9 @@ class CostingService {
         'Unique'
       ];
 
-      await sheetService.initializeSheet(this.sheetName, headers);
+      // Tables are Supabase-managed; just ensure it exists if the facade supports it.
+      void headers;
+      await sheetService.createSheetIfNotExists?.(this.sheetName);
       return { success: true, message: 'Costing sheet initialized successfully' };
     } catch (error) {
       console.error('Error initializing costing sheet:', error);

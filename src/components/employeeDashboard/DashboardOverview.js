@@ -319,35 +319,44 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
               
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <Button
-                    variant={summary?.attendance?.isCheckedIn ? "outlined" : "contained"}
-                    color={summary?.attendance?.isCheckedIn ? "error" : "success"}
-                    fullWidth
-                    startIcon={<TimeIcon />}
-                    sx={{ mb: 1 }}
-                  >
-                    {summary?.attendance?.isCheckedIn ? 'Clock Out' : 'Clock In'}
-                  </Button>
+                  <span title="Coming soon" style={{ display: 'block' }}>
+                    <Button
+                      variant={summary?.attendance?.isCheckedIn ? "outlined" : "contained"}
+                      color={summary?.attendance?.isCheckedIn ? "error" : "success"}
+                      fullWidth
+                      disabled
+                      startIcon={<TimeIcon />}
+                      sx={{ mb: 1 }}
+                    >
+                      {summary?.attendance?.isCheckedIn ? 'Clock Out' : 'Clock In'}
+                    </Button>
+                  </span>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<TaskIcon />}
-                    sx={{ mb: 1 }}
-                  >
-                    View My Tasks
-                  </Button>
+                  <span title="Coming soon" style={{ display: 'block' }}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      disabled
+                      startIcon={<TaskIcon />}
+                      sx={{ mb: 1 }}
+                    >
+                      View My Tasks
+                    </Button>
+                  </span>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<CalendarIcon />}
-                    sx={{ mb: 1 }}
-                  >
-                    Check Schedule
-                  </Button>
+                  <span title="Coming soon" style={{ display: 'block' }}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      disabled
+                      startIcon={<CalendarIcon />}
+                      sx={{ mb: 1 }}
+                    >
+                      Check Schedule
+                    </Button>
+                  </span>
                 </Grid>
               </Grid>
 

@@ -241,7 +241,8 @@ const FGMaterialOutward = () => {
           "Remarks",
           "lastUpdated"
         ];
-        await sheetService.createSheetWithHeaders("FG Material Outward", headers);
+        void headers; // tables are Supabase-managed; ensure existence only.
+        await sheetService.createSheetIfNotExists?.("FG Material Outward");
       }
     } catch (error) {
       console.error("Error ensuring FG Material Outward sheet exists:", error);

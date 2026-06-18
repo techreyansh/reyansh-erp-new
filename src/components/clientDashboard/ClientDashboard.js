@@ -234,7 +234,7 @@ const ClientDashboard = () => {
   const handleNotesRows = (event) => { setNotesRows(parseInt(event.target.value, 10)); setNotesPage(0); };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (String(status || '').toLowerCase()) {
       case 'delivered':
       case 'paid':
       case 'completed':

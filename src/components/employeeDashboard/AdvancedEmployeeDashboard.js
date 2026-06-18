@@ -14,7 +14,6 @@ import {
   Button,
   Paper,
   IconButton,
-  Badge,
   Fab,
   Slide,
   Zoom,
@@ -56,7 +55,6 @@ import {
   Assignment as TaskIcon,
   TrendingUp as PerformanceIcon,
   Schedule as AttendanceIcon,
-  Notifications as NotificationIcon,
   Dashboard as DashboardIcon,
 
   Refresh as RefreshIcon,
@@ -91,7 +89,6 @@ import AdvancedProfileTab from './AdvancedProfileTab';
 import EnhancedTasksTab from './EnhancedTasksTab';
 import PerformanceTab from './PerformanceTab';
 import EnhancedAttendanceTab from './EnhancedAttendanceTab';
-import NotificationsTab from './NotificationsTab';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import AdminAccessControlSection from './AdminAccessControlSection';
@@ -963,16 +960,20 @@ const AdvancedEmployeeDashboard = () => {
                   >
                     <RefreshIcon />
                   </IconButton>
-                  <IconButton
-                    onClick={() => alert('Settings coming soon!')}
-                    sx={{
-                      bgcolor: 'background.paper',
-                      boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
-                    }}
-                  >
-                    <SettingsIcon />
-                  </IconButton>
+                  <Tooltip title="Coming soon">
+                    <span>
+                      <IconButton
+                        disabled
+                        sx={{
+                          bgcolor: 'background.paper',
+                          boxShadow: theme.shadows[2],
+                          '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
+                        }}
+                      >
+                        <SettingsIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
                 </Box>
               </Box>
             </Paper>
@@ -1016,16 +1017,6 @@ const AdvancedEmployeeDashboard = () => {
                 <Tab
                   icon={<AttendanceIcon />}
                   label="Attendance"
-                  sx={{ gap: 1 }}
-                />
-
-                <Tab
-                  icon={
-                    <Badge badgeContent={dashboardSummary?.notifications?.unread || 0} color="error">
-                      <NotificationIcon />
-                    </Badge>
-                  }
-                  label="Notifications"
                   sx={{ gap: 1 }}
                 />
                 {canManageAccess && (
@@ -1086,15 +1077,8 @@ const AdvancedEmployeeDashboard = () => {
                    />
                  </TabPanel>
 
-                <TabPanel value={activeTab} index={5}>
-                  <NotificationsTab
-                    employeeCode={selectedEmployee?.EmployeeCode}
-                    notifications={dashboardSummary?.notifications?.recent || []}
-                    onNotificationRead={() => loadEmployeeData(selectedEmployee)}
-                  />
-                </TabPanel>
                 {canManageAccess && (
-                  <TabPanel value={activeTab} index={6}>
+                  <TabPanel value={activeTab} index={5}>
                     <AdminAccessControlSection userEmail={user?.email} />
                   </TabPanel>
                 )}

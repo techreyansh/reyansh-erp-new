@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -317,6 +318,7 @@ const priorityConfig = {
 
 const DispatchManagement = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
@@ -574,7 +576,7 @@ const DispatchManagement = () => {
         subtitle="Advanced dispatch tracking with real-time analytics & comprehensive filtering"
         stats={headerStats}
         onRefresh={handleRefresh}
-        onAddNew={() => {/* Navigate to dispatch form */}}
+        onAddNew={() => navigate('/dispatch')}
         addButtonText="New Dispatch"
         addButtonIcon={<Add />}
         refreshLoading={loading}

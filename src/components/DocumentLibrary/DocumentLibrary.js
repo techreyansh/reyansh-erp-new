@@ -90,7 +90,7 @@ import { Navigate } from 'react-router-dom';
 
 const DocumentLibrary = () => {
   const theme = useTheme();
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   // State management
@@ -153,8 +153,25 @@ const DocumentLibrary = () => {
   }, [currentPath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const userRole = user?.role || 'Employee';
-  
-  // Redirect if not CEO
+
+  // Wait for auth/role hydration before deciding access, otherwise a hard
+  // refresh redirects the CEO before their role has resolved.
+  if (authLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh'
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Redirect if not CEO (only once role is actually resolved)
   if (userRole !== 'CEO') {
     return <Navigate to="/dashboard" replace />;
   }

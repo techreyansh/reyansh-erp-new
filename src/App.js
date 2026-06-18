@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthContext";
 import { useUser } from "./context/UserContext";
 import FullScreenLogoLoader from "./components/common/FullScreenLogoLoader";
 import ErrorBoundary from "./components/common/ErrorBoundary";
+import ComingSoon from "./components/common/ComingSoon";
 import {
   Box,
   CssBaseline,
@@ -119,7 +120,6 @@ const AccountabilityScorecard = lazy(() => import("./components/accountability/A
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
-const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
@@ -693,15 +693,6 @@ function AppContent() {
                   />
 
                   <Route
-                    path="/client-dashboard"
-                    element={
-                      <ProtectedRouteGate>
-                        <ClientDashboard />
-                      </ProtectedRouteGate>
-                    }
-                  />
-
-                  <Route
                     path="/employee-dashboard"
                     element={
                       <ProtectedRouteGate>
@@ -756,7 +747,7 @@ function AppContent() {
                     path="/ppc"
                     element={
                       <ProtectedRouteGate>
-                        <Navigate to="/ppc/production-plan" replace />
+                        <ComingSoon title="Production module — coming soon" />
                       </ProtectedRouteGate>
                     }
                   />
@@ -764,7 +755,7 @@ function AppContent() {
                     path="/ppc/:section"
                     element={
                       <ProtectedRouteGate>
-                        <PPCModulePage />
+                        <ComingSoon title="Production module — coming soon" />
                       </ProtectedRouteGate>
                     }
                   />

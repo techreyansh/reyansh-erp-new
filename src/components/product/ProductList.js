@@ -999,15 +999,6 @@ const ProductList = () => {
         <DialogContent sx={{ p: 0, overflow: 'auto', maxHeight: 'calc(90vh - 120px)' }}>
           {selectedProduct && (
             <Box sx={{ p: 3 }}>
-              {/* Debug: Show all sections are rendering */}
-              <Box sx={{ mb: 2, p: 2, backgroundColor: 'info.lighter', borderRadius: 1, border: '2px solid', borderColor: 'primary.main' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                  🔍 DEBUG: All sections should be visible below
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'primary.main' }}>
-                  Product: {selectedProduct.productCode} | Total fields: {Object.keys(selectedProduct).length}
-                </Typography>
-              </Box>
               {/* Basic Information Section */}
               <Card sx={{ mb: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>

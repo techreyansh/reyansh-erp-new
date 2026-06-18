@@ -122,8 +122,6 @@ import {
   Description,
   CloudDone,
   DeliveryDining,
-  TruckLoading,
-  Package,
   TrackChanges,
   Assessment,
   Timeline as TimelineIcon,
@@ -1026,14 +1024,6 @@ const ProductManagement = () => {
                       mb: 2
                     }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Client Code
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    {selectedProduct.clientCode}
-                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">
