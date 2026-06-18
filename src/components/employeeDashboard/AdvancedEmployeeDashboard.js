@@ -366,11 +366,13 @@ const AdvancedEmployeeDashboard = () => {
           bValue = b.EmployeeCode || '';
       }
 
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
+      let cmp;
+      if (aValue instanceof Date && bValue instanceof Date) {
+        cmp = aValue.getTime() - bValue.getTime();
       } else {
-        return aValue < bValue ? 1 : -1;
+        cmp = String(aValue).localeCompare(String(bValue));
       }
+      return sortOrder === 'asc' ? cmp : -cmp;
     });
 
     setFilteredEmployees(filtered);
@@ -820,9 +822,9 @@ const AdvancedEmployeeDashboard = () => {
               gap: 2,
               gridTemplateColumns: {
                 xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-                lg: 'repeat(4, 1fr)',
+                sm: 'repeat(2, minmax(0, 1fr))',
+                md: 'repeat(3, minmax(0, 1fr))',
+                lg: 'repeat(4, minmax(0, 1fr))',
               },
             }}
           >

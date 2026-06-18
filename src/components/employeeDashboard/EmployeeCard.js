@@ -209,9 +209,10 @@ const EmployeeCard = memo(({ employee, onSelect, onEdit, onView, onDelete }) => 
 
         {/* Contact Info */}
         <Box sx={{ flex: 1, minHeight: 70, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25, minHeight: 20 }}>
-            <EmailIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-            <Typography variant="caption" color="text.secondary" sx={{ 
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25, minHeight: 20, minWidth: 0 }}>
+            <EmailIcon sx={{ fontSize: 12, color: 'text.secondary', flexShrink: 0 }} />
+            <Typography variant="caption" color="text.secondary" title={safeGet(employee, 'Email')} sx={{
+              minWidth: 0,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',

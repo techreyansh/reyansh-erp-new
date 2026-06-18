@@ -25,6 +25,16 @@ body {
   transition: background-color var(--motion-duration-normal) var(--ease-out), color var(--motion-duration-normal) var(--ease-out);
 }
 
+/* Keep the app within the viewport — prevent accidental horizontal page scroll
+   that shifts the whole layout sideways. Use overflow-x: clip (not hidden) so it
+   does NOT create a scroll container and the sticky AppBar keeps working. */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 html[data-theme='dark'] body {
   background-color: #0F172A;
   color: #F1F5F9;
