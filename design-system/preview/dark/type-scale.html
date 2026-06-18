@@ -1,0 +1,43 @@
+<!-- @dsCard group="Foundations · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Typography · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  .head { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .display { font-family: "Montserrat", sans-serif; }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(226,232,237,0.12); }
+  .row .tag { width: 56px; flex: none; font-size: 11px; font-family: ui-monospace, monospace; color: #A9B2BA; }
+  .row .spec { margin-left: auto; font-size: 11px; font-family: ui-monospace, monospace; color: #6B767E; flex: none; }
+  .h1 { font-weight: 800; font-size: 36px; letter-spacing: -0.025em; }
+  .h2 { font-weight: 800; font-size: 30px; letter-spacing: -0.02em; }
+  .h3 { font-weight: 700; font-size: 24px; letter-spacing: -0.015em; }
+  .h4 { font-weight: 700; font-size: 20px; }
+  .h5 { font-weight: 700; font-size: 18px; }
+  .b1 { font-weight: 400; font-size: 16px; }
+  .b2 { font-weight: 400; font-size: 15px; color: #A9B2BA; }
+  .btn { font-weight: 600; font-size: 14px; letter-spacing: 0.02em; color: #84D2FC; }
+  .cap { font-size: 13px; letter-spacing: 0.02em; color: #A9B2BA; }
+</style>
+</head>
+<body>
+  <div class="head">Typography · Dark</div>
+  <div class="sub">Same Montserrat + Inter scale; near-white primary text, muted grey for secondary.</div>
+
+  <div class="row"><span class="tag">h1</span><span class="display h1">Production overview</span><span class="spec">Montserrat 800 · 36px</span></div>
+  <div class="row"><span class="tag">h2</span><span class="display h2">Dispatch schedule</span><span class="spec">Montserrat 800 · 30px</span></div>
+  <div class="row"><span class="tag">h3</span><span class="display h3">Client orders</span><span class="spec">Montserrat 700 · 24px</span></div>
+  <div class="row"><span class="tag">h4</span><span class="display h4">Bill of materials</span><span class="spec">Montserrat 700 · 20px</span></div>
+  <div class="row"><span class="tag">h5</span><span class="display h5">Inventory stock</span><span class="spec">Montserrat 700 · 18px</span></div>
+  <div class="row"><span class="tag">body1</span><span class="b1">Default reading text used across forms and panels.</span><span class="spec">Inter 400 · 16px</span></div>
+  <div class="row"><span class="tag">body2</span><span class="b2">Secondary text inside tables and dense lists.</span><span class="spec">Inter 400 · 15px</span></div>
+  <div class="row"><span class="tag">button</span><span class="btn">CREATE ORDER</span><span class="spec">Inter 600 · 14px</span></div>
+  <div class="row"><span class="tag">caption</span><span class="cap">Updated 2 minutes ago</span><span class="spec">Inter 400 · 13px</span></div>
+</body>
+</html>

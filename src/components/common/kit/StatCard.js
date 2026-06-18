@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Card, CardContent, Skeleton, Stack, Typography, alpha } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 /**
  * Compact KPI card. Optional `onClick` makes it a drill-in affordance.
@@ -12,7 +13,9 @@ import { Box, Card, CardContent, Skeleton, Stack, Typography, alpha } from '@mui
  * @param {boolean} [loading]
  * @param {function} [onClick]
  */
-function StatCard({ label, value, sub, icon: Icon, accent = '#45ADE6', loading, onClick }) {
+function StatCard({ label, value, sub, icon: Icon, accent, loading, onClick }) {
+  const theme = useTheme();
+  const accentColor = accent || theme.palette.primary.main;
   return (
     <Card
       variant="outlined"
@@ -23,7 +26,7 @@ function StatCard({ label, value, sub, icon: Icon, accent = '#45ADE6', loading, 
         cursor: onClick ? 'pointer' : 'default',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
         '&:hover': onClick
-          ? { borderColor: alpha(accent, 0.5), boxShadow: `0 8px 20px -12px ${alpha(accent, 0.6)}` }
+          ? { borderColor: alpha(accentColor, 0.5), boxShadow: `0 8px 20px -12px ${alpha(accentColor, 0.6)}` }
           : undefined,
       }}
     >
@@ -51,7 +54,7 @@ function StatCard({ label, value, sub, icon: Icon, accent = '#45ADE6', loading, 
             )}
           </Box>
           {Icon && (
-            <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(accent, 0.12), color: accent, display: 'flex' }}>
+            <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(accentColor, 0.12), color: accentColor, display: 'flex' }}>
               <Icon />
             </Box>
           )}

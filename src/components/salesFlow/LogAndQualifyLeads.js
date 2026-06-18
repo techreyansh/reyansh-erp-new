@@ -405,19 +405,19 @@ const LogAndQualifyLeads = () => {
   ];
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)',
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.info.lighter} 100%)`,
       py: 3
-    }}>
+    })}>
       <Container maxWidth="xl">
         <Fade in timeout={800}>
           <Box>
             {/* Enhanced Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 4,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: 'common.white',
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
               position: 'relative',
@@ -434,15 +434,15 @@ const LogAndQualifyLeads = () => {
                 background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
                 opacity: 0.3
               }
-            }}>
+            })}>
               <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap={3}>
                     <Tooltip title="Back to Sales Flow">
                       <IconButton
                         onClick={() => navigate('/sales-flow')}
-                        sx={{ 
-                          color: 'white',
+                        sx={{
+                          color: 'common.white',
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.2)',
@@ -456,11 +456,11 @@ const LogAndQualifyLeads = () => {
                     </Tooltip>
                     
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Box sx={{
+                      <Box sx={(theme) => ({
                         width: 60,
                         height: 60,
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -474,23 +474,23 @@ const LogAndQualifyLeads = () => {
                           right: -2,
                           bottom: -2,
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #1E7DBE, #45ADE6, #84D2FC)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                           zIndex: -1,
                           opacity: 0.7
                         }
-                      }}>
-                        <Diamond sx={{ fontSize: 28, color: 'white' }} />
+                      })}>
+                        <Diamond sx={{ fontSize: 28, color: 'common.white' }} />
                       </Box>
                       <Box>
-                        <Typography variant="h3" sx={{ 
+                        <Typography variant="h3" sx={(theme) => ({
                           fontWeight: 800,
-                          background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+                          background: `linear-gradient(135deg, ${theme.palette.common.white} 0%, ${theme.palette.grey[100]} 100%)`,
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           textShadow: '0 4px 8px rgba(0,0,0,0.1)',
                           mb: 1
-                        }}>
+                        })}>
                           Log & Qualify Leads
                         </Typography>
                         <Typography variant="h6" sx={{ 
@@ -515,8 +515,8 @@ const LogAndQualifyLeads = () => {
                     border: '1px solid rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <WorkspacePremium sx={{ color: '#84D2FC', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                    <WorkspacePremium sx={{ color: 'primary.light', fontSize: 20 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'common.white' }}>
                       Step 1
                     </Typography>
                   </Box>
@@ -529,21 +529,22 @@ const LogAndQualifyLeads = () => {
               borderRadius: 3,
               boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
               overflow: 'hidden',
-              background: 'white',
+              background: 'background.paper',
               maxWidth: '1400px',
               mx: 'auto'
             }}>
               <CardContent sx={{ p: 0 }}>
                 {/* Form Header */}
-                <Box sx={{ 
-                  p: 4, 
-                  borderBottom: '1px solid #e0e0e0',
-                  backgroundColor: '#f8f9fa'
+                <Box sx={{
+                  p: 4,
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.100',
+                  backgroundColor: 'grey.100'
                 }}>
                   <Box display="flex" alignItems="center" gap={2}>
-                    <Person sx={{ fontSize: 28, color: '#45ADE6' }} />
+                    <Person sx={{ fontSize: 28, color: 'primary.main' }} />
                     <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#45ADE6', mb: 0.5 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
                         Lead Information
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
@@ -558,17 +559,18 @@ const LogAndQualifyLeads = () => {
                     <Grid container spacing={3}>
                       {/* Client/Prospect Selection Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                             <Box display="flex" alignItems="center" gap={1.5}>
-                              <AccountCircle sx={{ fontSize: 22, color: '#45ADE6' }} />
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                              <AccountCircle sx={{ fontSize: 22, color: 'primary.main' }} />
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                                 Client/Prospect Selection (Optional)
                               </Typography>
                             </Box>
@@ -578,7 +580,7 @@ const LogAndQualifyLeads = () => {
                                 onClick={loadClients}
                                 disabled={loadingClients}
                                 sx={{
-                                  color: '#1E7DBE',
+                                  color: 'primary.dark',
                                   '&:hover': {
                                     backgroundColor: 'rgba(102, 126, 234, 0.1)'
                                   }
@@ -601,13 +603,13 @@ const LogAndQualifyLeads = () => {
                                   sx={{
                                     borderRadius: 2,
                                     '& .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#e0e0e0'
+                                      borderColor: 'grey.100'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }}
@@ -648,10 +650,10 @@ const LogAndQualifyLeads = () => {
                                   }}
                                   sx={{
                                     borderRadius: 2,
-                                    borderColor: createNewProspect ? '#1E7DBE' : '#e0e0e0',
-                                    color: createNewProspect ? '#1E7DBE' : 'text.secondary',
+                                    borderColor: createNewProspect ? 'primary.dark' : 'grey.100',
+                                    color: createNewProspect ? 'primary.dark' : 'text.secondary',
                                     '&:hover': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       backgroundColor: 'rgba(102, 126, 234, 0.04)'
                                     }
                                   }}
@@ -681,16 +683,17 @@ const LogAndQualifyLeads = () => {
 
                       {/* Basic Information Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Person sx={{ fontSize: 22, color: '#45ADE6' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <Person sx={{ fontSize: 22, color: 'primary.main' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Basic Information
                             </Typography>
                           </Box>
@@ -712,9 +715,9 @@ const LogAndQualifyLeads = () => {
                                 sx={{
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
-                                    backgroundColor: '#f5f5f5',
+                                    backgroundColor: 'grey.100',
                                     '& .MuiOutlinedInput-input': {
-                                      color: '#45ADE6',
+                                      color: 'primary.main',
                                       fontWeight: 600
                                     }
                                   }
@@ -741,10 +744,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -771,10 +774,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -787,16 +790,17 @@ const LogAndQualifyLeads = () => {
 
                       {/* Contact Information Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Phone sx={{ fontSize: 22, color: '#45ADE6' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <Phone sx={{ fontSize: 22, color: 'primary.main' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Contact Information
                             </Typography>
                           </Box>
@@ -820,10 +824,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -851,10 +855,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -882,10 +886,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -898,16 +902,17 @@ const LogAndQualifyLeads = () => {
 
                       {/* Assignment & Classification Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Assignment sx={{ fontSize: 22, color: '#45ADE6' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <Assignment sx={{ fontSize: 22, color: 'primary.main' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Assignment & Classification
                             </Typography>
                           </Box>
@@ -923,13 +928,13 @@ const LogAndQualifyLeads = () => {
                                   sx={{
                                     borderRadius: 2,
                                     '& .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: errors.customerType ? '#d32f2f' : '#e0e0e0'
+                                      borderColor: errors.customerType ? 'error.main' : 'grey.100'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }}
@@ -959,13 +964,13 @@ const LogAndQualifyLeads = () => {
                                   sx={{
                                     borderRadius: 2,
                                     '& .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: errors.leadAssignedTo ? '#d32f2f' : '#e0e0e0'
+                                      borderColor: errors.leadAssignedTo ? 'error.main' : 'grey.100'
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }}
@@ -989,16 +994,17 @@ const LogAndQualifyLeads = () => {
 
                       {/* Products Interested Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <ShoppingCart sx={{ fontSize: 22, color: '#45ADE6' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <ShoppingCart sx={{ fontSize: 22, color: 'primary.main' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Products Interested
                             </Typography>
                           </Box>
@@ -1019,10 +1025,10 @@ const LogAndQualifyLeads = () => {
                                         label={product ? product.label : value}
                                         size="small"
                                         sx={{
-                                          backgroundColor: '#1E7DBE',
-                                          color: 'white',
+                                          backgroundColor: 'primary.dark',
+                                          color: 'common.white',
                                           '& .MuiChip-deleteIcon': {
-                                            color: 'white'
+                                            color: 'common.white'
                                           }
                                         }}
                                       />
@@ -1033,13 +1039,13 @@ const LogAndQualifyLeads = () => {
                               sx={{
                                 borderRadius: 2,
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: errors.productsInterested ? '#d32f2f' : '#e0e0e0'
+                                  borderColor: errors.productsInterested ? 'error.main' : 'grey.100'
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#1E7DBE'
+                                  borderColor: 'primary.dark'
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#1E7DBE',
+                                  borderColor: 'primary.dark',
                                   borderWidth: 2
                                 }
                               }}
@@ -1069,16 +1075,17 @@ const LogAndQualifyLeads = () => {
 
                       {/* Details Section */}
                       <Grid item xs={12}>
-                        <Box sx={{ 
-                          p: 2.5, 
-                          mb: 3, 
-                          backgroundColor: '#f8f9fa', 
+                        <Box sx={{
+                          p: 2.5,
+                          mb: 3,
+                          backgroundColor: 'grey.100',
                           borderRadius: 2,
-                          border: '1px solid #e0e0e0'
+                          border: '1px solid',
+                          borderColor: 'grey.100'
                         }}>
                           <Box display="flex" alignItems="center" gap={1.5} mb={3}>
-                            <Notes sx={{ fontSize: 22, color: '#45ADE6' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <Notes sx={{ fontSize: 22, color: 'primary.main' }} />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Details
                             </Typography>
                           </Box>
@@ -1105,10 +1112,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -1135,10 +1142,10 @@ const LogAndQualifyLeads = () => {
                                   '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE'
+                                      borderColor: 'primary.dark'
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                      borderColor: '#1E7DBE',
+                                      borderColor: 'primary.dark',
                                       borderWidth: 2
                                     }
                                   }
@@ -1153,10 +1160,11 @@ const LogAndQualifyLeads = () => {
                   </Box>
 
                   {/* Action Buttons Section */}
-                  <Box sx={{ 
-                    p: 3, 
-                    borderTop: '1px solid #e0e0e0',
-                    backgroundColor: '#f8f9fa',
+                  <Box sx={{
+                    p: 3,
+                    borderTop: '1px solid',
+                    borderColor: 'grey.100',
+                    backgroundColor: 'grey.100',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
@@ -1197,13 +1205,13 @@ const LogAndQualifyLeads = () => {
                           px: 3,
                           py: 1,
                           minWidth: 100,
-                          borderColor: '#e0e0e0',
+                          borderColor: 'grey.100',
                           color: 'text.secondary',
                           fontWeight: 600,
                           '&:hover': {
-                            borderColor: '#d32f2f',
+                            borderColor: 'error.main',
                             backgroundColor: 'rgba(211, 47, 47, 0.04)',
-                            color: '#d32f2f'
+                            color: 'error.main'
                           }
                         }}
                       >
@@ -1214,9 +1222,9 @@ const LogAndQualifyLeads = () => {
                         variant="contained"
                         startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <AutoAwesome />}
                         disabled={loading}
-                        sx={{
-                          background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                          color: 'white',
+                        sx={(theme) => ({
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                          color: 'common.white',
                           fontWeight: 700,
                           px: 4,
                           py: 1,
@@ -1227,13 +1235,13 @@ const LogAndQualifyLeads = () => {
                           '&:hover': {
                             transform: 'translateY(-2px)',
                             boxShadow: '0 8px 24px rgba(79, 172, 254, 0.6)',
-                            background: 'linear-gradient(135deg, #84D2FC 0%, #45ADE6 100%)'
+                            background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
                           },
                           '&:disabled': {
-                            background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                             opacity: 0.7
                           }
-                        }}
+                        })}
                       >
                         {loading ? 'Creating...' : 'Create Lead'}
                       </Button>

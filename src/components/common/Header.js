@@ -905,7 +905,7 @@ const Header = () => {
                             height: 6,
                             borderRadius: "50%",
                             backgroundColor: theme.palette.primary.main,
-                            border: "1.5px solid #fff",
+                            border: `1.5px solid ${theme.palette.background.paper}`,
                           }}
                         />
                       }
@@ -1132,8 +1132,8 @@ const Header = () => {
                                 pr: 3,
                                 py: 1,
                                 "&.Mui-selected": {
-                                  backgroundColor: "#eff6ff",
-                                  "&:hover": { backgroundColor: "#dbeafe" },
+                                  backgroundColor: theme.palette.info.lighter,
+                                  "&:hover": { backgroundColor: theme.palette.info.light },
                                 },
                               }}
                             >

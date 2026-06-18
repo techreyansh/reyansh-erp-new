@@ -309,8 +309,8 @@ const ReceivingDocumentsList = ({ dispatches, onUploadDocument, title = "Upload 
                               <Typography 
                                 component="span" 
                                 variant="caption" 
-                                sx={{ 
-                                  color: '#9e9e9e',
+                                sx={{
+                                  color: 'text.disabled',
                                   fontSize: '0.7rem',
                                   textDecoration: 'line-through',
                                   ml: 0.5,

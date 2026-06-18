@@ -703,26 +703,26 @@ const DocumentLibrary = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header Section */}
       <Fade in timeout={600}>
-        <Box sx={{ 
-          mb: 4, 
-          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)', 
-          color: 'white',
+        <Box sx={(theme) => ({
+          mb: 4,
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+          color: 'common.white',
           borderRadius: 4,
           overflow: 'hidden',
           position: 'relative',
           boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)'
-        }}>
+        })}>
           {/* Decorative background pattern */}
-          <Box sx={{
+          <Box sx={(theme) => ({
             position: 'absolute',
             top: 0,
             right: 0,
             width: '50%',
             height: '100%',
             opacity: 0.1,
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundImage: `radial-gradient(circle, ${theme.palette.common.white} 1px, transparent 1px)`,
             backgroundSize: '20px 20px'
-          }} />
+          })} />
           
           <CardContent sx={{ py: 4, position: 'relative', zIndex: 1 }}>
             <Stack direction={{ xs: "column", md: "row" }} alignItems="center" spacing={3} justifyContent="space-between">
@@ -752,27 +752,27 @@ const DocumentLibrary = () => {
               </Stack>
               
               <Stack direction={{ xs: "row", md: "column" }} spacing={1} alignItems={{ xs: "center", md: "flex-end" }}>
-                <Chip 
+                <Chip
                   icon={<CloudUploadIcon />}
                   label={user?.name || 'User'}
-                  sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.2)', 
-                    color: 'white', 
+                  sx={(theme) => ({
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: 'common.white',
                     backdropFilter: 'blur(10px)',
                     fontWeight: 'bold',
-                    '& .MuiChip-icon': { color: 'white' }
-                  }}
+                    '& .MuiChip-icon': { color: theme.palette.common.white }
+                  })}
                 />
-                <Chip 
+                <Chip
                   icon={<FolderIcon />}
                   label={`${folders.length + files.length} items`}
-                  sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.2)', 
-                    color: 'white', 
+                  sx={(theme) => ({
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: 'common.white',
                     backdropFilter: 'blur(10px)',
                     fontWeight: 'bold',
-                    '& .MuiChip-icon': { color: 'white' }
-                  }}
+                    '& .MuiChip-icon': { color: theme.palette.common.white }
+                  })}
                 />
               </Stack>
             </Stack>
@@ -850,17 +850,17 @@ const DocumentLibrary = () => {
                     size="small"
                     startIcon={<CreateFolderIcon />}
                     onClick={() => setCreateFolderDialog(true)}
-                    sx={{ 
+                    sx={(theme) => ({
                       borderRadius: 2,
                       textTransform: 'none',
                       fontWeight: 'bold',
                       boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                       '&:hover': {
                         boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
                         transform: 'translateY(-2px)'
                       }
-                    }}
+                    })}
                   >
                     {!isMobile && 'New Folder'}
                   </Button>
@@ -1198,7 +1198,7 @@ const DocumentLibrary = () => {
                         size="small"
                         sx={{
                           bgcolor: item.type === 'folder' ? 'primary.main' : 'secondary.main',
-                          color: 'white',
+                          color: 'common.white',
                           fontWeight: 'bold',
                           fontSize: '0.7rem',
                           height: 24,
@@ -1243,7 +1243,7 @@ const DocumentLibrary = () => {
                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                             '&:hover': {
                               bgcolor: 'primary.main',
-                              color: 'white'
+                              color: 'common.white'
                             }
                           }}
                           onClick={(e) => {
@@ -1267,7 +1267,7 @@ const DocumentLibrary = () => {
                       minHeight: 200
                     }}>
                       {/* Icon with gradient background */}
-                      <Box sx={{
+                      <Box sx={(theme) => ({
                         width: 80,
                         height: 80,
                         borderRadius: '50%',
@@ -1275,8 +1275,8 @@ const DocumentLibrary = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         background: item.type === 'folder'
-                          ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                          : 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
+                          ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                          : `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.error.main} 100%)`,
                         mb: 2,
                         boxShadow: item.type === 'folder'
                           ? '0 8px 16px rgba(102, 126, 234, 0.3)'
@@ -1285,11 +1285,11 @@ const DocumentLibrary = () => {
                         '&:hover': {
                           transform: 'scale(1.1) rotate(5deg)'
                         }
-                      }}>
+                      })}>
                         {item.type === 'folder' ? (
-                          <FolderIcon sx={{ fontSize: 40, color: 'white' }} />
+                          <FolderIcon sx={{ fontSize: 40, color: 'common.white' }} />
                         ) : (
-                          <Box sx={{ color: 'white', '& svg': { fontSize: 40 } }}>
+                          <Box sx={{ color: 'common.white', '& svg': { fontSize: 40 } }}>
                             {getFileIcon(item.type || item.mimeType)}
                           </Box>
                         )}
@@ -1458,7 +1458,7 @@ const DocumentLibrary = () => {
                                 color: 'success.main',
                                 '&:hover': {
                                   bgcolor: 'success.main',
-                                  color: 'white'
+                                  color: 'common.white'
                                 }
                               }}
                             >
@@ -1516,17 +1516,17 @@ const DocumentLibrary = () => {
                       }}
                     >
                       <ListItemAvatar>
-                        <Avatar 
-                          sx={{ 
+                        <Avatar
+                          sx={(theme) => ({
                             width: 56,
                             height: 56,
                             background: item.type === 'folder'
-                              ? 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                              : 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
+                              ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                              : `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.error.main} 100%)`,
                             boxShadow: item.type === 'folder'
                               ? '0 4px 12px rgba(102, 126, 234, 0.3)'
                               : '0 4px 12px rgba(245, 87, 108, 0.3)'
-                          }}
+                          })}
                         >
                           {item.type === 'folder' ? (
                             <FolderIcon sx={{ fontSize: 28 }} />
@@ -1549,7 +1549,7 @@ const DocumentLibrary = () => {
                               size="small"
                               sx={{
                                 bgcolor: item.type === 'folder' ? 'primary.main' : 'secondary.main',
-                                color: 'white',
+                                color: 'common.white',
                                 fontWeight: 'bold',
                                 height: 24
                               }}
@@ -2051,12 +2051,12 @@ const DocumentLibrary = () => {
           {libraryStats && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: 'common.white',
                   textAlign: 'center',
                   p: 3
-                }}>
+                })}>
                   <FolderIcon sx={{ fontSize: 48, mb: 2 }} />
                   <Typography variant="h3" fontWeight="bold">
                     {libraryStats.totalFolders}
@@ -2068,12 +2068,12 @@ const DocumentLibrary = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #84D2FC 0%, #C0392B 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.error.main} 100%)`,
+                  color: 'common.white',
                   textAlign: 'center',
                   p: 3
-                }}>
+                })}>
                   <FileIcon sx={{ fontSize: 48, mb: 2 }} />
                   <Typography variant="h3" fontWeight="bold">
                     {libraryStats.totalFiles}
@@ -2085,12 +2085,12 @@ const DocumentLibrary = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                  color: 'common.white',
                   textAlign: 'center',
                   p: 3
-                }}>
+                })}>
                   <CloudUploadIcon sx={{ fontSize: 48, mb: 2 }} />
                   <Typography variant="h3" fontWeight="bold">
                     {libraryStats.formattedSize}

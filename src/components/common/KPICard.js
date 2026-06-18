@@ -58,7 +58,7 @@ const KPICard = ({
   };
 
   const getTrendColor = () => {
-    return trendUp ? '#4caf50' : '#f44336';
+    return trendUp ? theme.palette.success.main : theme.palette.error.main;
   };
 
   return (

@@ -1,0 +1,54 @@
+<!-- @dsCard group="Components · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buttons · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #A9B2BA; margin: 0 0 12px; }
+  .group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 22px; }
+  .btn { font-family: "Inter"; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; border-radius: 8px; padding: 10px 20px; border: none; cursor: pointer; }
+  .contained { background: #45ADE6; color: #0B1A24; }
+  .contained.sec { background: #A9B2BA; color: #1E2B38; }
+  .contained.err { background: #E05548; color: #fff; }
+  .outlined { background: transparent; color: #84D2FC; border: 1.5px solid #45ADE6; }
+  .text { background: transparent; color: #84D2FC; padding: 10px 12px; }
+  .sm { padding: 6px 14px; font-size: 13px; }
+  .lg { padding: 12px 26px; font-size: 15px; }
+  .disabled { background: #334155; color: #6B767E; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <h1>Buttons · Dark</h1>
+  <div class="sub">Contained buttons keep sky-blue fill with deep-slate text for AA contrast in dark mode.</div>
+
+  <div class="label">Variants</div>
+  <div class="group">
+    <button class="btn contained">Create order</button>
+    <button class="btn contained sec">Secondary</button>
+    <button class="btn outlined">Outlined</button>
+    <button class="btn text">Text action</button>
+    <button class="btn contained err">Delete</button>
+  </div>
+
+  <div class="label">Sizes</div>
+  <div class="group">
+    <button class="btn contained sm">Small</button>
+    <button class="btn contained">Medium</button>
+    <button class="btn contained lg">Large</button>
+  </div>
+
+  <div class="label">States</div>
+  <div class="group">
+    <button class="btn contained">Default</button>
+    <button class="btn contained" style="box-shadow:0 4px 16px rgba(69,173,230,0.28);transform:scale(1.02)">Hover</button>
+    <button class="btn disabled">Disabled</button>
+  </div>
+</body>
+</html>

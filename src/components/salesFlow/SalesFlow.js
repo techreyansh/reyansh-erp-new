@@ -321,13 +321,13 @@ const SalesDashboard = () => {
       <Fade in timeout={1000}>
         <Card
           elevation={0}
-          sx={{
+          sx={(theme) => ({
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+            background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[100]} 100%)`,
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden',
             position: "relative",
-          }}
+          })}
         >
           {/* Section Header */}
           <Box 
@@ -370,11 +370,11 @@ const SalesDashboard = () => {
 
           <CardContent sx={{ p: { xs: 4, sm: 5, md: 6 } }}>
             {/* Process Steps */}
-            <Box sx={{ 
-              display: "flex", 
-              alignItems: "flex-start", 
-              gap: { xs: 2, sm: 3, md: 4 }, 
-              flexWrap: "wrap", 
+            <Box sx={(theme) => ({
+              display: "flex",
+              alignItems: "flex-start",
+              gap: { xs: 2, sm: 3, md: 4 },
+              flexWrap: "wrap",
               justifyContent: "flex-start",
               maxHeight: "600px",
               overflowY: "auto",
@@ -383,29 +383,29 @@ const SalesDashboard = () => {
                 width: "8px",
               },
               "&::-webkit-scrollbar-track": {
-                backgroundColor: "#f1f1f1",
+                backgroundColor: theme.palette.grey[100],
                 borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#c1c1c1",
+                backgroundColor: theme.palette.divider,
                 borderRadius: "4px",
                 "&:hover": {
-                  backgroundColor: "#a8a8a8",
+                  backgroundColor: theme.palette.text.disabled,
                 },
               },
-            }}>
+            })}>
               {[
-                { step: 1, label: "Log Lead", color: "#0097a7", description: "Customer Relations Manager logs and qualifies leads", assignedTo: "Customer Relations Manager", tat: "Same day" },
-                { step: 2, label: "Initial Call", color: "#0097a7", description: "Sales Executive makes initial call and gathers requirements", assignedTo: "Sales Executive", tat: "1 day" },
-                { step: 3, label: "Evaluate Prospects", color: "#0097a7", description: "Sales Executive evaluates high-value prospects", assignedTo: "Sales Executive", tat: "1 day" },
-                { step: 4, label: "Check Feasibility", color: "#0097a7", description: "NPD team checks product feasibility", assignedTo: "NPD", tat: "2 days" },
-                { step: 5, label: "Confirm Standards", color: "#0097a7", description: "Quality Engineer confirms standards and compliance", assignedTo: "Quality Engineer", tat: "1 day" },
-                { step: 6, label: "Send Quotation", color: "#0097a7", description: "Sales Executive sends detailed quotation", assignedTo: "Sales Executive", tat: "1 day" },
-                { step: 7, label: "Approve Payment Terms", color: "#0097a7", description: "Director approves payment terms", assignedTo: "Director", tat: "1 day" },
-                { step: 8, label: "Submit Sample", color: "#0097a7", description: "Sales Executive submits product sample", assignedTo: "Sales Executive", tat: "2 days" },
-                { step: 9, label: "Get Sample Approval", color: "#0097a7", description: "Customer Relations Manager gets sample approval", assignedTo: "Customer Relations Manager", tat: "3 days" },
-                { step: 10, label: "Strategic Approval", color: "#0097a7", description: "Director approves strategic deals", assignedTo: "Director", tat: "1 day" },
-                { step: 11, label: "Order Booking", color: "#0097a7", description: "Sales Executive confirms order booking", assignedTo: "Sales Executive", tat: "Same day" },
+                { step: 1, label: "Log Lead", color: theme.palette.primary.dark, description: "Customer Relations Manager logs and qualifies leads", assignedTo: "Customer Relations Manager", tat: "Same day" },
+                { step: 2, label: "Initial Call", color: theme.palette.primary.dark, description: "Sales Executive makes initial call and gathers requirements", assignedTo: "Sales Executive", tat: "1 day" },
+                { step: 3, label: "Evaluate Prospects", color: theme.palette.primary.dark, description: "Sales Executive evaluates high-value prospects", assignedTo: "Sales Executive", tat: "1 day" },
+                { step: 4, label: "Check Feasibility", color: theme.palette.primary.dark, description: "NPD team checks product feasibility", assignedTo: "NPD", tat: "2 days" },
+                { step: 5, label: "Confirm Standards", color: theme.palette.primary.dark, description: "Quality Engineer confirms standards and compliance", assignedTo: "Quality Engineer", tat: "1 day" },
+                { step: 6, label: "Send Quotation", color: theme.palette.primary.dark, description: "Sales Executive sends detailed quotation", assignedTo: "Sales Executive", tat: "1 day" },
+                { step: 7, label: "Approve Payment Terms", color: theme.palette.primary.dark, description: "Director approves payment terms", assignedTo: "Director", tat: "1 day" },
+                { step: 8, label: "Submit Sample", color: theme.palette.primary.dark, description: "Sales Executive submits product sample", assignedTo: "Sales Executive", tat: "2 days" },
+                { step: 9, label: "Get Sample Approval", color: theme.palette.primary.dark, description: "Customer Relations Manager gets sample approval", assignedTo: "Customer Relations Manager", tat: "3 days" },
+                { step: 10, label: "Strategic Approval", color: theme.palette.primary.dark, description: "Director approves strategic deals", assignedTo: "Director", tat: "1 day" },
+                { step: 11, label: "Order Booking", color: theme.palette.primary.dark, description: "Sales Executive confirms order booking", assignedTo: "Sales Executive", tat: "Same day" },
               ].map((process, index) => (
                 <Stack key={index} direction="column" alignItems="center" spacing={2}>
                   <Box 
@@ -853,14 +853,14 @@ const SalesFlow = () => {
         justifyContent="center" 
         alignItems="center" 
         minHeight="400px"
-        sx={{
-          background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
+        sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           borderRadius: 3,
           p: 4
-        }}
+        })}
       >
-        <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
-        <Typography variant="h6" color="white" sx={{ fontWeight: 300 }}>
+        <CircularProgress size={60} sx={{ color: 'common.white', mb: 2 }} />
+        <Typography variant="h6" color="common.white" sx={{ fontWeight: 300 }}>
           Loading Sales Flow Data...
         </Typography>
       </Box>
@@ -900,7 +900,7 @@ const SalesFlow = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search sx={{ color: '#00bcd4' }} />
+                    <Search sx={{ color: 'primary.main' }} />
                   </InputAdornment>
                 ),
               }}
@@ -932,21 +932,21 @@ const SalesFlow = () => {
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)'
-                    }}>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Next Step</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Role</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Action</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Status</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Assigned To</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>TAT</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>TAT Status</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Start Time</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>End Time</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Routing</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Actions</TableCell>
+                    <TableRow sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+                    })}>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Next Step</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Role</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Action</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Status</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Assigned To</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>TAT</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>TAT Status</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Start Time</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>End Time</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Routing</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -954,12 +954,12 @@ const SalesFlow = () => {
                       <TableRow>
                         <TableCell colSpan={12} align="center" sx={{ py: 8 }}>
                           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                            <Avatar sx={{ 
-                              width: 80, 
-                              height: 80, 
-                              background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
+                            <Avatar sx={(theme) => ({
+                              width: 80,
+                              height: 80,
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                               mb: 2
-                            }}>
+                            })}>
                               <Timeline sx={{ fontSize: 40 }} />
                             </Avatar>
                             <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 500 }}>
@@ -1042,12 +1042,12 @@ const SalesFlow = () => {
                               </TableCell>
                               <TableCell>
                                 <Box display="flex" alignItems="center" gap={1}>
-                                  <Avatar sx={{ 
-                                    width: 24, 
-                                    height: 24, 
-                                    background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
+                                  <Avatar sx={(theme) => ({
+                                    width: 24,
+                                    height: 24,
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                                     fontSize: '0.75rem'
-                                  }}>
+                                  })}>
                                     {stepDef?.role?.charAt(0)}
                                   </Avatar>
                                   <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
@@ -1170,8 +1170,8 @@ const SalesFlow = () => {
                                         e.stopPropagation();
                                         handleViewDetails(step);
                                       }}
-                                      sx={{ 
-                                        color: '#00bcd4',
+                                      sx={{
+                                        color: 'primary.main',
                                         '&:hover': {
                                           backgroundColor: 'rgba(0, 188, 212, 0.1)'
                                         }
@@ -1187,8 +1187,8 @@ const SalesFlow = () => {
                                         e.stopPropagation();
                                         handleDelete(step);
                                       }}
-                                      sx={{ 
-                                        color: '#f44336',
+                                      sx={{
+                                        color: 'error.main',
                                         '&:hover': {
                                           backgroundColor: 'rgba(244, 67, 54, 0.1)'
                                         }
@@ -1203,11 +1203,11 @@ const SalesFlow = () => {
                                     startIcon={<CheckCircle />}
                                     onClick={(e) => handleTakeAction(step, e)}
                                     disabled={!canTakeAction}
-                                    sx={{ 
-                                      background: canTakeAction 
-                                        ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
-                                        : 'linear-gradient(135deg, #9e9e9e 0%, #757575 100%)',
-                                      color: 'white',
+                                    sx={(theme) => ({
+                                      background: canTakeAction
+                                        ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
+                                        : `linear-gradient(135deg, ${theme.palette.text.disabled} 0%, ${theme.palette.text.secondary} 100%)`,
+                                      color: theme.palette.common.white,
                                       fontWeight: 600,
                                       px: 2,
                                       py: 0.5,
@@ -1218,7 +1218,7 @@ const SalesFlow = () => {
                                         transform: canTakeAction ? 'translateY(-2px)' : 'none',
                                         boxShadow: canTakeAction ? '0 6px 20px rgba(76, 175, 80, 0.4)' : 'none'
                                       }
-                                    }}
+                                    })}
                                   >
                                     Take Action
                                   </Button>
@@ -1244,7 +1244,7 @@ const SalesFlow = () => {
                   backgroundColor: 'rgba(248, 250, 255, 0.5)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                     </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1254,7 +1254,7 @@ const SalesFlow = () => {
                           setRowsPerPage(e.target.value);
                           setPage(0);
                         }}
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiOutlinedInput-notchedOutline': {
                             borderColor: 'rgba(0, 188, 212, 0.3)',
                           },
@@ -1262,9 +1262,9 @@ const SalesFlow = () => {
                             borderColor: 'rgba(0, 188, 212, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#00bcd4',
+                            borderColor: theme.palette.primary.main,
                           }
-                        }}
+                        })}
                       >
                         <MenuItem value={5}>5</MenuItem>
                         <MenuItem value={10}>10</MenuItem>
@@ -1275,7 +1275,7 @@ const SalesFlow = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, tabFilteredData.length)} of {tabFilteredData.length} steps
                     </Typography>
                     
@@ -1288,7 +1288,7 @@ const SalesFlow = () => {
                         size="large"
                         showFirstButton
                         showLastButton
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiPaginationItem-root': {
                             borderRadius: 3,
                             fontWeight: 700,
@@ -1302,8 +1302,8 @@ const SalesFlow = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
-                              color: 'white',
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                              color: theme.palette.common.white,
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                               '&:hover': {
@@ -1312,7 +1312,7 @@ const SalesFlow = () => {
                               }
                             }
                           }
-                        }}
+                        })}
                       />
                     )}
                   </Box>

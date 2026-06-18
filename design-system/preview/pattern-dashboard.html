@@ -1,0 +1,104 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Layout</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 0; }
+  .shell { display: flex; min-height: 620px; }
+  .drawer { width: 210px; background: #fff; border-right: 1px solid #E2E8ED; padding: 14px 10px; flex: none; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 6px 10px 16px; }
+  .brand .mark { width: 28px; height: 28px; border-radius: 7px; background: #45ADE6; color: #fff; display: flex; align-items: center; justify-content: center; font-family: "Montserrat"; font-weight: 800; font-size: 14px; }
+  .brand .nm { font-family: "Montserrat"; font-weight: 800; font-size: 14px; }
+  .navitem { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #475569; margin-bottom: 2px; }
+  .navitem .ic { width: 16px; height: 16px; border-radius: 5px; background: #E2E8F0; }
+  .navitem.active { background: rgba(69,173,230,0.1); color: #1E7DBE; font-weight: 600; }
+  .navitem.active .ic { background: #45ADE6; }
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .appbar { height: 58px; background: #fff; border-bottom: 1px solid #E2E8ED; box-shadow: 0 1px 3px rgba(15,23,42,0.06); display: flex; align-items: center; padding: 0 22px; }
+  .appbar .pg { font-family: "Montserrat"; font-weight: 700; font-size: 16px; }
+  .appbar .spacer { flex: 1; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2D3D4C; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .content { padding: 22px; }
+  .pagehead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .pagehead h1 { font-family: "Montserrat"; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .btn { font-family: "Inter"; font-weight: 600; font-size: 13px; background: #45ADE6; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .kpi { background: #fff; border: 1px solid #E2E8ED; border-radius: 8px; padding: 14px; box-shadow: 0 2px 4px rgba(15,23,42,0.04); position: relative; overflow: hidden; }
+  .kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .kpi.p::before { background: #45ADE6; } .kpi.s::before { background: #059669; }
+  .kpi.w::before { background: #D97706; } .kpi.e::before { background: #C0392B; }
+  .kpi .l { font-size: 12px; color: #81898F; font-weight: 600; }
+  .kpi .v { font-family: "Montserrat"; font-weight: 800; font-size: 24px; margin-top: 6px; }
+  .lower { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+  .panel { background: #fff; border: 1px solid #E2E8ED; border-radius: 8px; box-shadow: 0 2px 4px rgba(15,23,42,0.04); overflow: hidden; }
+  .panel .ph { font-family: "Montserrat"; font-weight: 700; font-size: 14px; padding: 14px 16px; border-bottom: 1px solid #E2E8ED; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #2D3D4C; background: rgba(248,250,252,0.9); padding: 10px 16px; border-bottom: 1px solid #E2E8ED; }
+  td { font-size: 13px; padding: 10px 16px; border-bottom: 1px solid #E2E8ED; }
+  tr:last-child td { border-bottom: none; }
+  .chip { border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 500; }
+  .feed { padding: 8px 16px; }
+  .fitem { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid #E2E8ED; font-size: 13px; }
+  .fitem:last-child { border-bottom: none; }
+  .fitem .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex: none; }
+  .fitem .t { color: #81898F; font-size: 11px; }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="drawer">
+      <div class="brand"><div class="mark">R</div><div class="nm">Reyansh ERP</div></div>
+      <div class="navitem active"><span class="ic"></span>Dashboard</div>
+      <div class="navitem"><span class="ic"></span>CRM</div>
+      <div class="navitem"><span class="ic"></span>Sales</div>
+      <div class="navitem"><span class="ic"></span>Production</div>
+      <div class="navitem"><span class="ic"></span>Inventory</div>
+      <div class="navitem"><span class="ic"></span>Dispatch</div>
+      <div class="navitem"><span class="ic"></span>Reports</div>
+    </aside>
+    <div class="main">
+      <div class="appbar"><div class="pg">Dashboard</div><div class="spacer"></div><div class="avatar">AJ</div></div>
+      <div class="content">
+        <div class="pagehead">
+          <h1>Good morning, Abhishek</h1>
+          <button class="btn">+ New order</button>
+        </div>
+        <div class="kpis">
+          <div class="kpi p"><div class="l">Open orders</div><div class="v">42</div></div>
+          <div class="kpi s"><div class="l">Dispatched today</div><div class="v">17</div></div>
+          <div class="kpi w"><div class="l">QC holds</div><div class="v">5</div></div>
+          <div class="kpi e"><div class="l">Overdue</div><div class="v">3</div></div>
+        </div>
+        <div class="lower">
+          <div class="panel">
+            <div class="ph">Active orders</div>
+            <table>
+              <thead><tr><th>Order</th><th>Client</th><th>Qty</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>RO-1042</td><td>Apex Cables</td><td>1,200 m</td><td><span class="chip" style="background:#CFE6F6;color:#155E8C">In production</span></td></tr>
+                <tr><td>RO-1041</td><td>Volt Industries</td><td>800 pcs</td><td><span class="chip" style="background:#D1FAE5;color:#047857">Completed</span></td></tr>
+                <tr><td>RO-1040</td><td>Surya Electric</td><td>5,000 pcs</td><td><span class="chip" style="background:#FEF3C7;color:#B45309">Pending</span></td></tr>
+                <tr><td>RO-1039</td><td>Nova Wires</td><td>600 m</td><td><span class="chip" style="background:#FBE3E0;color:#97271C">Delayed</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="ph">Activity</div>
+            <div class="feed">
+              <div class="fitem"><span class="dot" style="background:#059669"></span><div>RO-1041 dispatched to Volt Industries<div class="t">12 min ago</div></div></div>
+              <div class="fitem"><span class="dot" style="background:#1E7DBE"></span><div>Production log added · Line 2<div class="t">38 min ago</div></div></div>
+              <div class="fitem"><span class="dot" style="background:#D97706"></span><div>Low stock alert · 2.5mm copper<div class="t">1 hr ago</div></div></div>
+              <div class="fitem"><span class="dot" style="background:#45ADE6"></span><div>New order RO-1042 created<div class="t">2 hr ago</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

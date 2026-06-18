@@ -30,13 +30,13 @@ import {
   MoreHoriz as MoreIcon
 } from '@mui/icons-material';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTheme } from '@mui/material/styles';
 import KPICard from '../common/KPICard';
 import AccountabilityWidget from './AccountabilityWidget';
 import employeeService from '../../services/employeeService';
 
-const COLORS = ['#4caf50', '#ff9800', '#f44336', '#45ADE6'];
-
 const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
+  const theme = useTheme();
   const [timeTrackingData, setTimeTrackingData] = useState([]);
   const [performanceData, setPerformanceData] = useState([]);
 
@@ -60,9 +60,9 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
   };
 
   const taskData = [
-    { name: 'Completed', value: summary?.tasks?.completed || 0, color: '#4caf50' },
-    { name: 'In Progress', value: summary?.tasks?.inProgress || 0, color: '#ff9800' },
-    { name: 'Pending', value: summary?.tasks?.pending || 0, color: '#f44336' }
+    { name: 'Completed', value: summary?.tasks?.completed || 0, color: theme.palette.success.main },
+    { name: 'In Progress', value: summary?.tasks?.inProgress || 0, color: theme.palette.warning.main },
+    { name: 'Pending', value: summary?.tasks?.pending || 0, color: theme.palette.error.main }
   ];
 
   const getGreeting = () => {
@@ -84,7 +84,7 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
   return (
     <Box>
       {/* Welcome Section */}
-      <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'white' }}>
+      <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'common.white' }}>
         <Typography variant="h5" sx={{ mb: 1 }}>
           {getGreeting()}, {employee?.EmployeeName?.split(' ')[0] || 'Employee'}! 👋
         </Typography>
@@ -239,7 +239,7 @@ const DashboardOverview = ({ employee, profile, summary, onRefresh }) => {
                         labelFormatter={(date) => new Date(date).toLocaleDateString()}
                         formatter={(value) => [`${value}h`, 'Hours']}
                       />
-                      <Bar dataKey="hours" fill="#45ADE6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="hours" fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>

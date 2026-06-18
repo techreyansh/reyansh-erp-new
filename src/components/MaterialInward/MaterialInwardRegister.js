@@ -854,15 +854,15 @@ const MaterialInwardRegister = () => {
           <InwardIcon fontSize="large" />
         </Avatar>
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-        sx={{
+          <Typography
+            variant="h4"
+            component="h1"
+        sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #2e7d32, #a5d6a7)',
+              background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             Material Inward Register
           </Typography>
@@ -1021,12 +1021,12 @@ const MaterialInwardRegister = () => {
               startIcon={<AddIcon />}
               onClick={() => setOpenDialog(true)}
               size="large"
-              sx={{ 
-                background: 'linear-gradient(45deg, #2e7d32, #a5d6a7)',
+              sx={(theme) => ({
+                background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #1b5e20, #2e7d32)',
+                  background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                 }
-              }}
+              })}
             >
               Add New Material
             </Button>
@@ -1084,7 +1084,7 @@ const MaterialInwardRegister = () => {
                             fontWeight: 'bold', 
                             textTransform: 'uppercase',
                             bgcolor: 'success.main',
-                            color: 'white',
+                            color: 'common.white',
                             fontSize: '0.75rem'
                           }}
                     sortDirection={orderBy === col.id ? order : false}
@@ -1094,7 +1094,7 @@ const MaterialInwardRegister = () => {
                         active={orderBy === col.id}
                         direction={orderBy === col.id ? order : "asc"}
                         onClick={() => handleRequestSort(col.id)}
-                              sx={{ color: 'white !important' }}
+                              sx={(theme) => ({ color: `${theme.palette.common.white} !important` })}
                       >
                         {col.label}
                       </TableSortLabel>
@@ -1306,7 +1306,7 @@ const MaterialInwardRegister = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#4caf50',
+              color: 'success.main',
               '&:hover': {
                 backgroundColor: 'rgba(76, 175, 80, 0.1)'
               }
@@ -1315,16 +1315,16 @@ const MaterialInwardRegister = () => {
             <CloseIcon />
           </IconButton>
           <Typography 
-            variant="h4" 
-            sx={{ 
+            variant="h4"
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
             Add New Material
           </Typography>
@@ -1357,28 +1357,28 @@ const MaterialInwardRegister = () => {
                   InputProps={{
                     startAdornment: <TodayIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: theme.palette.success.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -1397,28 +1397,28 @@ const MaterialInwardRegister = () => {
                         ...params.InputProps,
                         startAdornment: <InventoryIcon color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
+                      sx={(theme) => ({
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: theme.palette.divider
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: theme.palette.success.main
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: theme.palette.success.main
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: theme.palette.text.secondary,
                           '&.Mui-focused': {
-                            color: '#4caf50'
+                            color: theme.palette.success.main
                           }
                         },
                         '& .MuiInputBase-input': {
                           fontSize: '16px',
                           padding: '8px 0'
                         }
-                      }}
+                      })}
                     />
                   )}
                   renderOption={(props, option) => {
@@ -1473,28 +1473,28 @@ const MaterialInwardRegister = () => {
                   InputProps={{
                     startAdornment: <AssignmentIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: theme.palette.success.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -1510,28 +1510,28 @@ const MaterialInwardRegister = () => {
                   InputProps={{
                     startAdornment: <TrendingUpIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: theme.palette.success.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
             </Box>
@@ -1550,28 +1550,28 @@ const MaterialInwardRegister = () => {
                   InputProps={{
                     startAdornment: <ScaleIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#4caf50'
+                      borderBottomColor: theme.palette.success.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#4caf50'
+                        color: theme.palette.success.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -1591,28 +1591,28 @@ const MaterialInwardRegister = () => {
                         ...params.InputProps,
                         startAdornment: <SupplierIcon color="action" sx={{ mr: 1 }} />
                       }}
-                      sx={{
+                      sx={(theme) => ({
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: theme.palette.divider
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: theme.palette.success.main
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#4caf50'
+                          borderBottomColor: theme.palette.success.main
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: theme.palette.text.secondary,
                           '&.Mui-focused': {
-                            color: '#4caf50'
+                            color: theme.palette.success.main
                           }
                         },
                         '& .MuiInputBase-input': {
                           fontSize: '16px',
                           padding: '8px 0'
                         }
-                      }}
+                      })}
                     />
                   )}
                   renderOption={(props, option) => (
@@ -1640,15 +1640,16 @@ const MaterialInwardRegister = () => {
             variant="outlined"
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: '1px solid',
+              borderColor: 'divider',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#4caf50'
+                borderColor: 'success.main'
               }
             }}
           >
@@ -1658,16 +1659,16 @@ const MaterialInwardRegister = () => {
             onClick={handleSubmit} 
             variant="contained" 
             startIcon={<SaveIcon />}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
+              color: theme.palette.common.white,
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #388e3c, #4caf50)',
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                 boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -1676,7 +1677,7 @@ const MaterialInwardRegister = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             Add Material
           </Button>

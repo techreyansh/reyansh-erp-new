@@ -40,56 +40,56 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
       id: 'NEW',
       label: 'New SO',
       icon: <PlayArrow />,
-      color: '#45ADE6',
+      color: theme.palette.primary.main,
       description: 'New Sales Order'
     },
     {
       id: 'STORE_1',
       label: 'Store 1',
       icon: <Store />,
-      color: '#ff9800',
+      color: theme.palette.warning.main,
       description: 'Raw Material Storage'
     },
     {
       id: 'CABLE_PRODUCTION',
       label: 'Cable Production',
       icon: <Build />,
-      color: '#4caf50',
+      color: theme.palette.success.main,
       description: 'Cable Manufacturing'
     },
     {
       id: 'STORE_2',
       label: 'Store 2',
       icon: <Store />,
-      color: '#ff9800',
+      color: theme.palette.warning.main,
       description: 'Work-in-Progress Storage'
     },
     {
       id: 'MOULDING',
       label: 'Moulding',
       icon: <Build />,
-      color: '#9c27b0',
+      color: theme.palette.primary.main,
       description: 'Moulding Process'
     },
     {
       id: 'FG_SECTION',
       label: 'FG Section',
       icon: <Inventory />,
-      color: '#607d8b',
+      color: theme.palette.text.secondary,
       description: 'Finished Goods'
     },
     {
       id: 'DISPATCH',
       label: 'Dispatch',
       icon: <LocalShipping />,
-      color: '#795548',
+      color: theme.palette.text.secondary,
       description: 'Ready for Dispatch'
     },
     {
       id: 'DELIVERED',
       label: 'Delivered',
       icon: <CheckCircle />,
-      color: '#4caf50',
+      color: theme.palette.success.main,
       description: 'Completed'
     }
   ];
@@ -115,9 +115,9 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'DELIVERED':
-        return <CheckCircle sx={{ color: '#4caf50' }} />;
+        return <CheckCircle sx={{ color: 'success.main' }} />;
       default:
-        return <PlayArrow sx={{ color: '#45ADE6' }} />;
+        return <PlayArrow sx={{ color: 'primary.main' }} />;
     }
   };
 
@@ -189,12 +189,12 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
                           {step.description}
                         </Typography>
                       </Box>
-                      <Chip 
-                        label={taskCount} 
-                        size="small" 
-                        sx={{ 
+                      <Chip
+                        label={taskCount}
+                        size="small"
+                        sx={{
                           backgroundColor: step.color,
-                          color: 'white',
+                          color: 'common.white',
                           fontWeight: 600
                         }}
                       />
@@ -225,7 +225,7 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
                                   sx={{ 
                                     fontWeight: 600,
                                     fontFamily: 'monospace',
-                                    color: '#7b1fa2',
+                                    color: 'primary.main',
                                     display: 'block'
                                   }}
                                 >
@@ -244,15 +244,15 @@ const FlowVisualization = ({ tasks = [], onTaskAction, currentUser }) => {
                                 {(task.updatedBatch || task.BatchSize) && (
                                   <Typography 
                                     variant="caption" 
-                                    sx={{ 
-                                      color: '#f57c00',
+                                    sx={{
+                                      color: 'warning.main',
                                       fontSize: '0.7rem',
                                       display: 'block'
                                     }}
                                   >
                                     Batch: {(task.updatedBatch || task.BatchSize).toLocaleString()}
                                     {task.updatedBatch && task.BatchSize && task.updatedBatch !== task.BatchSize && (
-                                      <Typography component="span" variant="caption" sx={{ color: '#9e9e9e', textDecoration: 'line-through', ml: 0.5 }}>
+                                      <Typography component="span" variant="caption" sx={{ color: 'text.disabled', textDecoration: 'line-through', ml: 0.5 }}>
                                         (was {task.BatchSize.toLocaleString()})
                                       </Typography>
                                     )}

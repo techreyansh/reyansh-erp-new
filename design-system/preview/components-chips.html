@@ -1,0 +1,43 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status Chips</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin: 0 0 12px; }
+  .group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 22px; }
+  .chip { border-radius: 6px; height: 26px; padding: 0 10px; display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; }
+  .solid { color: #fff; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; }
+</style>
+</head>
+<body>
+  <h1>Status Chips</h1>
+  <div class="sub">Radius 6 · 26px tall. Soft tint for table cells, solid for emphasis.</div>
+
+  <div class="label">Soft (table / list status)</div>
+  <div class="group">
+    <span class="chip" style="background:#D1FAE5;color:#047857"><span class="dot" style="background:#059669"></span>Completed</span>
+    <span class="chip" style="background:#CFE6F6;color:#155E8C"><span class="dot" style="background:#1E7DBE"></span>In production</span>
+    <span class="chip" style="background:#FEF3C7;color:#B45309"><span class="dot" style="background:#D97706"></span>Pending</span>
+    <span class="chip" style="background:#FBE3E0;color:#97271C"><span class="dot" style="background:#C0392B"></span>Delayed</span>
+    <span class="chip" style="background:#E2E8F0;color:#475569"><span class="dot" style="background:#64748B"></span>Draft</span>
+  </div>
+
+  <div class="label">Solid (badges)</div>
+  <div class="group">
+    <span class="chip solid" style="background:#059669">Paid</span>
+    <span class="chip solid" style="background:#1E7DBE">Dispatched</span>
+    <span class="chip solid" style="background:#D97706">QC hold</span>
+    <span class="chip solid" style="background:#C0392B">Overdue</span>
+    <span class="chip solid" style="background:#2D3D4C">CEO</span>
+  </div>
+</body>
+</html>

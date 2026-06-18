@@ -36,12 +36,12 @@ export const getStatusLabel = (statusCode) => {
 export const getStatusColor = (statusCode) => {
   // Handle actual status values from data first
   const actualStatusColors = {
-    'NEW': '#3498db', // Blue
-    'IN_PROGRESS': '#f39c12', // Orange
-    'COMPLETED': '#27ae60', // Green
-    'PENDING': '#9b59b6', // Purple
-    'OVERDUE': '#e74c3c', // Red
-    'CANCELLED': '#95a5a6' // Grey
+    'NEW': 'primary.main', // Blue
+    'IN_PROGRESS': 'warning.main', // Orange
+    'COMPLETED': 'success.main', // Green
+    'PENDING': 'primary.main', // Purple
+    'OVERDUE': 'error.main', // Red
+    'CANCELLED': 'text.disabled' // Grey
   };
 
   // If it's an actual status value, return the appropriate color
@@ -51,17 +51,17 @@ export const getStatusColor = (statusCode) => {
 
   // Handle stage names (fallback to original logic)
   const statusColors = {
-    [config.statusCodes.NEW]: '#3498db', // Blue
-    [config.statusCodes.STORE1]: '#f39c12', // Orange
-    [config.statusCodes.CABLE_PRODUCTION]: '#9b59b6', // Purple
-    [config.statusCodes.STORE2]: '#e67e22', // Dark Orange
-    [config.statusCodes.MOULDING]: '#2ecc71', // Green
-    [config.statusCodes.FG_SECTION]: '#1abc9c', // Turquoise
-    [config.statusCodes.DISPATCH]: '#34495e', // Dark Blue
-    [config.statusCodes.DELIVERED]: '#27ae60', // Dark Green
+    [config.statusCodes.NEW]: 'primary.main', // Blue
+    [config.statusCodes.STORE1]: 'warning.main', // Orange
+    [config.statusCodes.CABLE_PRODUCTION]: 'primary.main', // Purple
+    [config.statusCodes.STORE2]: 'warning.main', // Dark Orange
+    [config.statusCodes.MOULDING]: 'success.main', // Green
+    [config.statusCodes.FG_SECTION]: 'primary.main', // Turquoise
+    [config.statusCodes.DISPATCH]: 'text.primary', // Dark Blue
+    [config.statusCodes.DELIVERED]: 'success.main', // Dark Green
   };
-  
-  return statusColors[statusCode] || '#95a5a6'; // Grey as default
+
+  return statusColors[statusCode] || 'text.disabled'; // Grey as default
 };
 
 // Check if the current status can be advanced

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reyansh ERP — Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; }
+  header { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #E2E8ED; padding: 16px 28px; display: flex; align-items: center; gap: 14px; }
+  header .mark { width: 32px; height: 32px; border-radius: 8px; background: #45ADE6; color: #fff; display: flex; align-items: center; justify-content: center; font-family: "Montserrat"; font-weight: 800; }
+  header h1 { font-family: "Montserrat"; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  header .sub { color: #81898F; font-size: 13px; }
+  header .spacer { flex: 1; }
+  .tabs { display: flex; gap: 6px; }
+  .tab { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid #E2E8ED; background: #fff; color: #475569; }
+  .tab.active { background: #45ADE6; color: #fff; border-color: #45ADE6; }
+  main { padding: 28px; max-width: 1400px; margin: 0 auto; }
+  .sech { font-family: "Montserrat"; font-weight: 800; font-size: 20px; letter-spacing: -0.02em; margin: 30px 0 4px; }
+  .secsub { color: #81898F; font-size: 13px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 20px; }
+  .full { grid-column: 1 / -1; }
+  .card { background: #fff; border: 1px solid #E2E8ED; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(15,23,42,0.05); }
+  .card .cap { font-size: 12px; font-weight: 600; color: #475569; padding: 10px 14px; border-bottom: 1px solid #E2E8ED; display: flex; justify-content: space-between; }
+  .card .cap .g { color: #AAB2B8; font-weight: 500; }
+  iframe { width: 100%; border: none; display: block; background: #fff; }
+  iframe.tall { height: 640px; }
+  iframe.std { height: 420px; }
+  .hide { display: none; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="mark">R</div>
+    <div>
+      <h1>Reyansh ERP — Design System</h1>
+      <div class="sub">36 live preview cards, generated from the app's MUI theme</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="tabs">
+      <div class="tab active" data-mode="light" onclick="setMode('light')">Light</div>
+      <div class="tab" data-mode="dark" onclick="setMode('dark')">Dark</div>
+    </div>
+  </header>
+  <main id="root"></main>
+
+  <script>
+    const SECTIONS = [
+      { title: "Foundations", sub: "Colors, type, spacing, elevation", items: [
+        ["colors-brand.html","Brand Colors","Foundations","std"],
+        ["colors-semantic.html","Semantic Colors","Foundations","std"],
+        ["colors-neutral.html","Neutrals & Surfaces","Foundations","std"],
+        ["type-scale.html","Typography","Foundations","tall"],
+        ["spacing-radii.html","Spacing & Radii","Foundations","std"],
+        ["elevation.html","Elevation","Foundations","std"],
+      ]},
+      { title: "Components", sub: "Buttons, inputs, table, tabs, dialog, nav", items: [
+        ["components-buttons.html","Buttons","Components","std"],
+        ["components-chips.html","Status Chips","Components","std"],
+        ["components-forms.html","Form Inputs","Components","std"],
+        ["components-table.html","Data Table","Components","std"],
+        ["components-tabs.html","Tabs","Components","std"],
+        ["components-card.html","Cards","Components","std"],
+        ["components-alerts.html","Alerts & Snackbars","Components","std"],
+        ["components-dialog.html","Dialog","Components","std"],
+        ["components-navigation.html","Navigation","Components","tall"],
+      ]},
+      { title: "Dashboard Widgets", sub: "KPI tiles, client & order cards", items: [
+        ["widget-kpi.html","KPI Stat Cards","Widgets","std"],
+        ["widget-client-order.html","Client & Order Cards","Widgets","std"],
+      ]},
+      { title: "Patterns", sub: "Full composed pages", items: [
+        ["pattern-dashboard.html","Dashboard Layout","Patterns","tall"],
+      ]},
+    ];
+
+    let mode = "light";
+    function render() {
+      const root = document.getElementById("root");
+      root.innerHTML = SECTIONS.map(sec => `
+        <div class="sech">${sec.title}</div>
+        <div class="secsub">${sec.sub}</div>
+        <div class="grid">
+          ${sec.items.map(([file,name,group,size]) => {
+            const src = mode === "dark" ? `preview/dark/${file}` : `preview/${file}`;
+            const full = (size === "tall") ? "full" : "";
+            return `<div class="card ${full}">
+              <div class="cap"><span>${name}</span><span class="g">${group}${mode==="dark"?" · Dark":""}</span></div>
+              <iframe class="${size}" src="${src}" loading="lazy"></iframe>
+            </div>`;
+          }).join("")}
+        </div>
+      `).join("");
+    }
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.mode === m));
+      document.body.style.background = m === "dark" ? "#16212C" : "#F2F5F7";
+      render();
+    }
+    render();
+  </script>
+</body>
+</html>

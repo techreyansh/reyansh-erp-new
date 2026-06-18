@@ -565,7 +565,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
             p: 2
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 Tasks per page:
               </Typography>
               <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -575,7 +575,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                     setRowsPerPage(e.target.value);
                     setPage(0);
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(102, 126, 234, 0.3)',
                     },
@@ -583,9 +583,9 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                       borderColor: 'rgba(102, 126, 234, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#1E7DBE',
+                      borderColor: theme.palette.primary.dark,
                     }
-                  }}
+                  })}
                 >
                   <MenuItem value={3}>3</MenuItem>
                   <MenuItem value={6}>6</MenuItem>
@@ -596,7 +596,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, filteredTasks.length)} of {filteredTasks.length} tasks
               </Typography>
               
@@ -609,7 +609,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                   size="large"
                   showFirstButton
                   showLastButton
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiPaginationItem-root': {
                       borderRadius: 3,
                       fontWeight: 700,
@@ -623,8 +623,8 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                        color: 'white',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                        color: theme.palette.common.white,
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                         '&:hover': {
@@ -633,7 +633,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                         }
                       }
                     }
-                  }}
+                  })}
                 />
               )}
             </Box>
@@ -715,28 +715,28 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
             px: 4,
             position: 'relative'
           }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
+            <Typography
+              variant="h4"
+              sx={(theme) => ({
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
                 lineHeight: 1.2
-              }}
+              })}
             >
               {editingTask ? 'Edit Task' : 'Create New Task'}
             </Typography>
-            <IconButton 
+            <IconButton
               onClick={() => setTaskFormOpen(false)}
-              sx={{ 
+              sx={{
                 position: 'absolute',
                 right: 16,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#00bcd4',
+                color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(0, 188, 212, 0.1)'
                 }
@@ -764,25 +764,25 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               onChange={(e) => setTaskForm(prev => ({ ...prev, TaskTitle: e.target.value }))}
               required
               variant="standard"
-              sx={{
+              sx={(theme) => ({
                 '& .MuiInput-underline:before': {
-                  borderBottomColor: '#e0e0e0'
+                  borderBottomColor: theme.palette.divider
                 },
                 '& .MuiInput-underline:after': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiFormLabel-root': {
-                  color: '#666',
+                  color: theme.palette.text.secondary,
                   fontSize: '14px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '16px',
                   padding: '8px 0'
                 }
-              }}
+              })}
             />
             
             {/* Description */}
@@ -795,25 +795,25 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               onChange={(e) => setTaskForm(prev => ({ ...prev, Description: e.target.value }))}
               placeholder="Describe the task in detail..."
               variant="standard"
-              sx={{
+              sx={(theme) => ({
                 '& .MuiInput-underline:before': {
-                  borderBottomColor: '#e0e0e0'
+                  borderBottomColor: theme.palette.divider
                 },
                 '& .MuiInput-underline:after': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiFormLabel-root': {
-                  color: '#666',
+                  color: theme.palette.text.secondary,
                   fontSize: '14px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '16px',
                   padding: '8px 0'
                 }
-              }}
+              })}
             />
             
             {/* Priority and Status Row */}
@@ -826,26 +826,26 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                   minWidth: '200px'
                 }}
               >
-                <InputLabel sx={{ color: '#666', fontSize: '14px' }}>Priority *</InputLabel>
+                <InputLabel sx={{ color: 'text.secondary', fontSize: '14px' }}>Priority *</InputLabel>
                 <Select
                   value={taskForm.Priority}
                   onChange={(e) => setTaskForm(prev => ({ ...prev, Priority: e.target.value }))}
                   label="Priority *"
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 >
                   <MenuItem value="Low">Low</MenuItem>
                   <MenuItem value="Medium">Medium</MenuItem>
@@ -861,26 +861,26 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                   minWidth: '200px'
                 }}
               >
-                <InputLabel sx={{ color: '#666', fontSize: '14px' }}>Status *</InputLabel>
+                <InputLabel sx={{ color: 'text.secondary', fontSize: '14px' }}>Status *</InputLabel>
                 <Select
                   value={taskForm.Status}
                   onChange={(e) => setTaskForm(prev => ({ ...prev, Status: e.target.value }))}
                   label="Status *"
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#00bcd4'
+                      borderBottomColor: theme.palette.primary.main
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 >
                   <MenuItem value="To Do">To Do</MenuItem>
                   <MenuItem value="In Progress">In Progress</MenuItem>
@@ -899,25 +899,25 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               onChange={(e) => setTaskForm(prev => ({ ...prev, DueDate: e.target.value }))}
               InputLabelProps={{ shrink: true }}
               variant="standard"
-              sx={{
+              sx={(theme) => ({
                 '& .MuiInput-underline:before': {
-                  borderBottomColor: '#e0e0e0'
+                  borderBottomColor: theme.palette.divider
                 },
                 '& .MuiInput-underline:after': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiFormLabel-root': {
-                  color: '#666',
+                  color: theme.palette.text.secondary,
                   fontSize: '14px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '16px',
                   padding: '8px 0'
                 }
-              }}
+              })}
             />
             
             {/* Notes */}
@@ -930,25 +930,25 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               onChange={(e) => setTaskForm(prev => ({ ...prev, Notes: e.target.value }))}
               placeholder="Any additional notes about this task..."
               variant="standard"
-              sx={{
+              sx={(theme) => ({
                 '& .MuiInput-underline:before': {
-                  borderBottomColor: '#e0e0e0'
+                  borderBottomColor: theme.palette.divider
                 },
                 '& .MuiInput-underline:after': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                  borderBottomColor: '#00bcd4'
+                  borderBottomColor: theme.palette.primary.main
                 },
                 '& .MuiFormLabel-root': {
-                  color: '#666',
+                  color: theme.palette.text.secondary,
                   fontSize: '14px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '16px',
                   padding: '8px 0'
                 }
-              }}
+              })}
             />
           </Box>
         </DialogContent>
@@ -962,30 +962,31 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
           zIndex: 1,
           flexShrink: 0
         }}>
-          <Button 
-            onClick={() => setTaskFormOpen(false)} 
-            sx={{ 
+          <Button
+            onClick={() => setTaskFormOpen(false)}
+            sx={(theme) => ({
               borderRadius: 3,
               px: 4,
               py: 1.5,
               textTransform: 'none',
               fontWeight: 600,
-              color: '#666',
-              border: '1px solid #e0e0e0',
+              color: 'text.secondary',
+              border: '1px solid',
+              borderColor: 'divider',
               backgroundColor: 'transparent',
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#00bcd4'
+                borderColor: theme.palette.primary.main
               }
-            }}
+            })}
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSaveTask}
             disabled={!taskForm.TaskTitle || !taskForm.Priority || !taskForm.Status}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
               px: 4,
               py: 1.5,
@@ -993,21 +994,21 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
               fontWeight: 700,
               fontSize: '16px',
               minWidth: '180px',
-              background: 'linear-gradient(135deg, #45ADE6, #00bcd4)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+              color: theme.palette.common.white,
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1E7DBE, #00acc1)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.dark})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
               '&:disabled': {
-                background: '#e0e0e0',
-                color: '#999',
+                background: theme.palette.divider,
+                color: theme.palette.text.disabled,
                 boxShadow: 'none',
                 transform: 'none'
               }
-            }}
+            })}
           >
             {editingTask ? 'UPDATE TASK' : 'CREATE TASK'}
           </Button>
@@ -1054,7 +1055,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                 right: -50,
                 width: 150,
                 height: 150,
-                background: alpha('#fff', 0.1),
+                background: alpha(theme.palette.common.white, 0.1),
                 borderRadius: '50%',
                 display: { xs: 'none', sm: 'block' }
               }}
@@ -1066,7 +1067,7 @@ const EnhancedTasksTab = ({ employeeCode, onTaskUpdate }) => {
                 left: -30,
                 width: 100,
                 height: 100,
-                background: alpha('#fff', 0.05),
+                background: alpha(theme.palette.common.white, 0.05),
                 borderRadius: '50%',
                 display: { xs: 'none', sm: 'block' }
               }}

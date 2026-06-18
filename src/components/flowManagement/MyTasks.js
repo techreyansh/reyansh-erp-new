@@ -121,13 +121,13 @@ const MyTasks = () => {
     <Box sx={{ width: '100%' }}>
       <Paper
         elevation={0}
-        sx={{
+        sx={(theme) => ({
           p: 4,
           mb: 4,
-          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
-          color: 'white',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: 'common.white',
           borderRadius: 3
-        }}
+        })}
       >
         <Typography variant="h3" sx={{ fontWeight: 700 }}>
           My Tasks
@@ -151,7 +151,7 @@ const MyTasks = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={0} sx={{ borderRadius: 3 }}>
             <CardContent sx={{ textAlign: 'center' }}>
-              <CheckCircle sx={{ fontSize: 40, color: '#4caf50' }} />
+              <CheckCircle sx={{ fontSize: 40, color: 'success.main' }} />
               <Typography variant="h4">
                 {tasks.filter(t => t.Status === 'DELIVERED').length}
               </Typography>
@@ -163,7 +163,7 @@ const MyTasks = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={0} sx={{ borderRadius: 3 }}>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Schedule sx={{ fontSize: 40, color: '#ff9800' }} />
+              <Schedule sx={{ fontSize: 40, color: 'warning.main' }} />
               <Typography variant="h4">
                 {tasks.filter(t => t.Status !== 'DELIVERED').length}
               </Typography>
@@ -175,7 +175,7 @@ const MyTasks = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={0} sx={{ borderRadius: 3 }}>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Warning sx={{ fontSize: 40, color: '#f44336' }} />
+              <Warning sx={{ fontSize: 40, color: 'error.main' }} />
               <Typography variant="h4">0</Typography>
               <Typography variant="body2">Rejected</Typography>
             </CardContent>

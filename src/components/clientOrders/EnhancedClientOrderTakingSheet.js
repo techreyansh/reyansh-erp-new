@@ -226,7 +226,7 @@ const FloatingActionButton = styled(Fab)(({ theme }) => ({
   right: theme.spacing(2),
   zIndex: 1000,
   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-  color: 'white',
+  color: theme.palette.common.white,
   animation: `${float} 3s ease-in-out infinite`,
   '&:hover': {
     background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.dark} 100%)`,
@@ -239,32 +239,32 @@ const StyledChip = styled(Chip)(({ theme, variant }) => {
     switch (variant) {
       case 'success':
         return {
-          background: `linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#4CAF50', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`,
         };
       case 'warning':
         return {
-          background: `linear-gradient(135deg, #FF9800 0%, #FFC107 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#FF9800', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.warning.main, 0.3)}`,
         };
       case 'error':
         return {
-          background: `linear-gradient(135deg, #F44336 0%, #E91E63 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#F44336', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.error.main, 0.3)}`,
         };
       case 'info':
         return {
-          background: `linear-gradient(135deg, #45ADE6 0%, #84D2FC 100%)`,
-          color: 'white',
-          boxShadow: `0 4px 12px ${alpha('#45ADE6', 0.3)}`,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+          color: theme.palette.common.white,
+          boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
         };
       default:
         return {
           background: `linear-gradient(135deg, ${theme.palette.grey[400]} 0%, ${theme.palette.grey[600]} 100%)`,
-          color: 'white',
+          color: theme.palette.common.white,
           boxShadow: `0 4px 12px ${alpha(theme.palette.grey[400], 0.3)}`,
         };
     }
@@ -302,8 +302,8 @@ const AnimatedButton = styled(Button)(({ theme, variant = 'primary' }) => {
     switch (variant) {
       case 'gradient':
         return {
-          background: `linear-gradient(90deg, #1E7DBE 0%, #f97316 100%)`, // Blue to orange gradient
-          color: 'white',
+          background: `linear-gradient(90deg, ${theme.palette.primary.dark} 0%, ${theme.palette.warning.main} 100%)`, // Blue to orange gradient
+          color: theme.palette.common.white,
           borderRadius: '20px', // More rounded corners
           fontWeight: 700,
           fontSize: '1rem',
@@ -311,25 +311,25 @@ const AnimatedButton = styled(Button)(({ theme, variant = 'primary' }) => {
           boxShadow: `0 6px 20px rgba(30, 58, 138, 0.3)`,
           border: 'none',
           '&:hover': {
-            background: `linear-gradient(90deg, #1e40af 0%, #ea580c 100%)`,
+            background: `linear-gradient(90deg, ${theme.palette.primary.dark} 0%, ${theme.palette.warning.dark} 100%)`,
             transform: 'translateY(-2px)',
             boxShadow: `0 8px 25px rgba(30, 58, 138, 0.4)`,
           },
         };
       case 'success':
         return {
-          background: `linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%)`,
-          color: 'white',
+          background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.light} 100%)`,
+          color: theme.palette.common.white,
           '&:hover': {
-            background: `linear-gradient(135deg, #388E3C 0%, #689F38 100%)`,
+            background: `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.main} 100%)`,
           },
         };
       case 'danger':
         return {
-          background: `linear-gradient(135deg, #F44336 0%, #E91E63 100%)`,
-          color: 'white',
+          background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.light} 100%)`,
+          color: theme.palette.common.white,
           '&:hover': {
-            background: `linear-gradient(135deg, #D32F2F 0%, #C2185B 100%)`,
+            background: `linear-gradient(135deg, ${theme.palette.error.dark} 0%, ${theme.palette.error.main} 100%)`,
           },
         };
       default:
@@ -371,7 +371,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const LoadingSkeleton = ({ rows = 5 }) => (
+const LoadingSkeleton = ({ rows = 5 }) => {
+  const theme = useTheme();
+  return (
   <Box>
     {Array.from({ length: rows }).map((_, index) => (
       <Fade in timeout={300 + index * 100} key={index}>
@@ -382,10 +384,10 @@ const LoadingSkeleton = ({ rows = 5 }) => (
             sx={{
               borderRadius: 2,
               animation: `${shimmer} 2s infinite linear`,
-              background: `linear-gradient(90deg, 
-                ${alpha('#f0f0f0', 0.2)} 0px, 
-                ${alpha('#e0e0e0', 0.4)} 40px, 
-                ${alpha('#f0f0f0', 0.2)} 80px)`,
+              background: `linear-gradient(90deg,
+                ${alpha(theme.palette.grey[100], 0.2)} 0px,
+                ${alpha(theme.palette.grey[50], 0.4)} 40px,
+                ${alpha(theme.palette.grey[100], 0.2)} 80px)`,
               backgroundSize: '468px 104px',
             }}
           />
@@ -393,19 +395,20 @@ const LoadingSkeleton = ({ rows = 5 }) => (
       </Fade>
     ))}
   </Box>
-);
+  );
+};
 
 const StatusStepper = ({ currentStatus, onStatusChange }) => {
   const theme = useTheme();
   const statusSteps = [
-    { label: 'Draft', icon: <Edit />, color: '#9E9E9E' },
-    { label: 'Pending', icon: <Schedule />, color: '#FF9800' },
-    { label: 'Confirmed', icon: <CheckCircle />, color: '#45ADE6' },
-    { label: 'Production', icon: <Assignment />, color: '#9C27B0' },
-    { label: 'Ready', icon: <Inventory />, color: '#607D8B' },
-    { label: 'Dispatched', icon: <LocalShipping />, color: '#4CAF50' },
-    { label: 'Delivered', icon: <CheckCircle />, color: '#8BC34A' },
-    { label: 'Completed', icon: <Celebration />, color: '#4CAF50' },
+    { label: 'Draft', icon: <Edit />, color: theme.palette.text.disabled },
+    { label: 'Pending', icon: <Schedule />, color: theme.palette.warning.main },
+    { label: 'Confirmed', icon: <CheckCircle />, color: theme.palette.primary.main },
+    { label: 'Production', icon: <Assignment />, color: theme.palette.primary.main },
+    { label: 'Ready', icon: <Inventory />, color: theme.palette.text.secondary },
+    { label: 'Dispatched', icon: <LocalShipping />, color: theme.palette.success.main },
+    { label: 'Delivered', icon: <CheckCircle />, color: theme.palette.success.light },
+    { label: 'Completed', icon: <Celebration />, color: theme.palette.success.main },
   ];
 
   const currentIndex = statusSteps.findIndex(step => 
@@ -430,7 +433,7 @@ const StatusStepper = ({ currentStatus, onStatusChange }) => {
                     background: index <= currentIndex 
                       ? `linear-gradient(135deg, ${step.color} 0%, ${alpha(step.color, 0.7)} 100%)`
                       : alpha(theme.palette.grey[300], 0.5),
-                    color: 'white',
+                    color: 'common.white',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     cursor: 'pointer',
                     '&:hover': {
@@ -456,40 +459,41 @@ const StatusStepper = ({ currentStatus, onStatusChange }) => {
 };
 
 const PriorityIndicator = ({ priority }) => {
+  const theme = useTheme();
   const getPriorityConfig = () => {
     switch (priority?.toLowerCase()) {
       case 'urgent':
-        return { 
-          color: '#F44336', 
-          icon: <PriorityHigh />, 
+        return {
+          color: theme.palette.error.main,
+          icon: <PriorityHigh />,
           animation: `${pulse} 1s infinite`,
           glow: '0 0 20px rgba(244, 67, 54, 0.5)'
         };
       case 'high':
-        return { 
-          color: '#FF5722', 
-          icon: <Flag />, 
+        return {
+          color: theme.palette.warning.main,
+          icon: <Flag />,
           animation: `${pulse} 2s infinite`,
           glow: '0 0 15px rgba(255, 87, 34, 0.4)'
         };
       case 'medium':
-        return { 
-          color: '#FF9800', 
-          icon: <Star />, 
+        return {
+          color: theme.palette.warning.main,
+          icon: <Star />,
           animation: 'none',
           glow: '0 0 10px rgba(255, 152, 0, 0.3)'
         };
       case 'low':
-        return { 
-          color: '#4CAF50', 
-          icon: <StarBorder />, 
+        return {
+          color: theme.palette.success.main,
+          icon: <StarBorder />,
           animation: 'none',
           glow: '0 0 5px rgba(76, 175, 80, 0.2)'
         };
       default:
-        return { 
-          color: '#9E9E9E', 
-          icon: <StarBorder />, 
+        return {
+          color: theme.palette.text.disabled,
+          icon: <StarBorder />,
           animation: 'none',
           glow: 'none'
         };
@@ -507,7 +511,7 @@ const PriorityIndicator = ({ priority }) => {
         padding: '4px 12px',
         borderRadius: '20px',
         background: `linear-gradient(135deg, ${config.color} 0%, ${alpha(config.color, 0.7)} 100%)`,
-        color: 'white',
+        color: 'common.white',
         animation: config.animation,
         boxShadow: config.glow,
         fontSize: '0.75rem',
@@ -1219,7 +1223,7 @@ const EnhancedClientOrderTakingSheet = () => {
                   },
                   '&.Mui-selected': {
                     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                    color: 'white',
+                    color: 'common.white',
                     transform: 'translateY(-4px)',
                     boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
                   },
@@ -1468,11 +1472,11 @@ const EnhancedClientOrderTakingSheet = () => {
                                     label="Drawing"
                                     size="small"
                                     sx={{
-                                      backgroundColor: '#e3f2fd',
-                                      color: '#45ADE6',
+                                      backgroundColor: 'info.lighter',
+                                      color: 'primary.main',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
-                                      '&:hover': { backgroundColor: '#bbdefb' }
+                                      '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.2) }
                                     }}
                                   />
                                 )}
@@ -1481,11 +1485,11 @@ const EnhancedClientOrderTakingSheet = () => {
                                     label="FPA"
                                     size="small"
                                     sx={{
-                                      backgroundColor: '#e3f2fd',
-                                      color: '#45ADE6',
+                                      backgroundColor: 'info.lighter',
+                                      color: 'primary.main',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
-                                      '&:hover': { backgroundColor: '#bbdefb' }
+                                      '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.2) }
                                     }}
                                   />
                                 )}
@@ -1494,11 +1498,11 @@ const EnhancedClientOrderTakingSheet = () => {
                                     label="BOM"
                                     size="small"
                                     sx={{
-                                      backgroundColor: '#e3f2fd',
-                                      color: '#45ADE6',
+                                      backgroundColor: 'info.lighter',
+                                      color: 'primary.main',
                                       fontSize: '0.7rem',
                                       cursor: 'pointer',
-                                      '&:hover': { backgroundColor: '#bbdefb' }
+                                      '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.2) }
                                     }}
                                   />
                                 )}
@@ -1541,7 +1545,7 @@ const EnhancedClientOrderTakingSheet = () => {
                   backgroundColor: 'rgba(248, 250, 255, 0.5)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       Rows per page:
                     </Typography>
                     <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1559,7 +1563,7 @@ const EnhancedClientOrderTakingSheet = () => {
                             borderColor: 'rgba(102, 126, 234, 0.5)',
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#1E7DBE',
+                            borderColor: 'primary.dark',
                           }
                         }}
                       >
@@ -1572,7 +1576,7 @@ const EnhancedClientOrderTakingSheet = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                       {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, getTabData().length)} of {getTabData().length} orders
                     </Typography>
                     
@@ -1585,7 +1589,7 @@ const EnhancedClientOrderTakingSheet = () => {
                         size="large"
                         showFirstButton
                         showLastButton
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiPaginationItem-root': {
                             borderRadius: 3,
                             fontWeight: 700,
@@ -1599,8 +1603,8 @@ const EnhancedClientOrderTakingSheet = () => {
                               boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                             },
                             '&.Mui-selected': {
-                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                              color: 'white',
+                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                              color: theme.palette.common.white,
                               fontWeight: 800,
                               boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                               '&:hover': {
@@ -1609,7 +1613,7 @@ const EnhancedClientOrderTakingSheet = () => {
                               }
                             }
                           }
-                        }}
+                        })}
                       />
                     )}
                   </Box>
@@ -1793,7 +1797,7 @@ const EnhancedClientOrderTakingSheet = () => {
                           },
                           '&.Mui-selected': {
                             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                            color: 'white',
+                            color: 'common.white',
                             transform: 'scale(1.1)',
                           },
                         },
@@ -1853,7 +1857,7 @@ const EnhancedClientOrderTakingSheet = () => {
         <DialogTitle
           sx={{
             background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
-            color: 'white',
+            color: 'common.white',
             fontWeight: 700,
             p: 3,
           }}

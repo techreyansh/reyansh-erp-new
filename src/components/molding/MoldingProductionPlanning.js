@@ -520,26 +520,26 @@ const MoldingProductionPlanning = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#45ADE6" }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "primary.main" }}>
         🏭 Molding Production Planning
       </Typography>
-      
-      <Typography variant="body1" sx={{ mb: 4, color: "#666" }}>
+
+      <Typography variant="body1" sx={{ mb: 4, color: "text.secondary" }}>
         Plan and optimize molding production from cable cutting to final packaging
       </Typography>
 
       {/* Production Process Overview */}
-      <Card sx={{ mb: 4, p: 2, backgroundColor: "#f8f9fa" }}>
+      <Card sx={{ mb: 4, p: 2, backgroundColor: "grey.100" }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
           🎯 Production Stages Overview
         </Typography>
         <Grid container spacing={2}>
           {productionStages.map((stage, index) => (
             <Grid item xs={12} md={3} key={index}>
-              <Box sx={{ textAlign: "center", p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
-                <Box sx={{ color: "#45ADE6", mb: 1 }}>{stage.icon}</Box>
+              <Box sx={{ textAlign: "center", p: 2, border: "1px solid", borderColor: "grey.100", borderRadius: 1 }}>
+                <Box sx={{ color: "primary.main", mb: 1 }}>{stage.icon}</Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>{stage.stage}</Typography>
-                <Typography variant="caption" sx={{ color: "#666", display: "block", mb: 1 }}>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1 }}>
                   {stage.description}
                 </Typography>
                 <Chip 
@@ -588,23 +588,23 @@ const MoldingProductionPlanning = () => {
                        />
                      )}
                      renderOption={(props, option) => (
-                       <Box component="li" {...props} sx={{ py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                       <Box component="li" {...props} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'grey.100' }}>
                          <Box sx={{ width: '100%' }}>
                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.5 }}>
-                             <Chip 
-                               label={option.DispatchUniqueId} 
-                               size="small" 
-                               sx={{ bgcolor: "#e8f5e9", color: "#2e7d32", fontWeight: "bold" }}
+                             <Chip
+                               label={option.DispatchUniqueId}
+                               size="small"
+                               sx={{ bgcolor: "success.lighter", color: "success.main", fontWeight: "bold" }}
                              />
-                             <Chip 
-                               label={option.UniqueId} 
-                               size="small" 
-                               sx={{ bgcolor: "#f3e5f5", color: "#7b1fa2" }}
+                             <Chip
+                               label={option.UniqueId}
+                               size="small"
+                               sx={{ bgcolor: "primary.light", color: "primary.main" }}
                              />
-                             <Chip 
-                               label={option.ClientCode} 
-                               size="small" 
-                               sx={{ bgcolor: "#e3f2fd", color: "#45ADE6" }}
+                             <Chip
+                               label={option.ClientCode}
+                               size="small"
+                               sx={{ bgcolor: "info.lighter", color: "primary.main" }}
                              />
                            </Box>
                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
@@ -642,13 +642,13 @@ const MoldingProductionPlanning = () => {
                          label="Dispatch ID"
                          value={planningData.dispatchUniqueId}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#e8f5e9",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.success.lighter,
                              fontWeight: "bold",
-                             color: "#2e7d32"
+                             color: theme.palette.success.main
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={4}>
@@ -657,13 +657,13 @@ const MoldingProductionPlanning = () => {
                          label="Unique ID"
                          value={planningData.uniqueId}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#f3e5f5",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.primary.light,
                              fontWeight: "bold",
-                             color: "#7b1fa2"
+                             color: theme.palette.primary.main
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={4}>
@@ -672,13 +672,13 @@ const MoldingProductionPlanning = () => {
                          label="Client Code"
                          value={planningData.clientCode}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#e3f2fd",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.info.lighter,
                              fontWeight: "bold",
-                             color: "#45ADE6"
+                             color: theme.palette.primary.main
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={6}>
@@ -687,12 +687,12 @@ const MoldingProductionPlanning = () => {
                          label="Product Code"
                          value={planningData.productCode}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#f5f5f5",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.grey[100],
                              fontWeight: "bold"
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={6}>
@@ -701,11 +701,11 @@ const MoldingProductionPlanning = () => {
                          label="Product Name"
                          value={planningData.productName}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#f5f5f5"
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.grey[100]
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={4}>
@@ -714,13 +714,13 @@ const MoldingProductionPlanning = () => {
                          label="Batch Number"
                          value={planningData.batchNumber}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#fff3e0",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.warning.lighter,
                              fontWeight: "bold",
-                             color: "#e65100"
+                             color: theme.palette.warning.main
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={4}>
@@ -730,12 +730,12 @@ const MoldingProductionPlanning = () => {
                          value={planningData.quantity}
                          InputProps={{ readOnly: true }}
                          helperText="pieces"
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#f5f5f5",
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.grey[100],
                              fontWeight: "bold"
                            }
-                         }}
+                         })}
                        />
                      </Grid>
                      <Grid item xs={12} md={4}>
@@ -744,12 +744,12 @@ const MoldingProductionPlanning = () => {
                          label="Dispatch Date"
                          value={planningData.dispatchDate ? new Date(planningData.dispatchDate).toLocaleDateString() : ""}
                          InputProps={{ readOnly: true }}
-                         sx={{ 
-                           "& .MuiInputBase-input": { 
-                             backgroundColor: "#e8f5e9",
-                             color: "#2e7d32"
+                         sx={(theme) => ({
+                           "& .MuiInputBase-input": {
+                             backgroundColor: theme.palette.success.lighter,
+                             color: theme.palette.success.main
                            }
-                         }}
+                         })}
                        />
                      </Grid>
 
@@ -792,13 +792,13 @@ const MoldingProductionPlanning = () => {
                      value={planningData.expectedPieces}
                      InputProps={{ readOnly: true }}
                      helperText="Auto-calculated"
-                     sx={{ 
-                       "& .MuiInputBase-input": { 
-                         backgroundColor: "#f5f5f5",
+                     sx={(theme) => ({
+                       "& .MuiInputBase-input": {
+                         backgroundColor: theme.palette.grey[100],
                          fontWeight: "bold",
-                         color: "#45ADE6"
+                         color: theme.palette.primary.main
                        }
-                     }}
+                     })}
                    />
                  </Grid>
                    </>
@@ -815,9 +815,9 @@ const MoldingProductionPlanning = () => {
                 {/* Product Specifications from Power Cord Master */}
                 {selectedDispatch && productOptions.find(p => p.value === planningData.productCode)?.masterData && (
                   <Grid item xs={12}>
-                    <Card sx={{ mt: 2, bgcolor: '#f8f9fa' }}>
+                    <Card sx={{ mt: 2, bgcolor: 'grey.100' }}>
                       <CardContent>
-                        <Typography variant="h6" gutterBottom sx={{ color: '#45ADE6', fontWeight: 'bold' }}>
+                        <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                           📋 Product Specifications (from Power Cord Master)
                         </Typography>
                         {(() => {
@@ -887,7 +887,7 @@ const MoldingProductionPlanning = () => {
                    startIcon={<ScheduleIcon />}
                    onClick={generateProductionSchedule}
                    disabled={!planningData.expectedPieces || loading}
-                   sx={{ bgcolor: "#45ADE6" }}
+                   sx={{ bgcolor: "primary.main" }}
                  >
                    {loading ? "Generating Schedule..." : "Generate Production Schedule"}
                  </Button>
@@ -931,7 +931,7 @@ const MoldingProductionPlanning = () => {
                     <TableContainer component={Paper}>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                          <TableRow sx={{ bgcolor: "grey.100" }}>
                             <TableCell><strong>Line</strong></TableCell>
                             <TableCell><strong>Allocated Pieces</strong></TableCell>
                             <TableCell><strong>Capacity</strong></TableCell>
@@ -983,7 +983,7 @@ const MoldingProductionPlanning = () => {
                     <TableContainer component={Paper}>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                          <TableRow sx={{ bgcolor: "grey.100" }}>
                             <TableCell><strong>Machine</strong></TableCell>
                             <TableCell><strong>Mold Type</strong></TableCell>
                             <TableCell><strong>Allocated Pieces</strong></TableCell>
@@ -1001,13 +1001,13 @@ const MoldingProductionPlanning = () => {
                                 </Typography>
                               </TableCell>
                               <TableCell>
-                                <Chip 
-                                  label={machine.moldType} 
-                                  size="small" 
-                                  sx={{ 
-                                    bgcolor: machine.moldType === "Inner" ? "#ffeb3b" : 
-                                             machine.moldType === "Outer" ? "#4caf50" : "#ff9800",
-                                    color: machine.moldType === "Outer" ? "white" : "black"
+                                <Chip
+                                  label={machine.moldType}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: machine.moldType === "Inner" ? "warning.light" :
+                                             machine.moldType === "Outer" ? "success.main" : "warning.main",
+                                    color: machine.moldType === "Outer" ? "common.white" : "common.black"
                                   }}
                                 />
                               </TableCell>
@@ -1038,7 +1038,7 @@ const MoldingProductionPlanning = () => {
                     <TableContainer component={Paper}>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                          <TableRow sx={{ bgcolor: "grey.100" }}>
                             <TableCell><strong>Line</strong></TableCell>
                             <TableCell><strong>Pieces</strong></TableCell>
                             <TableCell><strong>Capacity</strong></TableCell>
@@ -1072,14 +1072,14 @@ const MoldingProductionPlanning = () => {
 
                 {/* Optimization Results */}
                 {optimizationResults && (
-                  <Card sx={{ p: 3, mt: 2, backgroundColor: "#e3f2fd" }}>
+                  <Card sx={{ p: 3, mt: 2, backgroundColor: "info.lighter" }}>
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
                       📊 Production Optimization Analysis
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={3}>
                         <Box sx={{ textAlign: "center" }}>
-                          <Typography variant="h4" sx={{ color: "#45ADE6", fontWeight: "bold" }}>
+                          <Typography variant="h4" sx={{ color: "primary.main", fontWeight: "bold" }}>
                             {optimizationResults.overallEfficiency}%
                           </Typography>
                           <Typography variant="body2">Overall Efficiency</Typography>
@@ -1087,7 +1087,7 @@ const MoldingProductionPlanning = () => {
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <Box sx={{ textAlign: "center" }}>
-                          <Typography variant="h4" sx={{ color: "#f57c00", fontWeight: "bold" }}>
+                          <Typography variant="h4" sx={{ color: "warning.main", fontWeight: "bold" }}>
                             {optimizationResults.totalProductionTime}h
                           </Typography>
                           <Typography variant="body2">Total Time</Typography>
@@ -1095,7 +1095,7 @@ const MoldingProductionPlanning = () => {
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <Box sx={{ textAlign: "center" }}>
-                          <Typography variant="h5" sx={{ color: "#d32f2f", fontWeight: "bold" }}>
+                          <Typography variant="h5" sx={{ color: "error.main", fontWeight: "bold" }}>
                             {optimizationResults.bottleneckStage}
                           </Typography>
                           <Typography variant="body2">Bottleneck Stage</Typography>
@@ -1103,7 +1103,7 @@ const MoldingProductionPlanning = () => {
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <Box sx={{ textAlign: "center" }}>
-                          <Typography variant="h4" sx={{ color: "#4caf50", fontWeight: "bold" }}>
+                          <Typography variant="h4" sx={{ color: "success.main", fontWeight: "bold" }}>
                             600
                           </Typography>
                           <Typography variant="body2">Target pcs/hr</Typography>
@@ -1168,7 +1168,7 @@ const MoldingProductionPlanning = () => {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, border: "1px solid #e0e0e0" }}>
+              <Card sx={{ p: 2, border: "1px solid", borderColor: "grey.100" }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Machine Load Balancing
                 </Typography>
@@ -1178,7 +1178,7 @@ const MoldingProductionPlanning = () => {
               </Card>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, border: "1px solid #e0e0e0" }}>
+              <Card sx={{ p: 2, border: "1px solid", borderColor: "grey.100" }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Changeover Optimization
                 </Typography>
@@ -1188,7 +1188,7 @@ const MoldingProductionPlanning = () => {
               </Card>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, border: "1px solid #e0e0e0" }}>
+              <Card sx={{ p: 2, border: "1px solid", borderColor: "grey.100" }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Maintenance Scheduling
                 </Typography>
@@ -1198,7 +1198,7 @@ const MoldingProductionPlanning = () => {
               </Card>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, border: "1px solid #e0e0e0" }}>
+              <Card sx={{ p: 2, border: "1px solid", borderColor: "grey.100" }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Multi-Order Planning
                 </Typography>

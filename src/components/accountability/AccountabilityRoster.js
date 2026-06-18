@@ -7,11 +7,10 @@ import {
 import {
   GroupsOutlined, SyncOutlined, SearchOutlined, CheckCircleOutline, RemoveCircleOutline,
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import {
   getRoster, getRoles, syncEmployees, assignRole, subscribeScorecard,
 } from '../../services/accountabilityService';
-
-const BAND = { GREEN: '#059669', AMBER: '#D97706', RED: '#C0392B' };
 
 /**
  * The accountability register: every ERP employee, their role, login status, and
@@ -19,6 +18,12 @@ const BAND = { GREEN: '#059669', AMBER: '#D97706', RED: '#C0392B' };
  * scores stream live as scorecards are edited anywhere in the ERP.
  */
 const AccountabilityRoster = () => {
+  const theme = useTheme();
+  const BAND = {
+    GREEN: theme.palette.success.main,
+    AMBER: theme.palette.warning.main,
+    RED: theme.palette.error.main,
+  };
   const [rows, setRows] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +145,7 @@ const AccountabilityRoster = () => {
                 </TableCell>
                 <TableCell align="center">
                   {r.has_login
-                    ? <Tooltip title="Linked to a login"><CheckCircleOutline sx={{ color: '#059669', fontSize: 18 }} /></Tooltip>
+                    ? <Tooltip title="Linked to a login"><CheckCircleOutline sx={{ color: 'success.main', fontSize: 18 }} /></Tooltip>
                     : <Tooltip title="No login linked yet"><RemoveCircleOutline sx={{ color: 'text.disabled', fontSize: 18 }} /></Tooltip>}
                 </TableCell>
                 <TableCell align="center">

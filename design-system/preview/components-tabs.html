@@ -1,0 +1,32 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tabs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #E2E8ED; }
+  .tab { position: relative; padding: 14px 18px; font-size: 14px; font-weight: 500; color: #81898F; cursor: pointer; }
+  .tab.active { color: #1E7DBE; font-weight: 600; }
+  .tab.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: #45ADE6; border-radius: 2px; }
+  .panel { background: #fff; border: 1px solid #E2E8ED; border-top: none; border-radius: 0 0 8px 8px; padding: 22px; font-size: 14px; color: #475569; }
+</style>
+</head>
+<body>
+  <h1>Tabs</h1>
+  <div class="sub">No uppercase · 500 weight (600 active) · animated 2px primary indicator.</div>
+  <div class="tabs">
+    <div class="tab active">Overview</div>
+    <div class="tab">Production log</div>
+    <div class="tab">Materials</div>
+    <div class="tab">Dispatch</div>
+  </div>
+  <div class="panel">Overview content — KPI cards, recent orders, and the production timeline render here.</div>
+</body>
+</html>

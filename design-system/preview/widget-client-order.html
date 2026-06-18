@@ -1,0 +1,63 @@
+<!-- @dsCard group="Dashboard Widgets" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Client &amp; Order Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: #fff; border: 1px solid #E2E8ED; border-radius: 8px; padding: 18px; box-shadow: 0 2px 4px rgba(15,23,42,0.04); }
+  .client-head { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: #45ADE6; color: #fff; display: flex; align-items: center; justify-content: center; font-family: "Montserrat"; font-weight: 800; font-size: 16px; }
+  .client-head .name { font-family: "Montserrat"; font-weight: 700; font-size: 16px; }
+  .client-head .meta { font-size: 12px; color: #81898F; }
+  .stats { display: flex; gap: 22px; margin-top: 16px; }
+  .stat .n { font-family: "Montserrat"; font-weight: 800; font-size: 20px; }
+  .stat .l { font-size: 11px; color: #81898F; text-transform: uppercase; letter-spacing: 0.05em; }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .order-top .id { font-family: "Montserrat"; font-weight: 700; font-size: 16px; }
+  .chip { border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 500; background: #CFE6F6; color: #155E8C; }
+  .line { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px solid #E2E8ED; }
+  .line:last-child { border-bottom: none; }
+  .line .k { color: #81898F; }
+  .bar { height: 6px; border-radius: 3px; background: #E2E8F0; margin-top: 14px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 64%; background: #45ADE6; border-radius: 3px; }
+</style>
+</head>
+<body>
+  <h1>Client &amp; Order Cards</h1>
+  <div class="sub">Two staple ERP entities — a client summary and a work-order card with progress.</div>
+  <div class="grid">
+    <div class="card">
+      <div class="client-head">
+        <div class="avatar">AC</div>
+        <div><div class="name">Apex Cables</div><div class="meta">Mumbai · GSTIN 27AABCA…</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n">28</div><div class="l">Orders</div></div>
+        <div class="stat"><div class="n">₹12.4L</div><div class="l">YTD value</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">Open</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="order-top">
+        <div><div class="id">RO-1042</div><div class="meta" style="font-size:12px;color:#81898F">Apex Cables · Line 2</div></div>
+        <span class="chip">In production</span>
+      </div>
+      <div style="margin-top:14px">
+        <div class="line"><span class="k">Product</span><span>3-core flexible cable</span></div>
+        <div class="line"><span class="k">Quantity</span><span>1,200 m</span></div>
+        <div class="line"><span class="k">Due</span><span>22 Jun 2026</span></div>
+      </div>
+      <div class="bar"><i></i></div>
+      <div style="font-size:12px;color:#81898F;margin-top:6px">64% complete</div>
+    </div>
+  </div>
+</body>
+</html>

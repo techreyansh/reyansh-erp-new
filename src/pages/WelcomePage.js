@@ -181,21 +181,21 @@ function WelcomePage() {
   const kpiCards = useMemo(() => {
     if (showAnalytics) {
       return [
-        { label: "Revenue (This Month)", value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: "#45ADE6", path: "/dashboard" },
-        { label: "Order Book", value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: "#1E7DBE", path: "/crm/sales-orders" },
-        { label: "Outstanding", value: inrCompact(k.outstanding), icon: AccountBalanceWalletOutlined, accent: "#D97706", path: "/crm/collections" },
-        { label: "Pending Dispatch", value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: "#7C3AED", path: "/dispatch-management" },
+        { label: "Revenue (This Month)", value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: theme.palette.primary.main, path: "/dashboard" },
+        { label: "Order Book", value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: theme.palette.primary.dark, path: "/crm/sales-orders" },
+        { label: "Outstanding", value: inrCompact(k.outstanding), icon: AccountBalanceWalletOutlined, accent: theme.palette.warning.main, path: "/crm/collections" },
+        { label: "Pending Dispatch", value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: theme.palette.primary.main, path: "/dispatch-management" },
         { label: "Active Leads", value: k.activeLeads ?? 0, sub: `${k.team ?? 0} team`, icon: GroupsOutlined, accent: "#DB2777", path: "/crm/follow-ups" },
-        { label: "Active Clients", value: k.clients ?? 0, sub: `${k.prospects ?? 0} prospects`, icon: ContactMailOutlined, accent: "#059669", path: "/clients" },
+        { label: "Active Clients", value: k.clients ?? 0, sub: `${k.prospects ?? 0} prospects`, icon: ContactMailOutlined, accent: theme.palette.success.main, path: "/clients" },
       ];
     }
     return [
-      { label: "Due Today", value: taskKpis.dueToday, sub: "Assigned to you", icon: ChecklistOutlined, accent: "#1E7DBE", path: "/my-tasks" },
-      { label: "Pending", value: taskKpis.pending, sub: "Need action", icon: AssignmentTurnedInOutlined, accent: "#D97706", path: "/my-tasks" },
-      { label: "Completed", value: taskKpis.completed, sub: "All time", icon: TrendingUpOutlined, accent: "#059669", path: "/my-tasks" },
-      { label: "Overdue", value: taskKpis.overdue, sub: "Past due date", icon: BarChartOutlined, accent: taskKpis.overdue > 0 ? "#DC2626" : "#7C3AED", path: "/my-tasks" },
+      { label: "Due Today", value: taskKpis.dueToday, sub: "Assigned to you", icon: ChecklistOutlined, accent: theme.palette.primary.dark, path: "/my-tasks" },
+      { label: "Pending", value: taskKpis.pending, sub: "Need action", icon: AssignmentTurnedInOutlined, accent: theme.palette.warning.main, path: "/my-tasks" },
+      { label: "Completed", value: taskKpis.completed, sub: "All time", icon: TrendingUpOutlined, accent: theme.palette.success.main, path: "/my-tasks" },
+      { label: "Overdue", value: taskKpis.overdue, sub: "Past due date", icon: BarChartOutlined, accent: taskKpis.overdue > 0 ? theme.palette.error.main : theme.palette.primary.main, path: "/my-tasks" },
     ];
-  }, [showAnalytics, mtdRevenue, k, taskKpis]);
+  }, [showAnalytics, mtdRevenue, k, taskKpis, theme]);
 
   if (permissions.loading) return <LoadingScreen message="Loading dashboard…" />;
   if (!permissions.authorized || !permissions.employee) return <AccessDenied />;
@@ -210,7 +210,7 @@ function WelcomePage() {
       <Box
         sx={{
           background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.primary.light} 120%)`,
-          color: "#fff",
+          color: "common.white",
           px: { xs: 2, sm: 3 },
           py: { xs: 3, md: 4 },
         }}
@@ -222,7 +222,7 @@ function WelcomePage() {
                 <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: "-0.03em", fontSize: { xs: "1.6rem", md: "2rem" } }}>
                   {getGreeting(now)}, {displayName.split(" ")[0]}
                 </Typography>
-                <Chip label={roleLabel} size="small" sx={{ bgcolor: "rgba(255,255,255,0.22)", color: "#fff", fontWeight: 700 }} />
+                <Chip label={roleLabel} size="small" sx={{ bgcolor: "rgba(255,255,255,0.22)", color: "common.white", fontWeight: 700 }} />
               </Stack>
               <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 560 }}>
                 {showAnalytics
@@ -242,7 +242,7 @@ function WelcomePage() {
               {showAnalytics && (
                 <Tooltip title="Refresh">
                   <span>
-                    <IconButton onClick={() => load(true)} disabled={refreshing} sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.18)", "&:hover": { bgcolor: "rgba(255,255,255,0.3)" } }}>
+                    <IconButton onClick={() => load(true)} disabled={refreshing} sx={{ color: "common.white", bgcolor: "rgba(255,255,255,0.18)", "&:hover": { bgcolor: "rgba(255,255,255,0.3)" } }}>
                       <RefreshRounded />
                     </IconButton>
                   </span>
@@ -274,20 +274,20 @@ function WelcomePage() {
                       <AreaChart data={data.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="wOrd" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
+                            <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.35} />
+                            <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
                           </linearGradient>
                           <linearGradient id="wCol" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
+                            <stop offset="5%" stopColor={theme.palette.primary.dark} stopOpacity={0.3} />
+                            <stop offset="95%" stopColor={theme.palette.primary.dark} stopOpacity={0} />
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
                         <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                         <YAxis tickFormatter={inrCompact} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={66} />
                         <RTooltip formatter={(v) => inrCompact(v)} />
-                        <Area type="monotone" dataKey="ordered" stroke="#45ADE6" strokeWidth={2.5} fill="url(#wOrd)" name="Ordered" />
-                        <Area type="monotone" dataKey="collected" stroke="#1E7DBE" strokeWidth={2.5} fill="url(#wCol)" name="Collected" />
+                        <Area type="monotone" dataKey="ordered" stroke={theme.palette.primary.main} strokeWidth={2.5} fill="url(#wOrd)" name="Ordered" />
+                        <Area type="monotone" dataKey="collected" stroke={theme.palette.primary.dark} strokeWidth={2.5} fill="url(#wCol)" name="Collected" />
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (loading ? <Skeleton variant="rounded" height="100%" /> : <EmptyChart label="No revenue data yet" />)}
@@ -320,7 +320,7 @@ function WelcomePage() {
                         <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
                         <RTooltip cursor={{ fill: alpha(theme.palette.primary.main, 0.06) }} />
                         <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={38}>
-                          {departments.map((d, i) => <Cell key={d.key} fill={d.health === "warn" ? "#D97706" : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                          {departments.map((d, i) => <Cell key={d.key} fill={d.health === "warn" ? theme.palette.warning.main : CHART_COLORS[i % CHART_COLORS.length]} />)}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>

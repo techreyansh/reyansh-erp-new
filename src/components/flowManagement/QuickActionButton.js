@@ -123,20 +123,21 @@ const QuickActionButton = ({
         PaperProps={{
           sx: {
             borderRadius: 2,
-            border: '1px solid #e3f2fd'
+            border: '1px solid',
+            borderColor: 'info.lighter'
           }
         }}
       >
-        <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
-          color: 'white',
+        <DialogTitle sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: 'common.white',
           py: 2
-        }}>
+        })}>
           {buttonProps.dialogTitle}
         </DialogTitle>
-        
+
         <DialogContent sx={{ py: 3 }}>
-          <Typography variant="body1" sx={{ mb: 2, color: '#37474f' }}>
+          <Typography variant="body1" sx={{ mb: 2, color: 'text.primary' }}>
             {buttonProps.dialogContent}
           </Typography>
           
@@ -169,20 +170,20 @@ const QuickActionButton = ({
                   component="span"
                   startIcon={<Upload />}
                   size="small"
-                  sx={{
-                    borderColor: '#45ADE6',
-                    color: '#45ADE6',
+                  sx={(theme) => ({
+                    borderColor: 'primary.main',
+                    color: 'primary.main',
                     '&:hover': {
-                      borderColor: '#1E7DBE',
-                      backgroundColor: '#f8fbff'
+                      borderColor: theme.palette.primary.dark,
+                      backgroundColor: theme.palette.grey[50]
                     }
-                  }}
+                  })}
                 >
                   Upload Document (Optional)
                 </Button>
               </label>
               {file && (
-                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#45ADE6' }}>
+                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'primary.main' }}>
                   Selected: {file.name}
                 </Typography>
               )}
@@ -200,14 +201,14 @@ const QuickActionButton = ({
           <Button
             onClick={handleClose}
             variant="outlined"
-            sx={{
-              borderColor: '#45ADE6',
-              color: '#45ADE6',
+            sx={(theme) => ({
+              borderColor: 'primary.main',
+              color: 'primary.main',
               '&:hover': {
-                borderColor: '#1E7DBE',
-                backgroundColor: '#f8fbff'
+                borderColor: theme.palette.primary.dark,
+                backgroundColor: theme.palette.grey[50]
               }
-            }}
+            })}
           >
             Cancel
           </Button>

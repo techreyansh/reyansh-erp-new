@@ -842,12 +842,12 @@ const FGStockSheet = () => {
             <Typography 
               variant="h4" 
               component="h1" 
-              sx={{ 
+              sx={(theme) => ({
                 fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #45ADE6, #64b5f6)',
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-              }}
+              })}
             >
               FG Stock Sheet
             </Typography>
@@ -1046,13 +1046,13 @@ const FGStockSheet = () => {
                   startIcon={<AddIcon />}
                   onClick={handleOpenDialog}
                   size="medium"
-                  sx={{ 
-                    background: 'linear-gradient(45deg, #45ADE6, #64b5f6)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #0d47a1, #45ADE6)',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     },
                     whiteSpace: 'nowrap'
-                  }}
+                  })}
                 >
                   Add Product
                 </Button>
@@ -1065,13 +1065,13 @@ const FGStockSheet = () => {
                   onClick={() => navigate('/inventory/stock-sheet/fg-material-inward')}
                   startIcon={<AddIcon />}
                   size="medium"
-                  sx={{
-                    background: 'linear-gradient(45deg, #4caf50, #81c784)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #388e3c, #4caf50)',
+                      background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                     },
                     whiteSpace: 'nowrap'
-                  }}
+                  })}
                 >
                   Material Inward
                 </Button>
@@ -1080,13 +1080,13 @@ const FGStockSheet = () => {
                   onClick={() => navigate('/inventory/stock-sheet/fg-material-outward')}
                   startIcon={<RemoveIcon />}
                   size="medium"
-                  sx={{
-                    background: 'linear-gradient(45deg, #f44336, #ef5350)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #d32f2f, #f44336)',
+                      background: `linear-gradient(45deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                     },
                     whiteSpace: 'nowrap'
-                  }}
+                  })}
                 >
                   Material Outward
                 </Button>
@@ -1414,15 +1414,15 @@ const FGStockSheet = () => {
           </IconButton>
           <Typography 
             variant="h4" 
-            sx={{ 
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
             {selectedItem ? "Edit Product" : "Add New Product"}
           </Typography>
@@ -1853,16 +1853,16 @@ const FGStockSheet = () => {
             onClick={handleSubmit} 
             variant="contained" 
             startIcon={selectedItem ? <SaveIcon /> : <AddIcon />}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #45ADE6, #84D2FC)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              color: theme.palette.common.white,
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #0d47a1, #45ADE6)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -1871,7 +1871,7 @@ const FGStockSheet = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             {selectedItem ? "Update Product" : "Add Product"}
           </Button>

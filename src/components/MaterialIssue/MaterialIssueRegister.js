@@ -565,15 +565,15 @@ const MaterialIssueRegister = () => {
           <IssueIcon fontSize="large" />
         </Avatar>
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-        sx={{
+          <Typography
+            variant="h4"
+            component="h1"
+        sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #d32f2f, #ff8a80)',
+              background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             Material Issue Register
           </Typography>
@@ -709,12 +709,12 @@ const MaterialIssueRegister = () => {
               startIcon={<AddIcon />}
             onClick={handleOpenDialog}
               size="large"
-              sx={{ 
-                background: 'linear-gradient(45deg, #d32f2f, #ff8a80)',
+              sx={(theme) => ({
+                background: `linear-gradient(45deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #b71c1c, #d32f2f)',
+                  background: `linear-gradient(45deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                 }
-              }}
+              })}
           >
             Add New Issue Entry
           </Button>
@@ -771,7 +771,7 @@ const MaterialIssueRegister = () => {
                             fontWeight: 'bold', 
                             textTransform: 'uppercase',
                             bgcolor: 'error.main',
-                            color: 'white',
+                            color: 'common.white',
                             fontSize: '0.75rem'
                           }}
                     sortDirection={orderBy === col.id ? order : false}
@@ -781,7 +781,7 @@ const MaterialIssueRegister = () => {
                         active={orderBy === col.id}
                         direction={orderBy === col.id ? order : "asc"}
                         onClick={() => handleRequestSort(col.id)}
-                              sx={{ color: 'white !important' }}
+                              sx={(theme) => ({ color: `${theme.palette.common.white} !important` })}
                       >
                         {col.label}
                       </TableSortLabel>
@@ -971,7 +971,7 @@ const MaterialIssueRegister = () => {
               right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#d32f2f',
+              color: 'error.main',
               '&:hover': {
                 backgroundColor: 'rgba(211, 47, 47, 0.1)'
               }
@@ -980,16 +980,16 @@ const MaterialIssueRegister = () => {
             <CancelIcon />
           </IconButton>
           <Typography 
-            variant="h4" 
-            sx={{ 
+            variant="h4"
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #d32f2f, #ff8a80)',
+              background: `linear-gradient(135deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
           {selectedEntry ? "Edit Issue Entry" : "Add New Issue Entry"}
           </Typography>
@@ -1039,35 +1039,35 @@ const MaterialIssueRegister = () => {
                       {...params} 
                       fullWidth 
                         variant="standard"
-                        sx={{
+                        sx={(theme) => ({
                           '& .MuiInput-underline:before': {
-                            borderBottomColor: '#e0e0e0'
+                            borderBottomColor: theme.palette.divider
                           },
                           '& .MuiInput-underline:after': {
-                            borderBottomColor: '#45ADE6'
+                            borderBottomColor: theme.palette.primary.main
                           },
                           '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                            borderBottomColor: '#45ADE6'
+                            borderBottomColor: theme.palette.primary.main
                           },
                           '& .MuiFormLabel-root': {
                             fontSize: '14px',
-                            color: '#666',
+                            color: theme.palette.text.secondary,
                             '&.Mui-focused': {
-                              color: '#45ADE6'
+                              color: theme.palette.primary.main
                             }
                           },
                           '& .MuiInputBase-input': {
                             fontSize: '16px',
                             padding: '8px 0',
-                            color: '#333'
+                            color: theme.palette.text.primary
                           },
                           '& .MuiInputAdornment-root': {
                             '& .MuiIconButton-root': {
-                              color: '#666',
+                              color: theme.palette.text.secondary,
                               padding: '4px'
                             }
                           }
-                      }}
+                      })}
                     />
                   )}
                 />
@@ -1089,28 +1089,28 @@ const MaterialIssueRegister = () => {
                         ...params.InputProps,
                   startAdornment: <InventoryIcon color="action" sx={{ mr: 1 }} />
                 }}
-                      sx={{
+                      sx={(theme) => ({
                         '& .MuiInput-underline:before': {
-                          borderBottomColor: '#e0e0e0'
+                          borderBottomColor: theme.palette.divider
                         },
                         '& .MuiInput-underline:after': {
-                          borderBottomColor: '#d32f2f'
+                          borderBottomColor: theme.palette.error.main
                         },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                          borderBottomColor: '#d32f2f'
+                          borderBottomColor: theme.palette.error.main
                         },
                         '& .MuiFormLabel-root': {
                           fontSize: '14px',
-                          color: '#666',
+                          color: theme.palette.text.secondary,
                           '&.Mui-focused': {
-                            color: '#d32f2f'
+                            color: theme.palette.error.main
                           }
                         },
                         '& .MuiInputBase-input': {
                           fontSize: '16px',
                           padding: '8px 0'
                         }
-                      }}
+                      })}
                     />
                   )}
                   renderOption={(props, option) => {
@@ -1165,28 +1165,28 @@ const MaterialIssueRegister = () => {
                 InputProps={{
                   startAdornment: <AssignmentIcon color="action" sx={{ mr: 1 }} />
                 }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: theme.palette.error.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
               <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
@@ -1203,28 +1203,28 @@ const MaterialIssueRegister = () => {
                 InputProps={{
                     startAdornment: <ScaleIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: theme.palette.error.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
             </Box>
@@ -1242,28 +1242,28 @@ const MaterialIssueRegister = () => {
                 InputProps={{
                     startAdornment: <TrendingDownIcon color="action" sx={{ mr: 1 }} />
                   }}
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiInput-underline:before': {
-                      borderBottomColor: '#e0e0e0'
+                      borderBottomColor: theme.palette.divider
                     },
                     '& .MuiInput-underline:after': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                      borderBottomColor: '#d32f2f'
+                      borderBottomColor: theme.palette.error.main
                     },
                     '& .MuiFormLabel-root': {
                       fontSize: '14px',
-                      color: '#666',
+                      color: theme.palette.text.secondary,
                       '&.Mui-focused': {
-                        color: '#d32f2f'
+                        color: theme.palette.error.main
                       }
                     },
                     '& .MuiInputBase-input': {
                       fontSize: '16px',
                       padding: '8px 0'
                     }
-                  }}
+                  })}
                 />
               </Box>
             </Box>
@@ -1283,28 +1283,28 @@ const MaterialIssueRegister = () => {
                 rows={3}
                 placeholder="Enter any additional remarks or notes..."
                 variant="standard"
-                sx={{
+                sx={(theme) => ({
                   '& .MuiInput-underline:before': {
-                    borderBottomColor: '#e0e0e0'
+                    borderBottomColor: theme.palette.divider
                   },
                   '& .MuiInput-underline:after': {
-                    borderBottomColor: '#d32f2f'
+                    borderBottomColor: theme.palette.error.main
                   },
                   '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    borderBottomColor: '#d32f2f'
+                    borderBottomColor: theme.palette.error.main
                   },
                   '& .MuiFormLabel-root': {
                     fontSize: '14px',
-                    color: '#666',
+                    color: theme.palette.text.secondary,
                     '&.Mui-focused': {
-                      color: '#d32f2f'
+                      color: theme.palette.error.main
                     }
                   },
                   '& .MuiInputBase-input': {
                     fontSize: '16px',
                     padding: '8px 0'
                   }
-                }}
+                })}
               />
             </Box>
           </Box>
@@ -1317,15 +1317,16 @@ const MaterialIssueRegister = () => {
             startIcon={<CancelIcon />}
             sx={{
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: '1px solid',
+              borderColor: 'divider',
               backgroundColor: 'transparent',
-              color: '#666',
+              color: 'text.secondary',
               px: 3,
               py: 1.5,
               minWidth: '120px',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#d32f2f'
+                borderColor: 'error.main'
               }
             }}
           >
@@ -1336,16 +1337,16 @@ const MaterialIssueRegister = () => {
             variant="contained" 
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : (selectedEntry ? <SaveIcon /> : <AddIcon />)}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #d32f2f, #ff8a80)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.error.main}, ${theme.palette.error.light})`,
+              color: theme.palette.common.white,
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(211, 47, 47, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #b71c1c, #d32f2f)',
+                background: `linear-gradient(135deg, ${theme.palette.error.dark}, ${theme.palette.error.main})`,
                 boxShadow: '0 6px 16px rgba(211, 47, 47, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -1354,7 +1355,7 @@ const MaterialIssueRegister = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             {selectedEntry ? "Update Entry" : loading ? "Adding..." : "Add Entry"}
           </Button>

@@ -1,0 +1,43 @@
+<!-- @dsCard group="Foundations · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brand Colors · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #A9B2BA; margin-bottom: 10px; }
+  .swatch { border-radius: 8px; height: 84px; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; border: 1px solid rgba(226,232,237,0.12); box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+  .swatch .name { font-size: 12px; font-weight: 600; }
+  .swatch .hex { font-size: 11px; font-family: ui-monospace, monospace; opacity: 0.85; }
+  .on-dark .name, .on-dark .hex { color: #fff; }
+  .on-deep .name, .on-deep .hex { color: #0B1A24; }
+</style>
+</head>
+<body>
+  <h1>Brand Colors · Dark</h1>
+  <div class="sub">In dark mode primary stays sky blue but reads on a deep slate canvas; secondary lightens to a neutral grey.</div>
+
+  <div class="label">Primary</div>
+  <div class="row">
+    <div class="swatch on-deep" style="background:#84D2FC"><span class="name">light</span><span class="hex">#84D2FC</span></div>
+    <div class="swatch on-deep" style="background:#45ADE6"><span class="name">main</span><span class="hex">#45ADE6</span></div>
+    <div class="swatch on-dark" style="background:#1E7DBE"><span class="name">dark</span><span class="hex">#1E7DBE</span></div>
+    <div class="swatch on-dark" style="background:#0B1A24"><span class="name">contrast</span><span class="hex">#0B1A24</span></div>
+  </div>
+
+  <div class="label">Secondary (lightened for dark)</div>
+  <div class="row">
+    <div class="swatch on-deep" style="background:#C7CDD3"><span class="name">light</span><span class="hex">#C7CDD3</span></div>
+    <div class="swatch on-deep" style="background:#A9B2BA"><span class="name">main</span><span class="hex">#A9B2BA</span></div>
+    <div class="swatch on-dark" style="background:#81898F"><span class="name">dark</span><span class="hex">#81898F</span></div>
+    <div class="swatch on-dark" style="background:#2D3D4C"><span class="name">paper</span><span class="hex">#2D3D4C</span></div>
+  </div>
+</body>
+</html>

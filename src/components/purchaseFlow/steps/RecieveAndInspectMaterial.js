@@ -245,7 +245,7 @@ const RecieveAndInspectMaterial = () => {
       <Box sx={{ mb: 4 }}>
         <Card sx={{ 
           background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-          color: 'white',
+          color: 'common.white',
           borderRadius: 3,
           boxShadow: `0 8px 32px ${alpha(theme.palette.success.main, 0.3)}`
         }}>
@@ -268,7 +268,7 @@ const RecieveAndInspectMaterial = () => {
                 label={`${pos.length} Purchase Orders`} 
                 sx={{ 
                   bgcolor: 'rgba(255, 255, 255, 0.2)', 
-                  color: 'white',
+                  color: 'common.white',
                   fontWeight: 600,
                   fontSize: '0.9rem'
                 }} 
@@ -277,7 +277,7 @@ const RecieveAndInspectMaterial = () => {
                 label="Step 12" 
                 sx={{ 
                   bgcolor: 'rgba(255, 255, 255, 0.2)', 
-                  color: 'white',
+                  color: 'common.white',
                   fontWeight: 600,
                   fontSize: '0.9rem'
                 }} 
@@ -471,11 +471,11 @@ const RecieveAndInspectMaterial = () => {
                           disabled={!!processing[po.POId]}
                           sx={{ 
                             background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
-                            color: 'white',
+                            color: 'common.white',
                             fontWeight: 600,
                             borderRadius: 2,
                             '&:hover': {
-                              background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                              background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                             },
                             '&:disabled': {
                               background: 'rgba(0, 0, 0, 0.12)',
@@ -484,7 +484,7 @@ const RecieveAndInspectMaterial = () => {
                           }}
                         >
                           {processing[po.POId] ? (
-                            <CircularProgress size={16} sx={{ color: 'white' }} />
+                            <CircularProgress size={16} sx={{ color: 'common.white' }} />
                           ) : (
                             'Complete Step'
                           )}
@@ -697,7 +697,7 @@ const RecieveAndInspectMaterial = () => {
       >
         <DialogTitle sx={{
           background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
-          color: 'white',
+          color: 'common.white',
           fontWeight: 600
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -764,12 +764,12 @@ const RecieveAndInspectMaterial = () => {
             disabled={!selectedPO || !!processing[selectedPO?.POId]}
             sx={{ 
               background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
-              color: 'white',
+              color: 'common.white',
               fontWeight: 600,
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
               },
               '&:disabled': {
                 background: 'rgba(0, 0, 0, 0.12)',
@@ -778,7 +778,7 @@ const RecieveAndInspectMaterial = () => {
             }}
           >
             {processing[selectedPO?.POId] ? (
-              <CircularProgress size={20} sx={{ color: 'white' }} />
+              <CircularProgress size={20} sx={{ color: 'common.white' }} />
             ) : (
               'Save Data'
             )}

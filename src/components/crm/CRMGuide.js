@@ -53,10 +53,10 @@ const ROUTINE = [
 ];
 
 const LEGEND = [
-  { color: '#1E7DBE', label: 'New / Info', meaning: 'New lead, neutral state' },
-  { color: '#059669', label: 'Hot / Won', meaning: 'Qualified, active, won' },
-  { color: '#D97706', label: 'Due today', meaning: 'Action needed today' },
-  { color: '#C0392B', label: 'Overdue / Risk', meaning: 'Past due, at-risk, lost' },
+  { color: 'primary.dark', label: 'New / Info', meaning: 'New lead, neutral state' },
+  { color: 'success.main', label: 'Hot / Won', meaning: 'Qualified, active, won' },
+  { color: 'warning.main', label: 'Due today', meaning: 'Action needed today' },
+  { color: 'error.main', label: 'Overdue / Risk', meaning: 'Past due, at-risk, lost' },
 ];
 
 function Node({ node, onClick }) {
@@ -87,7 +87,7 @@ function CRMGuide() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
-      <Box sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.light} 120%)`, color: '#fff', px: { xs: 2, sm: 3 }, py: { xs: 3, md: 4 } }}>
+      <Box sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.light} 120%)`, color: 'common.white', px: { xs: 2, sm: 3 }, py: { xs: 3, md: 4 } }}>
         <Container maxWidth="xl" disableGutters>
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Box sx={{ width: 44, height: 44, borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(255,255,255,0.2)' }}>
@@ -134,8 +134,8 @@ function CRMGuide() {
           </Stack>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <Box onClick={() => navigate('/crm/customers')} sx={{ cursor: 'pointer', p: 1.75, borderRadius: 2, border: '1px solid', borderColor: alpha('#059669', 0.4), bgcolor: alpha('#059669', 0.06), display: 'flex', gap: 1.25, alignItems: 'center' }}>
-                <CheckCircleRounded sx={{ color: '#059669' }} />
+              <Box onClick={() => navigate('/crm/customers')} sx={{ cursor: 'pointer', p: 1.75, borderRadius: 2, border: '1px solid', borderColor: alpha(theme.palette.success.main, 0.4), bgcolor: alpha(theme.palette.success.main, 0.06), display: 'flex', gap: 1.25, alignItems: 'center' }}>
+                <CheckCircleRounded sx={{ color: 'success.main' }} />
                 <Box>
                   <Typography variant="subtitle2" fontWeight={800}>Won → Customer</Typography>
                   <Typography variant="caption" color="text.secondary">Becomes an account — orders, payments, retention.</Typography>
@@ -143,8 +143,8 @@ function CRMGuide() {
               </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Box sx={{ p: 1.75, borderRadius: 2, border: '1px solid', borderColor: alpha('#C0392B', 0.4), bgcolor: alpha('#C0392B', 0.06), display: 'flex', gap: 1.25, alignItems: 'center' }}>
-                <CancelRounded sx={{ color: '#C0392B' }} />
+              <Box sx={{ p: 1.75, borderRadius: 2, border: '1px solid', borderColor: alpha(theme.palette.error.main, 0.4), bgcolor: alpha(theme.palette.error.main, 0.06), display: 'flex', gap: 1.25, alignItems: 'center' }}>
+                <CancelRounded sx={{ color: 'error.main' }} />
                 <Box>
                   <Typography variant="subtitle2" fontWeight={800}>Lost → Capture the reason</Typography>
                   <Typography variant="caption" color="text.secondary">Record why & which competitor, so the team learns.</Typography>
@@ -160,7 +160,7 @@ function CRMGuide() {
           {STEPS.map((s) => (
             <Grid item xs={12} sm={6} md={4} key={s.n}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, height: '100%' }}>
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'primary.main', color: '#fff', fontWeight: 800, fontSize: '0.85rem', mb: 1 }}>
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'primary.main', color: 'common.white', fontWeight: 800, fontSize: '0.85rem', mb: 1 }}>
                   {s.n}
                 </Box>
                 <Typography variant="subtitle2" fontWeight={800}>{s.title}</Typography>

@@ -50,8 +50,8 @@ const MoldingMainNavigation = () => {
       label: "Dashboard",
       icon: <DashboardIcon />,
       description: "Real-time insights and analytics for molding operations",
-      color: "#ff9800",
-      gradient: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+      color: theme.palette.warning.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.main} 100%)`,
       route: "/molding/dashboard"
     },
     {
@@ -59,8 +59,8 @@ const MoldingMainNavigation = () => {
       label: "Power Cord Master",
       icon: <PowerCordIcon />,
       description: "Manage power cord specifications and product variants",
-      color: "#45ADE6",
-      gradient: "linear-gradient(135deg, #45ADE6 0%, #45ADE6 100%)",
+      color: theme.palette.primary.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
       route: "/molding/power-cord-master"
     },
     {
@@ -68,8 +68,8 @@ const MoldingMainNavigation = () => {
       label: "Production Planning",
       icon: <PlanningIcon />,
       description: "Optimize cutting, assembly, and molding workflows",
-      color: "#9c27b0",
-      gradient: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)",
+      color: theme.palette.primary.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
       route: "/molding/production-planning"
     },
     {
@@ -77,8 +77,8 @@ const MoldingMainNavigation = () => {
       label: "Production Management",
       icon: <ProductionIcon />,
       description: "Real-time monitoring of assembly lines and machines",
-      color: "#4caf50",
-      gradient: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+      color: theme.palette.success.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.main} 100%)`,
       route: "/molding/production-management"
     }
   ];
@@ -93,14 +93,14 @@ const MoldingMainNavigation = () => {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Fade in timeout={800}>
-          <Card 
-            sx={{ 
-              p: 6, 
+          <Card
+            sx={(theme) => ({
+              p: 6,
               textAlign: 'center',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.warning.main} 100%)`,
+              color: theme.palette.common.white,
               boxShadow: 6
-            }}
+            })}
           >
             <Avatar 
               sx={{ 
@@ -136,13 +136,13 @@ const MoldingMainNavigation = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Enhanced Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.main} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -191,15 +191,15 @@ const MoldingMainNavigation = () => {
                     icon={<AdminIcon />}
                     label={userRole}
                     variant="outlined"
-                    sx={{ 
-                      color: 'white', 
+                    sx={{
+                      color: 'common.white',
                       borderColor: 'rgba(255,255,255,0.5)',
-                      '& .MuiChip-icon': { color: 'white' }
+                      '& .MuiChip-icon': { color: 'common.white' }
                     }}
                   />
                 </Tooltip>
                 <Tooltip title="System Status">
-                  <IconButton sx={{ color: 'white' }}>
+                  <IconButton sx={{ color: 'common.white' }}>
                     <Badge badgeContent={4} color="error">
                       <AnalyticsIcon />
                     </Badge>
@@ -298,10 +298,10 @@ const MoldingMainNavigation = () => {
       <Fade in timeout={1000}>
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {[
-            { label: "Active Orders", value: "24", icon: <PowerCordIcon />, color: "#45ADE6" },
-            { label: "Production Plans", value: "8", icon: <PlanningIcon />, color: "#9c27b0" },
-            { label: "Machines Running", value: "8/10", icon: <SpeedIcon />, color: "#4caf50" },
-            { label: "Efficiency", value: "97%", icon: <TrendingUpIcon />, color: "#ff9800" }
+            { label: "Active Orders", value: "24", icon: <PowerCordIcon />, color: theme.palette.primary.main },
+            { label: "Production Plans", value: "8", icon: <PlanningIcon />, color: theme.palette.primary.main },
+            { label: "Machines Running", value: "8/10", icon: <SpeedIcon />, color: theme.palette.success.main },
+            { label: "Efficiency", value: "97%", icon: <TrendingUpIcon />, color: theme.palette.warning.main }
           ].map((stat, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Card 

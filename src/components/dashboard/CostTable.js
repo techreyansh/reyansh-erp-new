@@ -131,13 +131,13 @@ const CostTable = ({ data, loading }) => {
                 ))}
                 
                 {/* Summary row */}
-                <TableRow 
-                  sx={{ 
-                    '& td': { 
+                <TableRow
+                  sx={(theme) => ({
+                    '& td': {
                       fontWeight: 'bold',
-                      backgroundColor: '#f5f5f5'
-                    } 
-                  }}
+                      backgroundColor: theme.palette.grey[100]
+                    }
+                  })}
                 >
                   <TableCell colSpan={3}>
                     Totals
@@ -173,7 +173,7 @@ const CostTable = ({ data, loading }) => {
           alignItems: 'center', 
           justifyContent: 'center',
           height: '350px',
-          bgcolor: '#f9f9f9',
+          bgcolor: 'grey.100',
           borderRadius: 1
         }}>
           <Typography variant="body1" color="textSecondary">

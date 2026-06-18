@@ -1,5 +1,6 @@
 import React from "react";
 import { Grid, Paper, Stack, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   Bar,
   BarChart,
@@ -14,6 +15,7 @@ import {
 } from "recharts";
 
 const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
+  const theme = useTheme();
   const defectData = [
     { name: "Defect", value: reportMetrics.defectRate },
     { name: "Good", value: 100 - reportMetrics.defectRate }
@@ -32,8 +34,8 @@ const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
                 <XAxis dataKey="period" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="target" fill="#94A3B8" />
-                <Bar dataKey="production" fill="#45ADE6" />
+                <Bar dataKey="target" fill={theme.palette.text.disabled} />
+                <Bar dataKey="production" fill={theme.palette.primary.main} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -45,8 +47,8 @@ const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
             <ResponsiveContainer width="100%" height="78%">
               <PieChart>
                 <Pie data={defectData} dataKey="value" outerRadius={70} label>
-                  <Cell fill="#DC2626" />
-                  <Cell fill="#059669" />
+                  <Cell fill={theme.palette.error.main} />
+                  <Cell fill={theme.palette.success.main} />
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -66,7 +68,7 @@ const ReportsDashboard = ({ reportMetrics, leadConversionRate }) => {
                 <XAxis dataKey="machine" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="utilization" fill="#1E7DBE" />
+                <Bar dataKey="utilization" fill={theme.palette.primary.dark} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>

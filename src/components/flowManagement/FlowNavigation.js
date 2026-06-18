@@ -24,63 +24,65 @@ import {
   ArrowBack
 } from '@mui/icons-material';
 import config from '../../config/config';
+import { useTheme } from '@mui/material/styles';
 
 const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, stageCompletions = {} }) => {
+  const theme = useTheme();
   const steps = [
     {
       id: config.statusCodes.NEW,
       label: 'New Order',
       icon: <Assignment />,
-      color: '#45ADE6',
+      color: theme.palette.primary.main,
       description: 'New purchase order created'
     },
     {
       id: config.statusCodes.STORE1,
       label: 'Store 1',
       icon: <Inventory />,
-      color: '#4caf50',
+      color: theme.palette.success.main,
       description: 'Material preparation and kitting'
     },
     {
       id: config.statusCodes.CABLE_PRODUCTION,
       label: 'Cable Production',
       icon: <Build />,
-      color: '#ff9800',
+      color: theme.palette.warning.main,
       description: 'Cable manufacturing process'
     },
     {
       id: config.statusCodes.STORE2,
       label: 'Store 2',
       icon: <Inventory />,
-      color: '#4caf50',
+      color: theme.palette.success.main,
       description: 'Secondary material handling'
     },
     {
       id: config.statusCodes.MOULDING,
       label: 'Moulding',
       icon: <Build />,
-      color: '#ff9800',
+      color: theme.palette.warning.main,
       description: 'Moulding and assembly'
     },
     {
       id: config.statusCodes.FG_SECTION,
       label: 'FG Section',
       icon: <Verified />,
-      color: '#9c27b0',
+      color: theme.palette.primary.main,
       description: 'Final quality check and packaging'
     },
     {
       id: config.statusCodes.DISPATCH,
       label: 'Dispatch',
       icon: <LocalShipping />,
-      color: '#607d8b',
+      color: theme.palette.text.secondary,
       description: 'Ready for dispatch'
     },
     {
       id: config.statusCodes.DELIVERED,
       label: 'Delivered',
       icon: <CheckCircle />,
-      color: '#4caf50',
+      color: theme.palette.success.main,
       description: 'Order completed and delivered'
     }
   ];
@@ -121,31 +123,32 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
   return (
     <Paper 
       elevation={2}
-      sx={{ 
-        p: 3, 
+      sx={(theme) => ({
+        p: 3,
         borderRadius: 3,
-        background: 'linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%)',
-        border: '1px solid #e3f2fd'
-      }}
+        background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.info.lighter} 100%)`,
+        border: '1px solid',
+        borderColor: 'info.lighter'
+      })}
     >
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600, mb: 1 }}>
+        <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 1 }}>
           Production Flow Progress
         </Typography>
-        <LinearProgress 
-          variant="determinate" 
-          value={getProgressPercentage()} 
-          sx={{ 
-            height: 8, 
+        <LinearProgress
+          variant="determinate"
+          value={getProgressPercentage()}
+          sx={(theme) => ({
+            height: 8,
             borderRadius: 4,
-            backgroundColor: '#e3f2fd',
+            backgroundColor: theme.palette.info.lighter,
             '& .MuiLinearProgress-bar': {
-              background: 'linear-gradient(90deg, #45ADE6, #84D2FC)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
               borderRadius: 4
             }
-          }} 
+          })}
         />
-        <Typography variant="caption" sx={{ color: '#546e7a', mt: 1, display: 'block' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
           {Math.round(getProgressPercentage())}% Complete
         </Typography>
       </Box>
@@ -162,36 +165,36 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
               <StepLabel
                 StepIconComponent={({ active, completed }) => (
                   <Box
-                    sx={{
+                    sx={(theme) => ({
                       width: 40,
                       height: 40,
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: completed 
-                        ? '#4caf50' 
-                        : active 
-                        ? step.color 
-                        : '#e0e0e0',
-                      color: completed || active ? 'white' : '#9e9e9e',
+                      backgroundColor: completed
+                        ? theme.palette.success.main
+                        : active
+                        ? step.color
+                        : theme.palette.grey[100],
+                      color: completed || active ? theme.palette.common.white : theme.palette.text.disabled,
                       border: `2px solid ${active ? step.color : 'transparent'}`,
                       transition: 'all 0.3s ease',
                       '&:hover': {
                         transform: 'scale(1.1)',
                         boxShadow: `0 4px 12px ${step.color}40`
                       }
-                    }}
+                    })}
                   >
                     {step.icon}
                   </Box>
                 )}
-                sx={{
+                sx={(theme) => ({
                   '& .MuiStepLabel-label': {
-                    color: isActive ? step.color : isCompleted ? '#4caf50' : '#9e9e9e',
+                    color: isActive ? step.color : isCompleted ? theme.palette.success.main : theme.palette.text.disabled,
                     fontWeight: isActive ? 600 : 400
                   }
-                }}
+                })}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: isActive ? 600 : 400 }}>
@@ -203,7 +206,7 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
                       size="small"
                       sx={{
                         backgroundColor: step.color,
-                        color: 'white',
+                        color: 'common.white',
                         fontSize: '0.7rem',
                         height: 20
                       }}
@@ -221,7 +224,7 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
               </StepLabel>
               
               <StepContent>
-                <Typography variant="body2" sx={{ color: '#546e7a', mb: 2 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
                   {step.description}
                 </Typography>
                 
@@ -235,11 +238,11 @@ const FlowNavigation = ({ currentStatus, onNavigateToStep, canNavigate = true, s
                           startIcon={<ArrowBack />}
                           onClick={() => onNavigateToStep && onNavigateToStep(steps[index - 1].id)}
                           sx={{
-                            borderColor: '#45ADE6',
-                            color: '#45ADE6',
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
                             '&:hover': {
-                              backgroundColor: '#f8fbff',
-                              borderColor: '#1E7DBE'
+                              backgroundColor: 'grey.50',
+                              borderColor: 'primary.dark'
                             }
                           }}
                         >

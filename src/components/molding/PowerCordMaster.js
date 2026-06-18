@@ -516,8 +516,8 @@ const PowerCordMaster = () => {
                 return (
                   <>
                     {molding.inner && <Chip label="Inner" size="small" sx={{ bgcolor: "#ffeb3b" }} />}
-                    {molding.outer && <Chip label="Outer" size="small" sx={{ bgcolor: "#4caf50", color: "white" }} />}
-                    {molding.grommet && <Chip label="Grommet" size="small" sx={{ bgcolor: "#ff9800", color: "white" }} />}
+                    {molding.outer && <Chip label="Outer" size="small" sx={{ bgcolor: "success.main", color: "common.white" }} />}
+                    {molding.grommet && <Chip label="Grommet" size="small" sx={{ bgcolor: "warning.main", color: "common.white" }} />}
                   </>
                 );
               })()}
@@ -552,9 +552,9 @@ const PowerCordMaster = () => {
         <Box sx={{ flex: 1 }}>
           <Typography 
             variant="h4" 
-            sx={{ 
-              fontWeight: "bold", 
-              color: "#45ADE6",
+            sx={{
+              fontWeight: "bold",
+              color: "primary.main",
               fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
             }}
           >
@@ -575,8 +575,8 @@ const PowerCordMaster = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setDialogOpen(true)}
-          sx={{ 
-            bgcolor: "#45ADE6",
+          sx={{
+            bgcolor: "primary.main",
             whiteSpace: 'nowrap',
             flexShrink: 0
           }}
@@ -718,7 +718,7 @@ const PowerCordMaster = () => {
               gap: 2
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   Rows per page:
                 </Typography>
                 <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -728,7 +728,7 @@ const PowerCordMaster = () => {
                       setRowsPerPage(e.target.value);
                       setPage(0);
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(102, 126, 234, 0.3)',
                       },
@@ -736,9 +736,9 @@ const PowerCordMaster = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#1E7DBE',
+                        borderColor: theme.palette.primary.dark,
                       }
-                    }}
+                    })}
                   >
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
@@ -748,10 +748,10 @@ const PowerCordMaster = () => {
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, powerCords.length)} of {powerCords.length} items
                 </Typography>
-                
+
                 {Math.ceil(powerCords.length / rowsPerPage) > 1 && (
                   <Pagination
                     count={Math.ceil(powerCords.length / rowsPerPage)}
@@ -761,7 +761,7 @@ const PowerCordMaster = () => {
                     size="large"
                     showFirstButton
                     showLastButton
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiPaginationItem-root': {
                         borderRadius: 3,
                         fontWeight: 700,
@@ -775,8 +775,8 @@ const PowerCordMaster = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                          color: 'white',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.common.white,
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                           '&:hover': {
@@ -785,7 +785,7 @@ const PowerCordMaster = () => {
                           }
                         }
                       }
-                    }}
+                    })}
                   />
                 )}
               </Box>
@@ -805,7 +805,7 @@ const PowerCordMaster = () => {
         >
           <Table stickyHeader>
             <TableHead>
-              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+              <TableRow sx={{ bgcolor: "grey.100" }}>
                 <TableCell sx={{ fontWeight: 600 }}>Dispatch ID</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Unique ID</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Client</TableCell>
@@ -825,17 +825,17 @@ const PowerCordMaster = () => {
                         label={cord.dispatchUniqueId || "—"} 
                         size="small" 
                         onClick={() => handlePlanProduction(cord)}
-                        sx={{ 
-                          bgcolor: "#e8f5e9", 
-                          color: "#2e7d32", 
+                        sx={(theme) => ({
+                          bgcolor: theme.palette.success.lighter,
+                          color: theme.palette.success.main,
                           fontWeight: "bold",
                           cursor: "pointer",
                           "&:hover": {
-                            bgcolor: "#c8e6c9",
+                            bgcolor: theme.palette.success.light,
                             transform: "scale(1.05)",
                           },
                           transition: "all 0.2s"
-                        }}
+                        })}
                       />
                     </Tooltip>
                   </TableCell>
@@ -843,26 +843,26 @@ const PowerCordMaster = () => {
                     <Tooltip title="Click to plan production">
                       <Box 
                         onClick={() => handlePlanProduction(cord)}
-                        sx={{ 
-                          bgcolor: "#f3e5f5", 
-                          p: 1, 
+                        sx={(theme) => ({
+                          bgcolor: theme.palette.primary.light,
+                          p: 1,
                           borderRadius: 1,
                           cursor: "pointer",
                           "&:hover": {
-                            bgcolor: "#e1bee7",
+                            bgcolor: theme.palette.primary.light,
                             transform: "scale(1.02)",
                           },
                           transition: "all 0.2s"
-                        }}
+                        })}
                       >
-                        <Typography variant="body2" sx={{ fontWeight: "bold", color: "#7b1fa2" }}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold", color: "primary.main" }}>
                           {cord.uniqueId || "—"}
                         </Typography>
                       </Box>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: "bold", color: "#45ADE6" }}>
+                    <Typography variant="body2" sx={{ fontWeight: "bold", color: "primary.main" }}>
                       {cord.clientCode || "—"}
                     </Typography>
                   </TableCell>
@@ -881,7 +881,7 @@ const PowerCordMaster = () => {
                       <Chip 
                         label={cord.batchNumber ? `Batch ${cord.batchNumber}` : "—"} 
                         size="small" 
-                        sx={{ bgcolor: "#fff3e0", color: "#e65100", fontWeight: "bold", mb: 0.5 }}
+                        sx={{ bgcolor: "warning.lighter", color: "warning.main", fontWeight: "bold", mb: 0.5 }}
                       />
                       <Typography variant="caption" color="text.secondary" display="block">
                         {cord.quantity || cord.batchSize || 0} pcs
@@ -889,12 +889,12 @@ const PowerCordMaster = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: cord.completedDate ? "#2e7d32" : "text.secondary", fontStyle: cord.completedDate ? "normal" : "italic" }}>
+                    <Typography variant="body2" sx={{ color: cord.completedDate ? "success.main" : "text.secondary", fontStyle: cord.completedDate ? "normal" : "italic" }}>
                       {cord.completedDate ? new Date(cord.completedDate).toLocaleDateString() : "Not completed"}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: "#2e7d32" }}>
+                    <Typography variant="body2" sx={{ color: "success.main" }}>
                       {cord.DispatchDate ? new Date(cord.DispatchDate).toLocaleDateString() : "—"}
                     </Typography>
                   </TableCell>
@@ -948,7 +948,7 @@ const PowerCordMaster = () => {
               backgroundColor: 'rgba(248, 250, 255, 0.5)'
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   Rows per page:
                 </Typography>
                 <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -958,7 +958,7 @@ const PowerCordMaster = () => {
                       setRowsPerPage(e.target.value);
                       setPage(0);
                     }}
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(102, 126, 234, 0.3)',
                       },
@@ -966,9 +966,9 @@ const PowerCordMaster = () => {
                         borderColor: 'rgba(102, 126, 234, 0.5)',
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#1E7DBE',
+                        borderColor: theme.palette.primary.dark,
                       }
-                    }}
+                    })}
                   >
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
@@ -979,10 +979,10 @@ const PowerCordMaster = () => {
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, powerCords.length)} of {powerCords.length} items
                 </Typography>
-                
+
                 {Math.ceil(powerCords.length / rowsPerPage) > 1 && (
                   <Pagination
                     count={Math.ceil(powerCords.length / rowsPerPage)}
@@ -992,7 +992,7 @@ const PowerCordMaster = () => {
                     size="large"
                     showFirstButton
                     showLastButton
-                    sx={{
+                    sx={(theme) => ({
                       '& .MuiPaginationItem-root': {
                         borderRadius: 3,
                         fontWeight: 700,
@@ -1006,8 +1006,8 @@ const PowerCordMaster = () => {
                           boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                         },
                         '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                          color: 'white',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.common.white,
                           fontWeight: 800,
                           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                           '&:hover': {
@@ -1016,7 +1016,7 @@ const PowerCordMaster = () => {
                           }
                         }
                       }
-                    }}
+                    })}
                   />
                 )}
               </Box>

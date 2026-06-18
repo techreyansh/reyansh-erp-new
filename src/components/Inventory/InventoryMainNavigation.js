@@ -249,8 +249,8 @@ const InventoryMainNavigation = () => {
       label: "Stock Sheet",
       icon: <StockIcon />,
       description: "Manage raw materials and stock levels",
-      color: "#45ADE6",
-      gradient: "linear-gradient(135deg, #45ADE6 0%, #45ADE6 100%)",
+      color: theme.palette.primary.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
       route: "/inventory/stock-sheet"
     },
     {
@@ -258,8 +258,8 @@ const InventoryMainNavigation = () => {
       label: "Finished Goods",
       icon: <FactoryIcon />,
       description: "Comprehensive finished goods management",
-      color: "#9c27b0",
-      gradient: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)",
+      color: theme.palette.primary.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
       route: "/inventory/finished-goods"
     },
     {
@@ -267,8 +267,8 @@ const InventoryMainNavigation = () => {
       label: "Bill of Materials",
       icon: <BOMIcon />,
       description: "Product recipes and material requirements",
-      color: "#ff9800",
-      gradient: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+      color: theme.palette.warning.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
       route: "/inventory/bill-of-materials"
     },
     {
@@ -276,8 +276,8 @@ const InventoryMainNavigation = () => {
       label: "Kitting Sheet",
       icon: <KittingIcon />,
       description: "Component assembly and kitting operations",
-      color: "#4caf50",
-      gradient: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+      color: theme.palette.success.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
       route: "/inventory/kitting-sheet"
     },
     {
@@ -285,8 +285,8 @@ const InventoryMainNavigation = () => {
       label: "FG to Billing",
       icon: <BillingIcon />,
       description: "Client-wise billing for finished goods",
-      color: "#00bcd4",
-      gradient: "linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)",
+      color: theme.palette.primary.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
       route: "/inventory/fg-to-billing"
     }
   ];
@@ -299,14 +299,14 @@ const InventoryMainNavigation = () => {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Fade in timeout={800}>
-          <Card 
-            sx={{ 
-              p: 6, 
+          <Card
+            sx={(theme) => ({
+              p: 6,
               textAlign: 'center',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.warning.main} 100%)`,
+              color: theme.palette.common.white,
               boxShadow: 6
-            }}
+            })}
           >
             <Avatar 
               sx={{ 
@@ -342,13 +342,13 @@ const InventoryMainNavigation = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Enhanced Header Section */}
       <Fade in timeout={600}>
-        <Card 
-          sx={{ 
-            mb: 4, 
-            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-            color: 'white',
+        <Card
+          sx={(theme) => ({
+            mb: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+            color: theme.palette.common.white,
             boxShadow: 6
-          }}
+          })}
         >
           <CardContent sx={{ py: 4 }}>
             <Stack 
@@ -393,10 +393,10 @@ const InventoryMainNavigation = () => {
               
               <Stack direction="row" spacing={2}>
                 <Tooltip title="Refresh Statistics">
-                  <IconButton 
+                  <IconButton
                     onClick={fetchStatistics}
                     disabled={loading}
-                    sx={{ color: 'white' }}
+                    sx={{ color: 'common.white' }}
                   >
                     {loading ? <CircularProgress size={24} color="inherit" /> : <AnalyticsIcon />}
                   </IconButton>
@@ -406,15 +406,15 @@ const InventoryMainNavigation = () => {
                     icon={<AdminIcon />}
                     label={userRole}
                     variant="outlined"
-                    sx={{ 
-                      color: 'white', 
+                    sx={{
+                      color: 'common.white',
                       borderColor: 'rgba(255,255,255,0.5)',
-                      '& .MuiChip-icon': { color: 'white' }
+                      '& .MuiChip-icon': { color: 'common.white' }
                     }}
                   />
                 </Tooltip>
                 <Tooltip title="System Status">
-                  <IconButton sx={{ color: 'white' }}>
+                  <IconButton sx={{ color: 'common.white' }}>
                     <Badge badgeContent={6} color="error">
                       <AnalyticsIcon />
                     </Badge>

@@ -111,8 +111,8 @@ const CRMImport = () => {
                 <TableCell>{r.contacts?.[0]?.name || '—'}</TableCell>
                 <TableCell>
                   {r.exists
-                    ? <Chip size="small" label="Exists" sx={{ height: 20, bgcolor: alpha('#475569', 0.12), color: '#475569', fontWeight: 600 }} />
-                    : <Chip size="small" label="New" sx={{ height: 20, bgcolor: alpha('#059669', 0.14), color: '#059669', fontWeight: 700 }} />}
+                    ? <Chip size="small" label="Exists" sx={(theme) => ({ height: 20, bgcolor: alpha(theme.palette.text.secondary, 0.12), color: 'text.secondary', fontWeight: 600 })} />
+                    : <Chip size="small" label="New" sx={(theme) => ({ height: 20, bgcolor: alpha(theme.palette.success.main, 0.14), color: 'success.main', fontWeight: 700 })} />}
                 </TableCell>
               </TableRow>
             ))}
@@ -176,10 +176,10 @@ const CRMImport = () => {
         {data && (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={6} md={3}><StatCard label="Leads in file" value={data.leads.length} sub={`${newLeads.length} new`} icon={GroupsOutlined} accent="#1E7DBE" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Customers in file" value={data.customers.length} sub={`${newCustomers.length} new`} icon={StorefrontOutlined} accent="#45ADE6" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="Already in ERP" value={(data.leads.length - newLeads.length) + (data.customers.length - newCustomers.length)} sub="matched by name" icon={InfoOutlined} accent="#475569" /></Grid>
-              <Grid item xs={6} md={3}><StatCard label="ERP records" value={data.existingCount} sub="current accounts" icon={ContactMailOutlined} accent="#7C3AED" /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Leads in file" value={data.leads.length} sub={`${newLeads.length} new`} icon={GroupsOutlined} accent={theme.palette.primary.dark} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Customers in file" value={data.customers.length} sub={`${newCustomers.length} new`} icon={StorefrontOutlined} accent={theme.palette.primary.main} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="Already in ERP" value={(data.leads.length - newLeads.length) + (data.customers.length - newCustomers.length)} sub="matched by name" icon={InfoOutlined} accent={theme.palette.text.secondary} /></Grid>
+              <Grid item xs={6} md={3}><StatCard label="ERP records" value={data.existingCount} sub="current accounts" icon={ContactMailOutlined} accent={theme.palette.primary.main} /></Grid>
             </Grid>
 
             {busy && progress.total > 0 && (

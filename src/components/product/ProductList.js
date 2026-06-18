@@ -14,12 +14,14 @@ import {
   Refresh, Settings, Inventory, People,
   CheckCircle, Error as ErrorIcon, Warning, Assignment
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import LoadingSpinner from '../common/LoadingSpinner';
 import DocumentViewer from '../common/DocumentViewer';
 import { getAllClients, updateClient } from '../../services/clientService';
 import ProductForm from './ProductForm';
 
 const ProductList = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -209,32 +211,33 @@ const ProductList = () => {
   const summaryCards = (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={{
           height: '100%',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e9ecef',
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'grey.100',
           '&:hover': {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }
         }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ 
-                width: 40, 
+              <Box sx={{
+                width: 40,
                 height: 40,
-                backgroundColor: '#f8f9fa',
+                backgroundColor: 'grey.100',
                 borderRadius: 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Inventory sx={{ color: '#6c757d', fontSize: 20 }} />
+                <Inventory sx={{ color: 'text.secondary', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 400 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
                   Total Products
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 500, color: '#495057' }}>
+                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.primary' }}>
                   {totalProducts}
                 </Typography>
               </Box>
@@ -243,32 +246,33 @@ const ProductList = () => {
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={{
           height: '100%',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e9ecef',
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'grey.100',
           '&:hover': {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }
         }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ 
-                width: 40, 
+              <Box sx={{
+                width: 40,
                 height: 40,
-                backgroundColor: '#f8f9fa',
+                backgroundColor: 'grey.100',
                 borderRadius: 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Description sx={{ color: '#6c757d', fontSize: 20 }} />
+                <Description sx={{ color: 'text.secondary', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 400 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
                   Total Attachments
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 500, color: '#495057' }}>
+                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.primary' }}>
                   {totalAttachments}
                 </Typography>
               </Box>
@@ -277,32 +281,33 @@ const ProductList = () => {
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ 
+        <Card sx={{
           height: '100%',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e9ecef',
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'grey.100',
           '&:hover': {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }
         }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ 
-                width: 40, 
+              <Box sx={{
+                width: 40,
                 height: 40,
-                backgroundColor: '#f8f9fa',
+                backgroundColor: 'grey.100',
                 borderRadius: 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <CheckCircle sx={{ color: '#6c757d', fontSize: 20 }} />
+                <CheckCircle sx={{ color: 'text.secondary', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 400 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
                   Status
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 500, color: '#495057' }}>
+                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.primary' }}>
                   Active
                 </Typography>
               </Box>
@@ -317,25 +322,26 @@ const ProductList = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: 500, color: '#2c3e50' }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 500, color: 'text.primary' }}>
           Product Management
         </Typography>
         
         {/* Welcome Section */}
-        <Paper sx={{ 
-          p: 3, 
-          mb: 3, 
-          backgroundColor: '#f8f9fa',
+        <Paper sx={{
+          p: 3,
+          mb: 3,
+          backgroundColor: 'grey.100',
           borderRadius: 2,
-          border: '1px solid #e9ecef'
+          border: '1px solid',
+          borderColor: 'grey.100'
         }}>
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography variant="h5" sx={{ mb: 1, fontWeight: 500, color: '#495057' }}>
+                <Typography variant="h5" sx={{ mb: 1, fontWeight: 500, color: 'text.primary' }}>
                   Product Catalog
                 </Typography>
-                <Typography variant="body1" sx={{ color: '#6c757d' }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   Manage your product database efficiently
                 </Typography>
               </Box>
@@ -346,17 +352,17 @@ const ProductList = () => {
                   onClick={() => setIsFormOpen(true)}
                   sx={{ 
                     minWidth: 120,
-                    backgroundColor: '#007bff',
-                    '&:hover': { backgroundColor: '#0056b3' }
+                    backgroundColor: 'primary.main',
+                    '&:hover': { backgroundColor: 'primary.dark' }
                   }}
                 >
                   Add Product
                 </Button>
                 <IconButton
                   onClick={fetchProducts}
-                  sx={{ 
-                    color: '#6c757d',
-                    '&:hover': { color: '#495057', backgroundColor: '#f8f9fa' }
+                  sx={{
+                    color: 'text.secondary',
+                    '&:hover': { color: 'text.primary', backgroundColor: 'grey.100' }
                   }}
                   title="Refresh Products"
                 >
@@ -371,18 +377,19 @@ const ProductList = () => {
       {summaryCards}
 
       {/* Search and Filter Controls */}
-      <Card sx={{ 
+      <Card sx={{
         mb: 3,
-        backgroundColor: '#ffffff',
-        border: '1px solid #e9ecef'
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'grey.100'
       }}>
         <CardContent sx={{ p: 2 }}>
-          <Typography variant="subtitle1" sx={{ 
-            mb: 2, 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Typography variant="subtitle1" sx={{
+            mb: 2,
+            display: 'flex',
+            alignItems: 'center',
             gap: 1,
-            color: '#495057',
+            color: 'text.primary',
             fontWeight: 500
           }}>
             <Search sx={{ fontSize: 18 }} />
@@ -463,19 +470,20 @@ const ProductList = () => {
       </Card>
 
       {/* Main Products Table */}
-      <Card sx={{ 
+      <Card sx={{
         mb: 3,
-        backgroundColor: '#ffffff',
-        border: '1px solid #e9ecef'
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'grey.100'
       }}>
         <CardContent sx={{ p: 2 }}>
           {error && (
             <Alert 
               severity="error" 
-              sx={{ 
+              sx={{
                 mb: 3,
                 borderRadius: 2,
-                '& .MuiAlert-icon': { color: '#d32f2f' }
+                '& .MuiAlert-icon': { color: 'error.main' }
               }}
               icon={<ErrorIcon />}
             >
@@ -483,73 +491,81 @@ const ProductList = () => {
             </Alert>
           )}
 
-          <TableContainer 
+          <TableContainer
             component={Paper} 
-            sx={{ 
-              mb: 2, 
+            sx={{
+              mb: 2,
               borderRadius: 2,
-              border: '1px solid #e9ecef',
+              border: '1px solid',
+              borderColor: 'grey.100',
               overflow: 'hidden'
             }}
           >
             <Table size="medium">
               <TableHead>
-                <TableRow sx={{ 
-                  backgroundColor: '#f8f9fa'
+                <TableRow sx={{
+                  backgroundColor: 'grey.100'
                 }}>
                   <TableCell sx={{ 
                     fontWeight: 500, 
-                    color: '#495057', 
+                    color: 'text.primary', 
                     fontSize: '0.875rem',
-                    borderBottom: '1px solid #e9ecef'
+                    borderBottom: '1px solid',
+                    borderBottomColor: 'grey.100'
                   }}>
                     Client Code
                   </TableCell>
                   <TableCell sx={{ 
                     fontWeight: 500, 
-                    color: '#495057', 
+                    color: 'text.primary', 
                     fontSize: '0.875rem',
-                    borderBottom: '1px solid #e9ecef'
+                    borderBottom: '1px solid',
+                    borderBottomColor: 'grey.100'
                   }}>
                     Product Code
                   </TableCell>
                   <TableCell sx={{ 
                     fontWeight: 500, 
-                    color: '#495057', 
+                    color: 'text.primary', 
                     fontSize: '0.875rem',
-                    borderBottom: '1px solid #e9ecef'
+                    borderBottom: '1px solid',
+                    borderBottomColor: 'grey.100'
                   }}>
                     Product Name
                   </TableCell>
                   <TableCell sx={{ 
                     fontWeight: 500, 
-                    color: '#495057', 
+                    color: 'text.primary', 
                     fontSize: '0.875rem',
-                    borderBottom: '1px solid #e9ecef'
+                    borderBottom: '1px solid',
+                    borderBottomColor: 'grey.100'
                   }}>
                     Description
                   </TableCell>
                    <TableCell sx={{ 
                      fontWeight: 500, 
-                     color: '#495057', 
+                     color: 'text.primary', 
                      fontSize: '0.875rem',
-                     borderBottom: '1px solid #e9ecef'
+                     borderBottom: '1px solid',
+                     borderBottomColor: 'grey.100'
                    }}>
                      Cable Info
                    </TableCell>
                    <TableCell sx={{ 
                      fontWeight: 500, 
-                     color: '#495057', 
+                     color: 'text.primary', 
                      fontSize: '0.875rem',
-                     borderBottom: '1px solid #e9ecef'
+                     borderBottom: '1px solid',
+                     borderBottomColor: 'grey.100'
                    }}>
                      Moulding
                    </TableCell>
                   <TableCell sx={{ 
                     fontWeight: 500, 
-                    color: '#495057', 
+                    color: 'text.primary', 
                     fontSize: '0.875rem',
-                    borderBottom: '1px solid #e9ecef'
+                    borderBottom: '1px solid',
+                    borderBottomColor: 'grey.100'
                   }}>
                     Actions
                   </TableCell>
@@ -649,8 +665,8 @@ const ProductList = () => {
                                   sx={{
                                     fontSize: '0.6rem',
                                     height: 16,
-                                    backgroundColor: '#e3f2fd',
-                                    color: '#45ADE6',
+                                    backgroundColor: 'info.lighter',
+                                    color: 'primary.main',
                                     border: '1px solid rgba(25, 118, 210, 0.2)'
                                   }}
                                 />
@@ -693,8 +709,8 @@ const ProductList = () => {
                               sx={{
                                 fontSize: '0.6rem',
                                 height: 16,
-                                backgroundColor: '#fff3e0',
-                                color: '#e65100',
+                                backgroundColor: 'warning.lighter',
+                                color: 'warning.main',
                                 border: '1px solid rgba(230, 81, 0, 0.2)'
                               }}
                             />
@@ -773,16 +789,17 @@ const ProductList = () => {
             
             {/* Pagination Controls */}
             {filteredProducts.length > 0 && (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 p: 2,
-                borderTop: '1px solid #e9ecef',
-                backgroundColor: '#f8f9fa'
+                borderTop: '1px solid',
+                borderTopColor: 'grey.100',
+                backgroundColor: 'grey.100'
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                     Rows per page:
                   </Typography>
                   <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -800,7 +817,7 @@ const ProductList = () => {
                           borderColor: 'rgba(102, 126, 234, 0.5)',
                         },
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#1E7DBE',
+                          borderColor: 'primary.dark',
                         }
                       }}
                     >
@@ -814,7 +831,7 @@ const ProductList = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                     {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, filteredProducts.length)} of {filteredProducts.length} products
                   </Typography>
                   
@@ -827,7 +844,7 @@ const ProductList = () => {
                       size="large"
                       showFirstButton
                       showLastButton
-                      sx={{
+                      sx={(theme) => ({
                         '& .MuiPaginationItem-root': {
                           borderRadius: 3,
                           fontWeight: 700,
@@ -841,8 +858,8 @@ const ProductList = () => {
                             boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                           },
                           '&.Mui-selected': {
-                            background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                            color: 'white',
+                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                            color: theme.palette.common.white,
                             fontWeight: 800,
                             boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                             '&:hover': {
@@ -851,7 +868,7 @@ const ProductList = () => {
                             }
                           }
                         }
-                      }}
+                      })}
                     />
                   )}
                 </Box>
@@ -870,16 +887,18 @@ const ProductList = () => {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            border: '1px solid #e9ecef',
+            border: '1px solid',
+            borderColor: 'grey.100',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }
         }}
       >
-        <DialogTitle sx={{ 
-          color: '#495057', 
+        <DialogTitle sx={{
+          color: 'text.primary',
           fontWeight: 500,
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e9ecef'
+          backgroundColor: 'grey.100',
+          borderBottom: '1px solid',
+          borderBottomColor: 'grey.100'
         }}>
           {selectedProduct ? 'Edit Product' : 'Add New Product'}
         </DialogTitle>
@@ -897,16 +916,18 @@ const ProductList = () => {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            border: '1px solid #e9ecef',
+            border: '1px solid',
+            borderColor: 'grey.100',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }
         }}
       >
-        <DialogTitle sx={{ 
-          color: '#495057', 
+        <DialogTitle sx={{
+          color: 'text.primary',
           fontWeight: 500,
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e9ecef'
+          backgroundColor: 'grey.100',
+          borderBottom: '1px solid',
+          borderBottomColor: 'grey.100'
         }}>
           {selectedFile?.name}
         </DialogTitle>
@@ -947,27 +968,28 @@ const ProductList = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          color: '#495057', 
+        <DialogTitle sx={{
+          color: 'text.primary',
           fontWeight: 500,
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e9ecef',
+          backgroundColor: 'grey.100',
+          borderBottom: '1px solid',
+          borderBottomColor: 'grey.100',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50' }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary' }}>
               Product Details
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#6c757d', mt: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ color: 'text.secondary', mt: 0.5 }}>
               {selectedProduct?.productCode} - {selectedProduct?.productName}
             </Typography>
           </Box>
-          <Button 
+          <Button
             onClick={() => setIsDetailsOpen(false)}
-            sx={{ 
-              color: '#6c757d',
+            sx={{
+              color: 'text.secondary',
               '&:hover': { backgroundColor: 'rgba(108, 117, 125, 0.1)' }
             }}
           >
@@ -978,102 +1000,102 @@ const ProductList = () => {
           {selectedProduct && (
             <Box sx={{ p: 3 }}>
               {/* Debug: Show all sections are rendering */}
-              <Box sx={{ mb: 2, p: 2, backgroundColor: '#e3f2fd', borderRadius: 1, border: '2px solid #45ADE6' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+              <Box sx={{ mb: 2, p: 2, backgroundColor: 'info.lighter', borderRadius: 1, border: '2px solid', borderColor: 'primary.main' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
                   🔍 DEBUG: All sections should be visible below
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#45ADE6' }}>
+                <Typography variant="body2" sx={{ color: 'primary.main' }}>
                   Product: {selectedProduct.productCode} | Total fields: {Object.keys(selectedProduct).length}
                 </Typography>
               </Box>
               {/* Basic Information Section */}
               <Card sx={{ mb: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid #e3f2fd' }}>
-                    <Box sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#e3f2fd', 
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid', borderBottomColor: 'info.lighter' }}>
+                    <Box sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      backgroundColor: 'info.lighter',
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
                       mr: 2
                     }}>
-                      <Inventory sx={{ fontSize: 20, color: '#45ADE6' }} />
+                      <Inventory sx={{ fontSize: 20, color: 'primary.main' }} />
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
                       Basic Information (9 fields)
                     </Typography>
                   </Box>
                   
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Client Code</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Client Code</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.clientCode || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Product Code</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Product Code</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.productCode || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Product Name</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Product Name</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.productName || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Manpower Required</Typography>
-                        <Typography variant="body2" sx={{ color: '#2c3e50', mb: 0.5 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Manpower Required</Typography>
+                        <Typography variant="body2" sx={{ color: 'text.primary', mb: 0.5 }}>
                           Assembly: {selectedProduct.assemblyLineManpower || 0} | Cable: {selectedProduct.cableCuttingManpower || 0}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#2c3e50', mb: 0.5 }}>
+                        <Typography variant="body2" sx={{ color: 'text.primary', mb: 0.5 }}>
                           Molding: {selectedProduct.moldingMachineManpower || 0} | Packing: {selectedProduct.packingLineManpower || 0}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#45ADE6', fontWeight: 600 }}>
+                        <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 600 }}>
                           Total: {parseInt(selectedProduct.assemblyLineManpower || 0) + parseInt(selectedProduct.cableCuttingManpower || 0) + parseInt(selectedProduct.moldingMachineManpower || 0) + parseInt(selectedProduct.packingLineManpower || 0)}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Category</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Category</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.category || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Total Length</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Total Length</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.totalLength || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Colour</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Colour</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.colour || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Description</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Description</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.description || 'No description provided'}
                         </Typography>
                       </Box>
@@ -1085,100 +1107,100 @@ const ProductList = () => {
               {/* Cable Information Section */}
               <Card sx={{ mb: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid #e8f5e9' }}>
-                    <Box sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#e8f5e9', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid', borderBottomColor: 'success.lighter' }}>
+                    <Box sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      backgroundColor: 'success.lighter',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       mr: 2
                     }}>
-                      <Description sx={{ fontSize: 20, color: '#2e7d32' }} />
+                      <Description sx={{ fontSize: 20, color: 'success.main' }} />
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600, color: 'success.main' }}>
                       Cable Information (10 fields)
                     </Typography>
                   </Box>
                   
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Copper Gauge</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Copper Gauge</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.copperStrands || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Number of Strands</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Number of Strands</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.numberOfStrands || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Number of Core</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Number of Core</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.numberOfCore || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Core OD</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Core OD</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.coreOD || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Core PVC</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Core PVC</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.corePVC || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Sheath OD</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Sheath OD</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.sheathOD || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Sheath Inner PVC</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Sheath Inner PVC</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.sheathInnerPVC || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Sheath Outer PVC</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Sheath Outer PVC</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.sheathOuterPVC || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Printing Material</Typography>
-                        <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Printing Material</Typography>
+                        <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                           {selectedProduct.printingMaterial || 'Not specified'}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Core Colors</Typography>
+                      <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Core Colors</Typography>
                         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
                           {selectedProduct.coreColors && Array.isArray(selectedProduct.coreColors) && selectedProduct.coreColors.length > 0 ? (
                             selectedProduct.coreColors.map((color, index) => (
@@ -1187,15 +1209,15 @@ const ProductList = () => {
                                 label={color}
                                 size="small"
                                 sx={{
-                                  backgroundColor: '#e3f2fd',
-                                  color: '#45ADE6',
+                                  backgroundColor: 'info.lighter',
+                                  color: 'primary.main',
                                   border: '1px solid rgba(25, 118, 210, 0.2)',
                                   fontSize: '0.75rem'
                                 }}
                               />
                             ))
                           ) : (
-                            <Typography variant="body2" sx={{ color: '#6c757d', fontStyle: 'italic' }}>No colors specified</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>No colors specified</Typography>
                           )}
                         </Box>
                       </Box>
@@ -1207,51 +1229,51 @@ const ProductList = () => {
               {/* Moulding Information Section */}
               <Card sx={{ mb: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid #fff3e0' }}>
-                    <Box sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#fff3e0', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid', borderBottomColor: 'warning.lighter' }}>
+                    <Box sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      backgroundColor: 'warning.lighter',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       mr: 2
                     }}>
-                      <Add sx={{ fontSize: 20, color: '#f57c00' }} />
+                      <Add sx={{ fontSize: 20, color: 'warning.main' }} />
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#f57c00' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600, color: 'warning.main' }}>
                       Moulding Information (10 fields)
                     </Typography>
                   </Box>
                   
                   {/* Side A */}
                   <Box sx={{ mb: 4 }}>
-                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#f57c00', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#f57c00', mr: 1 }}></Box>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: 'warning.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'warning.main', mr: 1 }}></Box>
                       Side A
                     </Typography>
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Type of Product</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Type of Product</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.typeOfProduct || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Type of Mould</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Type of Mould</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.typeOfMould || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Pin Type</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Pin Type</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.pinType || 'Not specified'}
                           </Typography>
                         </Box>
@@ -1261,60 +1283,60 @@ const ProductList = () => {
 
                   {/* Side B */}
                   <Box>
-                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#f57c00', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#f57c00', mr: 1 }}></Box>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: 'warning.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'warning.main', mr: 1 }}></Box>
                       Side B
                     </Typography>
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Sheath Length</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Sheath Length</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.sheathLength || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Strip Length</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Strip Length</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.stripLength || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Core-Red</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Core-Red</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.coreRed || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Sleeve</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Sleeve</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.sleeve || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Terminals</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Terminals</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.terminals || 'Not specified'}
                           </Typography>
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Grommet Present</Typography>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Grommet Present</Typography>
                           <Chip
                             label={selectedProduct.grommetPresent ? 'Yes' : 'No'}
                             size="small"
                             sx={{
-                              backgroundColor: selectedProduct.grommetPresent ? '#e8f5e9' : '#ffebee',
-                              color: selectedProduct.grommetPresent ? '#2e7d32' : '#c62828',
+                              backgroundColor: selectedProduct.grommetPresent ? 'success.lighter' : 'error.lighter',
+                              color: selectedProduct.grommetPresent ? 'success.main' : 'error.main',
                               border: selectedProduct.grommetPresent ? '1px solid rgba(46, 125, 50, 0.2)' : '1px solid rgba(198, 40, 40, 0.2)',
                               fontSize: '0.75rem',
                               fontWeight: 500
@@ -1323,9 +1345,9 @@ const ProductList = () => {
                         </Box>
                       </Grid>
                       <Grid item xs={12} sm={6} md={4}>
-                        <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 1, border: '1px solid #e9ecef' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>Grommet Length from Side B</Typography>
-                          <Typography variant="body1" sx={{ color: '#2c3e50', fontWeight: 500 }}>
+                        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1, border: '1px solid', borderColor: 'grey.100' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>Grommet Length from Side B</Typography>
+                          <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {selectedProduct.grommetLengthFromSideB || 'Not specified'}
                           </Typography>
                         </Box>
@@ -1338,41 +1360,41 @@ const ProductList = () => {
               {/* Document Attachments Section */}
               <Card sx={{ mb: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid #f3e5f5' }}>
-                    <Box sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#f3e5f5', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid', borderBottomColor: 'primary.light' }}>
+                    <Box sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      backgroundColor: 'primary.light',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       mr: 2
                     }}>
-                      <Description sx={{ fontSize: 20, color: '#7b1fa2' }} />
+                      <Description sx={{ fontSize: 20, color: 'primary.main' }} />
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#7b1fa2' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
                       Document Attachments (8 fields)
                     </Typography>
                   </Box>
                   
                   <Grid container spacing={3}>
                     {[
-                      { field: 'drawing', label: 'Drawing', color: '#45ADE6', icon: '📄' },
-                      { field: 'fpa', label: 'FPA', color: '#7b1fa2', icon: '📋' },
-                      { field: 'pdi', label: 'PDI', color: '#388e3c', icon: '✅' },
-                      { field: 'processChecksheet', label: 'Process Checksheet', color: '#f57c00', icon: '📝' },
-                      { field: 'packagingStandard', label: 'Packaging Standard', color: '#d32f2f', icon: '📦' },
-                      { field: 'bom', label: 'BOM', color: '#0288d1', icon: '📊' },
-                      { field: 'sop', label: 'SOP', color: '#5d4037', icon: '📖' },
-                      { field: 'pfc', label: 'PFC', color: '#455a64', icon: '🔧' }
+                      { field: 'drawing', label: 'Drawing', color: theme.palette.primary.main, icon: '📄' },
+                      { field: 'fpa', label: 'FPA', color: theme.palette.primary.main, icon: '📋' },
+                      { field: 'pdi', label: 'PDI', color: theme.palette.success.main, icon: '✅' },
+                      { field: 'processChecksheet', label: 'Process Checksheet', color: theme.palette.warning.main, icon: '📝' },
+                      { field: 'packagingStandard', label: 'Packaging Standard', color: theme.palette.error.main, icon: '📦' },
+                      { field: 'bom', label: 'BOM', color: theme.palette.primary.main, icon: '📊' },
+                      { field: 'sop', label: 'SOP', color: theme.palette.text.primary, icon: '📖' },
+                      { field: 'pfc', label: 'PFC', color: theme.palette.text.primary, icon: '🔧' }
                     ].map(({ field, label, color, icon }) => (
                       <Grid item xs={12} sm={6} md={3} key={field}>
                         <Box sx={{ 
                           p: 3, 
-                          border: `2px solid ${selectedProduct[field] ? color : '#e0e0e0'}`,
+                          border: `2px solid ${selectedProduct[field] ? color : theme.palette.grey[100]}`,
                           borderRadius: 2,
-                          backgroundColor: selectedProduct[field] ? '#f8f9fa' : '#fafafa',
+                          backgroundColor: selectedProduct[field] ? 'grey.100' : 'grey.100',
                           textAlign: 'center',
                           transition: 'all 0.3s ease',
                           '&:hover': {
@@ -1383,7 +1405,7 @@ const ProductList = () => {
                           <Typography variant="h6" sx={{ mb: 1, fontSize: '1.5rem' }}>
                             {icon}
                           </Typography>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#495057', mb: 2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary', mb: 2 }}>
                             {label}
                           </Typography>
                           {selectedProduct[field] ? (
@@ -1393,7 +1415,7 @@ const ProductList = () => {
                               onClick={() => handleViewFile(selectedProduct[field], label)}
                               sx={{
                                 backgroundColor: color,
-                                color: 'white',
+                                color: 'common.white',
                                 fontWeight: 500,
                                 '&:hover': {
                                   backgroundColor: color,
@@ -1404,7 +1426,7 @@ const ProductList = () => {
                               View File
                             </Button>
                           ) : (
-                            <Typography variant="body2" sx={{ color: '#6c757d', fontStyle: 'italic' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                               No file attached
                             </Typography>
                           )}
@@ -1417,7 +1439,7 @@ const ProductList = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: '1px solid #e9ecef' }}>
+        <DialogActions sx={{ p: 3, borderTop: '1px solid', borderTopColor: 'grey.100' }}>
           <Button 
             onClick={() => setIsDetailsOpen(false)}
             variant="outlined"
@@ -1447,7 +1469,7 @@ const ProductList = () => {
           sx={{ 
             width: "100%",
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#2e7d32' }
+            '& .MuiAlert-icon': { color: 'success.main' }
           }}
           icon={<CheckCircle />}
         >
@@ -1464,10 +1486,10 @@ const ProductList = () => {
       >
         <Alert 
           severity="error" 
-          sx={{ 
+          sx={{
             width: "100%",
             borderRadius: 2,
-            '& .MuiAlert-icon': { color: '#d32f2f' }
+            '& .MuiAlert-icon': { color: 'error.main' }
           }}
           icon={<ErrorIcon />}
         >
@@ -1481,11 +1503,11 @@ const ProductList = () => {
           position: 'fixed', 
           bottom: 16, 
           right: 16,
-          backgroundColor: '#007bff',
-          color: 'white',
+          backgroundColor: 'primary.main',
+          color: 'common.white',
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           '&:hover': {
-            backgroundColor: '#0056b3',
+            backgroundColor: 'primary.dark',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
           }
         }}

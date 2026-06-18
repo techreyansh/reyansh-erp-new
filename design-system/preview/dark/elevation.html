@@ -1,0 +1,32 @@
+<!-- @dsCard group="Foundations · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Elevation · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 32px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 28px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .card { background: #2D3D4C; border: 1px solid rgba(226,232,237,0.12); border-radius: 8px; height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; }
+  .card b { font-size: 13px; }
+  .card span { color: #A9B2BA; font-family: ui-monospace, monospace; font-size: 11px; }
+  .e1 { box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+  .e2 { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .e3 { box-shadow: 0 8px 20px rgba(0,0,0,0.45); }
+</style>
+</head>
+<body>
+  <h1>Elevation · Dark</h1>
+  <div class="sub">Shadows deepen in dark mode to separate surfaces from the slate canvas.</div>
+  <div class="grid">
+    <div class="card e1"><b>elevation 1</b><span>resting card</span></div>
+    <div class="card e2"><b>elevation 2</b><span>menus · popovers</span></div>
+    <div class="card e3"><b>elevation 3</b><span>dialogs · hover lift</span></div>
+  </div>
+</body>
+</html>

@@ -531,8 +531,8 @@ const CableProductMaster = () => {
                         label={product.uniqueId || 'N/A'}
                         size="small"
                         sx={{
-                          backgroundColor: product.uniqueId ? '#e3f2fd' : '#f5f5f5',
-                          color: product.uniqueId ? '#45ADE6' : '#9e9e9e',
+                          backgroundColor: product.uniqueId ? 'info.lighter' : 'grey.100',
+                          color: product.uniqueId ? 'primary.main' : 'text.disabled',
                           fontWeight: 600,
                           fontFamily: 'monospace',
                           fontSize: '0.7rem'
@@ -546,8 +546,8 @@ const CableProductMaster = () => {
                         label={product.soId || 'N/A'}
                         size="small"
                         sx={{
-                          backgroundColor: product.soId ? '#e8f5e9' : '#f5f5f5',
-                          color: product.soId ? '#2e7d32' : '#9e9e9e',
+                          backgroundColor: product.soId ? 'success.lighter' : 'grey.100',
+                          color: product.soId ? 'success.main' : 'text.disabled',
                           fontWeight: 600,
                           fontFamily: 'monospace',
                           fontSize: '0.7rem'
@@ -660,7 +660,7 @@ const CableProductMaster = () => {
             backgroundColor: 'rgba(248, 250, 255, 0.5)'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 Rows per page:
               </Typography>
               <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -678,7 +678,7 @@ const CableProductMaster = () => {
                       borderColor: 'rgba(102, 126, 234, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#1E7DBE',
+                      borderColor: theme.palette.primary.dark,
                     }
                   }}
                 >
@@ -690,7 +690,7 @@ const CableProductMaster = () => {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, products.length)} of {products.length} products
               </Typography>
               
@@ -717,8 +717,8 @@ const CableProductMaster = () => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                        color: 'white',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                        color: theme.palette.common.white,
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                         '&:hover': {

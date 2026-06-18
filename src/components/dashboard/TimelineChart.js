@@ -1,9 +1,11 @@
 import React from 'react';
 import { Chart } from 'react-google-charts';
 import { Paper, Typography, Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const TimelineChart = ({ data, loading }) => {
+  const theme = useTheme();
   // Transform timeline data for the chart
   const prepareChartData = () => {
     if (!data || data.length === 0) {
@@ -78,7 +80,13 @@ const TimelineChart = ({ data, loading }) => {
     hAxis: {
       format: 'MMM d, yyyy',
     },
-    colors: ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#8E24AA'],
+    colors: [
+      theme.palette.primary.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+      theme.palette.error.main,
+      theme.palette.primary.dark
+    ],
     backgroundColor: 'transparent'
   };
   
@@ -104,7 +112,7 @@ const TimelineChart = ({ data, loading }) => {
           alignItems: 'center', 
           justifyContent: 'center',
           height: '350px',
-          bgcolor: '#f9f9f9',
+          bgcolor: 'grey.50',
           borderRadius: 1
         }}>
           <Typography variant="body1" color="textSecondary">

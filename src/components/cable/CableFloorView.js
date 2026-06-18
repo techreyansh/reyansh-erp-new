@@ -73,7 +73,7 @@ export default function CableFloorView() {
   // Rendered through a portal to <body> so the fixed full-screen overlay escapes
   // the app shell (whose transformed ancestors would otherwise clip it).
   return createPortal(
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "#0b1020", color: "#fff", zIndex: 13000, overflow: "auto", p: { xs: 2, md: 4 }, boxSizing: "border-box" }}>
+    <Box sx={{ position: "fixed", inset: 0, bgcolor: "#0b1020", color: "common.white", zIndex: 13000, overflow: "auto", p: { xs: 2, md: 4 }, boxSizing: "border-box" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ mb: 3 }}>
         <Typography sx={{ fontWeight: 900, fontSize: { xs: 24, md: 40 }, lineHeight: 1.1 }}>
           {machine.name} <Box component="span" sx={{ opacity: 0.5 }}>· {machine.id}</Box>
@@ -84,7 +84,7 @@ export default function CableFloorView() {
             <Typography sx={{ opacity: 0.6, fontSize: { xs: 12, md: 14 } }}>{new Date(now).toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short" })}</Typography>
           </Box>
           <Tooltip title="Exit floor view">
-            <IconButton onClick={exit} sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.1)", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}>
+            <IconButton onClick={exit} sx={{ color: "common.white", bgcolor: "rgba(255,255,255,0.1)", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}>
               <CloseRounded />
             </IconButton>
           </Tooltip>
@@ -92,7 +92,7 @@ export default function CableFloorView() {
       </Stack>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress sx={{ color: "#fff" }} /></Box>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress sx={{ color: "common.white" }} /></Box>
       ) : jobs.length === 0 ? (
         <Typography sx={{ fontSize: 28, opacity: 0.6, textAlign: "center", mt: 8 }}>No jobs scheduled today.</Typography>
       ) : (
@@ -107,13 +107,14 @@ export default function CableFloorView() {
               <Box key={row.scheduleId} sx={{
                 borderRadius: 3, p: { xs: 2, md: 3 },
                 bgcolor: running ? "rgba(16,185,129,0.18)" : "rgba(255,255,255,0.05)",
-                border: running ? "2px solid #10b981" : "1px solid rgba(255,255,255,0.1)",
+                border: running ? "2px solid" : "1px solid rgba(255,255,255,0.1)",
+                borderColor: running ? "success.light" : undefined,
               }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap">
                   <Stack direction="row" spacing={2} alignItems="center">
-                    {running ? <Chip label="▶ RUNNING NOW" sx={{ bgcolor: "#10b981", color: "#fff", fontWeight: 900, fontSize: 16 }} />
-                      : done ? <Chip label="✓ DONE" sx={{ bgcolor: "rgba(255,255,255,0.2)", color: "#fff", fontWeight: 800 }} />
-                      : <Chip label={`Job ${i + 1}`} sx={{ bgcolor: "rgba(255,255,255,0.12)", color: "#fff" }} />}
+                    {running ? <Chip label="▶ RUNNING NOW" sx={{ bgcolor: "success.light", color: "common.white", fontWeight: 900, fontSize: 16 }} />
+                      : done ? <Chip label="✓ DONE" sx={{ bgcolor: "rgba(255,255,255,0.2)", color: "common.white", fontWeight: 800 }} />
+                      : <Chip label={`Job ${i + 1}`} sx={{ bgcolor: "rgba(255,255,255,0.12)", color: "common.white" }} />}
                     <Typography sx={{ fontWeight: 900, fontSize: { xs: 22, md: 30 } }}>{spec.title}</Typography>
                   </Stack>
                   <Typography sx={{ fontSize: { xs: 18, md: 26 }, fontWeight: 800, opacity: 0.85 }}>{hhmm(row.scheduledStartTime)} – {hhmm(row.scheduledEndTime)}</Typography>
@@ -128,7 +129,7 @@ export default function CableFloorView() {
                   ))}
                 </Box>
                 {row.actualQuantity != null && row.actualQuantity !== "" && (
-                  <Typography sx={{ mt: 1.5, color: "#34d399", fontWeight: 800, fontSize: 18 }}>Actual: {row.actualQuantity} m</Typography>
+                  <Typography sx={{ mt: 1.5, color: "success.light", fontWeight: 800, fontSize: 18 }}>Actual: {row.actualQuantity} m</Typography>
                 )}
               </Box>
             );

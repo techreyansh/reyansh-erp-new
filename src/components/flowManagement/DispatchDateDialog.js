@@ -88,19 +88,20 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
       PaperProps={{
         sx: {
           borderRadius: 2,
-          border: '1px solid #e3f2fd'
+          border: '1px solid',
+          borderColor: 'info.lighter'
         }
       }}
     >
       <DialogTitle
-        sx={{
-          background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
-          color: 'white',
+        sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: 'common.white',
           py: 3,
           display: 'flex',
           alignItems: 'center',
           gap: 2
-        }}
+        })}
       >
         <DispatchIcon sx={{ fontSize: 32 }} />
         <Box>
@@ -113,7 +114,7 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ py: 3, px: 3, backgroundColor: '#fafbfc' }}>
+      <DialogContent sx={{ py: 3, px: 3, backgroundColor: 'grey.100' }}>
         <Box sx={{ mb: 3 }}>
           <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 3 }}>
             <Typography variant="body2">
@@ -138,13 +139,13 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
             }}
             error={!!error}
             helperText={error || 'Select the target date for dispatch (D)'}
-            sx={{
+            sx={(theme) => ({
               '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: '#e3f2fd' },
-                '&:hover fieldset': { borderColor: '#45ADE6' },
-                '&.Mui-focused fieldset': { borderColor: '#45ADE6' }
+                '& fieldset': { borderColor: theme.palette.info.lighter },
+                '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main }
               }
-            }}
+            })}
           />
         </Box>
 
@@ -153,14 +154,15 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
             elevation={0}
             sx={{
               p: 3,
-              backgroundColor: 'white',
-              border: '1px solid #e3f2fd',
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'info.lighter',
               borderRadius: 2
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <ScheduleIcon sx={{ color: '#45ADE6' }} />
-              <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600 }}>
+              <ScheduleIcon sx={{ color: 'primary.main' }} />
+              <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
                 Production Timeline
               </Typography>
             </Box>
@@ -171,29 +173,29 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
               {orderedDates.map((stageInfo, index) => (
                 <Box
                   key={stageInfo.status}
-                  sx={{
+                  sx={(theme) => ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     p: 2,
-                    backgroundColor: index === orderedDates.length - 1 
-                      ? '#e8f5e9' 
-                      : '#f8fbff',
+                    backgroundColor: index === orderedDates.length - 1
+                      ? theme.palette.success.lighter
+                      : theme.palette.grey[100],
                     borderRadius: 1,
                     border: index === orderedDates.length - 1
-                      ? '2px solid #4caf50'
-                      : '1px solid #e3f2fd'
-                  }}
+                      ? `2px solid ${theme.palette.success.main}`
+                      : `1px solid ${theme.palette.info.lighter}`
+                  })}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Chip
                       label={stageInfo.label}
                       size="small"
                       sx={{
-                        backgroundColor: index === orderedDates.length - 1 
-                          ? '#4caf50' 
-                          : '#45ADE6',
-                        color: 'white',
+                        backgroundColor: index === orderedDates.length - 1
+                          ? 'success.main'
+                          : 'primary.main',
+                        color: 'common.white',
                         fontWeight: 600,
                         minWidth: 50
                       }}
@@ -202,7 +204,7 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
                       variant="body1"
                       sx={{
                         fontWeight: index === orderedDates.length - 1 ? 700 : 500,
-                        color: index === orderedDates.length - 1 ? '#2e7d32' : '#37474f'
+                        color: index === orderedDates.length - 1 ? 'success.main' : 'text.primary'
                       }}
                     >
                       {stageInfo.stage}
@@ -214,10 +216,10 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
                       fontFamily: 'monospace',
                       fontSize: '0.95rem',
                       fontWeight: 600,
-                      color: index === orderedDates.length - 1 ? '#2e7d32' : '#45ADE6',
-                      backgroundColor: index === orderedDates.length - 1 
-                        ? 'white' 
-                        : '#e3f2fd',
+                      color: index === orderedDates.length - 1 ? 'success.main' : 'primary.main',
+                      backgroundColor: index === orderedDates.length - 1
+                        ? 'background.paper'
+                        : 'info.lighter',
                       px: 2,
                       py: 0.5,
                       borderRadius: 1
@@ -240,16 +242,16 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, backgroundColor: '#f8fbff' }}>
+      <DialogActions sx={{ p: 3, backgroundColor: 'grey.100' }}>
         <Button
           onClick={handleClose}
           variant="outlined"
           sx={{
-            borderColor: '#45ADE6',
-            color: '#45ADE6',
+            borderColor: 'primary.main',
+            color: 'primary.main',
             '&:hover': {
-              borderColor: '#1E7DBE',
-              backgroundColor: '#f8fbff'
+              borderColor: 'primary.dark',
+              backgroundColor: 'grey.100'
             }
           }}
         >
@@ -261,9 +263,9 @@ const DispatchDateDialog = ({ open, onClose, onConfirm, task }) => {
           disabled={!dispatchDate || !!error}
           startIcon={<EventIcon />}
           sx={{
-            backgroundColor: '#4caf50',
-            '&:hover': { backgroundColor: '#2e7d32' },
-            '&:disabled': { backgroundColor: '#e0e0e0' }
+            backgroundColor: 'success.main',
+            '&:hover': { backgroundColor: 'success.dark' },
+            '&:disabled': { backgroundColor: 'grey.300' }
           }}
         >
           Confirm & Start Production

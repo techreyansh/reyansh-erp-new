@@ -1081,7 +1081,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                             boxShadow: canCompleteStep(po) ? `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}` : 'none',
                             '&:hover': {
                               background: canCompleteStep(po)
-                                ? `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                                ? `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                                 : 'rgba(0, 0, 0, 0.12)',
                               boxShadow: canCompleteStep(po) ? `0 6px 20px ${alpha(theme.palette.success.main, 0.4)}` : 'none',
                               transform: canCompleteStep(po) ? 'translateY(-1px)' : 'none'
@@ -1125,7 +1125,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
                       background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                       color: 'white',
                       '&:hover': {
-                        background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                        background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
                       }
                     }
                   }
@@ -1224,7 +1224,7 @@ ${user?.name || user?.email || 'Purchase Team'}`);
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.success.dark}, #0d47a1)`
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.dark})`
               },
               '&:disabled': {
                 background: 'rgba(0, 0, 0, 0.12)',

@@ -131,7 +131,7 @@ const EfficiencyGauge = ({ data, loading }) => {
           alignItems: 'center', 
           justifyContent: 'center',
           height: '350px',
-          bgcolor: '#f9f9f9',
+          bgcolor: 'grey.50',
           borderRadius: 1
         }}>
           <Typography variant="body1" color="textSecondary">

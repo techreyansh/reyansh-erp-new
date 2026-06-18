@@ -1,0 +1,32 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Elevation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 32px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 28px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .card { background: #fff; border: 1px solid #E2E8ED; border-radius: 8px; height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; }
+  .card b { font-size: 13px; }
+  .card span { color: #81898F; font-family: ui-monospace, monospace; font-size: 11px; }
+  .e1 { box-shadow: 0 2px 4px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03); }
+  .e2 { box-shadow: 0 4px 6px -2px rgba(15,23,42,0.05), 0 2px 4px -2px rgba(15,23,42,0.04); }
+  .e3 { box-shadow: 0 8px 12px -4px rgba(15,23,42,0.06), 0 4px 8px -2px rgba(15,23,42,0.04); }
+</style>
+</head>
+<body>
+  <h1>Elevation</h1>
+  <div class="sub">Soft, slate-tinted shadows. Cards rest at elevation 1 and lift on hover.</div>
+  <div class="grid">
+    <div class="card e1"><b>elevation 1</b><span>resting card</span></div>
+    <div class="card e2"><b>elevation 2</b><span>menus · popovers</span></div>
+    <div class="card e3"><b>elevation 3</b><span>dialogs · hover lift</span></div>
+  </div>
+</body>
+</html>

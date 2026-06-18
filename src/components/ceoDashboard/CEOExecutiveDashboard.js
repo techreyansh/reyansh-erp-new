@@ -202,12 +202,12 @@ const CEOExecutiveDashboard = () => {
   }
 
   const kpiCards = [
-    { label: 'Revenue (This Month)', value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: '#45ADE6', path: '/dashboard' },
-    { label: 'Order Book', value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: '#1E7DBE', path: '/crm/sales-orders' },
-    { label: 'Collected', value: inrCompact(k.collected), icon: AccountBalanceWalletOutlined, accent: '#059669', path: '/crm/collections' },
-    { label: 'Outstanding', value: inrCompact(k.outstanding), icon: TrendingUpRounded, accent: '#D97706', path: '/crm/collections' },
-    { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: '#7C3AED', path: '/dispatch-management' },
-    { label: 'Active Leads', value: k.activeLeads ?? 0, sub: `${k.team ?? 0} team members`, icon: GroupsOutlined, accent: '#DB2777', path: '/crm/follow-ups' },
+    { label: 'Revenue (This Month)', value: inrCompact(mtdRevenue), icon: PaidOutlined, accent: theme.palette.primary.main, path: '/dashboard' },
+    { label: 'Order Book', value: inrCompact(k.orderBook), icon: ReceiptLongOutlined, accent: theme.palette.primary.dark, path: '/crm/sales-orders' },
+    { label: 'Collected', value: inrCompact(k.collected), icon: AccountBalanceWalletOutlined, accent: theme.palette.success.main, path: '/crm/collections' },
+    { label: 'Outstanding', value: inrCompact(k.outstanding), icon: TrendingUpRounded, accent: theme.palette.warning.main, path: '/crm/collections' },
+    { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: `${k.dispatchTotal ?? 0} total`, icon: LocalShippingOutlined, accent: theme.palette.primary.main, path: '/dispatch-management' },
+    { label: 'Active Leads', value: k.activeLeads ?? 0, sub: `${k.team ?? 0} team members`, icon: GroupsOutlined, accent: theme.palette.primary.main, path: '/crm/follow-ups' },
   ];
 
   const managementLinks = [
@@ -268,7 +268,7 @@ const CEOExecutiveDashboard = () => {
             <Chip
               size="small"
               label={attention.length}
-              sx={{ height: 20, fontWeight: 800, bgcolor: attention.length ? alpha('#DC2626', 0.12) : alpha('#059669', 0.12), color: attention.length ? '#DC2626' : '#059669' }}
+              sx={{ height: 20, fontWeight: 800, bgcolor: attention.length ? alpha(theme.palette.error.main, 0.12) : alpha(theme.palette.success.main, 0.12), color: attention.length ? 'error.main' : 'success.main' }}
             />
           )}
         </Stack>
@@ -282,8 +282,8 @@ const CEOExecutiveDashboard = () => {
             ))}
           </Grid>
         ) : attention.length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2.5, display: 'flex', alignItems: 'center', gap: 2, borderLeft: '4px solid #059669' }}>
-            <CheckCircleOutlineRounded sx={{ color: '#059669', fontSize: 32 }} />
+          <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2.5, display: 'flex', alignItems: 'center', gap: 2, borderLeft: '4px solid', borderLeftColor: 'success.main' }}>
+            <CheckCircleOutlineRounded sx={{ color: 'success.main', fontSize: 32 }} />
             <Box>
               <Typography variant="subtitle1" fontWeight={700}>All clear</Typography>
               <Typography variant="body2" color="text.secondary">No outstanding risks, delays, or overdue work detected right now.</Typography>
@@ -317,20 +317,20 @@ const CEOExecutiveDashboard = () => {
                   <AreaChart data={data.revenueTrend} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="cc-ord" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1E7DBE" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#1E7DBE" stopOpacity={0} />
+                        <stop offset="5%" stopColor={theme.palette.primary.dark} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={theme.palette.primary.dark} stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="cc-col" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#45ADE6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#45ADE6" stopOpacity={0} />
+                        <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
                     <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                     <YAxis tickFormatter={inrCompact} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={70} />
                     <RTooltip formatter={(v) => inrCompact(v)} />
-                    <Area type="monotone" dataKey="ordered" stroke="#1E7DBE" strokeWidth={2} fill="url(#cc-ord)" name="Ordered" />
-                    <Area type="monotone" dataKey="collected" stroke="#45ADE6" strokeWidth={2} fill="url(#cc-col)" name="Collected" />
+                    <Area type="monotone" dataKey="ordered" stroke={theme.palette.primary.dark} strokeWidth={2} fill="url(#cc-ord)" name="Ordered" />
+                    <Area type="monotone" dataKey="collected" stroke={theme.palette.primary.main} strokeWidth={2} fill="url(#cc-col)" name="Collected" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
@@ -389,7 +389,7 @@ const CEOExecutiveDashboard = () => {
               {data?.concentration?.top1Name ? (
                 <Stack spacing={2} justifyContent="center" sx={{ height: '100%' }}>
                   <Box>
-                    <Typography variant="h3" fontWeight={800} sx={{ color: data.concentration.top1Share >= 0.35 ? '#DC2626' : data.concentration.top1Share >= 0.25 ? '#D97706' : '#059669', letterSpacing: '-0.03em' }}>
+                    <Typography variant="h3" fontWeight={800} sx={{ color: data.concentration.top1Share >= 0.35 ? 'error.main' : data.concentration.top1Share >= 0.25 ? 'warning.main' : 'success.main', letterSpacing: '-0.03em' }}>
                       {pct(data.concentration.top1Share)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -401,7 +401,7 @@ const CEOExecutiveDashboard = () => {
                     <Typography variant="body2" color="text.secondary">from top 3 customers · {data.concentration.customerCount} total</Typography>
                   </Box>
                   {data.concentration.top1Share >= 0.25 && (
-                    <Chip size="small" icon={<WarningAmberRounded />} label="Diversify customer base" sx={{ alignSelf: 'flex-start', fontWeight: 700, bgcolor: alpha('#D97706', 0.12), color: '#D97706' }} />
+                    <Chip size="small" icon={<WarningAmberRounded />} label="Diversify customer base" sx={{ alignSelf: 'flex-start', fontWeight: 700, bgcolor: alpha(theme.palette.warning.main, 0.12), color: 'warning.main' }} />
                   )}
                 </Stack>
               ) : (
@@ -422,14 +422,14 @@ const CEOExecutiveDashboard = () => {
                 const warn = dep.health === 'warn';
                 return (
                   <Grid item xs={6} sm={4} md={2} key={dep.key}>
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, height: '100%', borderTop: `3px solid ${warn ? '#D97706' : '#059669'}` }}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, height: '100%', borderTop: '3px solid', borderTopColor: warn ? 'warning.main' : 'success.main' }}>
                       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{dep.name}</Typography>
                       <Typography variant="h5" fontWeight={800} sx={{ mt: 0.5, letterSpacing: '-0.02em' }}>{dep.metric}</Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{dep.metricLabel}</Typography>
                       <Chip
                         size="small"
                         label={warn ? 'Attention' : 'On track'}
-                        sx={{ mt: 1, height: 20, fontWeight: 700, fontSize: '0.65rem', bgcolor: alpha(warn ? '#D97706' : '#059669', 0.12), color: warn ? '#D97706' : '#059669' }}
+                        sx={{ mt: 1, height: 20, fontWeight: 700, fontSize: '0.65rem', bgcolor: alpha(warn ? theme.palette.warning.main : theme.palette.success.main, 0.12), color: warn ? 'warning.main' : 'success.main' }}
                       />
                     </Paper>
                   </Grid>

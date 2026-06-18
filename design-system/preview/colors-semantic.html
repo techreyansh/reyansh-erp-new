@@ -1,0 +1,47 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Semantic Colors</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin-top: 4px; margin-bottom: 22px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .col .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin-bottom: 10px; }
+  .chip-main { border-radius: 8px; height: 64px; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; color: #fff; box-shadow: 0 2px 4px rgba(15,23,42,0.05); }
+  .chip-main .hex { font-size: 11px; font-family: ui-monospace, monospace; opacity: 0.9; }
+  .chip-soft { border-radius: 8px; height: 40px; margin-top: 8px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <h1>Semantic Colors</h1>
+  <div class="sub">Status meaning across the app — success, error, warning, info. Each has a solid main + soft tint for backgrounds.</div>
+  <div class="grid">
+    <div class="col">
+      <div class="label">Success</div>
+      <div class="chip-main" style="background:#059669"><span>main</span><span class="hex">#059669</span></div>
+      <div class="chip-soft" style="background:#D1FAE5;color:#047857">lighter · #D1FAE5</div>
+    </div>
+    <div class="col">
+      <div class="label">Error</div>
+      <div class="chip-main" style="background:#C0392B"><span>main</span><span class="hex">#C0392B</span></div>
+      <div class="chip-soft" style="background:#FBE3E0;color:#97271C">lighter · #FBE3E0</div>
+    </div>
+    <div class="col">
+      <div class="label">Warning</div>
+      <div class="chip-main" style="background:#D97706"><span>main</span><span class="hex">#D97706</span></div>
+      <div class="chip-soft" style="background:#FEF3C7;color:#B45309">lighter · #FEF3C7</div>
+    </div>
+    <div class="col">
+      <div class="label">Info</div>
+      <div class="chip-main" style="background:#1E7DBE"><span>main</span><span class="hex">#1E7DBE</span></div>
+      <div class="chip-soft" style="background:#CFE6F6;color:#155E8C">lighter · #CFE6F6</div>
+    </div>
+  </div>
+</body>
+</html>

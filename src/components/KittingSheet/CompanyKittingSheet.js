@@ -1708,15 +1708,15 @@ const CompanyKittingSheet = () => {
           <KittingIcon fontSize="large" />
         </Avatar>
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            sx={{ 
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #45ADE6, #84D2FC)',
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             Company Kitting Sheet
           </Typography>
@@ -1822,13 +1822,13 @@ const CompanyKittingSheet = () => {
                 fullWidth
                 size="large"
                 startIcon={<GenerateIcon />}
-                sx={{ 
+                sx={(theme) => ({
                   py: 1.5,
-                  background: 'linear-gradient(45deg, #45ADE6, #21cbf3)',
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #45ADE6, #00bcd4)',
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                   }
-                }}
+                })}
               >
                 Generate List
               </Button>
@@ -1908,11 +1908,11 @@ const CompanyKittingSheet = () => {
 
       {/* Tab Navigation System */}
       <Card sx={{ mb: 3, boxShadow: 3 }}>
-        <Box sx={{ 
-          background: 'linear-gradient(45deg, #45ADE6 30%, #84D2FC 90%)',
-          color: 'white',
+        <Box sx={(theme) => ({
+          background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`,
+          color: theme.palette.common.white,
           p: 2
-        }}>
+        })}>
           <Stack direction="row" spacing={3}>
             <Button
               onClick={() => setActiveTab("kitting")}
@@ -1920,7 +1920,7 @@ const CompanyKittingSheet = () => {
               startIcon={<IssueIcon />}
               sx={{
                 backgroundColor: activeTab === "kitting" ? 'rgba(255,255,255,0.2)' : 'transparent',
-                color: 'white',
+                color: 'common.white',
                 borderColor: 'rgba(255,255,255,0.5)',
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.1)',
@@ -1938,7 +1938,7 @@ const CompanyKittingSheet = () => {
               startIcon={<ViewIcon />}
               sx={{
                 backgroundColor: activeTab === "issued" ? 'rgba(255,255,255,0.2)' : 'transparent',
-                color: 'white',
+                color: 'common.white',
                 borderColor: 'rgba(255,255,255,0.5)',
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.1)',
@@ -1956,7 +1956,7 @@ const CompanyKittingSheet = () => {
         <Card sx={{ mb: 3, boxShadow: 3 }}>
           <CardContent>
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Avatar sx={{ bgcolor: '#45ADE6' }}>
+              <Avatar sx={{ bgcolor: 'primary.main' }}>
                 <ViewIcon />
               </Avatar>
               <Box>
@@ -1995,13 +1995,14 @@ const CompanyKittingSheet = () => {
               const filteredIssues = filterIssuedItemsByTime(issuedItemsList, showLast24Hours);
               return Object.keys(filteredIssues).length === 0;
             })() ? (
-              <Box sx={{ 
-                textAlign: 'center', 
+              <Box sx={(theme) => ({
+                textAlign: 'center',
                 py: 6,
-                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
                 borderRadius: 2,
-                border: '2px dashed #ddd'
-              }}>
+                border: '2px dashed',
+                borderColor: 'divider'
+              })}>
                 <ViewIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary" gutterBottom>
                   {showLast24Hours ? 'No Items Issued in Last 24 Hours' : 'No Issued Items Found'}
@@ -2013,14 +2014,15 @@ const CompanyKittingSheet = () => {
             ) : (
               <Stack spacing={3}>
                 {Object.entries(filterIssuedItemsByTime(issuedItemsList, showLast24Hours)).map(([kittingId, issues]) => (
-                  <Card key={kittingId} variant="outlined" sx={{ 
-                    border: '2px solid #45ADE6',
+                  <Card key={kittingId} variant="outlined" sx={{
+                    border: '2px solid',
+                    borderColor: 'primary.main',
                     '&:hover': { boxShadow: 6 }
                   }}>
                     <CardContent>
                       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
                         <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#45ADE6' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                             Kitting ID: {kittingId}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -2071,10 +2073,10 @@ const CompanyKittingSheet = () => {
                         </Stack>
                       </Stack>
 
-                      <TableContainer sx={{ border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                      <TableContainer sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                         <Table size="small">
                           <TableHead>
-                            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                            <TableRow sx={{ bgcolor: 'grey.100' }}>
                               <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}>Item Details</TableCell>
                               <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}>Process</TableCell>
                               <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}>Issued Qty</TableCell>
@@ -2086,7 +2088,7 @@ const CompanyKittingSheet = () => {
                           </TableHead>
                           <TableBody>
                             {issues.map((issue) => (
-                              <TableRow key={issue.id} sx={{ '&:hover': { bgcolor: '#f9f9f9' } }}>
+                              <TableRow key={issue.id} sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
                                 <TableCell>
                                   <Box>
                                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -2149,7 +2151,7 @@ const CompanyKittingSheet = () => {
                                         sx={{
                                           '&:hover': {
                                             bgcolor: 'error.light',
-                                            color: 'white'
+                                            color: 'common.white'
                                           }
                                         }}
                                       >
@@ -2200,7 +2202,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       S.No
@@ -2209,7 +2211,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Item Details
@@ -2218,7 +2220,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Process
@@ -2227,7 +2229,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Qty/PC
@@ -2236,7 +2238,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Unit
@@ -2245,7 +2247,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Location
@@ -2254,7 +2256,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Required
@@ -2263,7 +2265,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       On-Hand
@@ -2272,7 +2274,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Available
@@ -2281,7 +2283,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Balance
@@ -2290,7 +2292,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Issue Qty
@@ -2299,7 +2301,7 @@ const CompanyKittingSheet = () => {
                       fontWeight: 'bold', 
                       textTransform: 'uppercase',
                       bgcolor: 'primary.main',
-                      color: 'white',
+                      color: 'common.white',
                       fontSize: '0.75rem'
                     }}>
                       Actions
@@ -2423,7 +2425,7 @@ const CompanyKittingSheet = () => {
                               sx={{
                                 '&:hover': {
                                   bgcolor: 'error.light',
-                                  color: 'white'
+                                  color: 'common.white'
                                 }
                               }}
                             >
@@ -2498,7 +2500,7 @@ const CompanyKittingSheet = () => {
             <Grid container spacing={3}>
               {/* Company Header */}
               <Grid item xs={12}>
-                <Card sx={{ bgcolor: 'primary.main', color: 'white', p: 2, textAlign: 'center' }}>
+                <Card sx={{ bgcolor: 'primary.main', color: 'common.white', p: 2, textAlign: 'center' }}>
                   <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
                     REYANSH INTERNATIONAL PVT. LTD
                   </Typography>
@@ -2640,16 +2642,16 @@ const CompanyKittingSheet = () => {
                   </Stack>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
-                      <Box sx={{ textAlign: 'center', border: '1px solid #ddd', p: 2, borderRadius: 1 }}>
+                      <Box sx={{ textAlign: 'center', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2 }}>KITTING OPERATOR</Typography>
-                        <Box sx={{ height: 40, borderBottom: '1px solid #333', mb: 1 }}></Box>
+                        <Box sx={{ height: 40, borderBottom: '1px solid', borderColor: 'text.primary', mb: 1 }}></Box>
                         <Typography variant="caption">SIGNATURE</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Box sx={{ textAlign: 'center', border: '1px solid #ddd', p: 2, borderRadius: 1 }}>
+                      <Box sx={{ textAlign: 'center', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2 }}>SUPERVISOR</Typography>
-                        <Box sx={{ height: 40, borderBottom: '1px solid #333', mb: 1 }}></Box>
+                        <Box sx={{ height: 40, borderBottom: '1px solid', borderColor: 'text.primary', mb: 1 }}></Box>
                         <Typography variant="caption">SIGNATURE</Typography>
                       </Box>
                     </Grid>
@@ -2722,7 +2724,7 @@ const CompanyKittingSheet = () => {
             <Grid container spacing={3}>
               {/* Company Header */}
               <Grid item xs={12}>
-                <Card sx={{ bgcolor: 'success.main', color: 'white', p: 2, textAlign: 'center' }}>
+                <Card sx={{ bgcolor: 'success.main', color: 'common.white', p: 2, textAlign: 'center' }}>
                   <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
                     REYANSH INTERNATIONAL PVT. LTD
                   </Typography>
@@ -2855,16 +2857,16 @@ const CompanyKittingSheet = () => {
                   </Stack>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
-                      <Box sx={{ textAlign: 'center', border: '1px solid #ddd', p: 2, borderRadius: 1 }}>
+                      <Box sx={{ textAlign: 'center', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2 }}>MATERIAL ISSUED BY</Typography>
-                        <Box sx={{ height: 40, borderBottom: '1px solid #333', mb: 1 }}></Box>
+                        <Box sx={{ height: 40, borderBottom: '1px solid', borderColor: 'text.primary', mb: 1 }}></Box>
                         <Typography variant="caption">SIGNATURE</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Box sx={{ textAlign: 'center', border: '1px solid #ddd', p: 2, borderRadius: 1 }}>
+                      <Box sx={{ textAlign: 'center', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2 }}>RECEIVED BY</Typography>
-                        <Box sx={{ height: 40, borderBottom: '1px solid #333', mb: 1 }}></Box>
+                        <Box sx={{ height: 40, borderBottom: '1px solid', borderColor: 'text.primary', mb: 1 }}></Box>
                         <Typography variant="caption">SIGNATURE</Typography>
                       </Box>
                     </Grid>

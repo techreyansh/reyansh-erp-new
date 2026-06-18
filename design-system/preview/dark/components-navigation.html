@@ -1,0 +1,63 @@
+<!-- @dsCard group="Components · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Navigation · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 20px; }
+  .frame { border: 1px solid rgba(226,232,237,0.12); border-radius: 10px; overflow: hidden; display: flex; height: 460px; box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+  .drawer { width: 232px; background: #2D3D4C; border-right: 1px solid rgba(226,232,237,0.12); padding: 14px 10px; flex: none; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px 16px; }
+  .brand .mark { width: 30px; height: 30px; border-radius: 7px; background: #45ADE6; color: #0B1A24; display: flex; align-items: center; justify-content: center; font-family: "Montserrat"; font-weight: 800; }
+  .brand .nm { font-family: "Montserrat"; font-weight: 800; font-size: 15px; }
+  .navitem { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 8px; font-size: 14px; color: #A9B2BA; margin-bottom: 2px; cursor: pointer; }
+  .navitem .ic { width: 18px; height: 18px; border-radius: 5px; background: #475569; flex: none; }
+  .navitem.active { background: rgba(69,173,230,0.1); color: #84D2FC; font-weight: 600; }
+  .navitem.active .ic { background: #45ADE6; }
+  .sec { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6B767E; padding: 14px 12px 6px; }
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .appbar { height: 60px; background: #2D3D4C; border-bottom: 1px solid rgba(226,232,237,0.12); box-shadow: 0 1px 3px rgba(0,0,0,0.45); display: flex; align-items: center; padding: 0 20px; gap: 14px; }
+  .appbar .pg { font-family: "Montserrat"; font-weight: 700; font-size: 16px; }
+  .appbar .spacer { flex: 1; }
+  .search { background: #1E2B38; border-radius: 8px; height: 36px; width: 220px; display: flex; align-items: center; padding: 0 12px; color: #6B767E; font-size: 13px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: #45ADE6; color: #0B1A24; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+  .canvas { flex: 1; background: #1E2B38; padding: 18px; color: #A9B2BA; font-size: 13px; }
+</style>
+</head>
+<body>
+  <h1>Navigation · Dark</h1>
+  <div class="sub">Drawer and AppBar sit on paper; the canvas drops to the deep slate background.</div>
+  <div class="frame">
+    <aside class="drawer">
+      <div class="brand"><div class="mark">R</div><div class="nm">Reyansh ERP</div></div>
+      <div class="navitem active"><span class="ic"></span>Dashboard</div>
+      <div class="navitem"><span class="ic"></span>CRM</div>
+      <div class="navitem"><span class="ic"></span>Sales</div>
+      <div class="navitem"><span class="ic"></span>Production</div>
+      <div class="navitem"><span class="ic"></span>Inventory</div>
+      <div class="navitem"><span class="ic"></span>Dispatch</div>
+      <div class="sec">Operations</div>
+      <div class="navitem"><span class="ic"></span>Accounts</div>
+      <div class="navitem"><span class="ic"></span>Employees</div>
+      <div class="navitem"><span class="ic"></span>Tasks</div>
+      <div class="navitem"><span class="ic"></span>Reports</div>
+      <div class="navitem"><span class="ic"></span>Settings</div>
+    </aside>
+    <div class="main">
+      <div class="appbar">
+        <div class="pg">Dashboard</div>
+        <div class="spacer"></div>
+        <div class="search">Search orders, clients…</div>
+        <div class="avatar">AJ</div>
+      </div>
+      <div class="canvas">Page content renders here.</div>
+    </div>
+  </div>
+</body>
+</html>

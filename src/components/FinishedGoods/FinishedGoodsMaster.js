@@ -430,15 +430,15 @@ const FinishedGoodsMaster = () => {
           <CategoryIcon fontSize="large" />
         </Avatar>
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            sx={{ 
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #9c27b0, #e1bee7)',
+              background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             Finished Goods Master
           </Typography>
@@ -487,12 +487,12 @@ const FinishedGoodsMaster = () => {
                   onClick={handleOpenDialog}
                   startIcon={<AddIcon />}
                   size="large"
-                  sx={{ 
-                    background: 'linear-gradient(45deg, #9c27b0, #e1bee7)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #7b1fa2, #9c27b0)',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                     }
-                  }}
+                  })}
                 >
                   Add New Product
                 </Button>
@@ -897,7 +897,7 @@ const FinishedGoodsMaster = () => {
                   renderOption={(props, option) => (
                     <Box component="li" {...props} key={option.productCode}>
                       <Box sx={{ width: '100%' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#9c27b0' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                           {option.productCode}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -996,12 +996,12 @@ const FinishedGoodsMaster = () => {
             variant="contained"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
-            sx={{ 
-              background: 'linear-gradient(45deg, #9c27b0, #e1bee7)',
+            sx={(theme) => ({
+              background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               '&:hover': {
-                background: 'linear-gradient(45deg, #7b1fa2, #9c27b0)',
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               }
-            }}
+            })}
           >
             {selectedProduct ? "Update Product" : loading ? "Saving..." : "Create Product"}
           </Button>

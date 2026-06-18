@@ -1,0 +1,44 @@
+<!-- @dsCard group="Components · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cards &amp; Surfaces · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .card { background: #2D3D4C; border: 1px solid rgba(226,232,237,0.12); border-radius: 8px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.32); }
+  .card.hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); border-color: rgba(148,163,184,0.22); }
+  .card h3 { font-family: "Montserrat"; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 14px; color: #A9B2BA; line-height: 1.55; }
+  .tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #A9B2BA; margin-bottom: 10px; }
+  .divider { height: 1px; background: rgba(226,232,237,0.12); margin: 14px 0; }
+  .foot { display: flex; justify-content: space-between; font-size: 13px; color: #A9B2BA; }
+</style>
+</head>
+<body>
+  <h1>Cards &amp; Surfaces · Dark</h1>
+  <div class="sub">Paper lifts off the canvas with deeper shadow; border brightens slightly on hover.</div>
+  <div class="grid">
+    <div class="card">
+      <div class="tag">Resting</div>
+      <h3>Work order RO-1042</h3>
+      <p>3-core flexible cable for Apex Cables. Scheduled on Line 2.</p>
+      <div class="divider"></div>
+      <div class="foot"><span>Due 22 Jun</span><span>1,200 m</span></div>
+    </div>
+    <div class="card hover">
+      <div class="tag">Hover</div>
+      <h3>Work order RO-1041</h3>
+      <p>Power cord assembly for Volt Industries. QC passed.</p>
+      <div class="divider"></div>
+      <div class="foot"><span>Completed</span><span>800 pcs</span></div>
+    </div>
+  </div>
+</body>
+</html>

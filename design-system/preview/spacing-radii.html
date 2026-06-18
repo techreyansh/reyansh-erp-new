@@ -1,0 +1,45 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spacing &amp; Radii</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #F2F5F7; color: #2D3D4C; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #81898F; font-size: 13px; margin: 4px 0 22px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #81898F; margin: 0 0 12px; }
+  .stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .srow { display: flex; align-items: center; gap: 14px; font-size: 12px; }
+  .srow .bar { background: #45ADE6; height: 16px; border-radius: 3px; }
+  .srow .v { font-family: ui-monospace, monospace; color: #81898F; width: 90px; }
+  .radii { display: flex; gap: 18px; }
+  .rad { text-align: center; font-size: 12px; }
+  .rad .box { width: 84px; height: 64px; background: #fff; border: 1px solid #E2E8ED; box-shadow: 0 2px 4px rgba(15,23,42,0.04); margin-bottom: 8px; }
+  .rad .v { font-family: ui-monospace, monospace; color: #81898F; }
+</style>
+</head>
+<body>
+  <h1>Spacing &amp; Radii</h1>
+  <div class="sub">8px base grid (MUI <code>spacing: 8</code>). Global corner radius is 8px (<code>shape.borderRadius</code>).</div>
+
+  <div class="label">Spacing scale (×8px)</div>
+  <div class="stack">
+    <div class="srow"><div class="bar" style="width:8px"></div><span class="v">1 · 8px</span></div>
+    <div class="srow"><div class="bar" style="width:16px"></div><span class="v">2 · 16px</span></div>
+    <div class="srow"><div class="bar" style="width:24px"></div><span class="v">3 · 24px</span></div>
+    <div class="srow"><div class="bar" style="width:32px"></div><span class="v">4 · 32px</span></div>
+    <div class="srow"><div class="bar" style="width:48px"></div><span class="v">6 · 48px</span></div>
+  </div>
+
+  <div class="label">Corner radii</div>
+  <div class="radii">
+    <div class="rad"><div class="box" style="border-radius:6px"></div><div>chip</div><div class="v">6px</div></div>
+    <div class="rad"><div class="box" style="border-radius:8px"></div><div>default</div><div class="v">8px</div></div>
+    <div class="rad"><div class="box" style="border-radius:50%"></div><div>avatar</div><div class="v">full</div></div>
+  </div>
+</body>
+</html>

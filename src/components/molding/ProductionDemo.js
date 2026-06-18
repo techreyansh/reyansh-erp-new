@@ -116,16 +116,16 @@ const ProductionDemo = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#45ADE6" }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "primary.main" }}>
         🎬 Production Management Demo
       </Typography>
-      
-      <Typography variant="body1" sx={{ mb: 4, color: "#666" }}>
+
+      <Typography variant="body1" sx={{ mb: 4, color: "text.secondary" }}>
         Live demonstration of power cord production flow according to your requirements
       </Typography>
 
       {/* Current Order */}
-      <Card sx={{ mb: 3, bgcolor: "#e3f2fd" }}>
+      <Card sx={{ mb: 3, bgcolor: "info.lighter" }}>
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
             📋 Current Production Order
@@ -225,7 +225,7 @@ const ProductionDemo = () => {
                       {step.data.inner.map((machine) => (
                         <Box key={machine.id} sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, ml: 2 }}>
                           <Typography variant="body2" sx={{ minWidth: 100 }}>{machine.id}:</Typography>
-                          <Chip label="Inner" size="small" sx={{ bgcolor: "#ffeb3b" }} />
+                          <Chip label="Inner" size="small" sx={{ bgcolor: "warning.light" }} />
                           <Typography variant="body2">{machine.allocated} pieces</Typography>
                           <Typography variant="body2">({machine.capacity} pcs/hr)</Typography>
                           <Chip label={`${machine.efficiency}%`} size="small" color="success" />
@@ -238,7 +238,7 @@ const ProductionDemo = () => {
                       {step.data.outer.map((machine) => (
                         <Box key={machine.id} sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, ml: 2 }}>
                           <Typography variant="body2" sx={{ minWidth: 100 }}>{machine.id}:</Typography>
-                          <Chip label="Outer" size="small" sx={{ bgcolor: "#4caf50", color: "white" }} />
+                          <Chip label="Outer" size="small" sx={{ bgcolor: "success.main", color: "common.white" }} />
                           <Typography variant="body2">{machine.allocated} pieces</Typography>
                           <Typography variant="body2">({machine.capacity} pcs/hr)</Typography>
                           <Chip label={`${machine.efficiency}%`} size="small" color="success" />
@@ -265,14 +265,14 @@ const ProductionDemo = () => {
           </Stepper>
 
           {activeStep === steps.length && (
-            <Box sx={{ mt: 3, p: 3, bgcolor: "#e8f5e8", borderRadius: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2e7d32", mb: 2 }}>
+            <Box sx={{ mt: 3, p: 3, bgcolor: "success.lighter", borderRadius: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: "bold", color: "success.main", mb: 2 }}>
                 ✅ Production Complete!
               </Typography>
               <Typography variant="body1">
                 Successfully produced {demoData.order.expectedPieces} power cords following the complete workflow:
               </Typography>
-              <Typography variant="body2" sx={{ mt: 1, color: "#666" }}>
+              <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
                 Material Inward → Cable Cutting → Assembly (4 lines) → Molding (Inner + Outer) → Final Packing
               </Typography>
             </Box>
@@ -289,7 +289,7 @@ const ProductionDemo = () => {
           
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+              <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Real-time Monitoring
                 </Typography>
@@ -302,7 +302,7 @@ const ProductionDemo = () => {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+              <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Mold-Machine Compatibility
                 </Typography>
@@ -315,7 +315,7 @@ const ProductionDemo = () => {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+              <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Production Ratios
                 </Typography>
@@ -328,7 +328,7 @@ const ProductionDemo = () => {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+              <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                   Google Sheets Integration
                 </Typography>

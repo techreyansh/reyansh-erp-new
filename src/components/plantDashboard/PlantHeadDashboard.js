@@ -134,17 +134,17 @@ function derivePlantAttention(d) {
   return sortBySeverity(items);
 }
 
-const STATUS_COLORS = {
-  RUNNING: '#1E7DBE',
-  PENDING: '#D97706',
-  COMPLETED: '#059669',
-  FAILED: '#DC2626',
-  Unknown: '#475569',
-};
-
 const PlantHeadDashboard = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+
+  const STATUS_COLORS = {
+    RUNNING: theme.palette.primary.dark,
+    PENDING: theme.palette.warning.main,
+    COMPLETED: theme.palette.success.main,
+    FAILED: theme.palette.error.main,
+    Unknown: theme.palette.text.secondary,
+  };
   const { loading: permissionsLoading, employee, authorized } = usePermissions();
 
   const [data, setData] = useState(null);
@@ -183,16 +183,16 @@ const PlantHeadDashboard = () => {
     return <AccessDenied />;
   }
 
-  const achievementColor = k.achievement >= 0.9 ? '#059669' : k.achievement >= 0.7 ? '#D97706' : '#DC2626';
-  const rejectionColor = k.rejectionRate < 0.05 ? '#059669' : k.rejectionRate < 0.1 ? '#D97706' : '#DC2626';
+  const achievementColor = k.achievement >= 0.9 ? theme.palette.success.main : k.achievement >= 0.7 ? theme.palette.warning.main : theme.palette.error.main;
+  const rejectionColor = k.rejectionRate < 0.05 ? theme.palette.success.main : k.rejectionRate < 0.1 ? theme.palette.warning.main : theme.palette.error.main;
 
   const kpiCards = [
-    { label: 'Output Today', value: Math.round(k.producedToday ?? 0).toLocaleString('en-IN'), sub: 'units produced', icon: PrecisionManufacturingOutlined, accent: '#45ADE6', path: '/ppc/production-tracking' },
+    { label: 'Output Today', value: Math.round(k.producedToday ?? 0).toLocaleString('en-IN'), sub: 'units produced', icon: PrecisionManufacturingOutlined, accent: theme.palette.primary.main, path: '/ppc/production-tracking' },
     { label: 'Plan Achievement', value: pct(k.achievement ?? 0), sub: `${Math.round(k.producedQty ?? 0).toLocaleString('en-IN')} / ${Math.round(k.targetQty ?? 0).toLocaleString('en-IN')}`, icon: RuleOutlined, accent: achievementColor, path: '/ppc/production-plan' },
     { label: 'Rejection %', value: pct(k.rejectionRate ?? 0), sub: 'defects / total', icon: ReportProblemOutlined, accent: rejectionColor, path: '/ppc/quality-control' },
-    { label: 'Running Jobs', value: k.running ?? 0, sub: `${k.pendingJobs ?? 0} pending`, icon: FactoryOutlined, accent: '#1E7DBE', path: '/ppc/work-orders' },
-    { label: 'Plans In Progress', value: k.inProgressPlans ?? 0, sub: `${k.planCount ?? 0} total`, icon: PlaylistAddCheckOutlined, accent: '#7C3AED', path: '/ppc/production-plan' },
-    { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: 'ready to ship', icon: LocalShippingOutlined, accent: '#DB2777', path: '/dispatch-management' },
+    { label: 'Running Jobs', value: k.running ?? 0, sub: `${k.pendingJobs ?? 0} pending`, icon: FactoryOutlined, accent: theme.palette.primary.dark, path: '/ppc/work-orders' },
+    { label: 'Plans In Progress', value: k.inProgressPlans ?? 0, sub: `${k.planCount ?? 0} total`, icon: PlaylistAddCheckOutlined, accent: theme.palette.primary.main, path: '/ppc/production-plan' },
+    { label: 'Pending Dispatch', value: k.pendingDispatch ?? 0, sub: 'ready to ship', icon: LocalShippingOutlined, accent: theme.palette.primary.main, path: '/dispatch-management' },
   ];
 
   return (
@@ -237,8 +237,8 @@ const PlantHeadDashboard = () => {
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
         {/* No-data hint */}
         {!loading && data && !data.hasData && (
-          <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2.5, display: 'flex', gap: 1.5, alignItems: 'center', bgcolor: alpha('#1E7DBE', 0.04), borderColor: alpha('#1E7DBE', 0.3) }}>
-            <InfoOutlined sx={{ color: '#1E7DBE' }} />
+          <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2.5, display: 'flex', gap: 1.5, alignItems: 'center', bgcolor: alpha(theme.palette.primary.dark, 0.04), borderColor: alpha(theme.palette.primary.dark, 0.3) }}>
+            <InfoOutlined sx={{ color: 'primary.dark' }} />
             <Typography variant="body2" color="text.secondary">
               No production plans or work orders found yet. This dashboard populates from the PPC module (production plans → work orders → QC). Create a plan to see live metrics.
             </Typography>
@@ -254,7 +254,7 @@ const PlantHeadDashboard = () => {
             <Chip
               size="small"
               label={attention.length}
-              sx={{ height: 20, fontWeight: 800, bgcolor: attention.length ? alpha('#DC2626', 0.12) : alpha('#059669', 0.12), color: attention.length ? '#DC2626' : '#059669' }}
+              sx={{ height: 20, fontWeight: 800, bgcolor: attention.length ? alpha(theme.palette.error.main, 0.12) : alpha(theme.palette.success.main, 0.12), color: attention.length ? 'error.main' : 'success.main' }}
             />
           )}
         </Stack>
@@ -268,8 +268,8 @@ const PlantHeadDashboard = () => {
             ))}
           </Grid>
         ) : attention.length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2.5, display: 'flex', alignItems: 'center', gap: 2, borderLeft: '4px solid #059669' }}>
-            <CheckCircleOutlineRounded sx={{ color: '#059669', fontSize: 32 }} />
+          <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2.5, display: 'flex', alignItems: 'center', gap: 2, borderLeft: '4px solid', borderLeftColor: 'success.main' }}>
+            <CheckCircleOutlineRounded sx={{ color: 'success.main', fontSize: 32 }} />
             <Box>
               <Typography variant="subtitle1" fontWeight={700}>Line running clean</Typography>
               <Typography variant="body2" color="text.secondary">No shortages, blocks, quality alerts, or behind-target plans right now.</Typography>
@@ -302,13 +302,13 @@ const PlantHeadDashboard = () => {
                 <Stack spacing={1.5} sx={{ height: '100%', overflowY: 'auto', pr: 0.5 }}>
                   {data.planProgress.map((p) => {
                     const ratio = p.target > 0 ? Math.min(p.produced / p.target, 1) : 0;
-                    const barColor = ratio >= 0.9 ? '#059669' : ratio >= 0.6 ? '#1E7DBE' : '#D97706';
+                    const barColor = ratio >= 0.9 ? theme.palette.success.main : ratio >= 0.6 ? theme.palette.primary.dark : theme.palette.warning.main;
                     return (
                       <Box key={p.id}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
                           <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} noWrap>{p.label}</Typography>
-                            {p.shortage && <Chip size="small" label="Shortage" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700, bgcolor: alpha('#DC2626', 0.12), color: '#DC2626' }} />}
+                            {p.shortage && <Chip size="small" label="Shortage" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700, bgcolor: alpha(theme.palette.error.main, 0.12), color: 'error.main' }} />}
                           </Stack>
                           <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
                             {Math.round(p.produced).toLocaleString('en-IN')} / {Math.round(p.target).toLocaleString('en-IN')}
@@ -335,7 +335,7 @@ const PlantHeadDashboard = () => {
                   <PieChart>
                     <Pie data={data.jobsByStatus} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
                       {data.jobsByStatus.map((entry) => (
-                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || '#475569'} />
+                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || theme.palette.text.secondary} />
                       ))}
                     </Pie>
                     <RTooltip />
@@ -379,8 +379,8 @@ const PlantHeadDashboard = () => {
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={alpha(theme.palette.text.primary, 0.06)} />
                     <XAxis type="number" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={80} />
-                    <RTooltip cursor={{ fill: alpha('#DC2626', 0.06) }} />
-                    <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16} fill="#DC2626" />
+                    <RTooltip cursor={{ fill: alpha(theme.palette.error.main, 0.06) }} />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16} fill={theme.palette.error.main} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

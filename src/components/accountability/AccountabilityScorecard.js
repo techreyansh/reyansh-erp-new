@@ -14,7 +14,11 @@ import {
 } from '../../services/accountabilityService';
 import AccountabilityRoster from './AccountabilityRoster';
 
-const BAND = { GREEN: '#059669', AMBER: '#D97706', RED: '#C0392B' };
+const bandPalette = (theme) => ({
+  GREEN: theme.palette.success.main,
+  AMBER: theme.palette.warning.main,
+  RED: theme.palette.error.main,
+});
 const STATUS_LABEL = {
   DRAFT: 'Draft', TARGETS_SET: 'Targets set', IN_PROGRESS: 'In progress',
   SUBMITTED: 'Submitted', LOCKED: 'Locked',
@@ -64,6 +68,7 @@ function Onboarding({ onDone }) {
 
 const AccountabilityScorecard = () => {
   const theme = useTheme();
+  const BAND = bandPalette(theme);
   const [data, setData] = useState(null);
   const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +146,7 @@ const AccountabilityScorecard = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
       {/* Hero */}
-      <Box sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.light} 120%)`, color: '#fff', px: { xs: 2, sm: 3 }, py: { xs: 3, md: 3.5 } }}>
+      <Box sx={(theme) => ({ background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.light} 120%)`, color: theme.palette.common.white, px: { xs: 2, sm: 3 }, py: { xs: 3, md: 3.5 } })}>
         <Container maxWidth="xl" disableGutters>
           <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ md: 'center' }} gap={2}>
             <Box>
@@ -152,11 +157,11 @@ const AccountabilityScorecard = () => {
             </Box>
             <Stack direction="row" spacing={1.5} alignItems="center">
               {live && (
-                <Chip icon={<FiberManualRecord sx={{ fontSize: '10px !important', color: '#7CFFB2 !important' }} />} label="Live"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.16)', color: '#fff', fontWeight: 700 }} />
+                <Chip icon={<FiberManualRecord sx={(theme) => ({ fontSize: '10px !important', color: `${theme.palette.success.light} !important` })} />} label="Live"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.16)', color: 'common.white', fontWeight: 700 }} />
               )}
-              <Chip label={fmtWeek(sc?.week)} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', fontWeight: 700 }} />
-              <Chip label={STATUS_LABEL[sc?.status] || sc?.status} sx={{ bgcolor: 'rgba(255,255,255,0.16)', color: '#fff', fontWeight: 700 }} />
+              <Chip label={fmtWeek(sc?.week)} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'common.white', fontWeight: 700 }} />
+              <Chip label={STATUS_LABEL[sc?.status] || sc?.status} sx={{ bgcolor: 'rgba(255,255,255,0.16)', color: 'common.white', fontWeight: 700 }} />
             </Stack>
           </Stack>
         </Container>
@@ -255,9 +260,9 @@ function KpiRow({ row, locked, saving, onSave }) {
   useEffect(() => { setTarget(row.target_value ?? ''); setActual(row.actual_value ?? ''); setNote(row.note ?? ''); }, [row.target_value, row.actual_value, row.note]);
 
   const isBinary = row.direction_snapshot === 'BINARY';
-  const dirColor = row.direction_snapshot === 'HIGHER' ? '#059669' : row.direction_snapshot === 'LOWER' ? '#1E7DBE' : '#7C3AED';
+  const dirColor = row.direction_snapshot === 'HIGHER' ? theme.palette.success.main : row.direction_snapshot === 'LOWER' ? theme.palette.primary.dark : theme.palette.primary.main;
   const ach = row.achievement_pct;
-  const achColor = ach == null ? 'text.disabled' : ach >= 1 ? '#059669' : ach >= 0.7 ? '#D97706' : '#C0392B';
+  const achColor = ach == null ? theme.palette.text.disabled : ach >= 1 ? theme.palette.success.main : ach >= 0.7 ? theme.palette.warning.main : theme.palette.error.main;
 
   const saveField = (field, value) => {
     const v = value === '' ? null : Number(value);

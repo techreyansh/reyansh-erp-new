@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Chip, Stack, alpha } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { EventBusy, CheckCircle, CalendarMonth } from '@mui/icons-material';
 import { DateCalendar, PickersDay } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -16,6 +17,7 @@ const toKey = (date) => {
 };
 
 const HolidayManagerDialog = ({ open, onClose }) => {
+  const theme = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [version, setVersion] = useState(0); // trigger re-render after save
 
@@ -111,7 +113,7 @@ const HolidayManagerDialog = ({ open, onClose }) => {
           <Box sx={{ minWidth: 320 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Legend</Typography>
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-              <Chip icon={<EventBusy />} label="Holiday (company)" sx={{ backgroundColor: alpha('#45ADE6', 0.15) }} />
+              <Chip icon={<EventBusy />} label="Holiday (company)" sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.15) }} />
               <Chip icon={<EventBusy />} label="Holiday on base holiday" sx={{ backgroundColor: alpha('#ff80ab', 0.25) }} />
               <Chip icon={<CheckCircle />} label="Base Holiday/Sunday" sx={{ backgroundColor: alpha('#ffc107', 0.25) }} />
             </Stack>

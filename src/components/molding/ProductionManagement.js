@@ -638,10 +638,10 @@ const ProductionManagement = () => {
             <Grid item xs={12} md={3} key={stage}>
               <Card variant="outlined" sx={{ p: 2, textAlign: "center" }}>
                 <Box sx={{ mb: 1 }}>
-                  {stage === "cutting" && <CutIcon sx={{ fontSize: 32, color: "#45ADE6" }} />}
-                  {stage === "assembly" && <AssemblyIcon sx={{ fontSize: 32, color: "#f57c00" }} />}
-                  {stage === "molding" && <MoldingIcon sx={{ fontSize: 32, color: "#388e3c" }} />}
-                  {stage === "packing" && <PackingIcon sx={{ fontSize: 32, color: "#7b1fa2" }} />}
+                  {stage === "cutting" && <CutIcon sx={{ fontSize: 32, color: "primary.main" }} />}
+                  {stage === "assembly" && <AssemblyIcon sx={{ fontSize: 32, color: "warning.main" }} />}
+                  {stage === "molding" && <MoldingIcon sx={{ fontSize: 32, color: "success.main" }} />}
+                  {stage === "packing" && <PackingIcon sx={{ fontSize: 32, color: "primary.main" }} />}
                 </Box>
                 <Typography variant="h6" sx={{ textTransform: "capitalize", fontWeight: "bold" }}>
                   {stage}
@@ -679,7 +679,7 @@ const ProductionManagement = () => {
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+          <TableRow sx={{ bgcolor: "grey.100" }}>
             <TableCell><strong>Line</strong></TableCell>
             <TableCell><strong>Status</strong></TableCell>
             <TableCell><strong>Current Product</strong></TableCell>
@@ -818,7 +818,7 @@ const ProductionManagement = () => {
           backgroundColor: 'rgba(248, 250, 255, 0.5)'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Rows per page:
             </Typography>
             <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -828,7 +828,7 @@ const ProductionManagement = () => {
                   setAssemblyRowsPerPage(e.target.value);
                   setAssemblyPage(0);
                 }}
-                sx={{
+                sx={(theme) => ({
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'rgba(102, 126, 234, 0.3)',
                   },
@@ -836,9 +836,9 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#1E7DBE',
+                    borderColor: theme.palette.primary.dark,
                   }
-                }}
+                })}
               >
                 <MenuItem value={5}>5</MenuItem>
                 <MenuItem value={10}>10</MenuItem>
@@ -848,7 +848,7 @@ const ProductionManagement = () => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               {assemblyPage * assemblyRowsPerPage + 1}-{Math.min((assemblyPage + 1) * assemblyRowsPerPage, assemblyLines.length)} of {assemblyLines.length} items
             </Typography>
             
@@ -861,7 +861,7 @@ const ProductionManagement = () => {
                 size="large"
                 showFirstButton
                 showLastButton
-                sx={{
+                sx={(theme) => ({
                   '& .MuiPaginationItem-root': {
                     borderRadius: 3,
                     fontWeight: 700,
@@ -875,8 +875,8 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                      color: 'white',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                      color: theme.palette.common.white,
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                       '&:hover': {
@@ -885,7 +885,7 @@ const ProductionManagement = () => {
                       }
                     }
                   }
-                }}
+                })}
               />
             )}
           </Box>
@@ -898,7 +898,7 @@ const ProductionManagement = () => {
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+          <TableRow sx={{ bgcolor: "grey.100" }}>
             <TableCell><strong>Machine</strong></TableCell>
             <TableCell><strong>Status</strong></TableCell>
             <TableCell><strong>Mold Type</strong></TableCell>
@@ -932,11 +932,11 @@ const ProductionManagement = () => {
                 <Chip 
                   label={machine.moldType || "Unassigned"} 
                   size="small"
-                  sx={{ 
-                    bgcolor: machine.moldType === "Inner" ? "#ffeb3b" : 
-                             machine.moldType === "Outer" ? "#4caf50" : 
-                             machine.moldType === "Grommet" ? "#ff9800" : "#e0e0e0",
-                    color: machine.moldType === "Outer" ? "white" : "black"
+                  sx={{
+                    bgcolor: machine.moldType === "Inner" ? "#ffeb3b" :
+                             machine.moldType === "Outer" ? "success.main" :
+                             machine.moldType === "Grommet" ? "warning.main" : "grey.100",
+                    color: machine.moldType === "Outer" ? "common.white" : "common.black"
                   }}
                 />
               </TableCell>
@@ -1044,7 +1044,7 @@ const ProductionManagement = () => {
           backgroundColor: 'rgba(248, 250, 255, 0.5)'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Rows per page:
             </Typography>
             <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1054,7 +1054,7 @@ const ProductionManagement = () => {
                   setMoldingRowsPerPage(e.target.value);
                   setMoldingPage(0);
                 }}
-                sx={{
+                sx={(theme) => ({
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'rgba(102, 126, 234, 0.3)',
                   },
@@ -1062,9 +1062,9 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#1E7DBE',
+                    borderColor: theme.palette.primary.dark,
                   }
-                }}
+                })}
               >
                 <MenuItem value={5}>5</MenuItem>
                 <MenuItem value={10}>10</MenuItem>
@@ -1074,7 +1074,7 @@ const ProductionManagement = () => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               {moldingPage * moldingRowsPerPage + 1}-{Math.min((moldingPage + 1) * moldingRowsPerPage, moldingMachines.length)} of {moldingMachines.length} items
             </Typography>
             
@@ -1087,7 +1087,7 @@ const ProductionManagement = () => {
                 size="large"
                 showFirstButton
                 showLastButton
-                sx={{
+                sx={(theme) => ({
                   '& .MuiPaginationItem-root': {
                     borderRadius: 3,
                     fontWeight: 700,
@@ -1101,8 +1101,8 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                      color: 'white',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                      color: theme.palette.common.white,
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                       '&:hover': {
@@ -1111,7 +1111,7 @@ const ProductionManagement = () => {
                       }
                     }
                   }
-                }}
+                })}
               />
             )}
           </Box>
@@ -1124,7 +1124,7 @@ const ProductionManagement = () => {
     <TableContainer component={Paper}>
       <Table size="small">
         <TableHead>
-          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+          <TableRow sx={{ bgcolor: "grey.100" }}>
             <TableCell><strong>Mold</strong></TableCell>
             <TableCell><strong>Type</strong></TableCell>
             <TableCell><strong>Product Types</strong></TableCell>
@@ -1148,11 +1148,11 @@ const ProductionManagement = () => {
                 <Chip 
                   label={mold.type} 
                   size="small"
-                  sx={{ 
-                    bgcolor: mold.type === "Inner" ? "#ffeb3b" : 
-                             mold.type === "Outer" ? "#4caf50" : 
-                             mold.type === "Grommet" ? "#ff9800" : "#e0e0e0",
-                    color: mold.type === "Outer" ? "white" : "black"
+                  sx={{
+                    bgcolor: mold.type === "Inner" ? "#ffeb3b" :
+                             mold.type === "Outer" ? "success.main" :
+                             mold.type === "Grommet" ? "warning.main" : "grey.100",
+                    color: mold.type === "Outer" ? "common.white" : "common.black"
                   }}
                 />
               </TableCell>
@@ -1197,7 +1197,7 @@ const ProductionManagement = () => {
           backgroundColor: 'rgba(248, 250, 255, 0.5)'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Rows per page:
             </Typography>
             <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1207,7 +1207,7 @@ const ProductionManagement = () => {
                   setMoldCompatibilityRowsPerPage(e.target.value);
                   setMoldCompatibilityPage(0);
                 }}
-                sx={{
+                sx={(theme) => ({
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'rgba(102, 126, 234, 0.3)',
                   },
@@ -1215,9 +1215,9 @@ const ProductionManagement = () => {
                     borderColor: 'rgba(102, 126, 234, 0.5)',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#1E7DBE',
+                    borderColor: theme.palette.primary.dark,
                   }
-                }}
+                })}
               >
                 <MenuItem value={5}>5</MenuItem>
                 <MenuItem value={10}>10</MenuItem>
@@ -1227,7 +1227,7 @@ const ProductionManagement = () => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               {moldCompatibilityPage * moldCompatibilityRowsPerPage + 1}-{Math.min((moldCompatibilityPage + 1) * moldCompatibilityRowsPerPage, availableMolds.length)} of {availableMolds.length} items
             </Typography>
             
@@ -1240,7 +1240,7 @@ const ProductionManagement = () => {
                 size="large"
                 showFirstButton
                 showLastButton
-                sx={{
+                sx={(theme) => ({
                   '& .MuiPaginationItem-root': {
                     borderRadius: 3,
                     fontWeight: 700,
@@ -1254,8 +1254,8 @@ const ProductionManagement = () => {
                       boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                     },
                     '&.Mui-selected': {
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                      color: 'white',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                      color: theme.palette.common.white,
                       fontWeight: 800,
                       boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                       '&:hover': {
@@ -1264,7 +1264,7 @@ const ProductionManagement = () => {
                       }
                     }
                   }
-                }}
+                })}
               />
             )}
           </Box>
@@ -1277,10 +1277,10 @@ const ProductionManagement = () => {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#45ADE6" }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "primary.main" }}>
           🏭 Production Management System
         </Typography>
-        <Typography variant="body1" sx={{ color: "#666", mb: 2 }}>
+        <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
           Real-time monitoring and control of power cord production from cutting to packing
         </Typography>
         
@@ -1379,7 +1379,7 @@ const ProductionManagement = () => {
       </Box>
 
       {/* Current Order Status */}
-      <Card sx={{ mb: 3, bgcolor: "#e3f2fd" }}>
+      <Card sx={{ mb: 3, bgcolor: "info.lighter" }}>
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <OrderIcon color="primary" />
@@ -1493,7 +1493,7 @@ const ProductionManagement = () => {
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                    <TableRow sx={{ bgcolor: "grey.100" }}>
                       <TableCell><strong>Line</strong></TableCell>
                       <TableCell><strong>Status</strong></TableCell>
                       <TableCell><strong>Speed (pcs/hr)</strong></TableCell>
@@ -1608,7 +1608,7 @@ const ProductionManagement = () => {
                     backgroundColor: 'rgba(248, 250, 255, 0.5)'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                         Rows per page:
                       </Typography>
                       <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1618,7 +1618,7 @@ const ProductionManagement = () => {
                             setPackingRowsPerPage(e.target.value);
                             setPackingPage(0);
                           }}
-                          sx={{
+                          sx={(theme) => ({
                             '& .MuiOutlinedInput-notchedOutline': {
                               borderColor: 'rgba(102, 126, 234, 0.3)',
                             },
@@ -1626,9 +1626,9 @@ const ProductionManagement = () => {
                               borderColor: 'rgba(102, 126, 234, 0.5)',
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#1E7DBE',
+                              borderColor: theme.palette.primary.dark,
                             }
-                          }}
+                          })}
                         >
                           <MenuItem value={5}>5</MenuItem>
                           <MenuItem value={10}>10</MenuItem>
@@ -1638,7 +1638,7 @@ const ProductionManagement = () => {
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                         {packingPage * packingRowsPerPage + 1}-{Math.min((packingPage + 1) * packingRowsPerPage, packingLines.length)} of {packingLines.length} items
                       </Typography>
                       
@@ -1651,7 +1651,7 @@ const ProductionManagement = () => {
                           size="large"
                           showFirstButton
                           showLastButton
-                          sx={{
+                          sx={(theme) => ({
                             '& .MuiPaginationItem-root': {
                               borderRadius: 3,
                               fontWeight: 700,
@@ -1665,8 +1665,8 @@ const ProductionManagement = () => {
                                 boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                               },
                               '&.Mui-selected': {
-                                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                color: 'white',
+                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                color: theme.palette.common.white,
                                 fontWeight: 800,
                                 boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                                 '&:hover': {
@@ -1675,7 +1675,7 @@ const ProductionManagement = () => {
                                 }
                               }
                             }
-                          }}
+                          })}
                         />
                       )}
                     </Box>

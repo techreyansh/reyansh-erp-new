@@ -12,7 +12,7 @@ const StatusBadge = ({ status, size = 'medium' }) => {
       size={size}
       sx={{ 
         backgroundColor: color,
-        color: '#ffffff',
+        color: 'common.white',
         fontWeight: 'bold',
         '& .MuiChip-label': {
           px: 1

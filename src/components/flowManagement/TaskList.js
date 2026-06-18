@@ -796,8 +796,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             icon: <Inventory />,
             tooltip: moveCheck.tooltip || 'Move to Inventory',
             action: 'move_to_inventory',
-            color: '#ff9800',
-            hoverColor: '#fff3e0',
+            color: theme.palette.warning.main,
+            hoverColor: theme.palette.warning.lighter,
             disabled: !moveCheck.allowed
           });
           break;
@@ -816,8 +816,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             icon: <Build />,
             tooltip: tooltipText,
             action: 'move_to_cable_production',
-            color: '#9c27b0',
-            hoverColor: '#f3e5f5',
+            color: theme.palette.primary.main,
+            hoverColor: theme.palette.primary.light,
             disabled: isDisabled
           });
           break;
@@ -828,8 +828,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             icon: <Inventory />,
             tooltip: moveCheck.tooltip || 'Move to Inventory',
             action: 'move_to_inventory',
-            color: '#ff9800',
-            hoverColor: '#fff3e0',
+            color: theme.palette.warning.main,
+            hoverColor: theme.palette.warning.lighter,
             disabled: !moveCheck.allowed
           });
           break;
@@ -840,8 +840,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             icon: <PrecisionManufacturing />,
             tooltip: moveCheck.tooltip || 'Move to Moulding Module',
             action: 'move_to_moulding',
-            color: '#795548',
-            hoverColor: '#efebe9',
+            color: theme.palette.warning.dark,
+            hoverColor: theme.palette.warning.lighter,
             disabled: !moveCheck.allowed
           });
           break;
@@ -852,8 +852,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             icon: <Verified />,
             tooltip: moveCheck.tooltip || 'Move to FG Section Module',
             action: 'move_to_fg_section',
-            color: '#4caf50',
-            hoverColor: '#e8f5e8',
+            color: theme.palette.success.main,
+            hoverColor: theme.palette.success.lighter,
             disabled: !moveCheck.allowed
           });
           break;
@@ -945,8 +945,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
         icon: <UpdateIcon />,
         tooltip: tooltipText,
         action: 'update_status',
-        color: '#9c27b0',
-        hoverColor: '#f3e5f5',
+        color: theme.palette.primary.main,
+        hoverColor: theme.palette.primary.light,
         disabled: !isUpdateStatusEnabled // Disabled until batch is moved to Cable Production AND plan exists (for CABLE_PRODUCTION) or previous stage completed
       });
       
@@ -961,8 +961,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             ? 'Complete Work' // User will provide the actual logic/tooltip
             : 'Complete work (Status must be completed first)',
           action: 'complete_work', // User will provide the actual action name
-          color: '#4caf50',
-          hoverColor: '#e8f5e8',
+          color: theme.palette.success.main,
+          hoverColor: theme.palette.success.lighter,
           disabled: !isStatusCompleted // Only enabled when status is COMPLETED
         });
       }
@@ -980,8 +980,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
           icon: <ArrowForward />,
           tooltip: 'Complete Work', // User will provide the actual logic/tooltip
           action: 'complete_work', // User will provide the actual action name
-          color: '#4caf50',
-          hoverColor: '#e8f5e8',
+          color: theme.palette.success.main,
+          hoverColor: theme.palette.success.lighter,
           disabled: false // Enabled when status is COMPLETED
         });
       }
@@ -1000,28 +1000,29 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
         alignItems: 'center', 
         mb: 3,
         pb: 2,
-        borderBottom: '1px solid #e3f2fd'
+        borderBottom: '1px solid',
+        borderColor: 'info.lighter'
       }}>
         <Box>
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              color: '#45ADE6',
+          <Typography
+            variant="h5"
+            sx={{
+              color: 'primary.main',
               fontWeight: 700,
               mb: 0.5
             }}
           >
             {title}
           </Typography>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: '#546e7a'
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary'
             }}
           >
             {filteredTasks.length} tasks found
             {currentStage === 'CABLE_PRODUCTION' && selectedTasks.size > 0 && (
-              <span style={{ marginLeft: '10px', color: '#9c27b0', fontWeight: 600 }}>
+              <span style={{ marginLeft: '10px', color: theme.palette.primary.main, fontWeight: 600 }}>
                 ({selectedTasks.size} batch{selectedTasks.size > 1 ? 'es' : ''} selected)
               </span>
             )}
@@ -1055,16 +1056,16 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ color: '#45ADE6' }} />
+                <Search sx={{ color: 'primary.main' }} />
               </InputAdornment>
             ),
           }}
-          sx={{ 
+          sx={{
             width: '350px',
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: '#e3f2fd' },
-              '&:hover fieldset': { borderColor: '#45ADE6' },
-              '&.Mui-focused fieldset': { borderColor: '#45ADE6' }
+              '& fieldset': { borderColor: 'info.lighter' },
+              '&:hover fieldset': { borderColor: 'primary.main' },
+              '&.Mui-focused fieldset': { borderColor: 'primary.main' }
             }
           }}
         />
@@ -1120,7 +1121,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
         component={Paper} 
         sx={{ 
           borderRadius: 2,
-          border: '1px solid #e3f2fd',
+          border: '1px solid',
+          borderColor: 'info.lighter',
           overflowX: 'auto',
           overflowY: 'hidden',
           '&::-webkit-scrollbar': {
@@ -1141,18 +1143,18 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
       >
         <Table size="small" sx={{ minWidth: 800 }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f8fbff' }}>
+            <TableRow sx={{ backgroundColor: 'grey.50' }}>
               {currentStage === 'COMPLETE_O2D' ? (
                 <>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Date of Dispatch</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Customer</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Product/Spec</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Total Length (m)</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Batch Size (pcs)</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>DATE ENTRY</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Total Cable</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Date of Dispatch</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Customer</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Product/Spec</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Total Length (m)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Batch Size (pcs)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>DATE ENTRY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Total Cable</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
                 </>
               ) : (
                 <>
@@ -1170,7 +1172,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                     }
                     
                     return (
-                      <TableCell padding="checkbox" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>
+                      <TableCell padding="checkbox" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>
                         <Tooltip title="Select batches with same Unique ID to combine (only shown when Store 1 is completed)">
                           <Checkbox
                             indeterminate={false}
@@ -1182,26 +1184,26 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       </TableCell>
                     );
                   })()}
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Unique ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Client</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Product</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Batch</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Dispatch ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Unique ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Client</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Product</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Batch</TableCell>
                   {currentStage !== 'RECEIVING_DOCUMENTS' && currentStage !== 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Status</TableCell>
                   )}
                   {currentStage === 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Move History</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Move History</TableCell>
                   )}
                   {currentStage !== 'RECEIVING_DOCUMENTS' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Due Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Due Date</TableCell>
                   )}
                   {currentStage !== 'RECEIVING_DOCUMENTS' && currentStage !== 'MOULDING' && (
-                    <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Completed Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Completed Date</TableCell>
                   )}
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Dispatch Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Assigned To</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: '#45ADE6', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Dispatch Date</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Assigned To</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.7rem', py: 1 }}>Actions</TableCell>
                 </>
               )}
             </TableRow>
@@ -1214,19 +1216,21 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                 return (
                 <TableRow 
                   key={task._uniqueKey || task.DispatchUniqueId || task.UniqueId || task.POId}
-                  sx={{ 
-                    '&:hover': { 
-                      backgroundColor: currentStage === 'COMPLETE_O2D' ? 'transparent' : '#f8fbff',
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: currentStage === 'COMPLETE_O2D' ? 'transparent' : 'grey.50',
                       transition: 'background-color 0.2s ease'
                     },
                     '&:nth-of-type(even)': {
-                      backgroundColor: currentStage === 'COMPLETE_O2D' ? 'transparent' : '#fafbfc'
+                      backgroundColor: currentStage === 'COMPLETE_O2D' ? 'transparent' : 'grey.50'
                     },
-                    backgroundColor: currentStage === 'COMPLETE_O2D' 
-                      ? 'transparent' 
-                      : (isOverdue(task.DueDate) ? '#fff4f4' : isSelected && currentStage === 'CABLE_PRODUCTION' ? '#f3e5f5' : 'inherit'),
-                    borderBottom: currentStage === 'COMPLETE_O2D' ? '1px solid #e0e0e0' : 'inherit',
-                    borderLeft: isSelected && currentStage === 'CABLE_PRODUCTION' ? '3px solid #9c27b0' : 'none',
+                    backgroundColor: currentStage === 'COMPLETE_O2D'
+                      ? 'transparent'
+                      : (isOverdue(task.DueDate) ? 'error.lighter' : isSelected && currentStage === 'CABLE_PRODUCTION' ? 'primary.light' : 'inherit'),
+                    borderBottom: currentStage === 'COMPLETE_O2D' ? '1px solid' : 'inherit',
+                    borderBottomColor: currentStage === 'COMPLETE_O2D' ? 'divider' : undefined,
+                    borderLeft: isSelected && currentStage === 'CABLE_PRODUCTION' ? '3px solid' : 'none',
+                    borderLeftColor: isSelected && currentStage === 'CABLE_PRODUCTION' ? 'primary.main' : undefined,
                     '& .MuiTableCell-root': {
                       paddingTop: '4px',
                       paddingBottom: '4px'
@@ -1241,8 +1245,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           label={task.DispatchUniqueId || 'N/A'}
                           size="small"
                           sx={{
-                            backgroundColor: task.DispatchUniqueId ? '#e8f5e9' : '#f5f5f5',
-                            color: task.DispatchUniqueId ? '#2e7d32' : '#9e9e9e',
+                            backgroundColor: task.DispatchUniqueId ? 'success.lighter' : 'grey.100',
+                            color: task.DispatchUniqueId ? 'success.main' : 'text.disabled',
                             fontWeight: 600,
                             fontFamily: 'monospace',
                             fontSize: '0.7rem'
@@ -1254,9 +1258,9 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       <TableCell>
                         <Typography 
                           variant="body2" 
-                          sx={{ 
+                          sx={{
                             fontSize: '0.8rem',
-                            color: '#000000',
+                            color: 'text.primary',
                             fontFamily: 'sans-serif',
                             textAlign: 'left',
                             fontVariantNumeric: 'tabular-nums',
@@ -1273,8 +1277,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           label={task.ClientCode || 'N/A'}
                           size="small"
                           sx={{
-                            backgroundColor: '#e3f2fd',
-                            color: '#45ADE6',
+                            backgroundColor: 'info.lighter',
+                            color: 'primary.main',
                             fontWeight: 600,
                             fontSize: '0.75rem',
                             width: 'fit-content'
@@ -1284,7 +1288,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       
                       {/* Product/Spec */}
                       <TableCell>
-                        <Typography variant="body2" sx={{ color: '#37474f', fontWeight: 500, fontSize: '0.8rem' }}>
+                        <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500, fontSize: '0.8rem' }}>
                           {task.ProductCode || 'N/A'}
                         </Typography>
                       </TableCell>
@@ -1310,9 +1314,9 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       <TableCell>
                         <Typography 
                           variant="body2" 
-                          sx={{ 
+                          sx={{
                             fontSize: '0.8rem',
-                            color: '#000000',
+                            color: 'text.primary',
                             fontFamily: 'sans-serif',
                             textAlign: 'left',
                             fontVariantNumeric: 'tabular-nums',
@@ -1341,10 +1345,10 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                                   setSelectedTaskForSpecs(task);
                                   setSpecsDialogOpen(true);
                                 }}
-                                sx={{ 
-                                  color: '#4caf50',
-                                  '&:hover': { 
-                                    backgroundColor: '#e8f5e9',
+                                sx={{
+                                  color: 'success.main',
+                                  '&:hover': {
+                                    backgroundColor: 'success.lighter',
                                     transform: 'scale(1.05)'
                                   },
                                   transition: 'all 0.2s ease-in-out'
@@ -1414,8 +1418,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                         label={task.DispatchUniqueId || 'N/A'}
                         size="small"
                         sx={{
-                          backgroundColor: task.DispatchUniqueId ? '#e8f5e9' : '#f5f5f5',
-                          color: task.DispatchUniqueId ? '#2e7d32' : '#9e9e9e',
+                          backgroundColor: task.DispatchUniqueId ? 'success.lighter' : 'grey.100',
+                          color: task.DispatchUniqueId ? 'success.main' : 'text.disabled',
                           fontWeight: 600,
                           fontFamily: 'monospace',
                           fontSize: '0.65rem',
@@ -1434,12 +1438,12 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   <TableCell sx={{ py: 0.5 }}>
                     <Typography 
                       variant="body2" 
-                      sx={{ 
-                        fontWeight: 600, 
-                        color: '#7b1fa2',
+                      sx={{
+                        fontWeight: 600,
+                        color: 'primary.main',
                         fontFamily: 'monospace',
                         fontSize: '0.65rem',
-                        backgroundColor: '#f3e5f5',
+                        backgroundColor: 'primary.light',
                         px: 0.75,
                         py: 0.25,
                         borderRadius: 1,
@@ -1456,8 +1460,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                       label={task.ClientCode}
                       size="small"
                       sx={{
-                        backgroundColor: '#e3f2fd',
-                        color: '#45ADE6',
+                        backgroundColor: 'info.lighter',
+                        color: 'primary.main',
                         fontWeight: 600,
                         fontSize: '0.65rem',
                         height: '20px'
@@ -1468,11 +1472,11 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   {/* Product */}
                   <TableCell sx={{ py: 0.5 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                      <Typography variant="body2" sx={{ color: '#37474f', fontWeight: 500, fontSize: '0.7rem' }}>
+                      <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500, fontSize: '0.7rem' }}>
                         {task.ProductCode}
                       </Typography>
                       {(task.ProductName || task.Name) && (
-                        <Typography variant="caption" sx={{ color: '#546e7a', fontSize: '0.65rem' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
                           {(task.ProductName || task.Name).length > 18 
                             ? `${(task.ProductName || task.Name).substring(0, 18)}...` 
                             : (task.ProductName || task.Name)}
@@ -1486,18 +1490,18 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                       <Typography 
                         variant="body2" 
-                        sx={{ 
-                          color: '#f57c00',
+                        sx={{
+                          color: 'warning.main',
                           fontWeight: 600,
                           fontSize: '0.7rem'
                         }}
                       >
                         Batch #{task.BatchNumber || '1'}
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
-                          color: '#546e7a',
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'text.secondary',
                           fontSize: '0.65rem'
                         }}
                       >
@@ -1548,11 +1552,11 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                         sx={{
                           fontSize: '0.7rem',
                           textTransform: 'none',
-                          borderColor: task.moveHistory ? '#45ADE6' : '#9e9e9e',
-                          color: task.moveHistory ? '#45ADE6' : '#9e9e9e',
+                          borderColor: task.moveHistory ? 'primary.main' : 'text.disabled',
+                          color: task.moveHistory ? 'primary.main' : 'text.disabled',
                           '&:hover': {
-                            borderColor: task.moveHistory ? '#1E7DBE' : '#9e9e9e',
-                            backgroundColor: task.moveHistory ? '#e3f2fd' : 'transparent'
+                            borderColor: task.moveHistory ? 'primary.dark' : 'text.disabled',
+                            backgroundColor: task.moveHistory ? 'info.lighter' : 'transparent'
                           }
                         }}
                         disabled={!task.moveHistory}
@@ -1573,11 +1577,11 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   {currentStage !== 'RECEIVING_DOCUMENTS' && (
                     <TableCell sx={{ py: 0.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Schedule fontSize="small" sx={{ color: '#546e7a', fontSize: '0.875rem' }} />
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: isOverdue(task.DueDate) ? '#d32f2f' : '#37474f',
+                        <Schedule fontSize="small" sx={{ color: 'text.secondary', fontSize: '0.875rem' }} />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: isOverdue(task.DueDate) ? 'error.main' : 'text.primary',
                             fontWeight: isOverdue(task.DueDate) ? 600 : 400,
                             fontSize: '0.7rem'
                           }}
@@ -1593,11 +1597,11 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                     <TableCell sx={{ py: 0.5 }}>
                       {task.CompletionDate ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <CheckCircle fontSize="small" sx={{ color: '#4caf50', fontSize: '0.875rem' }} />
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              color: '#2e7d32',
+                          <CheckCircle fontSize="small" sx={{ color: 'success.main', fontSize: '0.875rem' }} />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'success.main',
                               fontWeight: 500,
                               fontSize: '0.7rem'
                             }}
@@ -1606,7 +1610,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           </Typography>
                         </Box>
                       ) : (
-                        <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic', fontSize: '0.65rem' }}>
+                        <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic', fontSize: '0.65rem' }}>
                           Not completed
                         </Typography>
                       )}
@@ -1617,11 +1621,11 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   <TableCell sx={{ py: 0.5 }}>
                     {task.DispatchDate ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <LocalShipping fontSize="small" sx={{ color: '#4caf50', fontSize: '0.875rem' }} />
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: '#2e7d32',
+                        <LocalShipping fontSize="small" sx={{ color: 'success.main', fontSize: '0.875rem' }} />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'success.main',
                             fontWeight: 500,
                             fontSize: '0.7rem'
                           }}
@@ -1630,7 +1634,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                         </Typography>
                       </Box>
                     ) : (
-                      <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic', fontSize: '0.65rem' }}>
+                      <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic', fontSize: '0.65rem' }}>
                         Not scheduled
                       </Typography>
                     )}
@@ -1640,13 +1644,13 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   <TableCell sx={{ py: 0.5 }}>
                     {task.AssignedTo ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Assignment fontSize="small" sx={{ color: '#45ADE6', fontSize: '0.875rem' }} />
-                        <Typography variant="body2" sx={{ color: '#37474f', fontSize: '0.7rem' }}>
+                        <Assignment fontSize="small" sx={{ color: 'primary.main', fontSize: '0.875rem' }} />
+                        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.7rem' }}>
                           {task.AssignedTo.split('@')[0]}
                         </Typography>
                       </Box>
                     ) : (
-                      <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic', fontSize: '0.65rem' }}>
+                      <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic', fontSize: '0.65rem' }}>
                         Unassigned
                       </Typography>
                     )}
@@ -1686,9 +1690,9 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                               }
                             }}
                             sx={{
-                              color: '#d32f2f',
-                              '&:hover': { 
-                                backgroundColor: '#ffebee',
+                              color: 'error.main',
+                              '&:hover': {
+                                backgroundColor: 'error.lighter',
                                 transform: 'scale(1.05)'
                               },
                               transition: 'all 0.2s ease-in-out'
@@ -1717,8 +1721,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
 
                               }}
                               sx={{
-                                color: '#ff9800',
-                                '&:hover': { backgroundColor: '#fff3e0' }
+                                color: 'warning.main',
+                                '&:hover': { backgroundColor: 'warning.lighter' }
                               }}
                             >
                               <EditIcon fontSize="small" />
@@ -1771,7 +1775,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                             sx={{
                               color: action.color,
                               '&:hover': { backgroundColor: action.hoverColor },
-                              '&:disabled': { color: '#ccc' }
+                              '&:disabled': { color: 'text.disabled' }
                             }}
                           >
                             {action.icon}
@@ -1789,23 +1793,23 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
               <TableRow>
                 <TableCell colSpan={currentStage === 'COMPLETE_O2D' ? 9 : currentStage === 'RECEIVING_DOCUMENTS' ? 8 : (currentStage === 'CABLE_PRODUCTION' ? 12 : 11)} align="center" sx={{ py: 6 }}>
                   <Box sx={{ textAlign: 'center' }}>
-                    <Assignment sx={{ fontSize: 60, color: '#e3f2fd', mb: 2 }} />
-                    <Typography variant="h6" sx={{ color: '#546e7a', mb: 1 }}>
+                    <Assignment sx={{ fontSize: 60, color: 'info.lighter', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1 }}>
                       {searchQuery ? 'No tasks match your search criteria' : 'No tasks available'}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 2 }}>
+                    <Typography variant="body2" sx={{ color: 'text.disabled', mb: 2 }}>
                       {searchQuery ? 'Try adjusting your search terms' : 'Tasks will appear here when they are created'}
                     </Typography>
                     {searchQuery && (
-                      <Button 
+                      <Button
                         variant="outlined"
                         onClick={() => setSearchQuery('')}
                         sx={{
-                          borderColor: '#45ADE6',
-                          color: '#45ADE6',
+                          borderColor: 'primary.main',
+                          color: 'primary.main',
                           '&:hover': {
-                            borderColor: '#1E7DBE',
-                            backgroundColor: '#f8fbff'
+                            borderColor: 'primary.dark',
+                            backgroundColor: 'grey.50'
                           }
                         }}
                       >
@@ -2114,7 +2118,8 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
         showStatistics={true}
         showRefreshButton={false}
         sx={{
-          border: '1px solid #e3f2fd',
+          border: '1px solid',
+          borderColor: 'info.lighter',
           backgroundColor: 'rgba(248, 250, 255, 0.5)'
         }}
       />
@@ -2368,7 +2373,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
               const moveHistory = selectedTaskForMoveHistory?.moveHistory;
               if (!moveHistory) {
                 return (
-                  <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                     No move history available for this batch.
                   </Typography>
                 );
@@ -2381,7 +2386,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                   historyData = JSON.parse(moveHistory);
                 } catch (e) {
                   return (
-                    <Typography variant="body2" sx={{ color: '#d32f2f', py: 2 }}>
+                    <Typography variant="body2" sx={{ color: 'error.main', py: 2 }}>
                       Error parsing move history data.
                     </Typography>
                   );
@@ -2397,15 +2402,15 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       {historyData.map((entry, index) => (
-                        <Card key={index} variant="outlined" sx={{ p: 2, backgroundColor: '#fafafa' }}>
+                        <Card key={index} variant="outlined" sx={{ p: 2, backgroundColor: 'grey.50' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'primary.main' }}>
                               Entry #{index + 1}
                             </Typography>
-                            <Chip 
-                              label={entry.date || entry.Date || 'N/A'} 
-                              size="small" 
-                              sx={{ backgroundColor: '#e3f2fd', color: '#45ADE6' }}
+                            <Chip
+                              label={entry.date || entry.Date || 'N/A'}
+                              size="small"
+                              sx={{ backgroundColor: 'info.lighter', color: 'primary.main' }}
                             />
                           </Box>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -2413,7 +2418,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                               <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 100 }}>
                                 Quantity:
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 600 }}>
+                              <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>
                                 {entry.quantity || entry.Quantity || entry.qty || 0} pcs
                               </Typography>
                             </Box>
@@ -2422,17 +2427,17 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                                 <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 100 }}>
                                   Remaining:
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#f57c00', fontWeight: 600 }}>
+                                <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
                                   {entry.remaining || entry.Remaining || 0} pcs
                                 </Typography>
                               </Box>
                             )}
                             {entry.details && (
-                              <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e0e0e0' }}>
-                                <Typography variant="caption" sx={{ color: '#546e7a', fontWeight: 500, display: 'block', mb: 0.5 }}>
+                              <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderTopColor: 'divider' }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, display: 'block', mb: 0.5 }}>
                                   Details:
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#37474f' }}>
+                                <Typography variant="body2" sx={{ color: 'text.primary' }}>
                                   {entry.details}
                                 </Typography>
                               </Box>
@@ -2449,15 +2454,15 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
               if (typeof historyData === 'object' && historyData !== null) {
                 return (
                   <Box sx={{ mt: 2 }}>
-                    <Card variant="outlined" sx={{ p: 2, backgroundColor: '#fafafa' }}>
+                    <Card variant="outlined" sx={{ p: 2, backgroundColor: 'grey.50' }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#45ADE6' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                           Move History Entry
                         </Typography>
-                        <Chip 
-                          label={historyData.date || historyData.Date || 'N/A'} 
-                          size="small" 
-                          sx={{ backgroundColor: '#e3f2fd', color: '#45ADE6' }}
+                        <Chip
+                          label={historyData.date || historyData.Date || 'N/A'}
+                          size="small"
+                          sx={{ backgroundColor: 'info.lighter', color: 'primary.main' }}
                         />
                       </Box>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -2465,7 +2470,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                           <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 120 }}>
                             Quantity:
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#45ADE6', fontWeight: 600 }}>
+                          <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>
                             {historyData.quantity || historyData.Quantity || historyData.qty || 0} pcs
                           </Typography>
                         </Box>
@@ -2474,17 +2479,17 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
                             <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 120 }}>
                               Remaining:
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#f57c00', fontWeight: 600 }}>
+                            <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
                               {historyData.remaining || historyData.Remaining || 0} pcs
                             </Typography>
                           </Box>
                         )}
                         {historyData.details && (
-                          <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e0e0e0' }}>
+                          <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderTopColor: 'divider' }}>
                             <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
                               Details:
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#37474f' }}>
+                            <Typography variant="body2" sx={{ color: 'text.primary' }}>
                               {historyData.details}
                             </Typography>
                           </Box>
@@ -2498,7 +2503,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
               // Fallback: display as string
               return (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" sx={{ color: '#37474f', whiteSpace: 'pre-wrap' }}>
+                  <Typography variant="body2" sx={{ color: 'text.primary', whiteSpace: 'pre-wrap' }}>
                     {String(moveHistory)}
                   </Typography>
                 </Box>
@@ -2506,7 +2511,7 @@ const TaskList = ({ tasks, onAdvanceTask, onEditStageDate, onMoveToModule, onUpd
             } catch (error) {
               console.error('Error parsing moveHistory:', error);
               return (
-                <Typography variant="body2" sx={{ color: '#d32f2f', py: 2 }}>
+                <Typography variant="body2" sx={{ color: 'error.main', py: 2 }}>
                   Error displaying move history. Please check the data format.
                 </Typography>
               );

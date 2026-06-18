@@ -85,9 +85,9 @@ const Login = () => {
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)",
+        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -105,7 +105,7 @@ const Login = () => {
           background: "radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%)",
           pointerEvents: "none",
         }
-      }}
+      })}
     >
       {/* Floating animated elements */}
       <Box
@@ -223,8 +223,8 @@ const Login = () => {
                   >
                     Factory Operations
                     <br />
-                    <Box component="span" sx={{ 
-                      color: "#fbbf24",
+                    <Box component="span" sx={{
+                      color: "warning.main",
                       textShadow: "0 2px 4px rgba(0,0,0,0.5)",
                     }}>
                       Monitoring System
@@ -319,8 +319,8 @@ const Login = () => {
                       },
                     }}
                   >
-                    <Security sx={{ fontSize: 20, mr: 1.5, color: "#22c55e" }} />
-                    <Typography variant="body1" sx={{ color: "#22c55e", fontWeight: 600, letterSpacing: "0.02em" }}>
+                    <Security sx={{ fontSize: 20, mr: 1.5, color: "success.main" }} />
+                    <Typography variant="body1" sx={{ color: "success.main", fontWeight: 600, letterSpacing: "0.02em" }}>
                       Enterprise-Grade Security
                     </Typography>
                   </Box>
@@ -355,9 +355,9 @@ const Login = () => {
                     {/* Header */}
                     <Slide direction="down" in timeout={1600}>
                       <Box sx={{ textAlign: "center", mb: 5 }}>
-                        <Typography variant="h3" gutterBottom sx={{ 
-                          fontWeight: 800, 
-                          color: "#1e293b",
+                        <Typography variant="h3" gutterBottom sx={{
+                          fontWeight: 800,
+                          color: "text.primary",
                           letterSpacing: "-0.02em",
                           mb: 1,
                         }}>
@@ -372,16 +372,17 @@ const Login = () => {
                     {/* Session expired message */}
                     {sessionExpiredMsg && (
                       <Grow in timeout={200}>
-                        <Alert 
-                          severity="info" 
-                          sx={{ 
-                            mb: 3, 
+                        <Alert
+                          severity="info"
+                          sx={(theme) => ({
+                            mb: 3,
                             borderRadius: 3,
-                            backgroundColor: "#fff3cd",
-                            border: "1px solid #ffc107",
-                            color: "#856404",
-                            "& .MuiAlert-icon": { fontSize: 24, color: "#ffc107" }
-                          }}
+                            backgroundColor: theme.palette.warning.lighter,
+                            border: "1px solid",
+                            borderColor: theme.palette.warning.main,
+                            color: theme.palette.warning.dark,
+                            "& .MuiAlert-icon": { fontSize: 24, color: theme.palette.warning.main }
+                          })}
                           onClose={() => setSessionExpiredMsg(null)}
                         >
                           {sessionExpiredMsg}

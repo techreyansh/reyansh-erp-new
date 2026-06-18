@@ -477,15 +477,15 @@ const FGMaterialInward = () => {
           <ProductIcon fontSize="large" />
         </Avatar>
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-        sx={{
+          <Typography
+            variant="h4"
+            component="h1"
+        sx={(theme) => ({
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #4caf50, #81c784)',
+              background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-            }}
+            })}
           >
             FG Material Inward
           </Typography>
@@ -614,12 +614,12 @@ const FGMaterialInward = () => {
               startIcon={<AddIcon />}
               onClick={handleOpenDialog}
               size="large"
-              sx={{ 
-                background: 'linear-gradient(45deg, #4caf50, #81c784)',
+              sx={(theme) => ({
+                background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #388e3c, #4caf50)',
+                  background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                 }
-              }}
+              })}
             >
               Add New Entry
             </Button>
@@ -638,8 +638,8 @@ const FGMaterialInward = () => {
               </Typography>
               {sortedItems.length > 0 && (
                 <Chip 
-                  label={`${sortedItems.length} entries`} 
-                  sx={{ bgcolor: 'success.main', color: 'white' }}
+                  label={`${sortedItems.length} entries`}
+                  sx={{ bgcolor: 'success.main', color: 'common.white' }}
                   size="small" 
                 />
               )}
@@ -668,7 +668,7 @@ const FGMaterialInward = () => {
                           fontWeight: 'bold', 
                           textTransform: 'uppercase',
                           bgcolor: 'success.main',
-                          color: 'white',
+                          color: 'common.white',
                           fontSize: '0.75rem'
                         }}>
                           {col !== "Actions" && col !== "Product Details" && col !== "Quantity" ? (
@@ -676,7 +676,7 @@ const FGMaterialInward = () => {
                         active={orderBy === col}
                         direction={orderBy === col ? order : "asc"}
                         onClick={() => handleRequestSort(col)}
-                              sx={{ color: 'white !important' }}
+                              sx={(theme) => ({ color: `${theme.palette.common.white} !important` })}
                       >
                         {col}
                       </TableSortLabel>
@@ -836,17 +836,17 @@ const FGMaterialInward = () => {
           >
             <CloseIcon />
           </IconButton>
-          <Typography 
-            variant="h4" 
-            sx={{ 
+          <Typography
+            variant="h4"
+            sx={(theme) => ({
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textAlign: 'center',
               lineHeight: 1.2
-            }}
+            })}
           >
             {selectedItem ? "Edit Entry" : "Add New Entry"}
           </Typography>
@@ -1156,16 +1156,16 @@ const FGMaterialInward = () => {
             }}
             variant="contained"
             startIcon={<AddIcon />}
-            sx={{ 
+            sx={(theme) => ({
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
+              color: theme.palette.common.white,
               px: 3,
               py: 1.5,
               minWidth: '180px',
               boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #388e3c, #4caf50)',
+                background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                 boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
                 transform: 'translateY(-1px)'
               },
@@ -1174,7 +1174,7 @@ const FGMaterialInward = () => {
                 color: 'rgba(0, 0, 0, 0.26)',
                 boxShadow: 'none'
               }
-            }}
+            })}
           >
             Add Entry
           </Button>

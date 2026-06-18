@@ -1,0 +1,38 @@
+<!-- @dsCard group="Components · Dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dialog · Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: #1E2B38; color: #F2F5F7; padding: 28px; }
+  h1 { font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sub { color: #A9B2BA; font-size: 13px; margin: 4px 0 22px; }
+  .scrim { background: rgba(0,0,0,0.5); border-radius: 12px; padding: 40px; display: flex; justify-content: center; }
+  .dialog { background: #2D3D4C; border: 1px solid rgba(226,232,237,0.12); border-radius: 8px; width: 440px; box-shadow: 0 24px 40px rgba(0,0,0,0.6); overflow: hidden; }
+  .dialog .title { font-family: "Montserrat"; font-weight: 700; font-size: 18px; padding: 20px 22px 8px; color: #F2F5F7; }
+  .dialog .body { padding: 0 22px 16px; font-size: 14px; color: #A9B2BA; line-height: 1.6; }
+  .dialog .actions { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid rgba(226,232,237,0.12); background: rgba(15,23,42,0.4); }
+  .btn { font-family: "Inter"; font-weight: 600; font-size: 14px; border-radius: 8px; padding: 9px 18px; border: none; cursor: pointer; }
+  .text { background: transparent; color: #A9B2BA; }
+  .danger { background: #E05548; color: #fff; }
+</style>
+</head>
+<body>
+  <h1>Dialog · Dark</h1>
+  <div class="sub">Paper dialog on a darker scrim · deeper shadow · footer divided from body.</div>
+  <div class="scrim">
+    <div class="dialog">
+      <div class="title">Delete work order RO-1042?</div>
+      <div class="body">This permanently removes the order and its production log entries for Apex Cables. This action cannot be undone.</div>
+      <div class="actions">
+        <button class="btn text">Cancel</button>
+        <button class="btn danger">Delete order</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

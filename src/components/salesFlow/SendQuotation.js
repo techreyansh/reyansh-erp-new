@@ -607,14 +607,14 @@ const SendQuotation = () => {
         justifyContent="center" 
         alignItems="center" 
         minHeight="400px"
-        sx={{
-          background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+        sx={(theme) => ({
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
           borderRadius: 3,
           p: 4
-        }}
+        })}
       >
-        <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
-        <Typography variant="h6" color="white" sx={{ fontWeight: 300 }}>
+        <CircularProgress size={60} sx={{ color: 'common.white', mb: 2 }} />
+        <Typography variant="h6" color="common.white" sx={{ fontWeight: 300 }}>
           Loading Quotation Data...
         </Typography>
       </Box>
@@ -622,22 +622,22 @@ const SendQuotation = () => {
   }
 
   return (
-    <Box sx={{ 
+    <Box sx={(theme) => ({
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
       py: 3,
-    }}>
+    })}>
       <Container maxWidth="xl">
         <Fade in timeout={800}>
           <Box>
             {/* Enhanced Header */}
-            <Card sx={{ 
+            <Card sx={(theme) => ({
               mb: 3,
-              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-              color: 'white',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: 'common.white',
               borderRadius: 3,
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-            }}>
+            })}>
               <CardContent sx={{ p: 4 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Box>
@@ -660,11 +660,11 @@ const SendQuotation = () => {
                       variant="outlined"
                       startIcon={<ArrowBack />}
                       onClick={() => navigate('/sales-flow')}
-                      sx={{ 
-                        color: 'white',
-                        borderColor: 'white',
+                      sx={{
+                        color: 'common.white',
+                        borderColor: 'common.white',
                         '&:hover': {
-                          borderColor: 'white',
+                          borderColor: 'common.white',
                           backgroundColor: 'rgba(255,255,255,0.1)'
                         }
                       }}
@@ -679,12 +679,12 @@ const SendQuotation = () => {
             {/* Stats Cards */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
               <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
+                  color: 'common.white',
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(16, 185, 129, 0.3)'
-                }}>
+                })}>
                   <CardContent>
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box>
@@ -702,12 +702,12 @@ const SendQuotation = () => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
+                  color: 'common.white',
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(245, 158, 11, 0.3)'
-                }}>
+                })}>
                   <CardContent>
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box>
@@ -725,12 +725,12 @@ const SendQuotation = () => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                  color: 'common.white',
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(59, 130, 246, 0.3)'
-                }}>
+                })}>
                   <CardContent>
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box>
@@ -748,12 +748,12 @@ const SendQuotation = () => {
               </Grid>
               
               <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                  color: 'white',
+                <Card sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: 'common.white',
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)'
-                }}>
+                })}>
                   <CardContent>
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box>
@@ -780,17 +780,17 @@ const SendQuotation = () => {
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ 
-                      background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                    }}>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Customer</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Company</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Products</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Priority</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Status</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Created</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Actions</TableCell>
+                    <TableRow sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                    })}>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Log ID</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Customer</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Company</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Products</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Priority</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Status</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Created</TableCell>
+                      <TableCell sx={{ color: 'common.white', fontWeight: 700, fontSize: '0.95rem' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -798,12 +798,12 @@ const SendQuotation = () => {
                       <TableRow>
                         <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
                           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                            <Avatar sx={{ 
-                              width: 80, 
-                              height: 80, 
-                              background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                            <Avatar sx={(theme) => ({
+                              width: 80,
+                              height: 80,
+                              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                               mb: 2
-                            }}>
+                            })}>
                               <Receipt sx={{ fontSize: 40 }} />
                             </Avatar>
                             <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 500 }}>
@@ -852,11 +852,11 @@ const SendQuotation = () => {
                               </TableCell>
                               <TableCell>
                                 <Box display="flex" alignItems="center" gap={2}>
-                                  <Avatar sx={{ 
-                                    width: 40, 
-                                    height: 40, 
-                                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)'
-                                  }}>
+                                  <Avatar sx={(theme) => ({
+                                    width: 40,
+                                    height: 40,
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                                  })}>
                                     {(lead.FullName || lead.CustomerName || 'C').charAt(0)}
                                   </Avatar>
                                   <Box>
@@ -877,16 +877,16 @@ const SendQuotation = () => {
                               <TableCell>
                                 <Box>
                                   {productsInterested.slice(0, 2).map((product, idx) => (
-                                    <Chip 
+                                    <Chip
                                       key={idx}
-                                      label={product} 
-                                      size="small" 
-                                      sx={{ 
-                                        mr: 0.5, 
+                                      label={product}
+                                      size="small"
+                                      sx={(theme) => ({
+                                        mr: 0.5,
                                         mb: 0.5,
-                                        background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                        color: 'white'
-                                      }} 
+                                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                        color: 'common.white'
+                                      })}
                                     />
                                   ))}
                                   {productsInterested.length > 2 && (
@@ -983,10 +983,10 @@ const SendQuotation = () => {
               maxWidth="md"
               fullWidth
             >
-              <DialogTitle sx={{ 
-                background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                color: 'white'
-              }}>
+              <DialogTitle sx={(theme) => ({
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                color: 'common.white'
+              })}>
                 <Box display="flex" alignItems="center" gap={2}>
                   <Person />
                   <Typography variant="h6">Lead Details</Typography>
@@ -1107,14 +1107,14 @@ const SendQuotation = () => {
                               }
                             }
                             return productsInterested.map((product, index) => (
-                              <Chip 
+                              <Chip
                                 key={index}
-                                label={product} 
-                                sx={{ 
-                                  background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
-                                  color: 'white',
+                                label={product}
+                                sx={(theme) => ({
+                                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                  color: 'common.white',
                                   fontWeight: 600
-                                }} 
+                                })}
                               />
                             ));
                           })()}
@@ -1151,12 +1151,12 @@ const SendQuotation = () => {
                     handleDownloadQuotation(selectedLead);
                     setDetailsDialogOpen(false);
                   }}
-                  sx={{ 
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
                     }
-                  }}
+                  })}
                 >
                   Download Quotation
                 </Button>
@@ -1167,12 +1167,12 @@ const SendQuotation = () => {
                     handleSendMail(selectedLead.Email || selectedLead.EmailId);
                     setDetailsDialogOpen(false);
                   }}
-                  sx={{ 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
                     }
-                  }}
+                  })}
                 >
                   Send Email
                 </Button>
@@ -1181,12 +1181,12 @@ const SendQuotation = () => {
                   startIcon={<CheckCircle />}
                   onClick={handleSubmit}
                   disabled={loading}
-                  sx={{ 
-                    background: 'linear-gradient(135deg, #1E7DBE 0%, #45ADE6 100%)',
+                  sx={(theme) => ({
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)'
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
                     }
-                  }}
+                  })}
                 >
                   {loading ? <CircularProgress size={20} color="inherit" /> : 'Complete & Move to Next Step'}
                 </Button>

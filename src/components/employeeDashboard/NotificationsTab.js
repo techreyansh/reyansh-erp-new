@@ -319,22 +319,23 @@ const NotificationsTab = ({ employeeCode, notifications, onNotificationRead }) =
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            sx={{
-              borderTop: '1px solid #e3f2fd',
+            sx={(theme) => ({
+              borderTop: '1px solid',
+              borderTopColor: theme.palette.info.lighter,
               '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                color: '#546e7a',
+                color: theme.palette.text.secondary,
                 fontWeight: 500
               },
               '& .MuiTablePagination-select': {
-                color: '#45ADE6',
+                color: theme.palette.primary.main,
                 fontWeight: 600
               },
               '& .MuiIconButton-root': {
-                color: '#45ADE6',
-                '&:hover': { backgroundColor: '#e3f2fd' },
-                '&.Mui-disabled': { color: '#9e9e9e' }
+                color: theme.palette.primary.main,
+                '&:hover': { backgroundColor: theme.palette.info.lighter },
+                '&.Mui-disabled': { color: theme.palette.text.disabled }
               }
-            }}
+            })}
           />
         )}
       </>

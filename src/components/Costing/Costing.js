@@ -39,10 +39,12 @@ import {
   TrendingUpRounded,
   CableOutlined,
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import costingService from '../../services/costingService';
 import { StatCard } from '../common/kit';
 
 const Costing = () => {
+  const theme = useTheme();
   const [costingEntries, setCostingEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -335,16 +337,16 @@ const Costing = () => {
       {/* Stats */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} md={3}>
-          <StatCard label="Total Entries" value={costingEntries.length} icon={ReceiptLongOutlined} accent="#1E7DBE" />
+          <StatCard label="Total Entries" value={costingEntries.length} icon={ReceiptLongOutlined} accent={theme.palette.primary.dark} />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard label="Copper Rate" value={`₹${settings.copperRate || 0}`} sub="per kg" icon={PaidOutlined} accent="#D97706" />
+          <StatCard label="Copper Rate" value={`₹${settings.copperRate || 0}`} sub="per kg" icon={PaidOutlined} accent={theme.palette.warning.main} />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard label="PVC Rate" value={`₹${settings.pvcRate || 0}`} sub="per kg" icon={CableOutlined} accent="#45ADE6" />
+          <StatCard label="PVC Rate" value={`₹${settings.pvcRate || 0}`} sub="per kg" icon={CableOutlined} accent={theme.palette.primary.main} />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard label="Labour Rate" value={`${settings.labourOnWire || 0}%`} sub="on wire" icon={TrendingUpRounded} accent="#7C3AED" />
+          <StatCard label="Labour Rate" value={`${settings.labourOnWire || 0}%`} sub="on wire" icon={TrendingUpRounded} accent={theme.palette.primary.main} />
         </Grid>
       </Grid>
 
@@ -362,23 +364,23 @@ const Costing = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: '#45ADE6', 
-          color: 'white',
+        <DialogTitle sx={{
+          backgroundColor: 'primary.main',
+          color: 'common.white',
           py: 3,
           px: 4,
           display: 'flex',
           alignItems: 'center',
           gap: 2
         }}>
-          <Box sx={{ 
-            width: 40, 
-            height: 40, 
-            borderRadius: '50%', 
-            backgroundColor: 'rgba(255,255,255,0.2)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center' 
+          <Box sx={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             <SettingsIcon />
           </Box>
@@ -386,10 +388,10 @@ const Costing = () => {
             Costing Settings
           </Typography>
         </DialogTitle>
-        
-        <DialogContent sx={{ p: 4, backgroundColor: '#fafafa' }}>
-          <Box sx={{ mb: 3, p: 3, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 3, color: '#45ADE6', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+
+        <DialogContent sx={{ p: 4, backgroundColor: 'grey.50' }}>
+          <Box sx={{ mb: 3, p: 3, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 3, color: 'primary.main', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
               💰 Material Rates Configuration
             </Typography>
             
@@ -406,11 +408,11 @@ const Costing = () => {
                   onChange={(e) => handleSettingsChange('copperRate', e.target.value)}
                   fullWidth
                   InputProps={{
-                    endAdornment: <Typography variant="caption" sx={{ color: '#666', ml: 1 }}>₹/kg</Typography>,
+                    endAdornment: <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>₹/kg</Typography>,
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     }
                   }}
@@ -418,7 +420,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -435,11 +437,11 @@ const Costing = () => {
                   onChange={(e) => handleSettingsChange('pvcRate', e.target.value)}
                   fullWidth
                   InputProps={{
-                    endAdornment: <Typography variant="caption" sx={{ color: '#666', ml: 1 }}>₹/kg</Typography>,
+                    endAdornment: <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>₹/kg</Typography>,
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     }
                   }}
@@ -447,7 +449,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -464,11 +466,11 @@ const Costing = () => {
                   onChange={(e) => handleSettingsChange('labourOnWire', e.target.value)}
                   fullWidth
                   InputProps={{
-                    endAdornment: <Typography variant="caption" sx={{ color: '#666', ml: 1 }}>%</Typography>,
+                    endAdornment: <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>%</Typography>,
                     sx: {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     }
                   }}
@@ -476,7 +478,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -488,44 +490,44 @@ const Costing = () => {
             </Grid>
           </Box>
           
-          <Box sx={{ p: 3, backgroundColor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1E7DBE', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ p: 3, backgroundColor: 'info.lighter', borderRadius: 2, border: '1px solid', borderColor: 'primary.light' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.dark', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
               ℹ️ Information
             </Typography>
-            <Typography variant="body2" color="#1E7DBE" sx={{ lineHeight: 1.6 }}>
+            <Typography variant="body2" color="primary.dark" sx={{ lineHeight: 1.6 }}>
               These rates are used as default values for all new costing entries. Copper rate: ₹700/kg, PVC rate: ₹100/kg, Labour rate: 12%. You can modify them at any time, and the changes will apply to future calculations. Existing entries will retain their original rates.
             </Typography>
           </Box>
         </DialogContent>
         
-        <DialogActions sx={{ p: 3, backgroundColor: '#f5f5f5', gap: 2 }}>
-          <Button 
+        <DialogActions sx={{ p: 3, backgroundColor: 'grey.100', gap: 2 }}>
+          <Button
             onClick={() => setOpenSettings(false)}
             variant="outlined"
-            sx={{ 
-              borderRadius: 2, 
+            sx={{
+              borderRadius: 2,
               px: 3,
               py: 1,
-              borderColor: '#666',
-              color: '#666',
+              borderColor: 'text.secondary',
+              color: 'text.secondary',
               '&:hover': {
-                borderColor: '#333',
-                backgroundColor: '#f0f0f0'
+                borderColor: 'text.primary',
+                backgroundColor: 'grey.100'
               }
             }}
           >
             Close
           </Button>
-          <Button 
+          <Button
             onClick={() => setOpenSettings(false)}
             variant="contained"
-            sx={{ 
-              borderRadius: 2, 
+            sx={{
+              borderRadius: 2,
               px: 4,
               py: 1,
-              backgroundColor: '#45ADE6',
+              backgroundColor: 'primary.main',
               '&:hover': {
-                backgroundColor: '#1E7DBE'
+                backgroundColor: 'primary.dark'
               }
             }}
           >
@@ -548,23 +550,23 @@ const Costing = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: '#45ADE6', 
-          color: 'white',
+        <DialogTitle sx={{
+          backgroundColor: 'primary.main',
+          color: 'common.white',
           py: 3,
           px: 4,
           display: 'flex',
           alignItems: 'center',
           gap: 2
         }}>
-          <Box sx={{ 
-            width: 40, 
-            height: 40, 
-            borderRadius: '50%', 
-            backgroundColor: 'rgba(255,255,255,0.2)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center' 
+          <Box sx={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             <AddIcon />
           </Box>
@@ -573,7 +575,7 @@ const Costing = () => {
           </Typography>
         </DialogTitle>
         
-        <DialogContent sx={{ p: 4, backgroundColor: '#fafafa' }}>
+        <DialogContent sx={{ p: 4, backgroundColor: 'grey.50' }}>
           {/* Live cost breakdown — updates as you fill the form */}
           <Paper
             elevation={0}
@@ -616,8 +618,8 @@ const Costing = () => {
             </Grid>
           </Paper>
 
-          <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+          <Box sx={{ mb: 3, p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
               📋 Basic Information
             </Typography>
             <Grid container spacing={3}>
@@ -634,7 +636,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -650,7 +652,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -659,8 +661,8 @@ const Costing = () => {
             </Grid>
           </Box>
 
-          <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+          <Box sx={{ mb: 3, p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
               🔧 Technical Specifications
             </Typography>
             <Grid container spacing={3}>
@@ -676,7 +678,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -694,7 +696,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -712,7 +714,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -729,9 +731,9 @@ const Costing = () => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: 'grey.100',
                       '& fieldset': {
-                        borderColor: '#ccc',
+                        borderColor: 'grey.300',
                       },
                     },
                   }}
@@ -750,7 +752,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -760,8 +762,8 @@ const Costing = () => {
             </Grid>
           </Box>
 
-          <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+          <Box sx={{ mb: 3, p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
               📏 Dimensions
             </Typography>
             <Grid container spacing={3}>
@@ -776,7 +778,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -793,7 +795,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -810,7 +812,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -819,8 +821,8 @@ const Costing = () => {
             </Grid>
           </Box>
 
-          <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+          <Box sx={{ mb: 3, p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
               💰 Cost & Labor
             </Typography>
             <Grid container spacing={3}>
@@ -837,7 +839,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -854,7 +856,7 @@ const Costing = () => {
                       borderRadius: 2,
                       '& .MuiOutlinedInput-notchedOutline': {
                         '&:hover': {
-                          borderColor: '#45ADE6',
+                          borderColor: 'primary.main',
                         },
                       },
                     }}
@@ -875,7 +877,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -892,7 +894,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -901,8 +903,8 @@ const Costing = () => {
             </Grid>
           </Box>
 
-          <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#45ADE6', fontWeight: 600 }}>
+          <Box sx={{ p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'grey.100' }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
               📝 Additional Information
             </Typography>
             <Grid container spacing={3}>
@@ -918,7 +920,7 @@ const Costing = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       '&:hover fieldset': {
-                        borderColor: '#45ADE6',
+                        borderColor: 'primary.main',
                       },
                     },
                   }}
@@ -928,26 +930,26 @@ const Costing = () => {
           </Box>
         </DialogContent>
         
-        <DialogActions sx={{ p: 3, backgroundColor: '#f5f5f5', gap: 2 }}>
-          <Button 
+        <DialogActions sx={{ p: 3, backgroundColor: 'grey.100', gap: 2 }}>
+          <Button
             onClick={() => setOpenDialog(false)}
             variant="outlined"
-            sx={{ 
-              borderRadius: 2, 
+            sx={{
+              borderRadius: 2,
               px: 3,
               py: 1,
-              borderColor: '#666',
-              color: '#666',
+              borderColor: 'text.secondary',
+              color: 'text.secondary',
               '&:hover': {
-                borderColor: '#333',
-                backgroundColor: '#f0f0f0'
+                borderColor: 'text.primary',
+                backgroundColor: 'grey.100'
               }
             }}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             variant="contained"
             disabled={
               !formData.specifications ||
@@ -958,17 +960,17 @@ const Costing = () => {
               !formData.lengthReq ||
               !formData.type
             }
-            sx={{ 
-              borderRadius: 2, 
+            sx={{
+              borderRadius: 2,
               px: 4,
               py: 1,
-              backgroundColor: '#45ADE6',
+              backgroundColor: 'primary.main',
               '&:hover': {
-                backgroundColor: '#1E7DBE'
+                backgroundColor: 'primary.dark'
               },
               '&:disabled': {
-                backgroundColor: '#ccc',
-                color: '#666'
+                backgroundColor: 'grey.300',
+                color: 'text.secondary'
               }
             }}
           >
@@ -998,14 +1000,15 @@ const Costing = () => {
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#E2E8F0',
-                  color: '#334155',
+                <TableCell sx={{
+                  fontWeight: 'bold',
+                  backgroundColor: 'grey.200',
+                  color: 'grey.700',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100,
                   textAlign: 'center',
                   py: 1
@@ -1014,344 +1017,372 @@ const Costing = () => {
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 90
                 }}>
                   Date
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 150
                 }}>
                   Specifications
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Cu Strands
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 70
                 }}>
                   Gauge
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Inner OD
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Bunch (%)
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   No. of Cores
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Round OD
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 70
                 }}>
                   Flat B
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 70
                 }}>
                   Flat W
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Laying (%)
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   Copper Weight
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   PVC Weight
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   Final Copper
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   Final PVC Round
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   Final PVC Flat
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 90
                 }}>
                   RMC
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Bundle Cost
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Bundle Weight
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Wire Cost/Mtr
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Length Req
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 90
                 }}>
                   Wire Cost
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 80
                 }}>
                   Type
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 90
                 }}>
                   Plug Cost
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 120
                 }}>
                   Terminal Cost
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 90
                 }}>
                   Cord Cost
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Enquiry By
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  borderRight: '1px solid #e0e0e0',
+                  borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                   minWidth: 100
                 }}>
                   Company
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: 'bold', 
-                  backgroundColor: '#F1F5F9',
-                  color: '#475569',
+                  backgroundColor: 'grey.100',
+                  color: 'grey.600',
                   fontSize: '0.72rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
@@ -1398,9 +1429,9 @@ const Costing = () => {
                   <TableRow 
                     key={entry.Unique || index}
                     sx={{ 
-                      '&:nth-of-type(odd)': { backgroundColor: '#f8f9fa' },
-                      '&:hover': { 
-                        backgroundColor: '#e3f2fd',
+                      '&:nth-of-type(odd)': { backgroundColor: 'grey.100' },
+                      '&:hover': {
+                        backgroundColor: 'info.lighter',
                         transform: 'scale(1.001)',
                         transition: 'all 0.2s ease'
                       },
@@ -1408,19 +1439,21 @@ const Costing = () => {
                     }}
                   >
                     <TableCell sx={{ 
-                      fontWeight: 'bold', 
-                      color: '#45ADE6',
-                      borderRight: '1px solid #e0e0e0',
+                      fontWeight: 'bold',
+                      color: 'primary.main',
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                       fontFamily: 'monospace',
                       textAlign: 'center'
                     }}>
                       {entry['Costing ID']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100' }}>
                       {formatDate(entry.Date)}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0',
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100',
                       maxWidth: 150,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -1428,86 +1461,90 @@ const Costing = () => {
                     }}>
                       {entry.Specifications}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Cu Strands']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry.Gauge}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Inner OD']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry.Bunch}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['No. Of Cores']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Round OD']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Flat B']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Flat W']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry.Laying}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['Copper Weight (Kgs/100 mtr)']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['PVC Weight (Kgs/100 mtr)']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['Final Copper (Kgs/100 mtr)']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['Final PVC Round (Kgs/100 mtr)']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['Final PVC Flat (Kgs/100 mtr)']}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0', 
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100', 
                       textAlign: 'right', 
                       fontFamily: 'monospace',
                       fontWeight: 'bold',
-                      color: '#2e7d32'
+                      color: 'success.main'
                     }}>
                       ₹{entry.RMC}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0', 
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100', 
                       textAlign: 'right', 
                       fontFamily: 'monospace',
                       fontWeight: 'bold',
-                      color: '#45ADE6'
+                      color: 'primary.main'
                     }}>
                       ₹{entry['Bundle Cost']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       {entry['Bundle Weight']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       ₹{entry['Cost Of Wire/Mtr']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Length Required']}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0', 
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100', 
                       textAlign: 'right', 
                       fontFamily: 'monospace',
                       fontWeight: 'bold',
-                      color: '#d32f2f'
+                      color: 'error.main'
                     }}>
                       ₹{entry['Wire Cost']}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0', 
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100', 
                       textAlign: 'center',
                       '& .MuiChip-root': {
                         fontSize: '0.75rem',
@@ -1521,26 +1558,27 @@ const Costing = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       ₹{entry['Plug Cost']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'right', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'right', fontFamily: 'monospace' }}>
                       ₹{entry['Terminal/Acc. Cost']}
                     </TableCell>
                     <TableCell sx={{ 
-                      borderRight: '1px solid #e0e0e0', 
+                      borderRight: '1px solid',
+                  borderRightColor: 'grey.100', 
                       textAlign: 'right', 
                       fontFamily: 'monospace',
                       fontWeight: 'bold',
-                      color: '#ed6c02',
+                      color: 'warning.main',
                       fontSize: '1.1rem'
                     }}>
                       ₹{entry['Cord Cost']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0', textAlign: 'center' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100', textAlign: 'center' }}>
                       {entry['Enquiry By']}
                     </TableCell>
-                    <TableCell sx={{ borderRight: '1px solid #e0e0e0' }}>
+                    <TableCell sx={{ borderRight: '1px solid', borderRightColor: 'grey.100' }}>
                       {entry.Company}
                     </TableCell>
                     <TableCell sx={{ 
@@ -1565,11 +1603,12 @@ const Costing = () => {
             justifyContent: 'space-between', 
             alignItems: 'center',
             p: 2,
-            borderTop: '1px solid #e0e0e0',
-            backgroundColor: '#f8f9fa'
+            borderTop: '1px solid',
+            borderTopColor: 'grey.100',
+            backgroundColor: 'grey.100'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 Rows per page:
               </Typography>
               <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -1587,7 +1626,7 @@ const Costing = () => {
                       borderColor: 'rgba(25, 118, 210, 0.5)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#45ADE6',
+                      borderColor: 'primary.main',
                     }
                   }}
                 >
@@ -1600,7 +1639,7 @@ const Costing = () => {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Typography variant="body2" sx={{ color: '#6c757d', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, costingEntries.length)} of {costingEntries.length} entries
               </Typography>
               
@@ -1613,7 +1652,7 @@ const Costing = () => {
                   size="large"
                   showFirstButton
                   showLastButton
-                  sx={{
+                  sx={(theme) => ({
                     '& .MuiPaginationItem-root': {
                       borderRadius: 3,
                       fontWeight: 700,
@@ -1627,8 +1666,8 @@ const Costing = () => {
                         boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                       },
                       '&.Mui-selected': {
-                        background: 'linear-gradient(135deg, #45ADE6 0%, #1E7DBE 100%)',
-                        color: 'white',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                        color: theme.palette.common.white,
                         fontWeight: 800,
                         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                         '&:hover': {
@@ -1637,7 +1676,7 @@ const Costing = () => {
                         }
                       }
                     }
-                  }}
+                  })}
                 />
               )}
             </Box>
@@ -1645,8 +1684,8 @@ const Costing = () => {
         )}
         
         {costingEntries.length > 0 && (
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-            <Typography variant="body1" sx={{ fontWeight: 500, color: '#45ADE6' }}>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, backgroundColor: 'grey.100', borderRadius: 2 }}>
+            <Typography variant="body1" sx={{ fontWeight: 500, color: 'primary.main' }}>
               📊 Total Entries: <strong>{costingEntries.length}</strong>
             </Typography>
             <Typography variant="body2" color="textSecondary">

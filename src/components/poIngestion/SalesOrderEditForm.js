@@ -556,7 +556,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                         InputProps={{ readOnly: true }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: 'grey.100',
                             '& fieldset': { borderColor: alpha(theme.palette.primary.main, 0.08) }
                           }
                         }}
@@ -596,8 +596,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                         InputProps={{ readOnly: true }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#f5f5f5',
-                            '& fieldset': { borderColor: '#e3f2fd' }
+                            backgroundColor: 'grey.100',
+                            '& fieldset': { borderColor: 'info.lighter' }
                           }
                         }}
                       />
@@ -611,36 +611,37 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
             {items.length > 0 && (
               <Grid item xs={12}>
                 <Grow in timeout={800} style={{ transitionDelay: '200ms' }}>
-                  <Paper 
+                  <Paper
                     elevation={0}
-                    sx={{ 
-                      border: '1px solid #e3f2fd',
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'info.lighter',
                       borderRadius: 2,
                       overflow: 'hidden'
                     }}
                   >
-                    <Box sx={{ p: 2, backgroundColor: '#f8fbff', borderBottom: '1px solid #e3f2fd' }}>
-                      <Typography variant="h6" sx={{ color: '#45ADE6', fontWeight: 600 }}>
+                    <Box sx={{ p: 2, backgroundColor: 'grey.50', borderBottom: '1px solid', borderColor: 'info.lighter' }}>
+                      <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
                         Current Items ({items.length})
                       </Typography>
                     </Box>
                     <TableContainer>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ backgroundColor: '#f8fbff' }}>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Item</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Description</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Code</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Order Type</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Qty</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Price</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Batch</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: '#45ADE6' }}>Actions</TableCell>
+                          <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Item</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Description</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Code</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Order Type</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Qty</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Price</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Batch</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {items.map((item, idx) => (
-                            <TableRow key={idx} sx={{ '&:hover': { backgroundColor: '#f8fbff' } }}>
+                            <TableRow key={idx} sx={{ '&:hover': { backgroundColor: 'grey.50' } }}>
                               <TableCell>{item.itemName}</TableCell>
                               <TableCell>{item.productDesc}</TableCell>
                               <TableCell>{item.productCode}</TableCell>
@@ -649,8 +650,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                                   label={item.orderType}
                                   size="small"
                                   sx={{
-                                    backgroundColor: '#e3f2fd',
-                                    color: '#45ADE6',
+                                    backgroundColor: 'info.lighter',
+                                    color: 'primary.main',
                                     fontSize: '0.75rem',
                                     fontWeight: 500
                                   }}
@@ -665,9 +666,9 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                                     <IconButton 
                                       onClick={() => handleEditItem(idx)}
                                       size="small"
-                                      sx={{ 
-                                        color: '#45ADE6',
-                                        '&:hover': { backgroundColor: '#e3f2fd' }
+                                      sx={{
+                                        color: 'primary.main',
+                                        '&:hover': { backgroundColor: 'info.lighter' }
                                       }}
                                     >
                                       <Edit fontSize="small" />
@@ -678,8 +679,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                                       onClick={() => handleDeleteItem(idx)} 
                                       color="error"
                                       size="small"
-                                      sx={{ 
-                                        '&:hover': { backgroundColor: '#ffebee' }
+                                      sx={{
+                                        '&:hover': { backgroundColor: 'error.lighter' }
                                       }}
                                     >
                                       <Delete fontSize="small" />
@@ -701,20 +702,21 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
             {itemSectionOpen && (
               <Grid item xs={12}>
                 <Slide direction="up" in={itemSectionOpen} timeout={600}>
-                  <Paper 
+                  <Paper
                     elevation={0}
-                    sx={{ 
-                      p: 3, 
-                      backgroundColor: '#f8fbff',
-                      border: '1px solid #e3f2fd',
+                    sx={{
+                      p: 3,
+                      backgroundColor: 'grey.50',
+                      border: '1px solid',
+                      borderColor: 'info.lighter',
                       borderRadius: 2
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                      <Typography 
-                        variant="h6" 
-                        sx={{ 
-                          color: '#45ADE6',
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: 'primary.main',
                           fontWeight: 600
                         }}
                       >
@@ -727,10 +729,10 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                           label="Ready to Save"
                           color="success"
                           variant="outlined"
-                          sx={{ 
+                          sx={{
                             fontWeight: 500,
-                            borderColor: '#2e7d32',
-                            color: '#2e7d32'
+                            borderColor: 'success.main',
+                            color: 'success.main'
                           }}
                         />
                       )}
@@ -748,7 +750,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                             label="Product Code"
                             renderValue={(selected) => {
                               if (!selected) {
-                                return <em style={{ color: '#999' }}>Select Product</em>;
+                                return <em style={{ color: theme.palette.text.secondary }}>Select Product</em>;
                               }
                               return selected;
                             }}
@@ -783,8 +785,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                           InputProps={{ readOnly: true }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: '#f5f5f5',
-                              '& fieldset': { borderColor: '#e3f2fd' }
+                              backgroundColor: 'grey.100',
+                              '& fieldset': { borderColor: 'info.lighter' }
                             }
                           }}
                         />
@@ -801,8 +803,8 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                           InputProps={{ readOnly: true }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: '#f5f5f5',
-                              '& fieldset': { borderColor: '#e3f2fd' }
+                              backgroundColor: 'grey.100',
+                              '& fieldset': { borderColor: 'info.lighter' }
                             }
                           }}
                         />
@@ -873,9 +875,9 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                           fullWidth
                           disabled={!itemData.itemName || !itemData.productDesc || !itemData.qty || !itemData.price || !itemData.batchSize}
                           sx={{
-                            backgroundColor: '#45ADE6',
-                            '&:hover': { backgroundColor: '#1E7DBE' },
-                            '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' }
+                            backgroundColor: 'primary.main',
+                            '&:hover': { backgroundColor: 'primary.dark' },
+                            '&:disabled': { backgroundColor: 'grey.100', color: 'text.disabled' }
                           }}
                         >
                           {editIndex !== null ? 'Update Item' : 'Add Item'}
@@ -902,11 +904,11 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                             variant="outlined"
                             fullWidth
                             sx={{
-                              borderColor: '#45ADE6',
-                              color: '#45ADE6',
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
                               '&:hover': {
-                                borderColor: '#1E7DBE',
-                                backgroundColor: '#f8fbff'
+                                borderColor: 'primary.dark',
+                                backgroundColor: 'grey.50'
                               }
                             }}
                           >
@@ -929,11 +931,11 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
                     onClick={() => setItemSectionOpen(true)}
                     startIcon={<Add />}
                     sx={{
-                      borderColor: '#45ADE6',
-                      color: '#45ADE6',
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
                       '&:hover': {
-                        borderColor: '#1E7DBE',
-                        backgroundColor: '#f8fbff'
+                        borderColor: 'primary.dark',
+                        backgroundColor: 'grey.50'
                       }
                     }}
                   >
@@ -951,11 +953,11 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
           onClick={handleClose}
           disabled={loading}
           sx={{
-            borderColor: '#45ADE6',
-            color: '#45ADE6',
+            borderColor: 'primary.main',
+            color: 'primary.main',
             '&:hover': {
-              borderColor: '#1E7DBE',
-              backgroundColor: '#f8fbff'
+              borderColor: 'primary.dark',
+              backgroundColor: 'grey.50'
             }
           }}
         >
@@ -971,9 +973,9 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
           }
           startIcon={<Save />}
           sx={{
-            backgroundColor: '#45ADE6',
-            '&:hover': { backgroundColor: '#1E7DBE' },
-            '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' }
+            backgroundColor: 'primary.main',
+            '&:hover': { backgroundColor: 'primary.dark' },
+            '&:disabled': { backgroundColor: 'grey.100', color: 'text.disabled' }
           }}
         >
           {loading ? 'Updating...' : 'Update Sales Order'}

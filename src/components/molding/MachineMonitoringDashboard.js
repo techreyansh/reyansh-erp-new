@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Typography,
@@ -36,6 +37,7 @@ import {
 } from "@mui/icons-material";
 
 const MachineMonitoringDashboard = () => {
+  const theme = useTheme();
   const [machineData, setMachineData] = useState([]);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [alertsOpen, setAlertsOpen] = useState(false);
@@ -255,12 +257,12 @@ const MachineMonitoringDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'running': return '#4caf50';
-      case 'idle': return '#ff9800';
-      case 'setup': return '#45ADE6';
-      case 'maintenance': return '#f44336';
+      case 'running': return theme.palette.success.main;
+      case 'idle': return theme.palette.warning.main;
+      case 'setup': return theme.palette.primary.main;
+      case 'maintenance': return theme.palette.error.main;
       case 'alarm': return '#e91e63';
-      default: return '#9e9e9e';
+      default: return theme.palette.text.disabled;
     }
   };
 
@@ -285,7 +287,7 @@ const MachineMonitoringDashboard = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", color: "#45ADE6" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "primary.main" }}>
           📊 Real-time Machine Monitoring
         </Typography>
         <Button
@@ -318,16 +320,16 @@ const MachineMonitoringDashboard = () => {
                   </Typography>
                   <Chip 
                     label={machine.status.toUpperCase()} 
-                    sx={{ 
+                    sx={{
                       bgcolor: getStatusColor(machine.status),
-                      color: 'white',
+                      color: 'common.white',
                       fontWeight: 'bold'
                     }}
                   />
                 </Box>
 
                 {machine.currentProduct && (
-                  <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
+                  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
                     Current: {machine.currentProduct}
                   </Typography>
                 )}
@@ -336,7 +338,7 @@ const MachineMonitoringDashboard = () => {
                 <Grid container spacing={1} sx={{ mb: 2 }}>
                   <Grid item xs={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <TempIcon sx={{ mr: 1, color: '#ff5722' }} />
+                      <TempIcon sx={{ mr: 1, color: 'warning.main' }} />
                       <Typography variant="body2">
                         {Math.round(machine.sensors.barrelTemperature)}°C
                       </Typography>
@@ -344,7 +346,7 @@ const MachineMonitoringDashboard = () => {
                   </Grid>
                   <Grid item xs={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <PressureIcon sx={{ mr: 1, color: '#45ADE6' }} />
+                      <PressureIcon sx={{ mr: 1, color: 'primary.main' }} />
                       <Typography variant="body2">
                         {Math.round(machine.sensors.injectionPressure)} bar
                       </Typography>
@@ -352,7 +354,7 @@ const MachineMonitoringDashboard = () => {
                   </Grid>
                   <Grid item xs={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <SpeedIcon sx={{ mr: 1, color: '#4caf50' }} />
+                      <SpeedIcon sx={{ mr: 1, color: 'success.main' }} />
                       <Typography variant="body2">
                         {Math.round(machine.production.currentCycleRate)} c/h
                       </Typography>
@@ -360,7 +362,7 @@ const MachineMonitoringDashboard = () => {
                   </Grid>
                   <Grid item xs={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <PowerIcon sx={{ mr: 1, color: '#ff9800' }} />
+                      <PowerIcon sx={{ mr: 1, color: 'warning.main' }} />
                       <Typography variant="body2">
                         {machine.sensors.powerConsumption.toFixed(1)} kW
                       </Typography>
@@ -374,27 +376,27 @@ const MachineMonitoringDashboard = () => {
                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                       OEE Score
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#45ADE6' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                       {calculateOEE(machine)}%
                     </Typography>
                   </Box>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={parseFloat(calculateOEE(machine))} 
-                    sx={{ 
-                      height: 8, 
+                  <LinearProgress
+                    variant="determinate"
+                    value={parseFloat(calculateOEE(machine))}
+                    sx={(theme) => ({
+                      height: 8,
                       borderRadius: 4,
-                      backgroundColor: '#e0e0e0',
+                      backgroundColor: theme.palette.divider,
                       '& .MuiLinearProgress-bar': {
-                        backgroundColor: parseFloat(calculateOEE(machine)) >= 85 ? '#4caf50' : 
-                                       parseFloat(calculateOEE(machine)) >= 75 ? '#ff9800' : '#f44336'
+                        backgroundColor: parseFloat(calculateOEE(machine)) >= 85 ? theme.palette.success.main :
+                                       parseFloat(calculateOEE(machine)) >= 75 ? theme.palette.warning.main : theme.palette.error.main
                       }
-                    }}
+                    })}
                   />
                 </Box>
 
                 {/* Production Summary */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#666' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'text.secondary' }}>
                   <span>Cycles: {machine.production.cyclesCompleted.toLocaleString()}</span>
                   <span>Quality: {((machine.production.goodParts / machine.production.cyclesCompleted) * 100).toFixed(1)}%</span>
                 </Box>
@@ -448,7 +450,7 @@ const MachineMonitoringDashboard = () => {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell><strong>Machine</strong></TableCell>
                   <TableCell><strong>Type</strong></TableCell>
                   <TableCell><strong>Message</strong></TableCell>

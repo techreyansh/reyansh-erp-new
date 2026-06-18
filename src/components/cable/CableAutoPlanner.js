@@ -24,8 +24,9 @@ import {
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
 
+// Categorical stage-identity palette (one distinct hue per production stage) — data/legend colors, kept literal so stages stay visually distinguishable.
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
-const RISK_COLOR = { critical: "#DC2626", warn: "#D97706", watch: "#2563EB", ok: "#16A34A" };
+const RISK_COLOR = (theme) => ({ critical: theme.palette.error.main, warn: theme.palette.warning.main, watch: theme.palette.info.main, ok: theme.palette.success.main });
 const kg = (v) => `${(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 1 })} kg`;
 const m = (v) => `${(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })} m`;
 const fmtDT = (iso) => new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
@@ -38,7 +39,7 @@ const dueLabel = (due) => {
   if (d === 1) return "due tomorrow";
   return `due in ${d}d`;
 };
-const loadColor = (pct) => (pct > 100 ? "#DC2626" : pct > 75 ? "#D97706" : pct > 25 ? "#65A30D" : pct > 0 ? "#86EFAC" : "transparent");
+const loadColor = (pct, theme) => (pct > 100 ? theme.palette.error.main : pct > 75 ? theme.palette.warning.main : pct > 25 ? theme.palette.success.main : pct > 0 ? theme.palette.success.light : "transparent");
 const RM_STOCK_KEY = "reyansh_cable_rm_stock_v1";
 // Engine RM keys → on-hand stock keys + labels, for the shortage view.
 const RM_ROWS = [
@@ -278,13 +279,13 @@ export default function CableAutoPlanner() {
           <Stack spacing={0.75}>
             {watchlist.slice(0, 8).map(({ order, level }) => (
               <Stack key={order.id} direction="row" alignItems="center" spacing={1.5}
-                sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: alpha(RISK_COLOR[level], 0.08) }}>
-                <Chip size="small" label={level} sx={{ bgcolor: RISK_COLOR[level], color: "#fff", fontWeight: 700, height: 20, textTransform: "capitalize" }} />
+                sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: alpha(RISK_COLOR(theme)[level], 0.08) }}>
+                <Chip size="small" label={level} sx={{ bgcolor: RISK_COLOR(theme)[level], color: "common.white", fontWeight: 700, height: 20, textTransform: "capitalize" }} />
                 <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 90 }}>{order.orderNo || order.id}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }} noWrap>
                   {order.customer || "—"} · {cablesById[order.cableId]?.code || order.cableId} · {m(order.qtyM)}
                 </Typography>
-                <Typography variant="caption" sx={{ color: RISK_COLOR[level], fontWeight: 700 }}>
+                <Typography variant="caption" sx={{ color: RISK_COLOR(theme)[level], fontWeight: 700 }}>
                   {dueLabel(order.dueDate)}
                 </Typography>
               </Stack>
@@ -337,7 +338,7 @@ export default function CableAutoPlanner() {
                       const onHand = stock[r.stockKey] || 0;
                       const bal = onHand - required;
                       const level = bal < 0 ? "short" : bal < required * 0.2 ? "low" : "ok";
-                      const color = level === "short" ? "#DC2626" : level === "low" ? "#D97706" : "#16A34A";
+                      const color = level === "short" ? theme.palette.error.main : level === "low" ? theme.palette.warning.main : theme.palette.success.main;
                       return (
                         <TableRow key={r.key} hover>
                           <TableCell sx={{ fontWeight: 600 }}>{r.label}</TableCell>
@@ -371,7 +372,7 @@ export default function CableAutoPlanner() {
                     <YAxis tick={{ fontSize: 10 }} width={48} />
                     <RTooltip formatter={(v) => `${v} kg`} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <ReferenceLine y={0} stroke="#DC2626" strokeDasharray="4 4" />
+                    <ReferenceLine y={0} stroke={theme.palette.error.main} strokeDasharray="4 4" />
                     <Line type="monotone" dataKey="copper" name="Copper" stroke="#b45309" dot={false} strokeWidth={2} />
                     <Line type="monotone" dataKey="ins" name="PVC Ins" stroke="#0ea5e9" dot={false} strokeWidth={2} />
                     <Line type="monotone" dataKey="sh" name="PVC Sheath" stroke="#10b981" dot={false} strokeWidth={2} />
@@ -490,10 +491,10 @@ function Heatmap({ heatmap, theme }) {
                 <Tooltip key={i} title={`${d.date}: ${d.hrs}h / ${d.capacity}h (${d.pct}%)`}>
                   <Box sx={{
                     flex: 1, height: 22, mx: "1px", borderRadius: 0.5,
-                    bgcolor: d.capacity === 0 ? alpha(theme.palette.text.primary, 0.04) : loadColor(d.pct),
+                    bgcolor: d.capacity === 0 ? alpha(theme.palette.text.primary, 0.04) : loadColor(d.pct, theme),
                     border: d.capacity === 0 ? "none" : `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
                     display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700,
-                    color: d.pct > 75 ? "#fff" : "text.secondary",
+                    color: d.pct > 75 ? "common.white" : "text.secondary",
                   }}>
                     {d.pct > 0 ? `${d.pct}` : ""}
                   </Box>
@@ -544,7 +545,7 @@ function Gantt({ schedule, machines, theme }) {
                       <Tooltip key={j.id} title={`${STAGE_LABEL[j.stage]} · ${j.cableId} · ${m(j.plannedM)} · ${fmtDT(j.startTime)}→${fmtDT(j.endTime)}`}>
                         <Box sx={{
                           position: "absolute", left: `${left}%`, width: `${width}%`, top: 3, height: 20,
-                          bgcolor: STAGE_COLOR[j.stage], borderRadius: 0.75, color: "#fff", fontSize: 10,
+                          bgcolor: STAGE_COLOR[j.stage], borderRadius: 0.75, color: "common.white", fontSize: 10,
                           px: 0.5, overflow: "hidden", whiteSpace: "nowrap", cursor: "default",
                           display: "flex", alignItems: "center", boxShadow: 1,
                         }}>
