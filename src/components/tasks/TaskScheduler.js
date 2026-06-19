@@ -21,6 +21,7 @@ import AccessDenied from '../auth/AccessDenied';
 import { DEPARTMENT_OPTIONS } from '../../config/departments';
 import { listEmployees, listEmployeesByDepartment } from '../../services/rbacService';
 import { createTask } from '../../services/taskService';
+import whatsappMessageService from '../../services/whatsappMessageService';
 
 const emptyTask = {
   title: '',
@@ -49,7 +50,9 @@ function TaskScheduler() {
   const [form, setForm] = useState(emptyTask);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  // Holds details of the most recently assigned task so we can show a success
+  // panel with a one-tap manual WhatsApp send (interim, until auto-notify deploys).
+  const [assigned, setAssigned] = useState(null);
 
   const canAssign = canCreate('tasks');
 
@@ -125,25 +128,50 @@ function TaskScheduler() {
   const handleAssign = async () => {
     setSaving(true);
     setError(null);
-    setSuccess(null);
+    setAssigned(null);
     try {
       if (!form.title?.trim()) throw new Error('Task title is required.');
       if (!form.assigned_to) throw new Error('Select an employee to assign the task.');
+
+      const assigneeName = selectedEmployee?.full_name || selectedEmployee?.email || 'team member';
+      const assigneeEmail = String(selectedEmployee?.email || '').trim().toLowerCase();
+      // The selected employee row (from rbacService EMPLOYEE_SELECT) carries `phone`.
+      const assigneePhone = selectedEmployee?.phone || selectedEmployee?.Phone || '';
+      const taskTitle = form.title.trim();
+      const dueLabel = form.due_date || 'no deadline set';
+
       await createTask(
         {
           ...form,
+          title: taskTitle,
           department: stepDepartment || form.department,
+          assigned_email: assigneeEmail,
+          assigned_name: assigneeName,
         },
         employee?.id,
         selectedEmployee
       );
-      setSuccess('Task assigned successfully.');
+
+      const message =
+        `Hi ${assigneeName}, you have been assigned a task: "${taskTitle}" ` +
+        `(priority ${form.priority}, due ${dueLabel}). Open the ERP to view.`;
+
+      setAssigned({
+        name: assigneeName,
+        phone: assigneePhone,
+        message,
+      });
       setForm({ ...emptyTask, department: stepDepartment });
     } catch (err) {
       setError(err.message || 'Failed to assign task.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!assigned?.phone) return;
+    whatsappMessageService.openWhatsApp(assigned.phone, assigned.message);
   };
 
   if (permissionsLoading) {
@@ -175,7 +203,39 @@ function TaskScheduler() {
         </Box>
 
         {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
-        {success && <Alert severity="success" onClose={() => setSuccess(null)}>{success}</Alert>}
+
+        {assigned && (
+          <Alert
+            severity="success"
+            icon={false}
+            onClose={() => setAssigned(null)}
+            sx={{ '& .MuiAlert-message': { width: '100%' } }}
+          >
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Task assigned to {assigned.name}
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleSendWhatsApp}
+                  disabled={!assigned.phone}
+                >
+                  📲 Send WhatsApp
+                </Button>
+                {!assigned.phone && (
+                  <Typography variant="caption" color="text.secondary">
+                    No phone number on file for this employee.
+                  </Typography>
+                )}
+              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                Email + WhatsApp auto-send activates once notifications are deployed.
+              </Typography>
+            </Stack>
+          </Alert>
+        )}
 
         <Card>
           <CardContent>
@@ -274,6 +334,7 @@ function TaskScheduler() {
                         onChange={(e) => setForm({ ...form, title: e.target.value })}
                         fullWidth
                         required
+                        helperText="A short, clear summary of what needs to be done."
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -285,7 +346,7 @@ function TaskScheduler() {
                           onChange={(e) => setForm({ ...form, priority: e.target.value })}
                         >
                           {priorities.map((p) => (
-                            <MenuItem key={p} value={p}>
+                            <MenuItem key={p} value={p} sx={{ textTransform: 'capitalize' }}>
                               {p}
                             </MenuItem>
                           ))}
@@ -316,6 +377,7 @@ function TaskScheduler() {
                         onChange={(e) => setForm({ ...form, due_date: e.target.value })}
                         fullWidth
                         InputLabelProps={{ shrink: true }}
+                        helperText="Optional — leave blank if there's no fixed due date."
                       />
                     </Grid>
                     <Grid item xs={12}>

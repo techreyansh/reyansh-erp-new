@@ -77,6 +77,7 @@ import { usePermissions } from "../../context/PermissionContext";
 import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
+import TaskBell from "./TaskBell";
 
 const Header = () => {
   const theme = useTheme();
@@ -929,6 +930,9 @@ const Header = () => {
                 </IconButton>
               </Tooltip>
             )}
+
+            {/* Task Notification Bell */}
+            {user && <TaskBell />}
 
             {/* User Profile */}
             {user ? (
