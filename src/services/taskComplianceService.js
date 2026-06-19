@@ -37,6 +37,10 @@ const taskComplianceService = {
       description: payload.description || null,
       department: payload.department,
       task_type: payload.task_type,
+      start_date: payload.start_date || null,
+      recurrence_unit: payload.recurrence_unit || null,
+      recurrence_interval:
+        payload.recurrence_interval != null ? Number(payload.recurrence_interval) : 1,
       assigned_role_code: payload.assigned_role_code || null,
       assigned_user_id: payload.assigned_user_id || null,
       assigned_email: payload.assigned_email ? normalizeEmail(payload.assigned_email) : null,

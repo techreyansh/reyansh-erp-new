@@ -49,6 +49,14 @@ const FREQUENCIES = [
   { value: 'monthly', label: 'Monthly' },
   { value: 'monthly_first_day', label: 'First working day of month' },
   { value: 'quarterly', label: 'Quarterly' },
+  { value: 'custom', label: 'Custom (every N…)' },
+];
+
+// Unit options for a custom (every N units) cadence.
+const RECURRENCE_UNITS = [
+  { value: 'day', label: 'Day(s)' },
+  { value: 'week', label: 'Week(s)' },
+  { value: 'month', label: 'Month(s)' },
 ];
 
 const FREQUENCY_LABEL = FREQUENCIES.reduce((acc, f) => {
@@ -63,6 +71,14 @@ const FREQUENCY_COLOR = {
   monthly: 'warning',
   monthly_first_day: 'secondary',
   quarterly: 'secondary',
+  custom: 'default',
+};
+
+// Human label for a custom cadence, e.g. "Every 2 week(s)".
+const customFrequencyLabel = (row) => {
+  const interval = row.recurrence_interval != null ? Number(row.recurrence_interval) : 1;
+  const unit = row.recurrence_unit || 'day';
+  return `Every ${interval} ${unit}(s)`;
 };
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -72,6 +88,9 @@ const emptyForm = {
   description: '',
   department: '',
   task_type: '',
+  start_date: '',
+  recurrence_unit: '',
+  recurrence_interval: 1,
   assigneeMode: 'role', // 'role' | 'person'
   assigned_role_code: '',
   assigned_email: '',
@@ -168,6 +187,9 @@ export default function ChecklistTemplateAdmin() {
       description: row.description || '',
       department: row.department || '',
       task_type: row.task_type || '',
+      start_date: row.start_date || '',
+      recurrence_unit: row.recurrence_unit || '',
+      recurrence_interval: row.recurrence_interval != null ? Number(row.recurrence_interval) : 1,
       assigneeMode: row.assigned_email ? 'person' : 'role',
       assigned_role_code: row.assigned_role_code || '',
       assigned_email: row.assigned_email || '',
@@ -185,6 +207,12 @@ export default function ChecklistTemplateAdmin() {
     if (!form.task_name.trim()) return 'Task name is required.';
     if (!form.department) return 'Department is required.';
     if (!form.task_type) return 'Frequency is required.';
+    if (form.task_type === 'custom') {
+      if (!form.start_date) return 'Start date is required for a custom cadence.';
+      if (!form.recurrence_unit) return 'Choose a recurrence unit for the custom cadence.';
+      if (!(Number(form.recurrence_interval) >= 1))
+        return 'Recurrence interval must be 1 or greater.';
+    }
     const hasAssignee =
       (form.assigneeMode === 'role' && form.assigned_role_code) ||
       (form.assigneeMode === 'person' && form.assigned_email);
@@ -204,11 +232,15 @@ export default function ChecklistTemplateAdmin() {
     setFormError('');
 
     const isRole = form.assigneeMode === 'role';
+    const isCustom = form.task_type === 'custom';
     const payload = {
       task_name: form.task_name.trim(),
       description: form.description.trim() || null,
       department: form.department,
       task_type: form.task_type,
+      start_date: form.start_date ? form.start_date : null,
+      recurrence_unit: isCustom ? form.recurrence_unit || null : null,
+      recurrence_interval: Number(form.recurrence_interval) || 1,
       assigned_role_code: isRole ? form.assigned_role_code : null,
       assigned_email: isRole ? null : form.assigned_email,
       assigned_user_id: null,
@@ -405,10 +437,23 @@ export default function ChecklistTemplateAdmin() {
                   <TableCell sx={{ py: 1.5 }}>
                     <Chip
                       size="small"
-                      label={FREQUENCY_LABEL[row.task_type] || row.task_type}
+                      label={
+                        row.task_type === 'custom'
+                          ? customFrequencyLabel(row)
+                          : FREQUENCY_LABEL[row.task_type] || row.task_type
+                      }
                       color={FREQUENCY_COLOR[row.task_type] || 'default'}
-                      sx={FREQUENCY_LABEL[row.task_type] ? undefined : { textTransform: 'capitalize' }}
+                      sx={
+                        FREQUENCY_LABEL[row.task_type] || row.task_type === 'custom'
+                          ? undefined
+                          : { textTransform: 'capitalize' }
+                      }
                     />
+                    {row.start_date ? (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        From {row.start_date}
+                      </Typography>
+                    ) : null}
                   </TableCell>
                   <TableCell sx={{ py: 1.5, display: { xs: 'none', md: 'table-cell' } }}>
                     {assigneeLabel(row)}
@@ -511,6 +556,58 @@ export default function ChecklistTemplateAdmin() {
               </FormControl>
             </Box>
 
+            <TextField
+              type="date"
+              label="Start date (optional)"
+              required={form.task_type === 'custom'}
+              value={form.start_date}
+              onChange={(e) => setField('start_date', e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              helperText={
+                form.task_type === 'custom'
+                  ? 'A custom cadence is anchored to this date — required.'
+                  : 'Leave blank to start immediately.'
+              }
+              fullWidth
+            />
+
+            {form.task_type === 'custom' ? (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', sm: 'auto minmax(0,120px) minmax(0,1fr)' },
+                  gap: 1.5,
+                  alignItems: 'center',
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Every
+                </Typography>
+                <TextField
+                  label="Interval"
+                  type="number"
+                  value={form.recurrence_interval}
+                  onChange={(e) => setField('recurrence_interval', e.target.value)}
+                  inputProps={{ min: 1, step: 1 }}
+                  fullWidth
+                />
+                <FormControl fullWidth required>
+                  <InputLabel>Unit</InputLabel>
+                  <Select
+                    value={form.recurrence_unit}
+                    label="Unit"
+                    onChange={(e) => setField('recurrence_unit', e.target.value)}
+                  >
+                    {RECURRENCE_UNITS.map((u) => (
+                      <MenuItem key={u.value} value={u.value}>
+                        {u.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            ) : null}
+
             <Divider flexItem>
               <Typography variant="caption" color="text.secondary">
                 Assign to
@@ -611,7 +708,14 @@ export default function ChecklistTemplateAdmin() {
           <Button onClick={() => setDialogOpen(false)} disabled={saving}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={saving}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={
+              saving ||
+              (form.task_type === 'custom' && (!form.start_date || !form.recurrence_unit))
+            }
+          >
             {saving ? 'Saving…' : 'Save'}
           </Button>
         </DialogActions>
