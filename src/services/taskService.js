@@ -157,6 +157,7 @@ export async function createTask(task, assignedBy, assignee = null) {
     assigned_name: assigneeName,
     assigned_by: assignedBy,
     priority: task.priority || 'medium',
+    difficulty: Number.isFinite(Number(task.difficulty)) ? Number(task.difficulty) : 2,
     due_date: task.due_date || null,
     task_status: task.task_status || 'pending',
     department: assigneeDepartment,

@@ -20,6 +20,8 @@ import {
   ChevronLeftRounded,
   ChevronRightRounded,
   LockOutlined,
+  LockRounded,
+  LockOpenRounded,
   CheckCircleOutline,
   HighlightOff,
   AutorenewRounded,
@@ -29,7 +31,11 @@ import {
   addWeeks,
   getRoster,
   getPersonScore,
+  getWeekStatus,
+  lockWeek,
+  unlockWeek,
 } from '../../services/misService';
+import { usePermissions } from '../../context/PermissionContext';
 
 // EOS Level-10 agenda — purely visual section markers for the meeting ribbon.
 const AGENDA = ['Segue', 'Scorecard', 'Goals', 'Headlines', 'To-Dos', 'IDS', 'Conclude'];
@@ -57,6 +63,39 @@ function shortDate(iso) {
   if (!y) return String(iso);
   const dt = new Date(y, (m || 1) - 1, d || 1);
   return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
+/** Format an ISO timestamp into a compact local label: '15 Jun, 14:30'. Returns '' when empty. */
+function lockStamp(iso) {
+  if (!iso) return '';
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return '';
+  return dt.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/** A "Locked" status chip showing who/when, with an optional tooltip. */
+function LockChip({ status, size = 'small' }) {
+  if (!status?.locked) return null;
+  const who = status.locked_by || 'someone';
+  const when = lockStamp(status.locked_at);
+  const detail = when ? `Locked by ${who} · ${when}` : `Locked by ${who}`;
+  return (
+    <Tooltip title={detail}>
+      <Chip
+        icon={<LockRounded sx={{ fontSize: '1rem' }} />}
+        label="Locked"
+        size={size}
+        color="success"
+        variant="outlined"
+        sx={{ fontWeight: 700, letterSpacing: '0.04em' }}
+      />
+    </Tooltip>
+  );
 }
 
 function AgendaRibbon() {
@@ -269,8 +308,9 @@ function ScorecardSkeleton() {
   );
 }
 
-function PersonScorecard({ score, loading, locked, onLock }) {
+function PersonScorecard({ score, loading, lockStatus, lockBusy, canUnlock, onLock, onUnlock }) {
   const theme = useTheme();
+  const locked = Boolean(lockStatus?.locked);
   if (loading) return <ScorecardSkeleton />;
   if (!score) {
     return (
@@ -316,7 +356,10 @@ function PersonScorecard({ score, loading, locked, onLock }) {
               <Typography variant="caption" color="text.secondary">/ 100</Typography>
             </Box>
             <Box>
-              <BandChip band={score.band} size="medium" />
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                <BandChip band={score.band} size="medium" />
+                <LockChip status={lockStatus} />
+              </Stack>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
                 {weekLabel(score.week_start)}
               </Typography>
@@ -336,16 +379,46 @@ function PersonScorecard({ score, loading, locked, onLock }) {
           </Box>
 
           <Box sx={{ justifySelf: { xs: 'start', sm: 'end' } }}>
-            <Button
-              variant={locked ? 'outlined' : 'contained'}
-              color={locked ? 'success' : 'primary'}
-              startIcon={<LockOutlined />}
-              onClick={onLock}
-              disabled={locked}
-              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
-            >
-              {locked ? 'Week locked' : 'Review & Lock week'}
-            </Button>
+            {locked ? (
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Button
+                  variant="outlined"
+                  color="success"
+                  startIcon={<LockRounded />}
+                  disabled
+                  sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+                >
+                  Week locked
+                </Button>
+                {canUnlock && (
+                  <Tooltip title="Unlock this week (CEO)">
+                    <span>
+                      <Button
+                        variant="text"
+                        color="error"
+                        startIcon={<LockOpenRounded />}
+                        onClick={onUnlock}
+                        disabled={lockBusy}
+                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+                      >
+                        Unlock
+                      </Button>
+                    </span>
+                  </Tooltip>
+                )}
+              </Stack>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<LockOutlined />}
+                onClick={onLock}
+                disabled={lockBusy}
+                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+              >
+                Review &amp; Lock week
+              </Button>
+            )}
           </Box>
         </Box>
       </Paper>
@@ -373,14 +446,18 @@ function PersonScorecard({ score, loading, locked, onLock }) {
 }
 
 export default function MISExecutiveMeeting() {
+  const { roleCode } = usePermissions();
+  const isCEO = roleCode === 'CEO';
+
   const [weekStart, setWeekStart] = useState(getCurrentWeekStart());
   const [roster, setRoster] = useState([]);
   const [rosterLoading, setRosterLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [score, setScore] = useState(null);
   const [scoreLoading, setScoreLoading] = useState(false);
-  const [lockedWeeks, setLockedWeeks] = useState({}); // { 'YYYY-MM-DD|email': true }
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
+  const [weekStatus, setWeekStatus] = useState({ locked: false, locked_by: null, locked_at: null });
+  const [lockBusy, setLockBusy] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Load roster whenever the week changes.
   useEffect(() => {
@@ -409,6 +486,16 @@ export default function MISExecutiveMeeting() {
     return () => { active = false; };
   }, [selectedEmail, weekStart]);
 
+  // Load the week's lock status on mount and whenever the week changes.
+  useEffect(() => {
+    let active = true;
+    getWeekStatus(weekStart).then((status) => {
+      if (!active) return;
+      setWeekStatus(status);
+    });
+    return () => { active = false; };
+  }, [weekStart]);
+
   const stats = useMemo(() => {
     if (!roster.length) return { avg: 0, green: 0, amber: 0, red: 0 };
     const sum = roster.reduce((a, r) => a + (Number(r.final_score) || 0), 0);
@@ -422,15 +509,31 @@ export default function MISExecutiveMeeting() {
 
   const goWeek = useCallback((n) => setWeekStart((w) => addWeeks(w, n)), []);
 
-  const lockKey = selectedEmail ? `${weekStart}|${selectedEmail}` : null;
-  const isLocked = lockKey ? Boolean(lockedWeeks[lockKey]) : false;
+  // Lock the currently selected week via the em_lock_week RPC.
+  const handleLock = useCallback(async () => {
+    setLockBusy(true);
+    const res = await lockWeek(weekStart);
+    setLockBusy(false);
+    if (res.ok) {
+      setWeekStatus(res.status);
+      setSnackbar({ open: true, message: 'Week locked', severity: 'success' });
+    } else {
+      setSnackbar({ open: true, message: 'Could not lock week. Please try again.', severity: 'error' });
+    }
+  }, [weekStart]);
 
-  // STUB: real lock RPC pending — this only toggles local lock state + confirms.
-  const handleLock = () => {
-    if (!lockKey) return;
-    setLockedWeeks((prev) => ({ ...prev, [lockKey]: true }));
-    setSnackbar({ open: true, message: 'Week locked' });
-  };
+  // Unlock the currently selected week (CEO) via the em_unlock_week RPC.
+  const handleUnlock = useCallback(async () => {
+    setLockBusy(true);
+    const res = await unlockWeek(weekStart);
+    setLockBusy(false);
+    if (res.ok) {
+      setWeekStatus(res.status);
+      setSnackbar({ open: true, message: 'Week unlocked', severity: 'success' });
+    } else {
+      setSnackbar({ open: true, message: 'Could not unlock week. Please try again.', severity: 'error' });
+    }
+  }, [weekStart]);
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', width: '100%' }}>
@@ -450,21 +553,24 @@ export default function MISExecutiveMeeting() {
             Weekly accountability — MIS
           </Typography>
         </Box>
-        <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Tooltip title="Previous week">
-            <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
-              <ChevronLeftRounded />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 168, textAlign: 'center' }}>
-            {weekLabel(weekStart)}
-          </Typography>
-          <Tooltip title="Next week">
-            <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
-              <ChevronRightRounded />
-            </IconButton>
-          </Tooltip>
-        </Paper>
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+          <LockChip status={weekStatus} />
+          <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Tooltip title="Previous week">
+              <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
+                <ChevronLeftRounded />
+              </IconButton>
+            </Tooltip>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 168, textAlign: 'center' }}>
+              {weekLabel(weekStart)}
+            </Typography>
+            <Tooltip title="Next week">
+              <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
+                <ChevronRightRounded />
+              </IconButton>
+            </Tooltip>
+          </Paper>
+        </Stack>
       </Stack>
 
       <Box sx={{ mb: 2 }}>
@@ -525,7 +631,15 @@ export default function MISExecutiveMeeting() {
               </Typography>
             </Paper>
           ) : (
-            <PersonScorecard score={score} loading={scoreLoading} locked={isLocked} onLock={handleLock} />
+            <PersonScorecard
+              score={score}
+              loading={scoreLoading}
+              lockStatus={weekStatus}
+              lockBusy={lockBusy}
+              canUnlock={isCEO}
+              onLock={handleLock}
+              onUnlock={handleUnlock}
+            />
           )}
         </Box>
       </Box>
@@ -536,7 +650,7 @@ export default function MISExecutiveMeeting() {
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" variant="filled" onClose={() => setSnackbar((s) => ({ ...s, open: false }))} sx={{ width: '100%' }}>
+        <Alert severity={snackbar.severity || 'success'} variant="filled" onClose={() => setSnackbar((s) => ({ ...s, open: false }))} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

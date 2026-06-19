@@ -60,5 +60,58 @@ export async function getPersonScore(email, weekStart) {
   return data || null;
 }
 
-const misService = { getCurrentWeekStart, addWeeks, getRoster, getPersonScore };
+/**
+ * Lock-status shape returned by the em_*_week RPCs.
+ * @typedef {{ locked: boolean, locked_by: (string|null), locked_at: (string|null) }} WeekLockStatus
+ */
+
+/** Normalize the jsonb returned by the lock RPCs into a stable WeekLockStatus. */
+function normalizeLockStatus(data) {
+  const obj = data && typeof data === 'object' ? data : {};
+  return {
+    locked: Boolean(obj.locked),
+    locked_by: obj.locked_by ?? null,
+    locked_at: obj.locked_at ?? null,
+  };
+}
+
+/** Current lock status for a week. Returns a WeekLockStatus (unlocked default on error). */
+export async function getWeekStatus(weekStart) {
+  const { data, error } = await supabase.rpc('em_week_status', { p_week_start: weekStart });
+  if (error) {
+    console.error('[misService] em_week_status failed:', error.message);
+    return { locked: false, locked_by: null, locked_at: null };
+  }
+  return normalizeLockStatus(data);
+}
+
+/** Lock a week. Resolves to { ok, status, error }. */
+export async function lockWeek(weekStart) {
+  const { data, error } = await supabase.rpc('em_lock_week', { p_week_start: weekStart });
+  if (error) {
+    console.error('[misService] em_lock_week failed:', error.message);
+    return { ok: false, status: null, error: error.message };
+  }
+  return { ok: true, status: normalizeLockStatus(data), error: null };
+}
+
+/** Unlock a week (CEO). Resolves to { ok, status, error }. */
+export async function unlockWeek(weekStart) {
+  const { data, error } = await supabase.rpc('em_unlock_week', { p_week_start: weekStart });
+  if (error) {
+    console.error('[misService] em_unlock_week failed:', error.message);
+    return { ok: false, status: null, error: error.message };
+  }
+  return { ok: true, status: normalizeLockStatus(data), error: null };
+}
+
+const misService = {
+  getCurrentWeekStart,
+  addWeeks,
+  getRoster,
+  getPersonScore,
+  getWeekStatus,
+  lockWeek,
+  unlockWeek,
+};
 export default misService;

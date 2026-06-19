@@ -27,11 +27,18 @@ const emptyTask = {
   description: '',
   assigned_to: '',
   priority: 'medium',
+  difficulty: 2,
   due_date: '',
   department: '',
 };
 
 const priorities = ['low', 'medium', 'high', 'urgent'];
+
+const difficulties = [
+  { label: 'Small', value: 1 },
+  { label: 'Medium', value: 2 },
+  { label: 'Large', value: 3 },
+];
 
 function TaskScheduler() {
   const { employee, canCreate, loading: permissionsLoading, authorized } = usePermissions();
@@ -280,6 +287,22 @@ function TaskScheduler() {
                           {priorities.map((p) => (
                             <MenuItem key={p} value={p}>
                               {p}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Difficulty</InputLabel>
+                        <Select
+                          label="Difficulty"
+                          value={form.difficulty}
+                          onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
+                        >
+                          {difficulties.map((d) => (
+                            <MenuItem key={d.value} value={d.value}>
+                              {d.label}
                             </MenuItem>
                           ))}
                         </Select>
