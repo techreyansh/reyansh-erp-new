@@ -120,6 +120,7 @@ const AccountabilityScorecard = lazy(() => import("./components/accountability/A
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
+const CRMPipelineBoard = lazy(() => import("./pages/crm/CRMPipelineBoard"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/ChecklistTemplateAdmin"));
@@ -221,6 +222,11 @@ function AppContent() {
                   <Route path="/crm-import" element={
                     <ProtectedRouteGate>
                       <CRMImport />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/crm-pipeline" element={
+                    <ProtectedRouteGate>
+                      <CRMPipelineBoard />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/accountability" element={

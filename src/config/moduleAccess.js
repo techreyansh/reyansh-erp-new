@@ -20,6 +20,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/employee-dashboard' || path === '/employees', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/profile' || path === '/help', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug', moduleKey: MODULE_KEYS.SETTINGS },
+  { test: (path) => path === '/crm-pipeline', moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/crm'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/sales-flow') || path === '/clients' || path === '/prospects-clients' || path === '/client-orders' || path === '/po-ingestion' || path === '/client-dashboard' || path === '/products', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path === '/plant-command' || path === '/production-log' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
