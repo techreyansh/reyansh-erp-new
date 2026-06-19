@@ -6,7 +6,6 @@ import { useAuth } from "./context/AuthContext";
 import { useUser } from "./context/UserContext";
 import FullScreenLogoLoader from "./components/common/FullScreenLogoLoader";
 import ErrorBoundary from "./components/common/ErrorBoundary";
-import ComingSoon from "./components/common/ComingSoon";
 import {
   Box,
   CssBaseline,
@@ -130,6 +129,7 @@ const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
 const MISHome = lazy(() => import("./pages/mis/MISHome"));
 const MISExecutiveMeeting = lazy(() => import("./pages/mis/MISExecutiveMeeting"));
+const PPCFoundation = lazy(() => import("./pages/ppc/PPCFoundation"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
@@ -775,7 +775,7 @@ function AppContent() {
                     path="/ppc"
                     element={
                       <ProtectedRouteGate>
-                        <ComingSoon title="Production module — coming soon" />
+                        <PPCFoundation />
                       </ProtectedRouteGate>
                     }
                   />
@@ -783,7 +783,7 @@ function AppContent() {
                     path="/ppc/:section"
                     element={
                       <ProtectedRouteGate>
-                        <ComingSoon title="Production module — coming soon" />
+                        <Navigate to="/ppc" replace />
                       </ProtectedRouteGate>
                     }
                   />

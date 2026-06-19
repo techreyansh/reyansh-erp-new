@@ -1,0 +1,1452 @@
+/**
+ * PPC Foundation — Phase 1 Production Planning & Control module.
+ *
+ * Real, working module backed by the LIVE Supabase PPC tables / RPCs
+ * (see src/services/ppcService.js). Tabs:
+ *   1. Items & BOM      — item master + multi-level bill of materials editor
+ *   2. Materials & Store — stock levels, reorder highlighting, low-stock summary
+ *   3. MRP Run          — explode a finished item's requirements (killer feature)
+ *   4. Lines & Machines — shop-floor masters
+ *   5. Plant Dashboard  — real KPIs derived from the above
+ *
+ * Theme-tokenized (no hardcoded hex), responsive, loading skeletons + empty
+ * states that guide the user to populate their own items/BOMs.
+ */
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  MenuItem,
+  Paper,
+  Skeleton,
+  Stack,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import {
+  AccountTreeOutlined,
+  AddRounded,
+  Inventory2Outlined,
+  CalculateOutlined,
+  PrecisionManufacturingOutlined,
+  SpaceDashboardOutlined,
+  DeleteOutlineRounded,
+  EditOutlined,
+  RefreshRounded,
+  WarningAmberRounded,
+  CheckCircleOutlineRounded,
+} from '@mui/icons-material';
+import ppcService, { ITEM_TYPES, FINISHED_TYPES, itemTypeLabel } from '../../services/ppcService';
+import { StatCard, GridBox, inrFull } from '../../components/common/kit';
+
+// ---------------------------------------------------------------------------
+// small shared helpers
+// ---------------------------------------------------------------------------
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
+function typeChipColor(type) {
+  switch (type) {
+    case 'cable':
+      return 'info';
+    case 'power_cord':
+      return 'primary';
+    case 'harness':
+      return 'secondary';
+    case 'component':
+      return 'default';
+    case 'raw_material':
+      return 'warning';
+    default:
+      return 'default';
+  }
+}
+
+function EmptyState({ icon: Icon, title, hint, action }) {
+  return (
+    <Box sx={{ textAlign: 'center', py: 6, px: 2 }}>
+      {Icon && <Icon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />}
+      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+        {title}
+      </Typography>
+      {hint && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2, maxWidth: 460, mx: 'auto' }}>
+          {hint}
+        </Typography>
+      )}
+      {action}
+    </Box>
+  );
+}
+
+function TableSkeleton({ cols = 5, rows = 5 }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, r) => (
+        <TableRow key={r}>
+          <TableCell colSpan={cols}>
+            <Skeleton variant="rounded" height={28} />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
+const headRowSx = {
+  '& th': {
+    bgcolor: 'grey.50',
+    fontWeight: 700,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: '0.03em',
+    color: 'text.secondary',
+    whiteSpace: 'nowrap',
+  },
+};
+
+// ===========================================================================
+// TAB 1 — Items & BOM
+// ===========================================================================
+function ItemsBomTab({ items, loading, error, reloadItems, notify }) {
+  const [selectedId, setSelectedId] = useState(null);
+  const [itemDialog, setItemDialog] = useState(null); // null | {} (new) | item (edit)
+  const [saving, setSaving] = useState(false);
+
+  const selected = useMemo(() => items.find((i) => i.id === selectedId) || null, [items, selectedId]);
+
+  const blankItem = { code: '', name: '', item_type: 'component', uom: 'nos', unit_cost: '', notes: '' };
+  const [form, setForm] = useState(blankItem);
+
+  const openNew = () => {
+    setForm(blankItem);
+    setItemDialog({});
+  };
+  const openEdit = (item) => {
+    setForm({
+      code: item.code || '',
+      name: item.name || '',
+      item_type: item.item_type || 'component',
+      uom: item.uom || 'nos',
+      unit_cost: item.unit_cost ?? '',
+      notes: item.notes || '',
+    });
+    setItemDialog(item);
+  };
+
+  const saveItem = async () => {
+    if (!form.code.trim() || !form.name.trim()) {
+      notify('Code and name are required.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (itemDialog && itemDialog.id) {
+        await ppcService.updateItem(itemDialog.id, form);
+        notify('Item updated.', 'success');
+      } else {
+        const created = await ppcService.createItem(form);
+        if (created?.id) setSelectedId(created.id);
+        notify('Item created.', 'success');
+      }
+      setItemDialog(null);
+      await reloadItems();
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleActive = async (item) => {
+    try {
+      if (item.is_active) await ppcService.deactivateItem(item.id);
+      else await ppcService.activateItem(item.id);
+      await reloadItems();
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gap: 2,
+        gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1.4fr) minmax(0, 1fr)' },
+        alignItems: 'start',
+      }}
+    >
+      {/* Items table */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Item Master
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Finished products, sub-assemblies, components & raw materials
+            </Typography>
+          </Box>
+          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew}>
+            New item
+          </Button>
+        </Stack>
+        <Divider />
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 0 }}>
+            {error}
+          </Alert>
+        )}
+        <TableContainer sx={{ maxHeight: 540 }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow sx={headRowSx}>
+                <TableCell>Code</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>UoM</TableCell>
+                <TableCell align="right">Unit Cost</TableCell>
+                <TableCell align="center">Active</TableCell>
+                <TableCell align="right">Edit</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading && <TableSkeleton cols={7} />}
+              {!loading && items.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} sx={{ p: 0, border: 0 }}>
+                    <EmptyState
+                      icon={Inventory2Outlined}
+                      title="No items yet"
+                      hint="Add your first item — a finished cable, a power cord, a sub-assembly, or a raw material. Then build its BOM on the right."
+                      action={
+                        <Button variant="contained" startIcon={<AddRounded />} onClick={openNew}>
+                          Add your first item
+                        </Button>
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading &&
+                items.map((item) => (
+                  <TableRow
+                    key={item.id}
+                    hover
+                    selected={item.id === selectedId}
+                    onClick={() => setSelectedId(item.id)}
+                    sx={{ cursor: 'pointer', opacity: item.is_active ? 1 : 0.55 }}
+                  >
+                    <TableCell sx={{ fontWeight: 600 }}>{item.code}</TableCell>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>
+                      <Chip size="small" label={itemTypeLabel(item.item_type)} color={typeChipColor(item.item_type)} variant="outlined" sx={{ fontWeight: 600 }} />
+                    </TableCell>
+                    <TableCell>{item.uom}</TableCell>
+                    <TableCell align="right">{inrFull(item.unit_cost)}</TableCell>
+                    <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                      <Switch size="small" checked={!!item.is_active} onChange={() => toggleActive(item)} />
+                    </TableCell>
+                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                      <IconButton size="small" onClick={() => openEdit(item)}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* BOM editor */}
+      <BomEditor selected={selected} items={items} notify={notify} />
+
+      {/* Item dialog */}
+      <Dialog open={!!itemDialog} onClose={() => setItemDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>{itemDialog && itemDialog.id ? 'Edit item' : 'New item'}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField
+                label="Code"
+                value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                fullWidth
+                required
+                helperText="Unique"
+              />
+              <TextField
+                select
+                label="Type"
+                value={form.item_type}
+                onChange={(e) => setForm({ ...form, item_type: e.target.value })}
+                fullWidth
+              >
+                {ITEM_TYPES.map((t) => (
+                  <MenuItem key={t.value} value={t.value}>
+                    {t.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Stack>
+            <TextField label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} fullWidth required />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Unit of measure" value={form.uom} onChange={(e) => setForm({ ...form, uom: e.target.value })} fullWidth helperText="e.g. nos, mtr, kg" />
+              <TextField label="Unit cost (₹)" type="number" value={form.unit_cost} onChange={(e) => setForm({ ...form, unit_cost: e.target.value })} fullWidth />
+            </Stack>
+            <TextField label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} fullWidth multiline minRows={2} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setItemDialog(null)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={saveItem} disabled={saving} startIcon={saving ? <CircularProgress size={16} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
+
+function BomEditor({ selected, items, notify }) {
+  const [lines, setLines] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState(null); // null | {} | line
+  const [saving, setSaving] = useState(false);
+
+  const blankLine = { component_item_id: '', qty_per: '1', scrap_pct: '0', sequence: '', notes: '' };
+  const [form, setForm] = useState(blankLine);
+
+  const load = useCallback(async () => {
+    if (!selected) {
+      setLines([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await ppcService.listBomForParent(selected.id);
+      setLines(data);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [selected, notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // candidate components = every other item (a component can itself have a BOM → multi-level)
+  const componentOptions = useMemo(
+    () => items.filter((i) => !selected || i.id !== selected.id),
+    [items, selected]
+  );
+
+  const openNew = () => {
+    setForm({ ...blankLine, sequence: String((lines.length + 1) * 10) });
+    setDialog({});
+  };
+  const openEdit = (line) => {
+    setForm({
+      component_item_id: line.component_item_id,
+      qty_per: String(line.qty_per ?? ''),
+      scrap_pct: String(line.scrap_pct ?? ''),
+      sequence: String(line.sequence ?? ''),
+      notes: line.notes || '',
+    });
+    setDialog(line);
+  };
+
+  const save = async () => {
+    if (!form.component_item_id) {
+      notify('Pick a component.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (dialog && dialog.id) {
+        await ppcService.updateBomLine(dialog.id, {
+          component_item_id: form.component_item_id,
+          qty_per: form.qty_per,
+          scrap_pct: form.scrap_pct,
+          sequence: form.sequence,
+          notes: form.notes,
+        });
+      } else {
+        await ppcService.addBomLine({ ...form, parent_item_id: selected.id });
+      }
+      setDialog(null);
+      await load();
+      notify('BOM saved.', 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (line) => {
+    try {
+      await ppcService.deleteBomLine(line.id);
+      await load();
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  };
+
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+            Bill of Materials
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap>
+            {selected ? `Components of ${selected.code} · ${selected.name}` : 'Select an item to edit its BOM'}
+          </Typography>
+        </Box>
+        {selected && (
+          <Button variant="outlined" size="small" startIcon={<AddRounded />} onClick={openNew}>
+            Add
+          </Button>
+        )}
+      </Stack>
+      <Divider />
+
+      {!selected ? (
+        <EmptyState icon={AccountTreeOutlined} title="No item selected" hint="Click an item on the left to view and edit its bill of materials." />
+      ) : (
+        <>
+          <TableContainer sx={{ maxHeight: 420 }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow sx={headRowSx}>
+                  <TableCell>Component</TableCell>
+                  <TableCell align="right">Qty / unit</TableCell>
+                  <TableCell align="right">Scrap %</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading && <TableSkeleton cols={4} rows={3} />}
+                {!loading && lines.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} sx={{ p: 0, border: 0 }}>
+                      <EmptyState
+                        icon={AccountTreeOutlined}
+                        title="No components yet"
+                        hint="Add the materials and sub-assemblies that go into this item."
+                        action={
+                          <Button variant="contained" startIcon={<AddRounded />} onClick={openNew}>
+                            Add component
+                          </Button>
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  lines.map((line) => (
+                    <TableRow key={line.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {line.component?.code || '—'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {line.component?.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        {num(line.qty_per)} {line.component?.uom || ''}
+                      </TableCell>
+                      <TableCell align="right">{num(line.scrap_pct)}%</TableCell>
+                      <TableCell align="right">
+                        <IconButton size="small" onClick={() => openEdit(line)}>
+                          <EditOutlined fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={() => remove(line)}>
+                          <DeleteOutlineRounded fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Box sx={{ px: 2, py: 1.25, bgcolor: 'action.hover' }}>
+            <Typography variant="caption" color="text.secondary">
+              BOMs are multi-level: any component above can itself have its own BOM, so MRP explodes the full tree.
+            </Typography>
+          </Box>
+        </>
+      )}
+
+      {/* BOM line dialog */}
+      <Dialog open={!!dialog} onClose={() => setDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>{dialog && dialog.id ? 'Edit BOM line' : 'Add component'}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField
+              select
+              label="Component"
+              value={form.component_item_id}
+              onChange={(e) => setForm({ ...form, component_item_id: e.target.value })}
+              fullWidth
+              required
+            >
+              {componentOptions.map((i) => (
+                <MenuItem key={i.id} value={i.id}>
+                  {i.code} — {i.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Qty per unit" type="number" value={form.qty_per} onChange={(e) => setForm({ ...form, qty_per: e.target.value })} fullWidth />
+              <TextField label="Scrap %" type="number" value={form.scrap_pct} onChange={(e) => setForm({ ...form, scrap_pct: e.target.value })} fullWidth />
+              <TextField label="Sequence" type="number" value={form.sequence} onChange={(e) => setForm({ ...form, sequence: e.target.value })} fullWidth />
+            </Stack>
+            <TextField label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} fullWidth />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialog(null)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={save} disabled={saving} startIcon={saving ? <CircularProgress size={16} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
+}
+
+// ===========================================================================
+// TAB 2 — Materials & Store
+// ===========================================================================
+function MaterialsTab({ items, notify }) {
+  const theme = useTheme();
+  const [stock, setStock] = useState([]);
+  const [low, setLow] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialog, setDialog] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const blank = { item_id: '', on_hand: '0', reorder_point: '0', safety_stock: '0', lead_time_days: '0', location: '' };
+  const [form, setForm] = useState(blank);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [s, l] = await Promise.all([ppcService.listStock(), ppcService.lowStock()]);
+      setStock(s);
+      setLow(l);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const stockedItemIds = useMemo(() => new Set(stock.map((s) => s.item_id)), [stock]);
+  const itemsWithoutStock = useMemo(() => items.filter((i) => !stockedItemIds.has(i.id)), [items, stockedItemIds]);
+
+  const openNew = () => {
+    setForm({ ...blank, item_id: itemsWithoutStock[0]?.id || '' });
+    setDialog({});
+  };
+  const openEdit = (row) => {
+    setForm({
+      item_id: row.item_id,
+      on_hand: String(row.on_hand ?? '0'),
+      reorder_point: String(row.reorder_point ?? '0'),
+      safety_stock: String(row.safety_stock ?? '0'),
+      lead_time_days: String(row.lead_time_days ?? '0'),
+      location: row.location || '',
+    });
+    setDialog(row);
+  };
+
+  const save = async () => {
+    if (!form.item_id) {
+      notify('Pick an item.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      await ppcService.upsertStock(form);
+      setDialog(null);
+      await load();
+      notify('Stock saved.', 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }} flexWrap="wrap" gap={1}>
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Materials & Store
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            On-hand stock, reorder points & lead times
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            size="small"
+            icon={<WarningAmberRounded />}
+            color={low.length ? 'error' : 'success'}
+            variant={low.length ? 'filled' : 'outlined'}
+            label={loading ? 'Low stock…' : `${low.length} low / reorder`}
+            sx={{ fontWeight: 700 }}
+          />
+          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew} disabled={itemsWithoutStock.length === 0}>
+            Set stock
+          </Button>
+        </Stack>
+      </Stack>
+      <Divider />
+      <TableContainer sx={{ maxHeight: 560 }}>
+        <Table size="small" stickyHeader>
+          <TableHead>
+            <TableRow sx={headRowSx}>
+              <TableCell>Code</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell align="right">On hand</TableCell>
+              <TableCell align="right">Reorder pt</TableCell>
+              <TableCell align="right">Safety</TableCell>
+              <TableCell align="right">Lead (d)</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell align="center">Status</TableCell>
+              <TableCell align="right">Edit</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading && <TableSkeleton cols={9} />}
+            {!loading && stock.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} sx={{ p: 0, border: 0 }}>
+                  <EmptyState
+                    icon={Inventory2Outlined}
+                    title="No stock records yet"
+                    hint={
+                      items.length
+                        ? "Use 'Set stock' to record on-hand quantity and reorder points for your items."
+                        : 'Add items in the Items & BOM tab first, then set their stock here.'
+                    }
+                    action={
+                      items.length ? (
+                        <Button variant="contained" startIcon={<AddRounded />} onClick={openNew} disabled={itemsWithoutStock.length === 0}>
+                          Set stock for an item
+                        </Button>
+                      ) : null
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              stock.map((row) => {
+                const reorder = num(row.on_hand) <= num(row.reorder_point);
+                return (
+                  <TableRow
+                    key={row.id}
+                    hover
+                    sx={reorder ? { bgcolor: theme.palette.error.lighter || `${theme.palette.error.main}14` } : undefined}
+                  >
+                    <TableCell sx={{ fontWeight: 600 }}>{row.item?.code || '—'}</TableCell>
+                    <TableCell>{row.item?.name || '—'}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>
+                      {num(row.on_hand)}
+                    </TableCell>
+                    <TableCell align="right">{num(row.reorder_point)}</TableCell>
+                    <TableCell align="right">{num(row.safety_stock)}</TableCell>
+                    <TableCell align="right">{num(row.lead_time_days)}</TableCell>
+                    <TableCell>{row.location || '—'}</TableCell>
+                    <TableCell align="center">
+                      {reorder ? (
+                        <Chip size="small" color="error" label="Reorder" sx={{ fontWeight: 700 }} />
+                      ) : (
+                        <Chip size="small" color="success" variant="outlined" label="OK" sx={{ fontWeight: 600 }} />
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" onClick={() => openEdit(row)}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog open={!!dialog} onClose={() => setDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>{dialog && dialog.id ? 'Edit stock' : 'Set stock'}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField
+              select
+              label="Item"
+              value={form.item_id}
+              onChange={(e) => setForm({ ...form, item_id: e.target.value })}
+              fullWidth
+              required
+              disabled={!!(dialog && dialog.id)}
+            >
+              {(dialog && dialog.id ? items : itemsWithoutStock).map((i) => (
+                <MenuItem key={i.id} value={i.id}>
+                  {i.code} — {i.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="On hand" type="number" value={form.on_hand} onChange={(e) => setForm({ ...form, on_hand: e.target.value })} fullWidth />
+              <TextField label="Reorder point" type="number" value={form.reorder_point} onChange={(e) => setForm({ ...form, reorder_point: e.target.value })} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Safety stock" type="number" value={form.safety_stock} onChange={(e) => setForm({ ...form, safety_stock: e.target.value })} fullWidth />
+              <TextField label="Lead time (days)" type="number" value={form.lead_time_days} onChange={(e) => setForm({ ...form, lead_time_days: e.target.value })} fullWidth />
+            </Stack>
+            <TextField label="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} fullWidth />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialog(null)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={save} disabled={saving} startIcon={saving ? <CircularProgress size={16} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
+}
+
+// ===========================================================================
+// TAB 3 — MRP Run
+// ===========================================================================
+function MrpTab({ items, notify }) {
+  const finished = useMemo(() => items.filter((i) => FINISHED_TYPES.includes(i.item_type) && i.is_active), [items]);
+  const [itemId, setItemId] = useState('');
+  const [qty, setQty] = useState('100');
+  const [result, setResult] = useState(null);
+  const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    if (!itemId && finished.length) setItemId(finished[0].id);
+  }, [finished, itemId]);
+
+  const run = async () => {
+    setRunning(true);
+    try {
+      const data = await ppcService.runMrp(itemId, qty);
+      setResult(data);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const lines = result?.lines || [];
+  const purchaseLines = lines.filter((l) => l.suggest_purchase);
+
+  return (
+    <Stack spacing={2}>
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, sm: 2.5 } }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+          Material Requirements Planning
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Pick a finished product and quantity to explode its full BOM against current stock.
+        </Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'flex-end' }} sx={{ mt: 2 }}>
+          <TextField select label="Finished product" value={itemId} onChange={(e) => setItemId(e.target.value)} sx={{ minWidth: 260, flex: 1 }} disabled={!finished.length}>
+            {finished.map((i) => (
+              <MenuItem key={i.id} value={i.id}>
+                {i.code} — {i.name} ({itemTypeLabel(i.item_type)})
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField label="Quantity" type="number" value={qty} onChange={(e) => setQty(e.target.value)} sx={{ width: { xs: '100%', sm: 160 } }} />
+          <Button variant="contained" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <CalculateOutlined />} onClick={run} disabled={!itemId || running}>
+            Run MRP
+          </Button>
+        </Stack>
+        {!finished.length && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            No finished products yet. Add a cable, power cord, or harness item (with a BOM) in the Items & BOM tab.
+          </Alert>
+        )}
+      </Paper>
+
+      {result && (
+        <>
+          {/* Headline */}
+          <GridBox min={220}>
+            <StatCard label="Build Quantity" value={num(result.qty)} sub="Units to produce" icon={PrecisionManufacturingOutlined} />
+            <StatCard
+              label="Total Est. Cost"
+              value={inrFull(result.total_est_cost)}
+              sub="Materials at unit cost"
+              icon={CalculateOutlined}
+            />
+            <StatCard
+              label="Shortages"
+              value={num(result.shortage_count)}
+              sub={num(result.shortage_count) ? 'Items short of stock' : 'Fully covered'}
+              icon={WarningAmberRounded}
+            />
+          </GridBox>
+
+          {/* Requirements table */}
+          <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Material Requirements
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Exploded BOM vs. on-hand stock
+              </Typography>
+            </Box>
+            <Divider />
+            <TableContainer sx={{ maxHeight: 480 }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow sx={headRowSx}>
+                    <TableCell>Code</TableCell>
+                    <TableCell>Material</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell align="right">Required</TableCell>
+                    <TableCell align="right">On hand</TableCell>
+                    <TableCell align="right">Shortage</TableCell>
+                    <TableCell align="right">Est. cost</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {lines.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                        No requirements — this item has no BOM. Add components in the Items & BOM tab.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {lines.map((l) => {
+                    const short = num(l.shortage) > 0;
+                    return (
+                      <TableRow key={l.item_id} hover sx={short ? { bgcolor: (t) => t.palette.error.lighter || `${t.palette.error.main}14` } : undefined}>
+                        <TableCell sx={{ fontWeight: 600 }}>{l.code}</TableCell>
+                        <TableCell>{l.name}</TableCell>
+                        <TableCell>
+                          <Chip size="small" label={itemTypeLabel(l.item_type)} color={typeChipColor(l.item_type)} variant="outlined" />
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700 }}>
+                          {num(l.required)} {l.uom}
+                        </TableCell>
+                        <TableCell align="right">{num(l.on_hand)}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, color: short ? 'error.main' : 'success.main' }}>
+                          {short ? num(l.shortage) : 0}
+                        </TableCell>
+                        <TableCell align="right">{inrFull(l.est_cost)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+
+          {/* Purchase suggestions */}
+          <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden', borderColor: purchaseLines.length ? 'warning.main' : 'divider' }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ px: 2, py: 1.5 }}>
+              {purchaseLines.length ? <WarningAmberRounded color="warning" /> : <CheckCircleOutlineRounded color="success" />}
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  Purchase Suggestions
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {purchaseLines.length ? 'Raise indents for the materials below' : 'No purchasing needed — stock covers this build'}
+                </Typography>
+              </Box>
+            </Stack>
+            {purchaseLines.length > 0 && (
+              <>
+                <Divider />
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={headRowSx}>
+                        <TableCell>Code</TableCell>
+                        <TableCell>Material</TableCell>
+                        <TableCell align="right">Shortage to buy</TableCell>
+                        <TableCell align="right">Reorder pt</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {purchaseLines.map((l) => (
+                        <TableRow key={l.item_id} hover>
+                          <TableCell sx={{ fontWeight: 600 }}>{l.code}</TableCell>
+                          <TableCell>{l.name}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: 'warning.dark' }}>
+                            {num(l.shortage)} {l.uom}
+                          </TableCell>
+                          <TableCell align="right">{num(l.reorder_point)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            )}
+          </Paper>
+        </>
+      )}
+    </Stack>
+  );
+}
+
+// ===========================================================================
+// TAB 4 — Lines & Machines
+// ===========================================================================
+const MACHINE_STATUSES = ['idle', 'running', 'maintenance', 'down'];
+
+function machineStatusColor(status) {
+  switch (String(status).toLowerCase()) {
+    case 'running':
+      return 'success';
+    case 'maintenance':
+      return 'warning';
+    case 'down':
+      return 'error';
+    default:
+      return 'default';
+  }
+}
+
+function LinesMachinesTab({ notify }) {
+  const [lines, setLines] = useState([]);
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lineDialog, setLineDialog] = useState(null);
+  const [machineDialog, setMachineDialog] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const blankLine = { name: '', line_type: '', sequence: '' };
+  const blankMachine = { name: '', machine_type: '', line_id: '', status: 'idle' };
+  const [lineForm, setLineForm] = useState(blankLine);
+  const [machineForm, setMachineForm] = useState(blankMachine);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [l, m] = await Promise.all([ppcService.listLines(), ppcService.listMachines()]);
+      setLines(l);
+      setMachines(m);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const saveLine = async () => {
+    if (!lineForm.name.trim()) {
+      notify('Line name required.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (lineDialog && lineDialog.id) await ppcService.updateLine(lineDialog.id, lineForm);
+      else await ppcService.createLine(lineForm);
+      setLineDialog(null);
+      await load();
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveMachine = async () => {
+    if (!machineForm.name.trim()) {
+      notify('Machine name required.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (machineDialog && machineDialog.id) await ppcService.updateMachine(machineDialog.id, machineForm);
+      else await ppcService.createMachine(machineForm);
+      setMachineDialog(null);
+      await load();
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'minmax(0,1fr) minmax(0,1.4fr)' }, alignItems: 'start' }}>
+      {/* Lines */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Production Lines
+          </Typography>
+          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={() => { setLineForm(blankLine); setLineDialog({}); }}>
+            Line
+          </Button>
+        </Stack>
+        <Divider />
+        <TableContainer sx={{ maxHeight: 480 }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow sx={headRowSx}>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell align="right">Seq</TableCell>
+                <TableCell align="center">Active</TableCell>
+                <TableCell align="right" />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading && <TableSkeleton cols={5} rows={3} />}
+              {!loading && lines.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
+                    <EmptyState icon={PrecisionManufacturingOutlined} title="No lines yet" hint="Add your production lines (e.g. Cable Line 1, Molding Line A)." />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading &&
+                lines.map((l) => (
+                  <TableRow key={l.id} hover>
+                    <TableCell sx={{ fontWeight: 600 }}>{l.name}</TableCell>
+                    <TableCell>{l.line_type || '—'}</TableCell>
+                    <TableCell align="right">{num(l.sequence)}</TableCell>
+                    <TableCell align="center">
+                      <Chip size="small" color={l.is_active ? 'success' : 'default'} variant="outlined" label={l.is_active ? 'Yes' : 'No'} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" onClick={() => { setLineForm({ name: l.name || '', line_type: l.line_type || '', sequence: String(l.sequence ?? '') }); setLineDialog(l); }}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Machines */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Machines
+          </Typography>
+          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={() => { setMachineForm({ ...blankMachine, line_id: lines[0]?.id || '' }); setMachineDialog({}); }}>
+            Machine
+          </Button>
+        </Stack>
+        <Divider />
+        <TableContainer sx={{ maxHeight: 480 }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow sx={headRowSx}>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Line</TableCell>
+                <TableCell align="center">Status</TableCell>
+                <TableCell align="right" />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading && <TableSkeleton cols={5} rows={3} />}
+              {!loading && machines.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
+                    <EmptyState icon={PrecisionManufacturingOutlined} title="No machines yet" hint="Add machines and assign each to a line." />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading &&
+                machines.map((m) => (
+                  <TableRow key={m.id} hover>
+                    <TableCell sx={{ fontWeight: 600 }}>{m.name}</TableCell>
+                    <TableCell>{m.machine_type || '—'}</TableCell>
+                    <TableCell>{m.line?.name || '—'}</TableCell>
+                    <TableCell align="center">
+                      <Chip size="small" color={machineStatusColor(m.status)} label={m.status || 'idle'} sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" onClick={() => { setMachineForm({ name: m.name || '', machine_type: m.machine_type || '', line_id: m.line_id || '', status: m.status || 'idle' }); setMachineDialog(m); }}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Line dialog */}
+      <Dialog open={!!lineDialog} onClose={() => setLineDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>{lineDialog && lineDialog.id ? 'Edit line' : 'New line'}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField label="Name" value={lineForm.name} onChange={(e) => setLineForm({ ...lineForm, name: e.target.value })} fullWidth required />
+            <TextField label="Line type" value={lineForm.line_type} onChange={(e) => setLineForm({ ...lineForm, line_type: e.target.value })} fullWidth helperText="e.g. cable, molding" />
+            <TextField label="Sequence" type="number" value={lineForm.sequence} onChange={(e) => setLineForm({ ...lineForm, sequence: e.target.value })} fullWidth />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLineDialog(null)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={saveLine} disabled={saving} startIcon={saving ? <CircularProgress size={16} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Machine dialog */}
+      <Dialog open={!!machineDialog} onClose={() => setMachineDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>{machineDialog && machineDialog.id ? 'Edit machine' : 'New machine'}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField label="Name" value={machineForm.name} onChange={(e) => setMachineForm({ ...machineForm, name: e.target.value })} fullWidth required />
+            <TextField label="Machine type" value={machineForm.machine_type} onChange={(e) => setMachineForm({ ...machineForm, machine_type: e.target.value })} fullWidth />
+            <TextField select label="Line" value={machineForm.line_id} onChange={(e) => setMachineForm({ ...machineForm, line_id: e.target.value })} fullWidth>
+              <MenuItem value="">— Unassigned —</MenuItem>
+              {lines.map((l) => (
+                <MenuItem key={l.id} value={l.id}>
+                  {l.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField select label="Status" value={machineForm.status} onChange={(e) => setMachineForm({ ...machineForm, status: e.target.value })} fullWidth>
+              {MACHINE_STATUSES.map((s) => (
+                <MenuItem key={s} value={s} sx={{ textTransform: 'capitalize' }}>
+                  {s}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMachineDialog(null)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={saveMachine} disabled={saving} startIcon={saving ? <CircularProgress size={16} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
+
+// ===========================================================================
+// TAB 5 — Plant Dashboard
+// ===========================================================================
+function PlantDashboardTab({ items, itemsLoading, notify }) {
+  const theme = useTheme();
+  const [stock, setStock] = useState([]);
+  const [low, setLow] = useState([]);
+  const [lines, setLines] = useState([]);
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [s, l, ln, mc] = await Promise.all([
+        ppcService.listStock(),
+        ppcService.lowStock(),
+        ppcService.listLines(),
+        ppcService.listMachines(),
+      ]);
+      setStock(s);
+      setLow(l);
+      setLines(ln);
+      setMachines(mc);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const finishedCount = items.filter((i) => FINISHED_TYPES.includes(i.item_type)).length;
+  const materialValue = stock.reduce((sum, s) => sum + num(s.on_hand) * num(s.item?.unit_cost), 0);
+  const machinesByStatus = useMemo(() => {
+    const m = new Map();
+    machines.forEach((mc) => {
+      const k = String(mc.status || 'idle').toLowerCase();
+      m.set(k, (m.get(k) || 0) + 1);
+    });
+    return Array.from(m.entries());
+  }, [machines]);
+
+  const busy = loading || itemsLoading;
+
+  const cards = [
+    { label: 'Total Items', value: items.length, sub: 'In the item master', icon: Inventory2Outlined, accent: theme.palette.primary.main },
+    { label: 'Finished Products', value: finishedCount, sub: 'Cable / power cord / harness', icon: PrecisionManufacturingOutlined, accent: theme.palette.info.main },
+    { label: 'Low Stock', value: low.length, sub: 'At / below reorder point', icon: WarningAmberRounded, accent: theme.palette.error.main },
+    { label: 'Material Value', value: inrFull(materialValue), sub: 'On-hand × unit cost', icon: CalculateOutlined, accent: theme.palette.success.main },
+    { label: 'Production Lines', value: lines.length, sub: `${machines.length} machines`, icon: SpaceDashboardOutlined, accent: theme.palette.primary.dark },
+  ];
+
+  return (
+    <Stack spacing={2}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          Plant Dashboard
+        </Typography>
+        <Tooltip title="Refresh">
+          <span>
+            <IconButton onClick={load} disabled={busy} size="small">
+              {busy ? <CircularProgress size={18} /> : <RefreshRounded />}
+            </IconButton>
+          </span>
+        </Tooltip>
+      </Stack>
+
+      <GridBox min={220}>
+        {cards.map((c) => (
+          <StatCard key={c.label} {...c} loading={busy} />
+        ))}
+      </GridBox>
+
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1.3fr) minmax(0,1fr)' }, alignItems: 'start' }}>
+        {/* Materials needing reorder */}
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Materials Needing Reorder
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              On-hand at or below reorder point
+            </Typography>
+          </Box>
+          <Divider />
+          <TableContainer sx={{ maxHeight: 360 }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow sx={headRowSx}>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="right">On hand</TableCell>
+                  <TableCell align="right">Reorder pt</TableCell>
+                  <TableCell align="right">Shortage</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {busy && <TableSkeleton cols={5} rows={4} />}
+                {!busy && low.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, color: 'success.main' }}>
+                      <CheckCircleOutlineRounded sx={{ verticalAlign: 'middle', mr: 0.5 }} /> All stock above reorder levels.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!busy &&
+                  low.map((r) => (
+                    <TableRow key={r.item_id} hover>
+                      <TableCell sx={{ fontWeight: 600 }}>{r.code}</TableCell>
+                      <TableCell>{r.name}</TableCell>
+                      <TableCell align="right">{num(r.on_hand)}</TableCell>
+                      <TableCell align="right">{num(r.reorder_point)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>
+                        {num(r.shortage)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+
+        {/* Machines by status */}
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Machines by Status
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Current shop-floor state
+            </Typography>
+          </Box>
+          <Divider />
+          <Stack divider={<Divider />}>
+            {busy && [0, 1, 2].map((i) => (
+              <Box key={i} sx={{ px: 2, py: 1.25 }}>
+                <Skeleton variant="rounded" height={24} />
+              </Box>
+            ))}
+            {!busy && machinesByStatus.length === 0 && (
+              <Box sx={{ px: 2, py: 4, textAlign: 'center', color: 'text.secondary' }}>
+                <Typography variant="body2">No machines added yet.</Typography>
+              </Box>
+            )}
+            {!busy &&
+              machinesByStatus.map(([status, count]) => (
+                <Stack key={status} direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.25 }}>
+                  <Chip size="small" color={machineStatusColor(status)} label={status} sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                    {count}
+                  </Typography>
+                </Stack>
+              ))}
+          </Stack>
+        </Paper>
+      </Box>
+    </Stack>
+  );
+}
+
+// ===========================================================================
+// Shell
+// ===========================================================================
+const TABS = [
+  { key: 'items', label: 'Items & BOM', icon: <AccountTreeOutlined fontSize="small" /> },
+  { key: 'store', label: 'Materials & Store', icon: <Inventory2Outlined fontSize="small" /> },
+  { key: 'mrp', label: 'MRP Run', icon: <CalculateOutlined fontSize="small" /> },
+  { key: 'lines', label: 'Lines & Machines', icon: <PrecisionManufacturingOutlined fontSize="small" /> },
+  { key: 'dashboard', label: 'Plant Dashboard', icon: <SpaceDashboardOutlined fontSize="small" /> },
+];
+
+export default function PPCFoundation() {
+  const theme = useTheme();
+  const [tab, setTab] = useState(0);
+  const [items, setItems] = useState([]);
+  const [itemsLoading, setItemsLoading] = useState(true);
+  const [itemsError, setItemsError] = useState(null);
+  const [toast, setToast] = useState(null); // { message, severity }
+
+  const notify = useCallback((message, severity = 'info') => {
+    setToast({ message, severity });
+  }, []);
+
+  const reloadItems = useCallback(async () => {
+    setItemsLoading(true);
+    setItemsError(null);
+    try {
+      const data = await ppcService.listItems();
+      setItems(data);
+    } catch (e) {
+      setItemsError(e.message);
+    } finally {
+      setItemsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    reloadItems();
+  }, [reloadItems]);
+
+  return (
+    <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 3 }, mb: { xs: 4, md: 8 }, px: { xs: 1.5, sm: 2 } }}>
+      {/* Header banner */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 2, sm: 3 },
+          mb: 2.5,
+          borderRadius: 3,
+          color: 'primary.contrastText',
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.info.main} 130%)`,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+          Production Planning & Control
+        </Typography>
+        <Typography variant="body2" sx={{ opacity: 0.85 }}>
+          Items & multi-level BOMs, store stock, material requirements planning, and shop-floor masters.
+        </Typography>
+      </Paper>
+
+      {/* Tabs */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, mb: 2.5 }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ px: 1 }}
+        >
+          {TABS.map((t) => (
+            <Tab key={t.key} icon={t.icon} iconPosition="start" label={t.label} sx={{ minHeight: 56, textTransform: 'none', fontWeight: 600 }} />
+          ))}
+        </Tabs>
+      </Paper>
+
+      {/* Tab panels */}
+      {tab === 0 && (
+        <ItemsBomTab items={items} loading={itemsLoading} error={itemsError} reloadItems={reloadItems} notify={notify} />
+      )}
+      {tab === 1 && <MaterialsTab items={items} notify={notify} />}
+      {tab === 2 && <MrpTab items={items} notify={notify} />}
+      {tab === 3 && <LinesMachinesTab notify={notify} />}
+      {tab === 4 && <PlantDashboardTab items={items} itemsLoading={itemsLoading} notify={notify} />}
+
+      {/* inline toast */}
+      {toast && (
+        <Box sx={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: (t) => t.zIndex.snackbar }}>
+          <Alert severity={toast.severity} variant="filled" onClose={() => setToast(null)} sx={{ boxShadow: 6 }}>
+            {toast.message}
+          </Alert>
+        </Box>
+      )}
+    </Container>
+  );
+}

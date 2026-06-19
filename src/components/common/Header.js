@@ -536,6 +536,7 @@ const Header = () => {
       label: "Production",
       icon: <ProductionIcon />,
       items: [
+        { subheader: "Planning", label: "Production Planning", path: "/ppc", icon: <Assignment />, roles: ppcModuleRoles },
         { subheader: "Lines", label: "Cable Production", path: "/cable-production", icon: <CableIcon />, roles: ["CEO", "Customer Relations Manager", "Cable Production Supervisor"] },
         { subheader: "Lines", label: "Molding Production", path: "/molding", icon: <ProductionIcon />, roles: ["CEO", "Customer Relations Manager", "Moulding Production Supervisor", "Production Manager", "Store Manager"] },
       ],
