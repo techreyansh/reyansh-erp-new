@@ -289,10 +289,69 @@ async function listWorkOrders() {
       .from('ppc_wo')
       .select(
         'id, wo_number, item_id, qty, line_id, status, priority, planned_start, planned_end, due_date, produced_qty, scrap_qty, owner_email, notes, created_at, ' +
+          'customer_name, customer_code, source_order_number, source_kind, ' +
           'item:ppc_items!ppc_wo_item_id_fkey(id, name, code), line:ppc_lines!ppc_wo_line_id_fkey(id, name)'
       )
       .order('created_at', { ascending: false }),
     'List work orders'
+  );
+  return data || [];
+}
+
+/**
+ * Create a work order for a CRM customer/order, then stamp the order link.
+ * Calls the same ppc_create_work_order RPC, then updates the new ppc_wo row
+ * with the customer + source-order metadata. Returns the RPC result (wo_number).
+ */
+async function createWorkOrderForCustomer({
+  itemId,
+  qty,
+  lineId,
+  due,
+  customerCode,
+  customerName,
+  orderNumber,
+  orderCycleId,
+}) {
+  if (!itemId) throw new Error('Create work order: an item must be selected');
+  const result = unwrap(
+    await supabase.rpc('ppc_create_work_order', {
+      p_item_id: itemId,
+      p_qty: Number(qty) || 0,
+      p_line_id: lineId || null,
+      p_due: due || null,
+      p_stages: null,
+    }),
+    'Create work order for customer'
+  );
+  if (result?.id) {
+    unwrap(
+      await supabase
+        .from('ppc_wo')
+        .update({
+          customer_code: customerCode || null,
+          customer_name: customerName || null,
+          source_order_number: orderNumber || null,
+          source_kind: 'crm_order',
+          crm_order_cycle_id: orderCycleId || null,
+        })
+        .eq('id', result.id),
+      'Link work order to CRM order'
+    );
+  }
+  return result || null;
+}
+
+/** List work orders linked to a given CRM order cycle, newest first. */
+async function listWorkOrdersForOrderCycle(orderCycleId) {
+  if (!orderCycleId) return [];
+  const data = unwrap(
+    await supabase
+      .from('ppc_wo')
+      .select('id, wo_number, status, qty, produced_qty, due_date')
+      .eq('crm_order_cycle_id', orderCycleId)
+      .order('created_at', { ascending: false }),
+    'List work orders for order cycle'
   );
   return data || [];
 }
@@ -460,6 +519,8 @@ const ppcService = {
   // shop floor (Phase 2)
   listWorkOrders,
   createWorkOrder,
+  createWorkOrderForCustomer,
+  listWorkOrdersForOrderCycle,
   getWorkOrder,
   updateStage,
   advanceStage,

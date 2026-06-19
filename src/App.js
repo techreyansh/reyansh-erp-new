@@ -115,7 +115,6 @@ const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOEx
 const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
-const AccountabilityScorecard = lazy(() => import("./components/accountability/AccountabilityScorecard"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
@@ -230,9 +229,7 @@ function AppContent() {
                     </ProtectedRouteGate>
                   } />
                   <Route path="/accountability" element={
-                    <ProtectedRouteGate>
-                      <AccountabilityScorecard />
-                    </ProtectedRouteGate>
+                    <Navigate to="/mis/executive-meeting" replace />
                   } />
                   <Route path="/access-management" element={
                     <CEOOnlyRoute>

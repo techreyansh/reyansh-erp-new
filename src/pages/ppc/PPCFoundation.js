@@ -1541,6 +1541,15 @@ function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
                 {wo.item?.code} · {wo.item?.name} · Qty {num(wo.qty)} {wo.item?.uom || ''}
               </Typography>
             )}
+            {wo && wo.source_kind === 'crm_order' && (
+              <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.5 }}>
+                <Chip size="small" color="secondary" label="CRM" sx={{ height: 18, fontSize: 10, fontWeight: 700 }} />
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  Customer: {wo.customer_name || wo.customer_code || '—'}
+                  {wo.source_order_number ? ` · Order: ${wo.source_order_number}` : ''}
+                </Typography>
+              </Stack>
+            )}
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
             {wo && <Chip size="small" color={woStatusColor(wo.status)} label={woStatusLabel(wo.status)} sx={{ fontWeight: 700 }} />}
@@ -1894,6 +1903,7 @@ function WorkOrdersTab({ items, notify }) {
             <TableRow sx={headRowSx}>
               <TableCell>WO #</TableCell>
               <TableCell>Item</TableCell>
+              <TableCell>Customer / Order</TableCell>
               <TableCell align="right">Qty</TableCell>
               <TableCell>Line</TableCell>
               <TableCell align="center">Status</TableCell>
@@ -1902,10 +1912,10 @@ function WorkOrdersTab({ items, notify }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading && <TableSkeleton cols={7} />}
+            {loading && <TableSkeleton cols={8} />}
             {!loading && wos.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} sx={{ p: 0, border: 0 }}>
+                <TableCell colSpan={8} sx={{ p: 0, border: 0 }}>
                   <EmptyState
                     icon={AssignmentOutlined}
                     title="No work orders yet — create one"
@@ -1936,6 +1946,27 @@ function WorkOrdersTab({ items, notify }) {
                     <Typography variant="caption" color="text.secondary">
                       {wo.item?.name}
                     </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {wo.source_kind === 'crm_order' ? (
+                      <Stack spacing={0.25}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                          {wo.customer_name || wo.customer_code || '—'}
+                        </Typography>
+                        {wo.source_order_number && (
+                          <Stack direction="row" spacing={0.5} alignItems="center">
+                            <Chip size="small" color="secondary" label="CRM" sx={{ height: 18, fontSize: 10, fontWeight: 700 }} />
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                              {wo.source_order_number}
+                            </Typography>
+                          </Stack>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Typography variant="caption" color="text.disabled">
+                        —
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell align="right">{num(wo.qty)}</TableCell>
                   <TableCell>{wo.line?.name || '—'}</TableCell>

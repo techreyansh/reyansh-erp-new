@@ -290,13 +290,6 @@ const Header = () => {
           roles: ["Customer Relations Manager", "CEO", "Store Manager"],
         },
         {
-          subheader: "Accountability",
-          label: "My Scorecard",
-          path: "/accountability",
-          icon: <SecurityIcon />,
-          roles: ["all"],
-        },
-        {
           subheader: "Operations",
           label: "Production Log",
           path: "/production-log",

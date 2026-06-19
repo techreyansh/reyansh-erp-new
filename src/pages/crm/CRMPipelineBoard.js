@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Chip,
@@ -18,6 +19,7 @@ import {
   MenuItem,
   Paper,
   Skeleton,
+  Snackbar,
   Stack,
   TextField,
   ToggleButton,
@@ -35,6 +37,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
@@ -56,6 +59,7 @@ import {
   updateCompany,
   getCurrentUserEmail,
 } from "../../services/crmPipelineService";
+import ppcService from "../../services/ppcService";
 
 /* ----------------------------------------------------------------------- */
 /* Helpers                                                                  */
@@ -882,12 +886,169 @@ function InfoRow({ label, value }) {
 }
 
 /* ----------------------------------------------------------------------- */
+/* Create work order dialog (links a recurring order to a PPC work order)   */
+/* ----------------------------------------------------------------------- */
+
+function CreateWorkOrderDialog({ open, onClose, cycle, onCreated, onError }) {
+  const [items, setItems] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(false);
+  const [item, setItem] = useState(null);
+  const [qty, setQty] = useState("1");
+  const [due, setDue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    (async () => {
+      setLoadingItems(true);
+      setErr(null);
+      try {
+        const list = await ppcService.listItems();
+        if (active) setItems(Array.isArray(list) ? list : []);
+      } catch (e) {
+        if (active) setErr(e?.message || "Failed to load items.");
+      } finally {
+        if (active) setLoadingItems(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  // Reset transient form state whenever the dialog re-opens.
+  useEffect(() => {
+    if (open) {
+      setItem(null);
+      setQty("1");
+      setDue("");
+      setErr(null);
+    }
+  }, [open]);
+
+  const submit = async () => {
+    if (!item?.id) {
+      setErr("Select an item for the work order.");
+      return;
+    }
+    setSaving(true);
+    setErr(null);
+    try {
+      const result = await ppcService.createWorkOrderForCustomer({
+        itemId: item.id,
+        qty: qty === "" ? 1 : Number(qty),
+        lineId: null,
+        due: due || null,
+        customerCode: cycle.customer_code || null,
+        customerName: cycle.company_name || cycle.customer_code || null,
+        orderNumber: cycle.order_number || cycle.order_ref || null,
+        orderCycleId: cycle.id,
+      });
+      onCreated?.(result);
+      onClose();
+    } catch (e) {
+      const msg = e?.message || "Failed to create work order.";
+      setErr(msg);
+      onError?.(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 700 }}>Create work order</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 0.5 }}>
+          {err && <Alert severity="error">{err}</Alert>}
+          <Typography variant="caption" color="text.secondary">
+            {cycle.company_name || cycle.customer_code || "Customer"} ·{" "}
+            {cycle.order_number || cycle.order_ref || "—"}
+          </Typography>
+          <Autocomplete
+            options={items}
+            loading={loadingItems}
+            value={item}
+            onChange={(_, v) => setItem(v)}
+            getOptionLabel={(o) => (o ? `${o.code} — ${o.name}` : "")}
+            isOptionEqualToValue={(o, v) => o.id === v.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Item"
+                required
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loadingItems ? <CircularProgress size={16} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField
+              label="Quantity"
+              type="number"
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+              inputProps={{ min: 1 }}
+              fullWidth
+            />
+            <TextField
+              label="Due date"
+              type="date"
+              value={due}
+              onChange={(e) => setDue(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} disabled={saving}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={submit} disabled={saving || !item}>
+          {saving ? "Creating…" : "Create work order"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
 /* Recurring order-cycle card                                               */
 /* ----------------------------------------------------------------------- */
 
-function OrderCycleCard({ cycle, onMove, theme }) {
+function OrderCycleCard({ cycle, onMove, theme, onNotify }) {
   const [moveAnchor, setMoveAnchor] = useState(null);
+  const [woDialogOpen, setWoDialogOpen] = useState(false);
+  const [workOrders, setWorkOrders] = useState([]);
   const days = daysSince(cycle.stage_entered_at);
+  const hasCycleId = Boolean(cycle.id);
+
+  const loadWorkOrders = useCallback(async () => {
+    if (!cycle.id) return;
+    try {
+      const list = await ppcService.listWorkOrdersForOrderCycle(cycle.id);
+      setWorkOrders(Array.isArray(list) ? list : []);
+    } catch (e) {
+      onNotify?.(e?.message || "Failed to load work orders.", "error");
+    }
+  }, [cycle.id, onNotify]);
+
+  // Lazily fetch linked work orders on mount of each card.
+  useEffect(() => {
+    loadWorkOrders();
+  }, [loadWorkOrders]);
+
   return (
     <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 2 }}>
       <Stack spacing={0.5}>
@@ -914,19 +1075,54 @@ function OrderCycleCard({ cycle, onMove, theme }) {
             sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
           />
         </Stack>
+
+        {/* Linked work orders */}
+        {workOrders.length > 0 ? (
+          <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap" useFlexGap>
+            {workOrders.map((wo) => (
+              <Chip
+                key={wo.id}
+                size="small"
+                variant="outlined"
+                color="secondary"
+                label={`${wo.wo_number} · ${wo.status}`}
+                sx={{ height: 20, "& .MuiChip-label": { px: 0.75, fontSize: 10.5 } }}
+              />
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="caption" color="text.disabled">
+            No work order yet
+          </Typography>
+        )}
+
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="caption" color="text.secondary">
             {fmtDate(cycle.order_date)}
           </Typography>
-          <Button
-            size="small"
-            variant="text"
-            endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
-            onClick={(e) => setMoveAnchor(e.currentTarget)}
-            sx={{ fontSize: 11, py: 0.25, minWidth: 0 }}
-          >
-            Move
-          </Button>
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            <Tooltip title={hasCycleId ? "Create work order" : "Save the order first"}>
+              <span>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  disabled={!hasCycleId}
+                  onClick={() => setWoDialogOpen(true)}
+                >
+                  <PrecisionManufacturingIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Button
+              size="small"
+              variant="text"
+              endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
+              onClick={(e) => setMoveAnchor(e.currentTarget)}
+              sx={{ fontSize: 11, py: 0.25, minWidth: 0 }}
+            >
+              Move
+            </Button>
+          </Stack>
         </Stack>
       </Stack>
       <StageMoveMenu
@@ -939,6 +1135,23 @@ function OrderCycleCard({ cycle, onMove, theme }) {
           onMove(cycle.id, toStage);
         }}
       />
+      {hasCycleId && (
+        <CreateWorkOrderDialog
+          open={woDialogOpen}
+          onClose={() => setWoDialogOpen(false)}
+          cycle={cycle}
+          onCreated={(result) => {
+            onNotify?.(
+              result?.wo_number
+                ? `Work order ${result.wo_number} created`
+                : "Work order created",
+              "success"
+            );
+            loadWorkOrders();
+          }}
+          onError={(msg) => onNotify?.(msg, "error")}
+        />
+      )}
     </Paper>
   );
 }
@@ -978,6 +1191,11 @@ export default function CRMPipelineBoard() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
+  const [snack, setSnack] = useState(null); // { message, severity }
+
+  const notify = useCallback((message, severity = "info") => {
+    setSnack({ message, severity });
+  }, []);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -1167,6 +1385,7 @@ export default function CRMPipelineBoard() {
             cycles={filteredCycles}
             onMove={handleMoveCycle}
             onOpen={(id) => setDrawerId(id)}
+            onNotify={notify}
           />
         )}
       </Box>
@@ -1184,6 +1403,24 @@ export default function CRMPipelineBoard() {
         onClose={() => setDrawerId(null)}
         onChanged={loadAll}
       />
+
+      <Snackbar
+        open={Boolean(snack)}
+        autoHideDuration={5000}
+        onClose={() => setSnack(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        {snack ? (
+          <Alert
+            severity={snack.severity}
+            variant="filled"
+            onClose={() => setSnack(null)}
+            sx={{ width: "100%" }}
+          >
+            {snack.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Container>
   );
 }
@@ -1224,7 +1461,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope }) {
   );
 }
 
-function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen }) {
+function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify }) {
   const cycleCount = cycles.length;
   return (
     <Stack spacing={2} sx={{ height: "100%" }}>
@@ -1290,7 +1527,7 @@ function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen
                 items={cyclesByStage[stage.key] || []}
                 theme={theme}
                 renderCard={(cycle) => (
-                  <OrderCycleCard cycle={cycle} onMove={onMove} theme={theme} />
+                  <OrderCycleCard cycle={cycle} onMove={onMove} theme={theme} onNotify={onNotify} />
                 )}
               />
             ))}
