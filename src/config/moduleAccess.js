@@ -28,7 +28,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/costing', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow'), moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/task-scheduler' || path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS },
-  { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
+  { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin' || path === '/checklist-templates', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/accountability', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/mis' || path.startsWith('/mis/'), moduleKey: MODULE_KEYS.REPORTS },
@@ -54,6 +54,7 @@ const ROUTE_ACTION_RULES = [
   { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
+  { test: (path) => path === '/checklist-templates', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
 ];
 
 export function getRequiredActionForPath(pathname = '') {

@@ -448,6 +448,13 @@ const Header = () => {
           icon: <TableChart />,
           roles: ["CEO", "HR Manager", "Management / HOD", "Process Coordinator"],
         },
+        {
+          subheader: "Tasks",
+          label: "Checklist Templates",
+          path: "/checklist-templates",
+          icon: <TableChart />,
+          roles: ["CEO", "Management / HOD", "Process Coordinator"],
+        },
       ],
     },
     {

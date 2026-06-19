@@ -122,6 +122,7 @@ const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashbo
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
+const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/ChecklistTemplateAdmin"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
@@ -725,6 +726,14 @@ function AppContent() {
                     element={
                       <ProtectedRouteGate>
                         <AdminTaskApprovalPanel />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/checklist-templates"
+                    element={
+                      <ProtectedRouteGate>
+                        <ChecklistTemplateAdmin />
                       </ProtectedRouteGate>
                     }
                   />
