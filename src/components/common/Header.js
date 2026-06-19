@@ -491,23 +491,11 @@ const Header = () => {
       label: "CRM",
       icon: <CRMIcon />,
       items: [
+        { subheader: "Pipelines", label: "New Customer Pipeline", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Pipelines", label: "Repeat Customer Pipeline", path: "/crm-pipeline?view=recurring", icon: <PeopleIcon />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
+        { subheader: "Tools", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
         { subheader: "Get started", label: "CRM Guide", path: "/crm/guide", icon: <HelpIcon />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Sales Pipeline", path: "/crm-pipeline", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Follow-ups", path: "/crm/follow-ups", icon: <Assignment />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Deals", path: "/crm/deals", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Lead Scoring", path: "/crm/lead-scoring", icon: <Analytics />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Activity Timeline", path: "/crm/timeline", icon: <Assignment />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Quotations", path: "/crm/quotations", icon: <TableChart />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Sales Orders", path: "/crm/sales-orders", icon: <ListAlt />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Collections", path: "/crm/collections", icon: <TableChart />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Flow", label: "Sales Flow", path: "/sales-flow", icon: <PurchaseIcon />, roles: ["Customer Relations Manager", "Sales Executive", "NPD", "Quality Engineer", "Director", "Production Manager", "Store Manager", "Accounts Executive", "CEO"] },
-        { subheader: "Data", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
       ],
     },
     {
@@ -637,10 +625,11 @@ const Header = () => {
       }).slice(0, 10) // Limit to top 10 results
     : [];
 
-  // Check if a path is active
+  // Check if a path is active (ignore any query string on the menu item path)
   const isPathActive = (path) => {
-    if (path === "/") return location.pathname === "/";
-    return location.pathname.startsWith(path);
+    const basePath = String(path || "").split("?")[0];
+    if (basePath === "/") return location.pathname === "/";
+    return location.pathname.startsWith(basePath);
   };
 
   // Check if any item in a group is active

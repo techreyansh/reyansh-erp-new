@@ -25,6 +25,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  Drawer,
   IconButton,
   MenuItem,
   Paper,
@@ -56,8 +57,21 @@ import {
   RefreshRounded,
   WarningAmberRounded,
   CheckCircleOutlineRounded,
+  AssignmentOutlined,
+  ViewKanbanOutlined,
+  PlayArrowRounded,
+  DoneRounded,
+  CloseRounded,
 } from '@mui/icons-material';
-import ppcService, { ITEM_TYPES, FINISHED_TYPES, itemTypeLabel } from '../../services/ppcService';
+import ppcService, {
+  ITEM_TYPES,
+  FINISHED_TYPES,
+  itemTypeLabel,
+  QC_CHECK_TYPES,
+  woStatusLabel,
+  woStatusColor,
+  STAGE_STATUS_COLOR,
+} from '../../services/ppcService';
 import { StatCard, GridBox, inrFull } from '../../components/common/kit';
 
 // ---------------------------------------------------------------------------
@@ -1354,6 +1368,836 @@ function PlantDashboardTab({ items, itemsLoading, notify }) {
 }
 
 // ===========================================================================
+// TAB 6 — Work Orders (shop-floor execution: 4 M's)
+// ===========================================================================
+function qcResultColor(result) {
+  switch (result) {
+    case 'pass':
+      return 'success';
+    case 'fail':
+      return 'error';
+    default:
+      return 'default';
+  }
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString();
+  } catch {
+    return String(d);
+  }
+}
+
+/** Per-stage Start/Done capture dialog (output + scrap). */
+function StageActionDialog({ open, stage, action, onClose, onConfirm, busy }) {
+  const [output, setOutput] = useState('');
+  const [scrap, setScrap] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setOutput(stage?.output_qty != null ? String(stage.output_qty) : '');
+      setScrap(stage?.scrap_qty != null ? String(stage.scrap_qty) : '');
+    }
+  }, [open, stage]);
+
+  const targetStatus = action === 'start' ? 'running' : 'done';
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>
+        {action === 'start' ? 'Start stage' : 'Complete stage'}
+        {stage ? ` — ${stage.stage_name}` : ''}
+      </DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={2} sx={{ mt: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {action === 'start'
+              ? 'Mark this stage as running. Record output so far (optional).'
+              : 'Mark this stage as done and record its good output and scrap.'}
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <TextField label="Output qty" type="number" value={output} onChange={(e) => setOutput(e.target.value)} fullWidth />
+            <TextField label="Scrap qty" type="number" value={scrap} onChange={(e) => setScrap(e.target.value)} fullWidth />
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={busy}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          color={action === 'start' ? 'primary' : 'success'}
+          onClick={() => onConfirm(targetStatus, output, scrap)}
+          disabled={busy}
+          startIcon={busy ? <CircularProgress size={16} color="inherit" /> : action === 'start' ? <PlayArrowRounded /> : <DoneRounded />}
+        >
+          {action === 'start' ? 'Start' : 'Mark done'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
+  const [wo, setWo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stageAction, setStageAction] = useState(null); // { stage, action }
+  const [busy, setBusy] = useState(false);
+  // QC add form
+  const blankQc = { stageId: '', checkType: QC_CHECK_TYPES[0], result: 'pass', value: '' };
+  const [qcForm, setQcForm] = useState(blankQc);
+  const [issueQty, setIssueQty] = useState({}); // materialId -> string
+
+  const load = useCallback(async () => {
+    if (!woId) return;
+    setLoading(true);
+    try {
+      const data = await ppcService.getWorkOrder(woId);
+      setWo(data);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [woId, notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const confirmStage = async (status, output, scrap) => {
+    setBusy(true);
+    try {
+      await ppcService.advanceStage(stageAction.stage.id, status, output, scrap);
+      setStageAction(null);
+      await load();
+      onChanged?.();
+      notify('Stage updated.', 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const updateStageField = async (stage, patch) => {
+    try {
+      await ppcService.updateStage(stage.id, patch);
+      await load();
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  };
+
+  const issue = async (mat) => {
+    const qty = issueQty[mat.id];
+    const remaining = num(mat.qty_required) - num(mat.qty_issued);
+    const amount = qty != null && qty !== '' ? Number(qty) : remaining;
+    if (!amount || amount <= 0) {
+      notify('Enter a quantity to issue.', 'warning');
+      return;
+    }
+    try {
+      await ppcService.issueMaterial(mat.id, amount);
+      setIssueQty((p) => ({ ...p, [mat.id]: '' }));
+      await load();
+      onChanged?.();
+      notify('Material issued — stock decremented.', 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  };
+
+  const addQc = async () => {
+    try {
+      await ppcService.recordQc({
+        woId,
+        stageId: qcForm.stageId || null,
+        checkType: qcForm.checkType,
+        result: qcForm.result,
+        value: qcForm.value,
+      });
+      setQcForm(blankQc);
+      await load();
+      notify('QC check recorded.', 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  };
+
+  return (
+    <Drawer anchor="right" open={!!woId} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 560, md: 640 }, maxWidth: '100%' } }}>
+      <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
+              {loading ? 'Loading…' : wo?.wo_number || 'Work order'}
+            </Typography>
+            {wo && (
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {wo.item?.code} · {wo.item?.name} · Qty {num(wo.qty)} {wo.item?.uom || ''}
+              </Typography>
+            )}
+          </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            {wo && <Chip size="small" color={woStatusColor(wo.status)} label={woStatusLabel(wo.status)} sx={{ fontWeight: 700 }} />}
+            <IconButton onClick={onClose} size="small">
+              <CloseRounded fontSize="small" />
+            </IconButton>
+          </Stack>
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+
+        {loading ? (
+          <Stack spacing={1.5}>
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} variant="rounded" height={64} />
+            ))}
+          </Stack>
+        ) : !wo ? (
+          <EmptyState icon={AssignmentOutlined} title="Work order not found" />
+        ) : (
+          <Stack spacing={2.5}>
+            {/* Summary */}
+            <GridBox min={150}>
+              <StatCard label="Planned" value={num(wo.qty)} sub="Units to build" icon={AssignmentOutlined} />
+              <StatCard label="Produced" value={num(wo.produced_qty)} sub="Good units" icon={CheckCircleOutlineRounded} />
+              <StatCard label="Scrap" value={num(wo.scrap_qty)} sub="Rejected units" icon={WarningAmberRounded} />
+            </GridBox>
+
+            {/* STAGES — Machine (4M), Man, Method */}
+            <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+              <Box sx={{ px: 2, py: 1.25 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  Routing stages
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  4 M&apos;s: Machine · Man (operator) · Method (sheet) — Start / Done capture output &amp; scrap
+                </Typography>
+              </Box>
+              <Divider />
+              {wo.stages.length === 0 ? (
+                <EmptyState icon={PrecisionManufacturingOutlined} title="No stages" hint="This work order has no routing stages." />
+              ) : (
+                <Stack divider={<Divider />}>
+                  {wo.stages.map((st) => (
+                    <Box key={st.id} sx={{ px: 2, py: 1.5 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ mb: 1 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                            {num(st.sequence)}. {st.stage_name}
+                          </Typography>
+                          <Chip size="small" color={STAGE_STATUS_COLOR[st.status] || 'default'} label={st.status} sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
+                        </Stack>
+                        <Stack direction="row" spacing={0.5}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<PlayArrowRounded />}
+                            disabled={st.status === 'done'}
+                            onClick={() => setStageAction({ stage: st, action: 'start' })}
+                          >
+                            Start
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="success"
+                            startIcon={<DoneRounded />}
+                            disabled={st.status === 'done'}
+                            onClick={() => setStageAction({ stage: st, action: 'done' })}
+                          >
+                            Done
+                          </Button>
+                        </Stack>
+                      </Stack>
+                      <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'minmax(0,1fr) minmax(0,1fr)' } }}>
+                        <TextField
+                          select
+                          size="small"
+                          label="Machine"
+                          value={st.machine_id || ''}
+                          onChange={(e) => updateStageField(st, { machine_id: e.target.value || null })}
+                          fullWidth
+                        >
+                          <MenuItem value="">— Unassigned —</MenuItem>
+                          {machines.map((m) => (
+                            <MenuItem key={m.id} value={m.id}>
+                              {m.name}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                        <TextField
+                          size="small"
+                          label="Operator"
+                          value={st.operator_name || ''}
+                          onChange={(e) => setWo((p) => ({ ...p, stages: p.stages.map((s) => (s.id === st.id ? { ...s, operator_name: e.target.value } : s)) }))}
+                          onBlur={(e) => updateStageField(st, { operator_name: e.target.value || null })}
+                          fullWidth
+                        />
+                        <TextField
+                          size="small"
+                          label="Method sheet"
+                          value={st.method_sheet || ''}
+                          onChange={(e) => setWo((p) => ({ ...p, stages: p.stages.map((s) => (s.id === st.id ? { ...s, method_sheet: e.target.value } : s)) }))}
+                          onBlur={(e) => updateStageField(st, { method_sheet: e.target.value || null })}
+                          fullWidth
+                          sx={{ gridColumn: { sm: '1 / -1' } }}
+                        />
+                      </Box>
+                      {(num(st.output_qty) > 0 || num(st.scrap_qty) > 0) && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
+                          Output {num(st.output_qty)} · Scrap {num(st.scrap_qty)}
+                        </Typography>
+                      )}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+            </Paper>
+
+            {/* MATERIALS — the 4th M */}
+            <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+              <Box sx={{ px: 2, py: 1.25 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  Material (issue to job)
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Issuing decrements store stock
+                </Typography>
+              </Box>
+              <Divider />
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={headRowSx}>
+                      <TableCell>Item</TableCell>
+                      <TableCell align="right">Required</TableCell>
+                      <TableCell align="right">Issued</TableCell>
+                      <TableCell align="right">Issue</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {wo.materials.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
+                          No material lines for this work order.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {wo.materials.map((mat) => {
+                      const fully = num(mat.qty_issued) >= num(mat.qty_required);
+                      return (
+                        <TableRow key={mat.id} hover>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {mat.item?.code || '—'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {mat.item?.name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            {num(mat.qty_required)} {mat.item?.uom || ''}
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: fully ? 'success.main' : 'text.primary' }}>
+                            {num(mat.qty_issued)}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="flex-end">
+                              <TextField
+                                size="small"
+                                type="number"
+                                placeholder={String(Math.max(0, num(mat.qty_required) - num(mat.qty_issued)))}
+                                value={issueQty[mat.id] ?? ''}
+                                onChange={(e) => setIssueQty((p) => ({ ...p, [mat.id]: e.target.value }))}
+                                sx={{ width: 90 }}
+                              />
+                              <Button size="small" variant="outlined" onClick={() => issue(mat)} disabled={fully}>
+                                Issue
+                              </Button>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+
+            {/* QC */}
+            <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+              <Box sx={{ px: 2, py: 1.25 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  Quality checks
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Record continuity, hi-pot, tensile and other checks
+                </Typography>
+              </Box>
+              <Divider />
+              <Box sx={{ px: 2, py: 1.5, display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0,1fr))' }, alignItems: 'center' }}>
+                <TextField select size="small" label="Stage" value={qcForm.stageId} onChange={(e) => setQcForm({ ...qcForm, stageId: e.target.value })} fullWidth>
+                  <MenuItem value="">— Whole WO —</MenuItem>
+                  {wo.stages.map((s) => (
+                    <MenuItem key={s.id} value={s.id}>
+                      {s.stage_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField select size="small" label="Check type" value={qcForm.checkType} onChange={(e) => setQcForm({ ...qcForm, checkType: e.target.value })} fullWidth>
+                  {QC_CHECK_TYPES.map((c) => (
+                    <MenuItem key={c} value={c} sx={{ textTransform: 'capitalize' }}>
+                      {c.replace(/_/g, ' ')}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField select size="small" label="Result" value={qcForm.result} onChange={(e) => setQcForm({ ...qcForm, result: e.target.value })} fullWidth>
+                  <MenuItem value="pass">Pass</MenuItem>
+                  <MenuItem value="fail">Fail</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                </TextField>
+                <Stack direction="row" spacing={1}>
+                  <TextField size="small" label="Measured value" value={qcForm.value} onChange={(e) => setQcForm({ ...qcForm, value: e.target.value })} fullWidth />
+                  <Button variant="contained" startIcon={<AddRounded />} onClick={addQc} sx={{ whiteSpace: 'nowrap' }}>
+                    Add
+                  </Button>
+                </Stack>
+              </Box>
+              <Divider />
+              <TableContainer sx={{ maxHeight: 220 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow sx={headRowSx}>
+                      <TableCell>Check</TableCell>
+                      <TableCell>Result</TableCell>
+                      <TableCell>Value</TableCell>
+                      <TableCell>When</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {wo.qc.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
+                          No QC checks recorded yet.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {wo.qc.map((q) => (
+                      <TableRow key={q.id} hover>
+                        <TableCell sx={{ textTransform: 'capitalize' }}>{String(q.check_type || '').replace(/_/g, ' ')}</TableCell>
+                        <TableCell>
+                          <Chip size="small" color={qcResultColor(q.result)} label={q.result} sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
+                        </TableCell>
+                        <TableCell>{q.measured_value || '—'}</TableCell>
+                        <TableCell>{fmtDate(q.checked_at)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Stack>
+        )}
+      </Box>
+
+      <StageActionDialog
+        open={!!stageAction}
+        stage={stageAction?.stage}
+        action={stageAction?.action}
+        busy={busy}
+        onClose={() => setStageAction(null)}
+        onConfirm={confirmStage}
+      />
+    </Drawer>
+  );
+}
+
+function WorkOrdersTab({ items, notify }) {
+  const finished = useMemo(() => items.filter((i) => FINISHED_TYPES.includes(i.item_type) && i.is_active), [items]);
+  const [wos, setWos] = useState([]);
+  const [lines, setLines] = useState([]);
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [openWoId, setOpenWoId] = useState(null);
+
+  const blank = { itemId: '', qty: '100', lineId: '', due: '' };
+  const [form, setForm] = useState(blank);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [w, l, m] = await Promise.all([ppcService.listWorkOrders(), ppcService.listLines(), ppcService.listMachines()]);
+      setWos(w);
+      setLines(l);
+      setMachines(m);
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const openNew = () => {
+    setForm({ ...blank, itemId: finished[0]?.id || '' });
+    setDialogOpen(true);
+  };
+
+  const create = async () => {
+    if (!form.itemId) {
+      notify('Pick a finished product.', 'warning');
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await ppcService.createWorkOrder({ itemId: form.itemId, qty: form.qty, lineId: form.lineId, due: form.due, stages: null });
+      setDialogOpen(false);
+      await load();
+      if (res?.id) setOpenWoId(res.id);
+      notify(`Work order ${res?.wo_number || ''} created.`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }} flexWrap="wrap" gap={1}>
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Work Orders
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Release jobs to the floor — click a WO to run its stages, issue material &amp; record QC
+          </Typography>
+        </Box>
+        <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew} disabled={!finished.length}>
+          New work order
+        </Button>
+      </Stack>
+      <Divider />
+      <TableContainer sx={{ maxHeight: 600 }}>
+        <Table size="small" stickyHeader>
+          <TableHead>
+            <TableRow sx={headRowSx}>
+              <TableCell>WO #</TableCell>
+              <TableCell>Item</TableCell>
+              <TableCell align="right">Qty</TableCell>
+              <TableCell>Line</TableCell>
+              <TableCell align="center">Status</TableCell>
+              <TableCell>Due</TableCell>
+              <TableCell align="right">Produced / Scrap</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading && <TableSkeleton cols={7} />}
+            {!loading && wos.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} sx={{ p: 0, border: 0 }}>
+                  <EmptyState
+                    icon={AssignmentOutlined}
+                    title="No work orders yet — create one"
+                    hint={
+                      finished.length
+                        ? 'Release a job for a finished cable, power cord, or harness. Stages and material lines are generated automatically.'
+                        : 'Add a finished product (cable / power cord / harness) in the Items & BOM tab first.'
+                    }
+                    action={
+                      finished.length ? (
+                        <Button variant="contained" startIcon={<AddRounded />} onClick={openNew}>
+                          New work order
+                        </Button>
+                      ) : null
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              wos.map((wo) => (
+                <TableRow key={wo.id} hover sx={{ cursor: 'pointer' }} onClick={() => setOpenWoId(wo.id)}>
+                  <TableCell sx={{ fontWeight: 700 }}>{wo.wo_number}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {wo.item?.code || '—'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {wo.item?.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">{num(wo.qty)}</TableCell>
+                  <TableCell>{wo.line?.name || '—'}</TableCell>
+                  <TableCell align="center">
+                    <Chip size="small" color={woStatusColor(wo.status)} label={woStatusLabel(wo.status)} sx={{ fontWeight: 700 }} />
+                  </TableCell>
+                  <TableCell>{fmtDate(wo.due_date)}</TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" component="span" sx={{ fontWeight: 700, color: 'success.main' }}>
+                      {num(wo.produced_qty)}
+                    </Typography>{' '}
+                    /{' '}
+                    <Typography variant="body2" component="span" sx={{ fontWeight: 700, color: num(wo.scrap_qty) ? 'error.main' : 'text.secondary' }}>
+                      {num(wo.scrap_qty)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* New work order dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>New work order</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField select label="Finished product" value={form.itemId} onChange={(e) => setForm({ ...form, itemId: e.target.value })} fullWidth required>
+              {finished.map((i) => (
+                <MenuItem key={i.id} value={i.id}>
+                  {i.code} — {i.name} ({itemTypeLabel(i.item_type)})
+                </MenuItem>
+              ))}
+            </TextField>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Quantity" type="number" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} fullWidth />
+              <TextField select label="Line (optional)" value={form.lineId} onChange={(e) => setForm({ ...form, lineId: e.target.value })} fullWidth>
+                <MenuItem value="">— Auto / unassigned —</MenuItem>
+                {lines.map((l) => (
+                  <MenuItem key={l.id} value={l.id}>
+                    {l.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Stack>
+            <TextField label="Due date (optional)" type="date" value={form.due} onChange={(e) => setForm({ ...form, due: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
+            <Alert severity="info" sx={{ borderRadius: 2 }}>
+              Routing stages and material requirements are generated automatically from the item&apos;s BOM.
+            </Alert>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} disabled={creating}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={create} disabled={creating} startIcon={creating ? <CircularProgress size={16} /> : null}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {openWoId && (
+        <WorkOrderDrawer woId={openWoId} machines={machines} notify={notify} onChanged={load} onClose={() => setOpenWoId(null)} />
+      )}
+    </Paper>
+  );
+}
+
+// ===========================================================================
+// TAB 7 — Shop Floor (live board)
+// ===========================================================================
+const BOARD_COLUMNS = ['planned', 'released', 'in_progress', 'qc'];
+
+function ShopFloorTab({ notify }) {
+  const [board, setBoard] = useState([]);
+  const [lines, setLines] = useState([]);
+  const [lineId, setLineId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [advancing, setAdvancing] = useState(null); // stage id being advanced
+
+  const loadLines = useCallback(async () => {
+    try {
+      setLines(await ppcService.listLines());
+    } catch (e) {
+      notify(e.message, 'error');
+    }
+  }, [notify]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setBoard(await ppcService.shopfloor(lineId));
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [lineId, notify]);
+
+  useEffect(() => {
+    loadLines();
+  }, [loadLines]);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  /** Find the running (or first pending) stage of a WO from its nested stages. */
+  const currentStage = (wo) => {
+    const stages = wo.stages || [];
+    return stages.find((s) => s.status === 'running') || stages.find((s) => s.status === 'pending') || null;
+  };
+
+  const advance = async (stage) => {
+    if (!stage) return;
+    setAdvancing(stage.id);
+    try {
+      const next = stage.status === 'running' ? 'done' : 'running';
+      await ppcService.advanceStage(stage.id, next, stage.output_qty || 0, stage.scrap_qty || 0);
+      await load();
+      notify(`Stage ${next === 'done' ? 'completed' : 'started'}.`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setAdvancing(null);
+    }
+  };
+
+  const grouped = useMemo(() => {
+    const map = new Map(BOARD_COLUMNS.map((c) => [c, []]));
+    board.forEach((wo) => {
+      const k = BOARD_COLUMNS.includes(wo.status) ? wo.status : 'planned';
+      map.get(k).push(wo);
+    });
+    return map;
+  }, [board]);
+
+  return (
+    <Stack spacing={2}>
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 1.5, sm: 2 } }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Shop Floor
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Live board of active work orders — advance the current stage in one click
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField select size="small" label="Line" value={lineId} onChange={(e) => setLineId(e.target.value)} sx={{ minWidth: 180 }}>
+              <MenuItem value="">All lines</MenuItem>
+              {lines.map((l) => (
+                <MenuItem key={l.id} value={l.id}>
+                  {l.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Tooltip title="Refresh">
+              <span>
+                <IconButton onClick={load} disabled={loading} size="small">
+                  {loading ? <CircularProgress size={18} /> : <RefreshRounded />}
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
+        </Stack>
+      </Paper>
+
+      {!loading && board.length === 0 ? (
+        <Paper variant="outlined" sx={{ borderRadius: 2.5 }}>
+          <EmptyState
+            icon={ViewKanbanOutlined}
+            title="No active work orders"
+            hint="Release a work order from the Work Orders tab and it will appear here as it moves through the floor."
+          />
+        </Paper>
+      ) : (
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0,1fr))', lg: 'repeat(4, minmax(0,1fr))' }, alignItems: 'start' }}>
+          {BOARD_COLUMNS.map((col) => {
+            const cards = grouped.get(col) || [];
+            return (
+              <Paper key={col} variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden', bgcolor: 'action.hover' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 1.5, py: 1 }}>
+                  <Chip size="small" color={woStatusColor(col)} label={woStatusLabel(col)} sx={{ fontWeight: 700 }} />
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    {cards.length}
+                  </Typography>
+                </Stack>
+                <Divider />
+                <Stack spacing={1.25} sx={{ p: 1.25, minHeight: 80 }}>
+                  {loading && [0, 1].map((i) => <Skeleton key={i} variant="rounded" height={92} />)}
+                  {!loading && cards.length === 0 && (
+                    <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'center', py: 2 }}>
+                      —
+                    </Typography>
+                  )}
+                  {!loading &&
+                    cards.map((wo) => {
+                      const st = currentStage(wo);
+                      return (
+                        <Paper key={wo.id} variant="outlined" sx={{ borderRadius: 2, p: 1.25, bgcolor: 'background.paper' }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                            <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                              {wo.wo_number}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {fmtDate(wo.due_date)}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>
+                            {wo.item_code || wo.item?.code || ''} {wo.item_name || wo.item?.name || ''}
+                          </Typography>
+                          {(wo.line_name || wo.line?.name) && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>
+                              Line: {wo.line_name || wo.line?.name}
+                            </Typography>
+                          )}
+                          <Divider sx={{ my: 0.75 }} />
+                          {st ? (
+                            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                              <Box sx={{ minWidth: 0 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Current stage
+                                </Typography>
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                                    {st.stage_name}
+                                  </Typography>
+                                  <Chip size="small" color={STAGE_STATUS_COLOR[st.status] || 'default'} label={st.status} sx={{ height: 18, fontSize: 10, fontWeight: 600, textTransform: 'capitalize' }} />
+                                </Stack>
+                              </Box>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color={st.status === 'running' ? 'success' : 'primary'}
+                                onClick={() => advance(st)}
+                                disabled={advancing === st.id}
+                                startIcon={advancing === st.id ? <CircularProgress size={14} color="inherit" /> : st.status === 'running' ? <DoneRounded /> : <PlayArrowRounded />}
+                                sx={{ whiteSpace: 'nowrap' }}
+                              >
+                                {st.status === 'running' ? 'Done' : 'Start'}
+                              </Button>
+                            </Stack>
+                          ) : (
+                            <Typography variant="caption" color="text.disabled">
+                              No pending stage
+                            </Typography>
+                          )}
+                        </Paper>
+                      );
+                    })}
+                </Stack>
+              </Paper>
+            );
+          })}
+        </Box>
+      )}
+    </Stack>
+  );
+}
+
+// ===========================================================================
 // Shell
 // ===========================================================================
 const TABS = [
@@ -1362,6 +2206,8 @@ const TABS = [
   { key: 'mrp', label: 'MRP Run', icon: <CalculateOutlined fontSize="small" /> },
   { key: 'lines', label: 'Lines & Machines', icon: <PrecisionManufacturingOutlined fontSize="small" /> },
   { key: 'dashboard', label: 'Plant Dashboard', icon: <SpaceDashboardOutlined fontSize="small" /> },
+  { key: 'workorders', label: 'Work Orders', icon: <AssignmentOutlined fontSize="small" /> },
+  { key: 'shopfloor', label: 'Shop Floor', icon: <ViewKanbanOutlined fontSize="small" /> },
 ];
 
 export default function PPCFoundation() {
@@ -1438,6 +2284,8 @@ export default function PPCFoundation() {
       {tab === 2 && <MrpTab items={items} notify={notify} />}
       {tab === 3 && <LinesMachinesTab notify={notify} />}
       {tab === 4 && <PlantDashboardTab items={items} itemsLoading={itemsLoading} notify={notify} />}
+      {tab === 5 && <WorkOrdersTab items={items} notify={notify} />}
+      {tab === 6 && <ShopFloorTab notify={notify} />}
 
       {/* inline toast */}
       {toast && (

@@ -27,6 +27,7 @@ import {
   alpha,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { useSearchParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -100,6 +101,28 @@ const initials = (email) => {
   return String(email).trim().slice(0, 2).toUpperCase();
 };
 
+/* Lightweight lead score derived purely from stage progression (no extra table).
+   Earlier stages = colder, later stages = hotter. Returns a % plus a Hot/Warm/Cold band. */
+const leadScoreForStage = (stageKey) => {
+  const idx = STAGES.findIndex((s) => s.key === stageKey);
+  if (idx < 0) return null;
+  const denom = Math.max(1, STAGES.length - 1);
+  const pct = Math.round((idx / denom) * 100);
+  let band = "Cold";
+  let color = "default";
+  if (pct >= 66) {
+    band = "Hot";
+    color = "error";
+  } else if (pct >= 33) {
+    band = "Warm";
+    color = "warning";
+  } else {
+    band = "Cold";
+    color = "info";
+  }
+  return { pct, band, color };
+};
+
 /* ----------------------------------------------------------------------- */
 /* Card component (shared shape for board columns)                          */
 /* ----------------------------------------------------------------------- */
@@ -109,6 +132,7 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey }) {
   const [moveAnchor, setMoveAnchor] = useState(null);
   const days = daysSince(company.stage_entered_at);
   const overdue = isPast(company.next_action_date);
+  const score = leadScoreForStage(company.stage);
 
   return (
     <Paper
@@ -155,6 +179,16 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey }) {
               variant="outlined"
               sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11, fontWeight: 700 } }}
             />
+          )}
+          {score && (
+            <Tooltip title={`Lead score ${score.pct}% (by stage)`}>
+              <Chip
+                size="small"
+                label={`${score.band} · ${score.pct}%`}
+                color={score.color}
+                sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11, fontWeight: 700 } }}
+              />
+            </Tooltip>
           )}
         </Stack>
 
@@ -915,8 +949,22 @@ function OrderCycleCard({ cycle, onMove, theme }) {
 
 export default function CRMPipelineBoard() {
   const theme = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [view, setView] = useState("prospects"); // 'prospects' | 'recurring'
+  // View is driven by the URL (?view=prospects | ?view=recurring) so the two CRM
+  // nav links deep-link straight to the right pipeline. Default 'prospects'.
+  const urlView = searchParams.get("view") === "recurring" ? "recurring" : "prospects";
+  const view = urlView; // 'prospects' (New Customers) | 'recurring' (Repeat Customers)
+
+  const setView = useCallback(
+    (next) => {
+      if (!next || next === view) return;
+      const params = new URLSearchParams(searchParams);
+      params.set("view", next);
+      setSearchParams(params, { replace: true });
+    },
+    [view, searchParams, setSearchParams]
+  );
   const [scope, setScope] = useState("my"); // 'my' | 'all'
   const [search, setSearch] = useState("");
 
@@ -1046,7 +1094,7 @@ export default function CRMPipelineBoard() {
         <Stack direction="row" spacing={1.5} alignItems="center">
           <TrendingUpIcon color="primary" />
           <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>
-            Sales Pipeline
+            {view === "recurring" ? "Repeat Customer Pipeline" : "New Customer Pipeline"}
           </Typography>
         </Stack>
 
@@ -1057,8 +1105,8 @@ export default function CRMPipelineBoard() {
             value={view}
             onChange={(_, v) => v && setView(v)}
           >
-            <ToggleButton value="prospects">Prospects board</ToggleButton>
-            <ToggleButton value="recurring">Recurring customers</ToggleButton>
+            <ToggleButton value="prospects">New Customers</ToggleButton>
+            <ToggleButton value="recurring">Repeat Customers</ToggleButton>
           </ToggleButtonGroup>
 
           <ToggleButtonGroup

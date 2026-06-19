@@ -246,6 +246,192 @@ async function lowStock() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------------------------------------------------------------------------
+// Phase 2 — Shop Floor: Work Orders, Stages, Materials, QC
+// ---------------------------------------------------------------------------
+
+/** QC check types offered when recording a quality check on a stage / WO. */
+export const QC_CHECK_TYPES = [
+  'continuity',
+  'hi_pot',
+  'spark',
+  'tensile',
+  'sheath_thickness',
+  'visual',
+  'pull_test',
+];
+
+/** Work-order lifecycle: human label + MUI chip color per status. */
+export const WO_STATUS = {
+  planned: { label: 'Planned', color: 'default' },
+  released: { label: 'Released', color: 'info' },
+  in_progress: { label: 'In progress', color: 'primary' },
+  qc: { label: 'QC', color: 'warning' },
+  done: { label: 'Done', color: 'success' },
+  cancelled: { label: 'Cancelled', color: 'error' },
+};
+
+export const woStatusLabel = (status) => WO_STATUS[status]?.label || status || '—';
+export const woStatusColor = (status) => WO_STATUS[status]?.color || 'default';
+
+/** Stage status → MUI chip color. */
+export const STAGE_STATUS_COLOR = {
+  pending: 'default',
+  running: 'primary',
+  done: 'success',
+  blocked: 'error',
+};
+
+/** List all work orders, newest first, joined to item + line names. */
+async function listWorkOrders() {
+  const data = unwrap(
+    await supabase
+      .from('ppc_wo')
+      .select(
+        'id, wo_number, item_id, qty, line_id, status, priority, planned_start, planned_end, due_date, produced_qty, scrap_qty, owner_email, notes, created_at, ' +
+          'item:ppc_items!ppc_wo_item_id_fkey(id, name, code), line:ppc_lines!ppc_wo_line_id_fkey(id, name)'
+      )
+      .order('created_at', { ascending: false }),
+    'List work orders'
+  );
+  return data || [];
+}
+
+/**
+ * Create a work order via RPC. Pass stages = null (or empty) to let the
+ * backend auto-derive the stage list from the item's routing/BOM.
+ */
+async function createWorkOrder({ itemId, qty, lineId, due, stages }) {
+  if (!itemId) throw new Error('Create work order: an item must be selected');
+  const stageArr = Array.isArray(stages) && stages.length ? stages : null;
+  const data = unwrap(
+    await supabase.rpc('ppc_create_work_order', {
+      p_item_id: itemId,
+      p_qty: Number(qty) || 0,
+      p_line_id: lineId || null,
+      p_due: due || null,
+      p_stages: stageArr,
+    }),
+    'Create work order'
+  );
+  return data || null;
+}
+
+/** Fetch a single work order with its stages (ordered), materials and QC checks. */
+async function getWorkOrder(id) {
+  if (!id) return null;
+  const wo = unwrap(
+    await supabase
+      .from('ppc_wo')
+      .select(
+        'id, wo_number, item_id, qty, line_id, status, priority, planned_start, planned_end, due_date, produced_qty, scrap_qty, owner_email, notes, ' +
+          'item:ppc_items!ppc_wo_item_id_fkey(id, name, code, uom), line:ppc_lines!ppc_wo_line_id_fkey(id, name)'
+      )
+      .eq('id', id)
+      .single(),
+    'Get work order'
+  );
+
+  const [stages, materials, qc] = await Promise.all([
+    supabase
+      .from('ppc_wo_stage')
+      .select(
+        'id, work_order_id, stage_name, sequence, machine_id, operator_name, method_sheet, status, output_qty, scrap_qty, started_at, completed_at, ' +
+          'machine:ppc_machines!ppc_wo_stage_machine_id_fkey(id, name)'
+      )
+      .eq('work_order_id', id)
+      .order('sequence', { ascending: true }),
+    supabase
+      .from('ppc_wo_material')
+      .select(
+        'id, work_order_id, item_id, qty_required, qty_issued, issued_by_email, issued_at, ' +
+          'item:ppc_items!ppc_wo_material_item_id_fkey(id, name, code, uom)'
+      )
+      .eq('work_order_id', id),
+    supabase
+      .from('ppc_wo_qc')
+      .select(
+        'id, work_order_id, stage_id, check_type, result, measured_value, checked_by_email, checked_at, notes'
+      )
+      .eq('work_order_id', id)
+      .order('checked_at', { ascending: false }),
+  ]);
+
+  return {
+    ...wo,
+    stages: unwrap(stages, 'Get WO stages') || [],
+    materials: unwrap(materials, 'Get WO materials') || [],
+    qc: unwrap(qc, 'Get WO QC') || [],
+  };
+}
+
+/** Patch a stage's 4-M assignment fields (machine, operator, method sheet). */
+async function updateStage(stageId, patch) {
+  if (!stageId) throw new Error('Update stage: no stage selected');
+  const allowed = ['machine_id', 'operator_name', 'method_sheet'];
+  const row = {};
+  allowed.forEach((k) => {
+    if (k in patch) row[k] = patch[k];
+  });
+  return unwrap(
+    await supabase.from('ppc_wo_stage').update(row).eq('id', stageId).select().single(),
+    'Update stage'
+  );
+}
+
+/** Advance a stage (set running/done) recording output + scrap. */
+async function advanceStage(stageId, status, output, scrap) {
+  if (!stageId) throw new Error('Advance stage: no stage selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_advance_stage', {
+      p_stage_id: stageId,
+      p_status: status,
+      p_output: output != null && output !== '' ? Number(output) : 0,
+      p_scrap: scrap != null && scrap !== '' ? Number(scrap) : 0,
+    }),
+    'Advance stage'
+  );
+  return data || null;
+}
+
+/** Issue material to a WO (decrements stock). */
+async function issueMaterial(woMaterialId, qty) {
+  if (!woMaterialId) throw new Error('Issue material: no material line selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_issue_material', {
+      p_wo_material_id: woMaterialId,
+      p_qty: Number(qty) || 0,
+    }),
+    'Issue material'
+  );
+  return data || null;
+}
+
+/** Record a QC check against a WO (optionally tied to a stage). */
+async function recordQc({ woId, stageId, checkType, result, value }) {
+  if (!woId) throw new Error('Record QC: no work order selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_record_qc', {
+      p_wo_id: woId,
+      p_stage_id: stageId || null,
+      p_check_type: checkType,
+      p_result: result,
+      p_value: value != null ? String(value) : null,
+    }),
+    'Record QC'
+  );
+  return data || null;
+}
+
+/** Shop-floor board: active WOs (with nested stages) for an optional line. */
+async function shopfloor(lineId) {
+  const data = unwrap(
+    await supabase.rpc('ppc_shopfloor', { p_line_id: lineId || null }),
+    'Shop floor'
+  );
+  return Array.isArray(data) ? data : [];
+}
+
 const ppcService = {
   // items
   listItems,
@@ -271,10 +457,24 @@ const ppcService = {
   // mrp
   runMrp,
   lowStock,
+  // shop floor (Phase 2)
+  listWorkOrders,
+  createWorkOrder,
+  getWorkOrder,
+  updateStage,
+  advanceStage,
+  issueMaterial,
+  recordQc,
+  shopfloor,
   // constants
   ITEM_TYPES,
   FINISHED_TYPES,
   itemTypeLabel,
+  QC_CHECK_TYPES,
+  WO_STATUS,
+  woStatusLabel,
+  woStatusColor,
+  STAGE_STATUS_COLOR,
 };
 
 export default ppcService;
