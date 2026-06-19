@@ -56,6 +56,7 @@ import AccessDenied from "../components/auth/AccessDenied";
 import { getExecutiveSummary } from "../services/executiveDashboardService";
 import { listMyTasks, isTaskOverdue } from "../services/taskService";
 import { StatCard, Panel, EmptyChart, CHART_COLORS, inrCompact } from "../components/common/kit";
+import MyFollowups from "../components/dashboard/MyFollowups";
 
 // Modules most relevant to each department — used to surface a person's own
 // workspace first on the role-aware home.
@@ -262,6 +263,12 @@ function WelcomePage() {
             </Grid>
           ))}
         </Grid>
+
+        {/* My Follow-ups — CRM next-actions, visible without opening the CRM.
+            Self-empties if nothing is scheduled, so it's safe to always render. */}
+        <Box sx={{ mb: 3 }}>
+          <MyFollowups email={user?.email} />
+        </Box>
 
         {/* Analytics (managers + CEO) */}
         {showAnalytics && (

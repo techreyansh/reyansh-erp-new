@@ -223,6 +223,115 @@ export async function moveOrderCycle(id, toStage, note) {
   return data;
 }
 
+/**
+ * The caller's planned CRM next-actions, for the home "My Follow-ups" widget.
+ *
+ * Pulls two sources, both already RLS-scoped to the caller:
+ *  - crm_pipeline.next_action / next_action_date (a card's planned next step)
+ *  - crm_pipeline_activity.next_follow_up_date (a logged activity's follow-up)
+ *
+ * Rows owned by the caller OR unassigned (owner_email IS NULL) are kept — the
+ * owner filter is applied in JS (case-insensitive) so RLS + ownership stay in
+ * sync with how the pipeline board scopes "My" rows.
+ *
+ * @param {string} email  the current user's email
+ * @returns {{ overdue:Array, today:Array, upcoming:Array,
+ *             counts:{ overdue:number, today:number, upcoming:number, total:number } }}
+ */
+export async function getMyFollowups(email) {
+  const mine = (ownerEmail) =>
+    ownerEmail == null ||
+    (email && String(ownerEmail).toLowerCase() === String(email).toLowerCase());
+
+  // 1) Pipeline cards with a planned next action.
+  const { data: pipeRows, error: pErr } = await supabase
+    .from("crm_pipeline")
+    .select("id,company_name,stage,next_action,next_action_date,owner_email")
+    .not("next_action_date", "is", null);
+  throwIf(pErr);
+
+  // 2) Activities with a planned follow-up. Company name comes from the joined
+  //    pipeline row (foreign-table select on the pipeline_id relationship).
+  const { data: actRows, error: aErr } = await supabase
+    .from("crm_pipeline_activity")
+    .select(
+      "id,pipeline_id,subject,activity_type,next_follow_up_date,owner_email,crm_pipeline(company_name)",
+    )
+    .not("next_follow_up_date", "is", null);
+  throwIf(aErr);
+
+  const items = [];
+
+  (pipeRows || []).filter((r) => mine(r.owner_email)).forEach((r) => {
+    items.push({
+      kind: "action",
+      id: r.id,
+      pipelineId: r.id,
+      company: r.company_name || "Untitled",
+      label: r.next_action || "Next action",
+      date: r.next_action_date,
+      stage: r.stage,
+    });
+  });
+
+  (actRows || []).filter((r) => mine(r.owner_email)).forEach((r) => {
+    const company =
+      (r.crm_pipeline && r.crm_pipeline.company_name) || "Untitled";
+    const typeLabel =
+      (ACTIVITY_TYPES.find((t) => t.key === r.activity_type) || {}).label ||
+      r.activity_type ||
+      "Activity";
+    items.push({
+      kind: "activity",
+      id: r.id,
+      pipelineId: r.pipeline_id,
+      company,
+      label: r.subject || typeLabel,
+      date: r.next_follow_up_date,
+      stage: null,
+    });
+  });
+
+  // Categorize relative to local today.
+  const startOfDay = (d) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  };
+  const today = startOfDay(new Date());
+  const weekAhead = startOfDay(new Date());
+  weekAhead.setDate(weekAhead.getDate() + 7);
+
+  const overdue = [];
+  const dueToday = [];
+  const upcoming = [];
+
+  items.forEach((it) => {
+    if (!it.date) return;
+    const d = startOfDay(it.date);
+    if (d < today) overdue.push(it);
+    else if (d.getTime() === today.getTime()) dueToday.push(it);
+    else if (d <= weekAhead) upcoming.push(it);
+  });
+
+  const byDateAsc = (a, b) => new Date(a.date) - new Date(b.date);
+  overdue.sort(byDateAsc);
+  dueToday.sort(byDateAsc);
+  upcoming.sort(byDateAsc);
+
+  return {
+    overdue,
+    today: dueToday,
+    upcoming,
+    counts: {
+      overdue: overdue.length,
+      today: dueToday.length,
+      upcoming: upcoming.length,
+      total: overdue.length + dueToday.length + upcoming.length,
+    },
+  };
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -248,6 +357,7 @@ const crmPipelineService = {
   updateCompany,
   listOrderCycles,
   moveOrderCycle,
+  getMyFollowups,
   getCurrentUserEmail,
 };
 
