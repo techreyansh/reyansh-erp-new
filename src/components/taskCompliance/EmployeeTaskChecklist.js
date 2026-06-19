@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -31,6 +32,14 @@ const STATUS_COLOR = {
   rejected: 'error',
 };
 
+const TASK_TYPE_LABELS = {
+  weekly_first_day: 'First working day of week',
+  monthly_first_day: 'First working day of month',
+};
+
+const formatTaskType = (value) =>
+  value ? TASK_TYPE_LABELS[value] || value : '-';
+
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '-');
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
@@ -44,6 +53,8 @@ export default function EmployeeTaskChecklist() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [submissionLink, setSubmissionLink] = useState('');
   const [submissionNotes, setSubmissionNotes] = useState('');
+  const [proofFile, setProofFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const loadTasks = async () => {
     if (!user?.email) return;
@@ -94,21 +105,39 @@ export default function EmployeeTaskChecklist() {
     setSelectedTask(task);
     setSubmissionLink(task.submission_link || '');
     setSubmissionNotes(task.submission_notes || '');
+    setProofFile(null);
     setDialogOpen(true);
   };
 
   const submitTask = async () => {
     if (!selectedTask) return;
+    setError('');
     try {
+      let link = submissionLink;
+      if (proofFile) {
+        setUploading(true);
+        link = await taskComplianceService.uploadProofFile(
+          selectedTask.id,
+          user?.email,
+          proofFile
+        );
+        setUploading(false);
+      }
       await taskComplianceService.submitTask(selectedTask.id, {
-        submissionLink,
+        submissionLink: link,
         submissionNotes,
       });
       setDialogOpen(false);
       await loadTasks();
     } catch (e) {
+      setUploading(false);
       setError(e?.message || 'Failed to submit task');
     }
+  };
+
+  const openProof = async (task) => {
+    const url = await taskComplianceService.getProofSignedUrl(task.submission_link);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -210,7 +239,7 @@ export default function EmployeeTaskChecklist() {
                     {task.task_templates?.department || '-'}
                   </TableCell>
                   <TableCell sx={{ py: 1.5, display: { xs: 'none', md: 'table-cell' } }}>
-                    {task.task_templates?.task_type || '-'}
+                    {formatTaskType(task.task_templates?.task_type)}
                   </TableCell>
                   <TableCell sx={{ py: 1.5, display: { xs: 'none', md: 'table-cell' } }}>
                     {formatDate(task.due_date)}
@@ -228,14 +257,25 @@ export default function EmployeeTaskChecklist() {
                         '.MuiTableRow-root:hover &': { opacity: 1 },
                       }}
                     >
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => openSubmitDialog(task)}
-                        disabled={task.status === 'approved'}
-                      >
-                        Submit Proof
-                      </Button>
+                      <Stack direction="row" spacing={1}>
+                        {task.submission_link && (
+                          <Button
+                            size="small"
+                            variant="text"
+                            onClick={() => openProof(task)}
+                          >
+                            View Proof
+                          </Button>
+                        )}
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => openSubmitDialog(task)}
+                          disabled={task.status === 'approved'}
+                        >
+                          Submit Proof
+                        </Button>
+                      </Stack>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -255,6 +295,36 @@ export default function EmployeeTaskChecklist() {
               onChange={(e) => setSubmissionLink(e.target.value)}
               fullWidth
             />
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Or upload a file (optional)
+              </Typography>
+              <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+                <Button
+                  component="label"
+                  variant="outlined"
+                  size="small"
+                  disabled={uploading}
+                  startIcon={uploading ? <CircularProgress size={16} /> : undefined}
+                >
+                  {uploading ? 'Uploading…' : 'Choose File'}
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                  />
+                </Button>
+                {proofFile && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ wordBreak: 'break-all' }}
+                  >
+                    {proofFile.name}
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
             <TextField
               label="Notes"
               value={submissionNotes}
@@ -266,9 +336,16 @@ export default function EmployeeTaskChecklist() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={submitTask}>
-            Submit
+          <Button onClick={() => setDialogOpen(false)} disabled={uploading}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={submitTask}
+            disabled={uploading}
+            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : undefined}
+          >
+            {uploading ? 'Uploading…' : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>

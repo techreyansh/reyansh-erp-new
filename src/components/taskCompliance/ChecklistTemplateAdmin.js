@@ -12,6 +12,7 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   IconButton,
   InputLabel,
   MenuItem,
@@ -38,12 +39,29 @@ import taskComplianceService from '../../services/taskComplianceService';
 import { listRoles, listEmployees } from '../../services/rbacService';
 
 const DEPARTMENTS = ['CRM', 'PPC', 'Production', 'Quality', 'Dispatch'];
-const FREQUENCIES = ['daily', 'weekly', 'monthly', 'quarterly'];
+
+// Frequency options (maps to task_templates.task_type). `label` is shown in the
+// Select and the table chip; values with no entry fall back to a capitalized value.
+const FREQUENCIES = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'weekly_first_day', label: 'First working day of week' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'monthly_first_day', label: 'First working day of month' },
+  { value: 'quarterly', label: 'Quarterly' },
+];
+
+const FREQUENCY_LABEL = FREQUENCIES.reduce((acc, f) => {
+  acc[f.value] = f.label;
+  return acc;
+}, {});
 
 const FREQUENCY_COLOR = {
   daily: 'success',
   weekly: 'info',
+  weekly_first_day: 'primary',
   monthly: 'warning',
+  monthly_first_day: 'secondary',
   quarterly: 'secondary',
 };
 
@@ -387,9 +405,9 @@ export default function ChecklistTemplateAdmin() {
                   <TableCell sx={{ py: 1.5 }}>
                     <Chip
                       size="small"
-                      label={row.task_type}
+                      label={FREQUENCY_LABEL[row.task_type] || row.task_type}
                       color={FREQUENCY_COLOR[row.task_type] || 'default'}
-                      sx={{ textTransform: 'capitalize' }}
+                      sx={FREQUENCY_LABEL[row.task_type] ? undefined : { textTransform: 'capitalize' }}
                     />
                   </TableCell>
                   <TableCell sx={{ py: 1.5, display: { xs: 'none', md: 'table-cell' } }}>
@@ -481,11 +499,15 @@ export default function ChecklistTemplateAdmin() {
                   onChange={(e) => setField('task_type', e.target.value)}
                 >
                   {FREQUENCIES.map((f) => (
-                    <MenuItem key={f} value={f} sx={{ textTransform: 'capitalize' }}>
-                      {f}
+                    <MenuItem key={f.value} value={f.value}>
+                      {f.label}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>
+                  First working day = the period's first weekday (Mon for week; 1st working day for
+                  month).
+                </FormHelperText>
               </FormControl>
             </Box>
 

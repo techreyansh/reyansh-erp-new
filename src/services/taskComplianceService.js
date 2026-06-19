@@ -136,6 +136,53 @@ const taskComplianceService = {
     return data || [];
   },
 
+  /**
+   * Upload an optional proof file for a checklist task instance to the private
+   * 'documents' Storage bucket. Returns the storage PATH (string) on success so
+   * it can be passed as the submission_link. Throws on error.
+   */
+  async uploadProofFile(taskInstanceId, email, file) {
+    if (!file) throw new Error('No file provided to upload.');
+    const safeEmail = normalizeEmail(email) || 'unknown';
+    const safeName = String(file.name || 'file')
+      .replace(/[^a-zA-Z0-9._-]+/g, '_')
+      .replace(/_+/g, '_');
+    const path = `checklist-proofs/${safeEmail}/${taskInstanceId}/${Date.now()}-${safeName}`;
+
+    const { error } = await supabase.storage
+      .from('documents')
+      .upload(path, file, { upsert: true });
+    if (error) {
+      console.error('uploadProofFile error:', error);
+      throw error;
+    }
+    return path;
+  },
+
+  /**
+   * Resolve a proof reference to an openable URL. If `path` is already an
+   * http(s) URL (legacy pasted links) it is returned as-is; otherwise a 1-hour
+   * signed URL is created for the private 'documents' bucket. Returns null on
+   * failure.
+   */
+  async getProofSignedUrl(path) {
+    if (!path) return null;
+    if (/^https?:\/\//i.test(path)) return path;
+    try {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(path, 3600);
+      if (error) {
+        console.error('getProofSignedUrl error:', error);
+        return null;
+      }
+      return data?.signedUrl || null;
+    } catch (e) {
+      console.error('getProofSignedUrl error:', e);
+      return null;
+    }
+  },
+
   async submitTask(taskInstanceId, { submissionLink = null, submissionNotes = null } = {}) {
     const { data, error } = await supabase.rpc('submit_task_instance', {
       p_task_instance_id: taskInstanceId,
