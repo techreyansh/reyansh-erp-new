@@ -163,6 +163,54 @@ const taskComplianceService = {
     return data;
   },
 
+  /**
+   * "My checklists today" — the caller's own checklist instances that are due
+   * today or already overdue and still need action (pending or submitted but not
+   * yet approved). Categorized into { today, overdue }. Joins the template so the
+   * UI can show the task name + frequency (task_type).
+   *
+   * @param {string} email  The logged-in user's email.
+   * @returns {Promise<{ today: object[], overdue: object[], total: number }>}
+   */
+  async getMyChecklistsToday(email) {
+    const normalized = normalizeEmail(email);
+    if (!normalized) return { today: [], overdue: [], total: 0 };
+
+    const { data, error } = await supabase
+      .from(TABLES.instances)
+      .select('*, task_templates(task_name, task_type)')
+      .ilike('assigned_to_email', normalized)
+      .in('status', ['pending', 'submitted'])
+      .order('due_date', { ascending: true });
+
+    if (error) {
+      console.error('getMyChecklistsToday error:', error);
+      return { today: [], overdue: [], total: 0 };
+    }
+
+    // End of today (local). Anything due at-or-before this is "due/overdue".
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const today = [];
+    const overdue = [];
+    for (const row of data || []) {
+      if (!row.due_date) {
+        // No due date — treat as due today so it isn't lost.
+        today.push(row);
+        continue;
+      }
+      const due = new Date(row.due_date);
+      if (due > endOfToday) continue; // future — not part of "today"
+      if (due < startOfToday) overdue.push(row);
+      else today.push(row);
+    }
+
+    return { today, overdue, total: today.length + overdue.length };
+  },
+
   subscribeToTaskRealtime({ onTaskChange, onScoreChange } = {}) {
     const channel = supabase
       .channel('task-compliance-realtime')

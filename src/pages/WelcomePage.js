@@ -57,6 +57,7 @@ import { getExecutiveSummary } from "../services/executiveDashboardService";
 import { listMyTasks, isTaskOverdue } from "../services/taskService";
 import { StatCard, Panel, EmptyChart, CHART_COLORS, inrCompact } from "../components/common/kit";
 import MyFollowups from "../components/dashboard/MyFollowups";
+import MyDayDashboard from "../components/dashboard/MyDayDashboard";
 
 // Modules most relevant to each department — used to surface a person's own
 // workspace first on the role-aware home.
@@ -255,6 +256,12 @@ function WelcomePage() {
       </Box>
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, mt: -3 }}>
+        {/* My Day — live personal dashboard (score + tasks + checklists).
+            Sits at the very top so every user lands on what they need to do. */}
+        <Box sx={{ mb: 3 }}>
+          <MyDayDashboard email={user?.email} />
+        </Box>
+
         {/* KPI strip */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {kpiCards.map((c) => (
