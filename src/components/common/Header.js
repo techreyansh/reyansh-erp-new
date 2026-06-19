@@ -72,6 +72,7 @@ import {
   MarkEmailRead as CampaignIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 import { usePermissions } from "../../context/PermissionContext";
 import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
@@ -93,6 +94,7 @@ const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openSections, setOpenSections] = useState({});
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   const toggleSection = (key) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -149,6 +151,32 @@ const Header = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Fetch the current user's profile photo once (for the top-right avatar).
+  useEffect(() => {
+    let active = true;
+    if (!user?.email) {
+      setProfilePhoto(null);
+      return undefined;
+    }
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('employees_data')
+          .select('ProfilePhoto')
+          .ilike('Email', user.email)
+          .maybeSingle();
+        if (active) setProfilePhoto(data?.ProfilePhoto || null);
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Header: could not load profile photo', err);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user?.email]);
 
   const canManageEmployees = permissions.canManageEmployees;
 
@@ -924,9 +952,9 @@ const Header = () => {
                     >
                       <Avatar
                         alt={user.name}
-                        src={user.imageUrl || "/static/images/avatar/2.jpg"}
-                        sx={{ 
-                          width: 32, 
+                        src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
+                        sx={{
+                          width: 32,
                           height: 32,
                           border: `1px solid ${theme.palette.divider}`,
                           fontSize: "0.875rem",
@@ -1085,7 +1113,7 @@ const Header = () => {
                   >
                     <Avatar
                       alt={user.name}
-                      src={user.imageUrl || "/static/images/avatar/2.jpg"}
+                      src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
                       sx={{ width: 64, height: 64, mb: 1 }}
                     />
                     <Typography variant="subtitle1">{user.name}</Typography>
