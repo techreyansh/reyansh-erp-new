@@ -247,6 +247,111 @@ async function lowStock() {
 }
 
 // ---------------------------------------------------------------------------
+// Inventory dashboard — reorder board, excess stock, item↔vendor linkage
+// ---------------------------------------------------------------------------
+
+/**
+ * Reorder / shortage board (RPC). Returns rows of items at/under reorder point
+ * with suggested replenishment qty + preferred vendor. Never throws — returns []
+ * so the dashboard renders even before the data/RPC exists.
+ */
+async function reorderBoard() {
+  try {
+    const { data, error } = await supabase.rpc('ppc_reorder_board');
+    if (error) {
+      console.warn('[ppcService] Reorder board:', error.message);
+      return [];
+    }
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn('[ppcService] Reorder board:', e.message);
+    return [];
+  }
+}
+
+/**
+ * Excess / slow-moving stock (RPC). p_cover_threshold = days-of-cover above which
+ * an item is flagged as excess. Never throws — returns [].
+ */
+async function excessStock(coverThreshold = 120) {
+  try {
+    const { data, error } = await supabase.rpc('ppc_excess_stock', {
+      p_cover_threshold: Number(coverThreshold) || 120,
+    });
+    if (error) {
+      console.warn('[ppcService] Excess stock:', error.message);
+      return [];
+    }
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn('[ppcService] Excess stock:', e.message);
+    return [];
+  }
+}
+
+/** Vendors linked to a given item, preferred first. */
+async function listItemVendors(itemId) {
+  if (!itemId) return [];
+  const data = unwrap(
+    await supabase
+      .from('ppc_item_vendors')
+      .select('*')
+      .eq('item_id', itemId)
+      .order('is_preferred', { ascending: false }),
+    'List item vendors'
+  );
+  return data || [];
+}
+
+/**
+ * Insert or update an item↔vendor link. If payload.id is present it updates,
+ * otherwise inserts. When is_preferred is set true, first clears any other
+ * preferred vendor for the item (to respect the one-preferred unique index).
+ */
+async function upsertItemVendor(payload) {
+  const row = {
+    item_id: payload.item_id,
+    vendor_code: payload.vendor_code?.trim() || null,
+    vendor_name: payload.vendor_name?.trim() || null,
+    is_preferred: payload.is_preferred ?? false,
+    lead_time_days:
+      payload.lead_time_days != null && payload.lead_time_days !== ''
+        ? Number(payload.lead_time_days)
+        : null,
+    unit_cost:
+      payload.unit_cost != null && payload.unit_cost !== '' ? Number(payload.unit_cost) : null,
+    moq: payload.moq != null && payload.moq !== '' ? Number(payload.moq) : null,
+  };
+
+  // Respect the one-preferred-per-item unique index: clear others first.
+  if (row.is_preferred && row.item_id) {
+    let clear = supabase
+      .from('ppc_item_vendors')
+      .update({ is_preferred: false })
+      .eq('item_id', row.item_id);
+    if (payload.id) clear = clear.neq('id', payload.id);
+    unwrap(await clear, 'Clear preferred vendor');
+  }
+
+  if (payload.id) {
+    return unwrap(
+      await supabase.from('ppc_item_vendors').update(row).eq('id', payload.id).select().single(),
+      'Update item vendor'
+    );
+  }
+  return unwrap(
+    await supabase.from('ppc_item_vendors').insert(row).select().single(),
+    'Add item vendor'
+  );
+}
+
+/** Delete an item↔vendor link by id. */
+async function deleteItemVendor(id) {
+  unwrap(await supabase.from('ppc_item_vendors').delete().eq('id', id), 'Delete item vendor');
+  return true;
+}
+
+// ---------------------------------------------------------------------------
 // Phase 2 — Shop Floor: Work Orders, Stages, Materials, QC
 // ---------------------------------------------------------------------------
 
@@ -516,6 +621,12 @@ const ppcService = {
   // mrp
   runMrp,
   lowStock,
+  // inventory dashboard
+  reorderBoard,
+  excessStock,
+  listItemVendors,
+  upsertItemVendor,
+  deleteItemVendor,
   // shop floor (Phase 2)
   listWorkOrders,
   createWorkOrder,

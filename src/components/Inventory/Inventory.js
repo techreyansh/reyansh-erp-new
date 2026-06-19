@@ -42,6 +42,7 @@ import FinishedGoodsMaster from "../FinishedGoods/FinishedGoodsMaster";
 import CompanyBillOfMaterials from "../BillOfMaterials/CompanyBillOfMaterials";
 import CompanyKittingSheet from "../KittingSheet/CompanyKittingSheet";
 import FGInventory from "./FinishedGoodsMaster";
+import InventoryDashboard from "./InventoryDashboard";
 import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import FGStockSheet from "./FGStockSheet";
@@ -57,6 +58,12 @@ const Inventory = () => {
 
   // Enhanced tab configuration with icons and descriptions
   const mainTabs = [
+    {
+      label: "Overview",
+      icon: <DashboardIcon />,
+      description: "Reorder, shortages & excess stock at a glance",
+      color: "primary.main"
+    },
     {
       label: "Stock Sheet",
       icon: <StockIcon />,
@@ -151,8 +158,10 @@ const Inventory = () => {
   const renderTabContent = () => {
     switch (selectedTab) {
       case 0:
-        return <StockManagement />;
+        return <InventoryDashboard />;
       case 1:
+        return <StockManagement />;
+      case 2:
         return (
           <Box>
             {/* FG Sub-navigation */}
@@ -206,9 +215,9 @@ const Inventory = () => {
             {selectedFGTab === 0 && <FGStockSheet />}
           </Box>
         );
-      case 2:
-        return <CompanyBillOfMaterials />;
       case 3:
+        return <CompanyBillOfMaterials />;
+      case 4:
         return <CompanyKittingSheet />;
       default:
         return null;
