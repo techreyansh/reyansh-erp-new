@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -36,6 +37,7 @@ import {
   unlockWeek,
 } from '../../services/misService';
 import { usePermissions } from '../../context/PermissionContext';
+import { useAuth } from '../../context/AuthContext';
 
 // EOS Level-10 agenda — purely visual section markers for the meeting ribbon.
 const AGENDA = ['Segue', 'Scorecard', 'Goals', 'Headlines', 'To-Dos', 'IDS', 'Conclude'];
@@ -257,10 +259,11 @@ function PillarBar({ label, score, weight, sub }) {
   );
 }
 
-function WorkList({ title, icon, items, colorKey, count }) {
+function WorkList({ title, icon, items, colorKey, count, onItemClick }) {
   const theme = useTheme();
   const accent = theme.palette[colorKey]?.main || theme.palette.primary.main;
   const list = Array.isArray(items) ? items : [];
+  const clickable = typeof onItemClick === 'function';
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2, p: 1.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -274,9 +277,34 @@ function WorkList({ title, icon, items, colorKey, count }) {
       ) : (
         <Stack spacing={1} sx={{ overflowY: 'auto' }}>
           {list.map((it) => (
+            // TODO: when per-task deep-linking lands, target '/my-tasks?task={it.id}' instead of the inbox.
             <Box
               key={it.id}
-              sx={{ borderLeft: `3px solid ${accent}`, bgcolor: alpha(accent, 0.05), borderRadius: 1, px: 1, py: 0.75 }}
+              onClick={clickable ? () => onItemClick(it) : undefined}
+              role={clickable ? 'button' : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onItemClick(it);
+                      }
+                    }
+                  : undefined
+              }
+              sx={{
+                borderLeft: `3px solid ${accent}`,
+                bgcolor: alpha(accent, 0.05),
+                borderRadius: 1,
+                px: 1,
+                py: 0.75,
+                ...(clickable && {
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s ease',
+                  '&:hover': { bgcolor: alpha(accent, 0.14) },
+                }),
+              }}
             >
               <Typography variant="body2" sx={{ fontWeight: 600 }}>{it.title}</Typography>
               {it.original_due_date && it.original_due_date !== it.due_date ? (
@@ -308,7 +336,7 @@ function ScorecardSkeleton() {
   );
 }
 
-function PersonScorecard({ score, loading, lockStatus }) {
+function PersonScorecard({ score, loading, lockStatus, onTaskClick }) {
   const theme = useTheme();
   if (loading) return <ScorecardSkeleton />;
   if (!score) {
@@ -393,9 +421,9 @@ function PersonScorecard({ score, loading, lockStatus }) {
 
       {/* Work lists */}
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' } }}>
-        <WorkList title="Work Done" icon={<CheckCircleOutline fontSize="small" />} items={score.work_done} colorKey="success" count={counts.done} />
-        <WorkList title="Work Not Done" icon={<HighlightOff fontSize="small" />} items={score.work_not_done} colorKey="error" count={counts.not_done} />
-        <WorkList title="Rescheduled" icon={<AutorenewRounded fontSize="small" />} items={score.rescheduled} colorKey="warning" count={counts.rescheduled} />
+        <WorkList title="Work Done" icon={<CheckCircleOutline fontSize="small" />} items={score.work_done} colorKey="success" count={counts.done} onItemClick={onTaskClick} />
+        <WorkList title="Work Not Done" icon={<HighlightOff fontSize="small" />} items={score.work_not_done} colorKey="error" count={counts.not_done} onItemClick={onTaskClick} />
+        <WorkList title="Rescheduled" icon={<AutorenewRounded fontSize="small" />} items={score.rescheduled} colorKey="warning" count={counts.rescheduled} onItemClick={onTaskClick} />
       </Box>
     </Stack>
   );
@@ -404,6 +432,17 @@ function PersonScorecard({ score, loading, lockStatus }) {
 export default function MISExecutiveMeeting() {
   const { roleCode } = usePermissions();
   const isCEO = roleCode === 'CEO';
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const currentEmail = user?.email ? String(user.email).trim().toLowerCase() : null;
+  // Auto-select the current user's own roster row once per page mount; after that, respect manual choices.
+  const didAutoSelect = useRef(false);
+
+  // Navigate from a scorecard task item to the task inbox.
+  // TODO: when per-task deep-linking lands, pass the task id (e.g. '/my-tasks?task={item.id}').
+  const handleTaskClick = useCallback(() => {
+    navigate('/my-tasks');
+  }, [navigate]);
 
   const [weekStart, setWeekStart] = useState(getCurrentWeekStart());
   const [roster, setRoster] = useState([]);
@@ -422,12 +461,28 @@ export default function MISExecutiveMeeting() {
     getRoster(weekStart).then((rows) => {
       if (!active) return;
       setRoster(rows);
-      // Keep selection if the person is still in the roster, else clear.
-      setSelectedEmail((prev) => (prev && rows.some((r) => r.email === prev) ? prev : null));
+      setSelectedEmail((prev) => {
+        // Keep an existing selection when the person is still in this week's roster.
+        if (prev && rows.some((r) => r.email === prev)) return prev;
+        // On first load, default-select the viewer's own row so they see their own scorecard first.
+        // Reviewers (CEO/etc.) without a roster row fall through to the existing "no selection" default,
+        // and can still click any row.
+        if (!didAutoSelect.current && currentEmail) {
+          const mine = rows.find(
+            (r) => r.email && String(r.email).trim().toLowerCase() === currentEmail
+          );
+          if (mine) {
+            didAutoSelect.current = true;
+            return mine.email;
+          }
+        }
+        // Selection no longer valid for this week (or nothing matched) — clear it.
+        return null;
+      });
       setRosterLoading(false);
     });
     return () => { active = false; };
-  }, [weekStart]);
+  }, [weekStart, currentEmail]);
 
   // Load the selected person's scorecard.
   useEffect(() => {
@@ -638,6 +693,7 @@ export default function MISExecutiveMeeting() {
               score={score}
               loading={scoreLoading}
               lockStatus={weekStatus}
+              onTaskClick={handleTaskClick}
             />
           )}
         </Box>
