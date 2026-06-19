@@ -425,6 +425,7 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
   const [editNextAction, setEditNextAction] = useState("");
   const [editNextDate, setEditNextDate] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
+  const [savingDeal, setSavingDeal] = useState(false);
 
   // Activity form
   const [actType, setActType] = useState("note");
@@ -465,6 +466,16 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
     } catch (e) {
       setErr(e?.message || "Update failed.");
     }
+  };
+
+  const saveDeal = async () => {
+    setSavingDeal(true);
+    await saveField({
+      value: editValue === "" ? null : Number(editValue),
+      next_action: editNextAction || null,
+      next_action_date: editNextDate || null,
+    });
+    setSavingDeal(false);
   };
 
   const saveOwner = async () => {
@@ -510,7 +521,15 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: { xs: "100%", sm: 460 }, maxWidth: "100%" } }}
+      PaperProps={{
+        sx: {
+          width: { xs: "100%", sm: 460 },
+          maxWidth: "100%",
+          top: { xs: 56, sm: 64 },
+          height: { xs: "calc(100% - 56px)", sm: "calc(100% - 64px)" },
+          overflowY: "auto",
+        },
+      }}
     >
       <Box sx={{ p: 2 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -570,23 +589,14 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
             <Box>
               <SectionTitle>Deal & next action</SectionTitle>
               <Stack spacing={1.5} sx={{ mt: 1 }}>
-                <Stack direction="row" spacing={1} alignItems="flex-end">
-                  <TextField
-                    label="Value (₹)"
-                    type="number"
-                    size="small"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    fullWidth
-                  />
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => saveField({ value: editValue === "" ? null : Number(editValue) })}
-                  >
-                    Save
-                  </Button>
-                </Stack>
+                <TextField
+                  label="Value (₹)"
+                  type="number"
+                  size="small"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  fullWidth
+                />
                 <TextField
                   label="Next action"
                   size="small"
@@ -594,29 +604,30 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
                   onChange={(e) => setEditNextAction(e.target.value)}
                   fullWidth
                 />
-                <Stack direction="row" spacing={1} alignItems="flex-end">
-                  <TextField
-                    label="Next action date"
-                    type="date"
-                    size="small"
-                    value={editNextDate || ""}
-                    onChange={(e) => setEditNextDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() =>
-                      saveField({
-                        next_action: editNextAction || null,
-                        next_action_date: editNextDate || null,
-                      })
-                    }
-                  >
-                    Save
-                  </Button>
-                </Stack>
+                <TextField
+                  label="Next action date"
+                  type="date"
+                  size="small"
+                  value={editNextDate || ""}
+                  onChange={(e) => setEditNextDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  disabled={savingDeal}
+                  onClick={saveDeal}
+                  sx={{ alignSelf: "flex-start", px: 2.5 }}
+                >
+                  {savingDeal ? "Saving…" : "Save changes"}
+                </Button>
+
+                <Divider sx={{ my: 0.5 }} />
+
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  Owner
+                </Typography>
                 <Stack direction="row" spacing={1} alignItems="flex-end">
                   <TextField
                     label="Owner email"
