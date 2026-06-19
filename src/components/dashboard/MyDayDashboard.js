@@ -614,7 +614,7 @@ function MyDayDashboard({ email }) {
           mb: 2,
         }}
       >
-        <ScoreCard score={score} loading={loading} theme={theme} onOpen={() => navigate("/mis")} />
+        <ScoreCard score={score} loading={loading} theme={theme} onOpen={() => navigate("/mis/executive-meeting")} />
         <SummaryCard
           label="My Tasks"
           icon={AssignmentTurnedInOutlined}

@@ -308,9 +308,8 @@ function ScorecardSkeleton() {
   );
 }
 
-function PersonScorecard({ score, loading, lockStatus, lockBusy, canUnlock, onLock, onUnlock }) {
+function PersonScorecard({ score, loading, lockStatus }) {
   const theme = useTheme();
-  const locked = Boolean(lockStatus?.locked);
   if (loading) return <ScorecardSkeleton />;
   if (!score) {
     return (
@@ -334,7 +333,7 @@ function PersonScorecard({ score, loading, lockStatus, lockBusy, canUnlock, onLo
     <Stack spacing={2}>
       {/* Headline score + say/do + lock */}
       <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, sm: 2.5 } }}>
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr auto' }, alignItems: 'center' }}>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, alignItems: 'center' }}>
           <Stack direction="row" spacing={2} alignItems="center">
             <Box
               sx={{
@@ -376,49 +375,6 @@ function PersonScorecard({ score, loading, lockStatus, lockBusy, canUnlock, onLo
             <Typography variant="caption" color="text.secondary">
               {`${counts.done ?? 0} done · ${counts.late ?? 0} late · ${counts.not_done ?? 0} missed`}
             </Typography>
-          </Box>
-
-          <Box sx={{ justifySelf: { xs: 'start', sm: 'end' } }}>
-            {locked ? (
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="success"
-                  startIcon={<LockRounded />}
-                  disabled
-                  sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
-                >
-                  Week locked
-                </Button>
-                {canUnlock && (
-                  <Tooltip title="Unlock this week (CEO)">
-                    <span>
-                      <Button
-                        variant="text"
-                        color="error"
-                        startIcon={<LockOpenRounded />}
-                        onClick={onUnlock}
-                        disabled={lockBusy}
-                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
-                      >
-                        Unlock
-                      </Button>
-                    </span>
-                  </Tooltip>
-                )}
-              </Stack>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<LockOutlined />}
-                onClick={onLock}
-                disabled={lockBusy}
-                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
-              >
-                Review &amp; Lock week
-              </Button>
-            )}
           </Box>
         </Box>
       </Paper>
@@ -553,23 +509,70 @@ export default function MISExecutiveMeeting() {
             Weekly accountability — MIS
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <LockChip status={weekStatus} />
-          <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Tooltip title="Previous week">
-              <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
-                <ChevronLeftRounded />
-              </IconButton>
-            </Tooltip>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 168, textAlign: 'center' }}>
-              {weekLabel(weekStart)}
-            </Typography>
-            <Tooltip title="Next week">
-              <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
-                <ChevronRightRounded />
-              </IconButton>
-            </Tooltip>
-          </Paper>
+        <Stack spacing={1} alignItems={{ xs: 'flex-start', sm: 'flex-end' }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <LockChip status={weekStatus} />
+            <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Previous week">
+                <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
+                  <ChevronLeftRounded />
+                </IconButton>
+              </Tooltip>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 168, textAlign: 'center' }}>
+                {weekLabel(weekStart)}
+              </Typography>
+              <Tooltip title="Next week">
+                <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
+                  <ChevronRightRounded />
+                </IconButton>
+              </Tooltip>
+            </Paper>
+
+            {/* Week-level lock control — applies to the WHOLE team for this week. */}
+            {weekStatus?.locked ? (
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Button
+                  variant="outlined"
+                  color="success"
+                  startIcon={<LockRounded />}
+                  disabled
+                  sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+                >
+                  Week locked (all team)
+                </Button>
+                {isCEO && (
+                  <Tooltip title="Unlock this week for the whole team (CEO)">
+                    <span>
+                      <Button
+                        variant="text"
+                        color="error"
+                        startIcon={<LockOpenRounded />}
+                        onClick={handleUnlock}
+                        disabled={lockBusy}
+                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+                      >
+                        Unlock week (all team)
+                      </Button>
+                    </span>
+                  </Tooltip>
+                )}
+              </Stack>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<LockOutlined />}
+                onClick={handleLock}
+                disabled={lockBusy}
+                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+              >
+                Review &amp; Lock week (all team)
+              </Button>
+            )}
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+            Locking applies to the whole team for this week.
+          </Typography>
         </Stack>
       </Stack>
 
@@ -635,10 +638,6 @@ export default function MISExecutiveMeeting() {
               score={score}
               loading={scoreLoading}
               lockStatus={weekStatus}
-              lockBusy={lockBusy}
-              canUnlock={isCEO}
-              onLock={handleLock}
-              onUnlock={handleUnlock}
             />
           )}
         </Box>
