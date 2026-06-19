@@ -1,272 +1,115 @@
-// Supabase Edge Function: task-notify
+// task-notify — drains the public.task_notifications outbox and sends.
+// Self-contained (only an esm.sh import) so it can be deployed via the
+// Supabase Management API without local bundling.
 //
-// Drains the task-notification outbox (public.task_notifications) and delivers
-// each pending notification over its channel:
-//   - 'email'    -> sent through the first connected Gmail account, reusing the
-//                   shared Gmail stack (_shared/gmail.ts + getFreshToken).
-//   - 'whatsapp' -> sent via the Meta WhatsApp Cloud API (when credentialed).
+// EMAIL  : Resend REST API.  Secrets: RESEND_API_KEY, RESEND_FROM (e.g. "Reyansh ERP <noreply@yourdomain.com>")
+// WHATSAPP (deferred): Meta WhatsApp Cloud API.  Secrets: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID
+//                      (when unset, whatsapp rows are marked 'skipped' — the in-app one-tap wa.me still works).
+// AUTH   : if SCHEDULER_SECRET is set, callers must send header x-scheduler-secret.
+// SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are auto-injected on deployed functions.
 //
-// Runs as trusted background work with the service role (bypasses RLS). It is
-// idempotent: it only ever touches rows with status='pending' whose
-// scheduled_for has elapsed, and writes a terminal status (sent/skipped/failed)
-// or leaves the row 'pending' for a later retry.
-//
-// ─────────────────────────────────────────────────────────────────────────────
-// REQUIRED env / secrets (set with `supabase secrets set ...`):
-//   SUPABASE_URL                 (auto-injected on deployed functions)
-//   SUPABASE_SERVICE_ROLE_KEY    (auto-injected on deployed functions)
-//   GOOGLE_CLIENT_ID             same OAuth client used for Gmail login
-//   GOOGLE_CLIENT_SECRET         "
-//
-// OPTIONAL secrets:
-//   WHATSAPP_TOKEN               Meta WhatsApp Cloud API permanent/system token
-//   WHATSAPP_PHONE_NUMBER_ID     the phone-number id to send from
-//        -> if BOTH are absent, whatsapp rows are marked 'skipped'.
-//   SCHEDULER_SECRET             if set, callers MUST send a matching
-//                                'x-scheduler-secret' request header.
-//
-// ─────────────────────────────────────────────────────────────────────────────
-// DEPLOY:
-//   supabase functions deploy task-notify
-//   supabase secrets set GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=...
-//   # optional:
-//   supabase secrets set WHATSAPP_TOKEN=... WHATSAPP_PHONE_NUMBER_ID=...
-//   supabase secrets set SCHEDULER_SECRET=...
-//
-// SCHEDULE (pg_cron) — run in the SQL editor, every 10 minutes:
-//   create extension if not exists pg_cron;
-//   create extension if not exists pg_net;
-//   select cron.schedule(
-//     'task-notify-drain',
-//     '*/10 * * * *',
-//     $$
-//       select net.http_post(
-//         url     := 'https://<PROJECT_REF>.functions.supabase.co/task-notify',
-//         headers := jsonb_build_object(
-//           'Content-Type',       'application/json',
-//           'x-scheduler-secret', '<SCHEDULER_SECRET>'   -- omit if not set
-//         ),
-//         body    := '{}'::jsonb
-//       );
-//     $$
-//   );
-//   -- to remove later: select cron.unschedule('task-notify-drain');
-//
-// Expected public.task_notifications columns:
-//   id, channel ('email'|'whatsapp'), recipient_email, recipient_phone,
-//   subject, body, status ('pending'|'sent'|'skipped'|'failed'),
-//   scheduled_for timestamptz, sent_at timestamptz, attempts int, error text
-import { preflight, json } from "../_shared/cors.ts";
-import { serviceClient } from "../_shared/db.ts";
-import { getFreshToken } from "../_shared/send.ts";
-import { buildMime, sendGmail } from "../_shared/gmail.ts";
+// Deploy: handled via Management API. Then schedule with pg_cron to POST every ~10 min.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const BATCH_SIZE = 50;
+const BATCH = 50;
 const MAX_ATTEMPTS = 3;
-const WHATSAPP_API_VERSION = "v20.0";
 
-const nowIso = () => new Date().toISOString();
-
-// Pick a Gmail account we can actually send from: connected + has a refresh
-// token. Returns null when none exists (so the row is skipped, not failed).
-async function findSendingAccount(db: any): Promise<any | null> {
-  const { data } = await db
-    .from("email_accounts")
-    .select("*")
-    .not("refresh_token", "is", null)
-    .eq("status", "connected")
-    .order("created_at", { ascending: true })
-    .limit(1);
-  if (data && data.length) return data[0];
-
-  // Fallback: any account with a refresh token (status may be stale/expired —
-  // getFreshToken will refresh and flip it back to connected).
-  const { data: any2 } = await db
-    .from("email_accounts")
-    .select("*")
-    .not("refresh_token", "is", null)
-    .order("created_at", { ascending: true })
-    .limit(1);
-  return any2 && any2.length ? any2[0] : null;
+async function mark(db: any, row: any, status: string, err: string | null) {
+  await db.from("task_notifications").update({
+    status,
+    error: err,
+    sent_at: status === "sent" ? new Date().toISOString() : null,
+    attempts: (row.attempts || 0) + 1,
+  }).eq("id", row.id);
 }
 
-// Send a WhatsApp text message via the Meta Cloud API. Throws on failure.
-//
-// TODO: outside the 24-hour customer-service window, free-form 'text' messages
-// are rejected by Meta — real proactive sends require a pre-approved *template*
-// message (type: 'template'). Swap the body below for a template payload once a
-// template is approved. For now we send 'text', which works for replies inside
-// the 24h window and for test numbers.
-async function sendWhatsApp(opts: { token: string; phoneNumberId: string; to: string; body: string }): Promise<string> {
-  const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${opts.phoneNumberId}/messages`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${opts.token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: opts.to,
-      type: "text",
-      text: { preview_url: false, body: opts.body },
-    }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data?.error?.message || `WhatsApp send failed (${res.status})`);
-  }
-  return data?.messages?.[0]?.id || "";
+async function retryOrFail(db: any, row: any, err: string) {
+  const attempts = (row.attempts || 0) + 1;
+  await db.from("task_notifications").update({
+    status: attempts < MAX_ATTEMPTS ? "pending" : "failed",
+    error: err,
+    attempts,
+  }).eq("id", row.id);
 }
 
 Deno.serve(async (req) => {
-  const pf = preflight(req);
-  if (pf) return pf;
-  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
-  // Optional shared-secret gate for the scheduler.
-  const expectedSecret = Deno.env.get("SCHEDULER_SECRET");
-  if (expectedSecret && req.headers.get("x-scheduler-secret") !== expectedSecret) {
-    return json({ error: "unauthorized" }, 401);
+  const schedulerSecret = Deno.env.get("SCHEDULER_SECRET");
+  if (schedulerSecret && req.headers.get("x-scheduler-secret") !== schedulerSecret) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  let db: any;
-  try { db = serviceClient(); } catch (e) { return json({ error: (e as Error).message }, 500); }
+  const db = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  const RESEND_FROM = Deno.env.get("RESEND_FROM") || "Reyansh ERP <onboarding@resend.dev>";
+  const WA_TOKEN = Deno.env.get("WHATSAPP_TOKEN");
+  const WA_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
 
   const { data: rows, error } = await db
     .from("task_notifications")
     .select("*")
     .eq("status", "pending")
-    .lte("scheduled_for", nowIso())
+    .lte("scheduled_for", new Date().toISOString())
     .order("scheduled_for", { ascending: true })
-    .limit(BATCH_SIZE);
+    .limit(BATCH);
 
-  if (error) return json({ error: error.message }, 500);
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500, headers: { "content-type": "application/json" },
+    });
+  }
 
-  // WhatsApp credentials are read once for the whole batch.
-  const waToken = Deno.env.get("WHATSAPP_TOKEN");
-  const waPhoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+  let sent = 0, skipped = 0, failed = 0;
 
-  // Cache the sending Gmail account/token across email rows in this batch.
-  let cachedAccount: any | null | undefined; // undefined = not looked up yet
-  let cachedToken: string | null = null;
-
-  let processed = 0, sent = 0, skipped = 0, failed = 0;
-
-  for (const row of (rows || [])) {
-    processed++;
+  for (const row of rows || []) {
     try {
-      const channel = (row.channel || "email").toLowerCase();
-
-      // ── EMAIL ─────────────────────────────────────────────────────────────
-      if (channel === "email") {
-        if (!row.recipient_email) {
-          await db.from("task_notifications")
-            .update({ status: "skipped", error: "no recipient_email" })
-            .eq("id", row.id);
-          skipped++;
-          continue;
-        }
-
-        if (cachedAccount === undefined) cachedAccount = await findSendingAccount(db);
-        if (!cachedAccount) {
-          await db.from("task_notifications")
-            .update({ status: "skipped", error: "no email account connected" })
-            .eq("id", row.id);
-          skipped++;
-          continue;
-        }
-
-        try {
-          if (!cachedToken) cachedToken = await getFreshToken(db, cachedAccount);
-          const mime = buildMime({
-            to: row.recipient_email,
-            fromEmail: cachedAccount.email,
-            fromName: cachedAccount.display_name,
+      if (row.channel === "email") {
+        if (!RESEND_API_KEY) { await mark(db, row, "skipped", "RESEND_API_KEY not set"); skipped++; continue; }
+        if (!row.recipient_email) { await mark(db, row, "skipped", "no recipient email"); skipped++; continue; }
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            from: RESEND_FROM,
+            to: [row.recipient_email],
             subject: row.subject || "Task notification",
-            body: row.body || "",
-          });
-          await sendGmail({ accessToken: cachedToken, mime });
-          await db.from("task_notifications")
-            .update({ status: "sent", sent_at: nowIso(), error: null })
-            .eq("id", row.id);
-          sent++;
-        } catch (e) {
-          const attempts = (row.attempts ?? 0) + 1;
-          // A token failure poisons the cache for the rest of the batch.
-          cachedToken = null;
-          await db.from("task_notifications")
-            .update({
-              status: attempts < MAX_ATTEMPTS ? "pending" : "failed",
-              attempts,
-              error: (e as Error).message,
-            })
-            .eq("id", row.id);
-          if (attempts < MAX_ATTEMPTS) processed--; // left pending, not terminal
-          else failed++;
-        }
-        continue;
+            text: row.body || row.subject || "You have a task update in the Reyansh ERP.",
+          }),
+        });
+        if (res.ok) { await mark(db, row, "sent", null); sent++; }
+        else { await retryOrFail(db, row, `email ${res.status} ${(await res.text()).slice(0, 200)}`); failed++; }
+      } else if (row.channel === "whatsapp") {
+        if (!WA_TOKEN || !WA_PHONE_ID) { await mark(db, row, "skipped", "whatsapp not configured"); skipped++; continue; }
+        if (!row.recipient_phone) { await mark(db, row, "skipped", "no recipient phone"); skipped++; continue; }
+        const phone = String(row.recipient_phone).replace(/[^0-9]/g, "");
+        // NOTE: business-initiated WhatsApp outside the 24h window needs a pre-approved template.
+        const res = await fetch(`https://graph.facebook.com/v20.0/${WA_PHONE_ID}/messages`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${WA_TOKEN}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: phone,
+            type: "text",
+            text: { body: row.body || row.subject || "Task update" },
+          }),
+        });
+        if (res.ok) { await mark(db, row, "sent", null); sent++; }
+        else { await retryOrFail(db, row, `wa ${res.status} ${(await res.text()).slice(0, 200)}`); failed++; }
+      } else {
+        await mark(db, row, "skipped", "unknown channel"); skipped++;
       }
-
-      // ── WHATSAPP ──────────────────────────────────────────────────────────
-      if (channel === "whatsapp") {
-        if (!waToken || !waPhoneId) {
-          await db.from("task_notifications")
-            .update({ status: "skipped", error: "whatsapp not configured" })
-            .eq("id", row.id);
-          skipped++;
-          continue;
-        }
-        if (!row.recipient_phone) {
-          await db.from("task_notifications")
-            .update({ status: "skipped", error: "no recipient_phone" })
-            .eq("id", row.id);
-          skipped++;
-          continue;
-        }
-
-        try {
-          await sendWhatsApp({
-            token: waToken,
-            phoneNumberId: waPhoneId,
-            to: row.recipient_phone,
-            body: row.body || row.subject || "Task notification",
-          });
-          await db.from("task_notifications")
-            .update({ status: "sent", sent_at: nowIso(), error: null })
-            .eq("id", row.id);
-          sent++;
-        } catch (e) {
-          const attempts = (row.attempts ?? 0) + 1;
-          await db.from("task_notifications")
-            .update({
-              status: attempts < MAX_ATTEMPTS ? "pending" : "failed",
-              attempts,
-              error: (e as Error).message,
-            })
-            .eq("id", row.id);
-          if (attempts < MAX_ATTEMPTS) processed--;
-          else failed++;
-        }
-        continue;
-      }
-
-      // ── UNKNOWN CHANNEL ───────────────────────────────────────────────────
-      await db.from("task_notifications")
-        .update({ status: "skipped", error: `unknown channel '${row.channel}'` })
-        .eq("id", row.id);
-      skipped++;
     } catch (e) {
-      // Defensive: a per-row crash must never stop the batch. Best-effort mark.
-      failed++;
-      try {
-        await db.from("task_notifications")
-          .update({ status: "failed", error: (e as Error).message, attempts: (row.attempts ?? 0) + 1 })
-          .eq("id", row.id);
-      } catch { /* swallow — already counted as failed */ }
+      await retryOrFail(db, row, String((e as any)?.message || e)); failed++;
     }
   }
 
-  return json({ processed, sent, skipped, failed });
+  return new Response(JSON.stringify({ processed: (rows || []).length, sent, skipped, failed }), {
+    headers: { "content-type": "application/json" },
+  });
 });
