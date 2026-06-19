@@ -1,19 +1,53 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
   Box,
   Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Menu,
+  MenuItem,
   Paper,
   Skeleton,
+  Snackbar,
   Stack,
+  TextField,
+  Tooltip,
   Typography,
   alpha,
   useTheme,
 } from "@mui/material";
-import { EventNoteOutlined } from "@mui/icons-material";
-import { getMyFollowups, STAGE_LABELS } from "../../services/crmPipelineService";
+import {
+  CheckCircleOutline,
+  EventNoteOutlined,
+  EventRepeatOutlined,
+  SwapHorizOutlined,
+} from "@mui/icons-material";
+import {
+  completeFollowup,
+  getMyFollowups,
+  moveFollowupStage,
+  rescheduleFollowup,
+  STAGES,
+  STAGE_LABELS,
+} from "../../services/crmPipelineService";
 
 const CRM_PATH = "/crm-pipeline";
+
+/** Normalize a date value to a YYYY-MM-DD string for <input type="date">. */
+function toDateInput(dateValue) {
+  if (!dateValue) return "";
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return "";
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off * 60000);
+  return local.toISOString().slice(0, 10);
+}
 
 /** Local-midnight copy of a date (string or Date). */
 function startOfDay(d) {
@@ -34,8 +68,14 @@ function relativeDay(dateValue) {
   return `in ${diff} days`;
 }
 
-function FollowupRow({ item, accent, onOpen }) {
+function FollowupRow({ item, accent, onOpen, onDone, onReschedule, onStage, busy }) {
   const stageLabel = item.stage ? STAGE_LABELS[item.stage] || item.stage : null;
+  const canStage = item.kind === "action" || !!item.pipelineId;
+  // Stop the row's click-to-open from firing when using an action button.
+  const guard = (fn) => (e) => {
+    e.stopPropagation();
+    fn();
+  };
   return (
     <Box
       role="button"
@@ -89,11 +129,55 @@ function FollowupRow({ item, accent, onOpen }) {
           )}
         </Stack>
       </Box>
+
+      <Stack direction="row" spacing={0.25} alignItems="center" sx={{ flexShrink: 0 }}>
+        {busy ? (
+          <CircularProgress size={18} sx={{ mx: 1, color: accent }} />
+        ) : (
+          <>
+            <Tooltip title="Mark done">
+              <IconButton
+                size="small"
+                aria-label="Mark follow-up done"
+                onClick={guard(onDone)}
+                sx={{ color: "success.main", "&:hover": { bgcolor: (t) => alpha(t.palette.success.main, 0.12) } }}
+              >
+                <CheckCircleOutline fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Reschedule">
+              <IconButton
+                size="small"
+                aria-label="Reschedule follow-up"
+                onClick={guard(onReschedule)}
+                sx={{ color: "info.main", "&:hover": { bgcolor: (t) => alpha(t.palette.info.main, 0.12) } }}
+              >
+                <EventRepeatOutlined fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            {canStage && (
+              <Tooltip title="Change stage">
+                <IconButton
+                  size="small"
+                  aria-label="Change pipeline stage"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStage(e.currentTarget);
+                  }}
+                  sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover" } }}
+                >
+                  <SwapHorizOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
+        )}
+      </Stack>
     </Box>
   );
 }
 
-function FollowupGroup({ emoji, title, items, accent, onOpen }) {
+function FollowupGroup({ emoji, title, items, accent, onOpen, onDone, onReschedule, onStage, busyId }) {
   if (!items.length) return null;
   return (
     <Box>
@@ -118,9 +202,21 @@ function FollowupGroup({ emoji, title, items, accent, onOpen }) {
         />
       </Stack>
       <Stack spacing={0.25}>
-        {items.map((it) => (
-          <FollowupRow key={`${it.kind}-${it.id}`} item={it} accent={accent} onOpen={onOpen} />
-        ))}
+        {items.map((it) => {
+          const rowKey = `${it.kind}-${it.id}`;
+          return (
+            <FollowupRow
+              key={rowKey}
+              item={it}
+              accent={accent}
+              onOpen={onOpen}
+              onDone={() => onDone(it)}
+              onReschedule={() => onReschedule(it)}
+              onStage={(anchorEl) => onStage(it, anchorEl)}
+              busy={busyId === rowKey}
+            />
+          );
+        })}
       </Stack>
     </Box>
   );
@@ -136,6 +232,14 @@ function MyFollowups({ email }) {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Inline-action state.
+  const [busyId, setBusyId] = useState(null);
+  const [snack, setSnack] = useState(null); // { severity, message }
+  const [reschedule, setReschedule] = useState(null); // { item, value }
+  const [stageMenu, setStageMenu] = useState(null); // { item, anchorEl }
+
+  const rowKey = (it) => `${it.kind}-${it.id}`;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -155,6 +259,58 @@ function MyFollowups({ email }) {
   }, [load]);
 
   const openCrm = useCallback(() => navigate(CRM_PATH), [navigate]);
+
+  // Run an action against the CRM, then refresh + toast the outcome.
+  const runAction = useCallback(
+    async (item, fn, successMessage) => {
+      setBusyId(rowKey(item));
+      try {
+        await fn();
+        const result = await getMyFollowups(email || "");
+        setData(result);
+        setSnack({ severity: "success", message: successMessage });
+      } catch (e) {
+        setSnack({ severity: "error", message: e?.message || "Action failed. Please try again." });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [email],
+  );
+
+  const handleDone = useCallback(
+    (item) => runAction(item, () => completeFollowup(item), "Follow-up marked done."),
+    [runAction],
+  );
+
+  const openReschedule = useCallback((item) => {
+    setReschedule({ item, value: toDateInput(item.date) });
+  }, []);
+
+  const confirmReschedule = useCallback(async () => {
+    if (!reschedule?.value) return;
+    const { item, value } = reschedule;
+    setReschedule(null);
+    await runAction(item, () => rescheduleFollowup(item, value), "Follow-up rescheduled.");
+  }, [reschedule, runAction]);
+
+  const openStageMenu = useCallback((item, anchorEl) => {
+    setStageMenu({ item, anchorEl });
+  }, []);
+
+  const handleMoveStage = useCallback(
+    async (toStage) => {
+      const item = stageMenu?.item;
+      setStageMenu(null);
+      if (!item) return;
+      await runAction(
+        item,
+        () => moveFollowupStage(item, toStage),
+        `Moved to ${STAGE_LABELS[toStage] || toStage}.`,
+      );
+    },
+    [stageMenu, runAction],
+  );
 
   const accents = useMemo(
     () => ({
@@ -215,17 +371,118 @@ function MyFollowups({ email }) {
         </Box>
       ) : (
         <Stack spacing={1.5}>
-          <FollowupGroup emoji="🔴" title="Overdue" items={data.overdue} accent={accents.overdue} onOpen={openCrm} />
-          <FollowupGroup emoji="🟡" title="Today" items={data.today} accent={accents.today} onOpen={openCrm} />
+          <FollowupGroup
+            emoji="🔴"
+            title="Overdue"
+            items={data.overdue}
+            accent={accents.overdue}
+            onOpen={openCrm}
+            onDone={handleDone}
+            onReschedule={openReschedule}
+            onStage={openStageMenu}
+            busyId={busyId}
+          />
+          <FollowupGroup
+            emoji="🟡"
+            title="Today"
+            items={data.today}
+            accent={accents.today}
+            onOpen={openCrm}
+            onDone={handleDone}
+            onReschedule={openReschedule}
+            onStage={openStageMenu}
+            busyId={busyId}
+          />
           <FollowupGroup
             emoji="🔵"
             title="Upcoming (next 7 days)"
             items={data.upcoming}
             accent={accents.upcoming}
             onOpen={openCrm}
+            onDone={handleDone}
+            onReschedule={openReschedule}
+            onStage={openStageMenu}
+            busyId={busyId}
           />
         </Stack>
       )}
+
+      {/* Reschedule dialog */}
+      <Dialog open={!!reschedule} onClose={() => setReschedule(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Reschedule follow-up</DialogTitle>
+        <DialogContent>
+          {reschedule && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              {reschedule.item.company} · {reschedule.item.label}
+            </Typography>
+          )}
+          <TextField
+            type="date"
+            label="New date"
+            value={reschedule?.value || ""}
+            onChange={(e) => setReschedule((r) => (r ? { ...r, value: e.target.value } : r))}
+            fullWidth
+            size="small"
+            InputLabelProps={{ shrink: true }}
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Typography
+            variant="button"
+            onClick={() => setReschedule(null)}
+            sx={{ color: "text.secondary", cursor: "pointer", px: 1, "&:hover": { color: "text.primary" } }}
+          >
+            Cancel
+          </Typography>
+          <Typography
+            variant="button"
+            onClick={confirmReschedule}
+            sx={{
+              color: reschedule?.value ? "primary.main" : "text.disabled",
+              cursor: reschedule?.value ? "pointer" : "default",
+              px: 1,
+              "&:hover": { textDecoration: reschedule?.value ? "underline" : "none" },
+            }}
+          >
+            Save
+          </Typography>
+        </DialogActions>
+      </Dialog>
+
+      {/* Stage menu */}
+      <Menu
+        open={!!stageMenu}
+        anchorEl={stageMenu?.anchorEl || null}
+        onClose={() => setStageMenu(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        {STAGES.map((s) => (
+          <MenuItem
+            key={s.key}
+            selected={stageMenu?.item?.stage === s.key}
+            onClick={() => handleMoveStage(s.key)}
+            sx={{ fontSize: "0.8rem", fontWeight: stageMenu?.item?.stage === s.key ? 700 : 400 }}
+          >
+            {s.label}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Outcome toast */}
+      <Snackbar
+        open={!!snack}
+        autoHideDuration={3000}
+        onClose={() => setSnack(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        {snack ? (
+          <Alert onClose={() => setSnack(null)} severity={snack.severity} variant="filled" sx={{ width: "100%" }}>
+            {snack.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Paper>
   );
 }

@@ -332,6 +332,60 @@ export async function getMyFollowups(email) {
   };
 }
 
+/**
+ * Reschedule a follow-up to a new date (YYYY-MM-DD string).
+ * Writes back to whichever table the item originated from.
+ */
+export async function rescheduleFollowup(item, newDateStr) {
+  if (item.kind === "action") {
+    const { error } = await supabase
+      .from("crm_pipeline")
+      .update({ next_action_date: newDateStr })
+      .eq("id", item.id);
+    throwIf(error);
+  } else {
+    const { error } = await supabase
+      .from("crm_pipeline_activity")
+      .update({ next_follow_up_date: newDateStr })
+      .eq("id", item.id);
+    throwIf(error);
+  }
+  return true;
+}
+
+/**
+ * Mark a follow-up done by clearing its reminder date, so it drops out of the
+ * widget. Operates on the originating row.
+ */
+export async function completeFollowup(item) {
+  if (item.kind === "action") {
+    const { error } = await supabase
+      .from("crm_pipeline")
+      .update({ next_action_date: null })
+      .eq("id", item.id);
+    throwIf(error);
+  } else {
+    const { error } = await supabase
+      .from("crm_pipeline_activity")
+      .update({ next_follow_up_date: null })
+      .eq("id", item.id);
+    throwIf(error);
+  }
+  return true;
+}
+
+/** Move the follow-up's parent pipeline card to another stage. */
+export async function moveFollowupStage(item, toStage) {
+  const pid = item.kind === "action" ? item.id : item.pipelineId;
+  const { data, error } = await supabase.rpc("crm_move_stage", {
+    p_pipeline_id: pid,
+    p_to_stage: toStage,
+    p_note: null,
+  });
+  throwIf(error);
+  return data;
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -358,6 +412,9 @@ const crmPipelineService = {
   listOrderCycles,
   moveOrderCycle,
   getMyFollowups,
+  rescheduleFollowup,
+  completeFollowup,
+  moveFollowupStage,
   getCurrentUserEmail,
 };
 
