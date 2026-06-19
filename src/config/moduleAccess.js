@@ -31,6 +31,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/accountability', moduleKey: MODULE_KEYS.DASHBOARD },
+  { test: (path) => path === '/mis' || path.startsWith('/mis/'), moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
 ];
 

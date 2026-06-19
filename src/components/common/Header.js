@@ -474,6 +474,27 @@ const Header = () => {
       ],
     },
     {
+      key: "mis",
+      label: "MIS",
+      icon: <Analytics />,
+      items: [
+        {
+          subheader: "Accountability",
+          label: "EM Executive Meeting",
+          path: "/mis/executive-meeting",
+          icon: <Assignment />,
+          roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"],
+        },
+        {
+          subheader: "Accountability",
+          label: "MIS Home",
+          path: "/mis",
+          icon: <Dashboard />,
+          roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"],
+        },
+      ],
+    },
+    {
       key: "ppc",
       label: "Production",
       icon: <ProductionIcon />,

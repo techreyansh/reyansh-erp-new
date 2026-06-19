@@ -126,6 +126,8 @@ const AccessManagementPage = lazy(() => import("./components/access/AccessManage
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
+const MISHome = lazy(() => import("./pages/mis/MISHome"));
+const MISExecutiveMeeting = lazy(() => import("./pages/mis/MISExecutiveMeeting"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
@@ -743,6 +745,17 @@ function AppContent() {
                       </ProtectedRouteGate>
                     }
                   />
+                  <Route path="/mis" element={
+                    <ProtectedRouteGate>
+                      <MISHome />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/mis/executive-meeting" element={
+                    <ProtectedRouteGate>
+                      <MISExecutiveMeeting />
+                    </ProtectedRouteGate>
+                  } />
+
                   <Route
                     path="/ppc"
                     element={
