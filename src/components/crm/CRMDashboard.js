@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Divider,
   LinearProgress,
   Paper,
@@ -123,17 +124,23 @@ export default function CRMDashboard({ data, loading }) {
   const { roleCode, hasFullAccess } = usePermissions();
   const [analytics, setAnalytics] = useState([]);
   const [myEmail, setMyEmail] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
+    setAnalyticsLoading(true);
     (async () => {
-      const [rows, email] = await Promise.all([
-        getCustomerAnalytics(),
-        getCurrentUserEmail(),
-      ]);
-      if (!alive) return;
-      setAnalytics(Array.isArray(rows) ? rows : []);
-      setMyEmail(email || null);
+      try {
+        const [rows, email] = await Promise.all([
+          getCustomerAnalytics(),
+          getCurrentUserEmail(),
+        ]);
+        if (!alive) return;
+        setAnalytics(Array.isArray(rows) ? rows : []);
+        setMyEmail(email || null);
+      } finally {
+        if (alive) setAnalyticsLoading(false);
+      }
     })();
     return () => {
       alive = false;
@@ -385,6 +392,13 @@ export default function CRMDashboard({ data, loading }) {
           </Typography>
         </Box>
 
+        {analyticsLoading ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 6, gap: 1.5, color: 'text.secondary' }}>
+            <CircularProgress size={22} />
+            <Typography variant="body2">Loading reorder &amp; retention analytics…</Typography>
+          </Box>
+        ) : (
+          <>
         {/* Retention KPIs */}
         <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' } }}>
           <StatCard label="Due to reorder" value={retentionKpis.dueToReorder} sub="Due soon + due" icon={AutorenewRounded} accent={theme.palette.warning.main} />
@@ -474,6 +488,8 @@ export default function CRMDashboard({ data, loading }) {
             </ResponsiveContainer>
           ) : <Empty label="No customer analytics yet" />}
         </Panel>
+          </>
+        )}
       </Box>
     </Box>
   );

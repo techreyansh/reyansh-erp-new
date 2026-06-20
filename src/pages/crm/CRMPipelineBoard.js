@@ -1287,7 +1287,9 @@ export default function CRMPipelineBoard() {
     (row) => {
       if (scope === "all") return true;
       if (!currentEmail) return true;
-      return row.owner_email === currentEmail;
+      // 'my' scope: a rep sees rows they own plus unassigned (claimable) leads.
+      const owner = row?.owner_email;
+      return owner === currentEmail || owner == null || owner === "";
     },
     [scope, currentEmail]
   );

@@ -13,6 +13,7 @@
  * states that guide the user to populate their own items/BOMs.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -44,6 +45,8 @@ import {
   TableRow,
   Tabs,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
   useTheme,
@@ -70,6 +73,7 @@ import {
   TuneRounded,
   LocalShippingOutlined,
   HistoryRounded,
+  AddShoppingCartOutlined,
 } from '@mui/icons-material';
 import ppcService, {
   ITEM_TYPES,
@@ -1215,11 +1219,27 @@ function MaterialsTab({ items, notify }) {
 // TAB 3 — MRP Run
 // ===========================================================================
 function MrpTab({ items, notify }) {
+  const navigate = useNavigate();
   const finished = useMemo(() => items.filter((i) => FINISHED_TYPES.includes(i.item_type) && i.is_active), [items]);
   const [itemId, setItemId] = useState('');
   const [qty, setQty] = useState('100');
   const [result, setResult] = useState(null);
   const [running, setRunning] = useState(false);
+
+  // Navigate to the purchase-flow Raise Indent page, pre-filling from a shortage row.
+  // Same { inventoryPrefill } shape the RaiseIndent page already consumes.
+  const raiseIndent = (l) =>
+    navigate('/purchase-flow/raise-indent', {
+      state: {
+        inventoryPrefill: {
+          itemCode: l.code,
+          itemName: l.name,
+          qty: l.shortage ?? l.suggest_purchase,
+          vendorCode: null,
+          vendorName: null,
+        },
+      },
+    });
 
   useEffect(() => {
     if (!itemId && finished.length) setItemId(finished[0].id);
@@ -1349,7 +1369,7 @@ function MrpTab({ items, notify }) {
           <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden', borderColor: purchaseLines.length ? 'warning.main' : 'divider' }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ px: 2, py: 1.5 }}>
               {purchaseLines.length ? <WarningAmberRounded color="warning" /> : <CheckCircleOutlineRounded color="success" />}
-              <Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   Purchase Suggestions
                 </Typography>
@@ -1357,6 +1377,18 @@ function MrpTab({ items, notify }) {
                   {purchaseLines.length ? 'Raise indents for the materials below' : 'No purchasing needed — stock covers this build'}
                 </Typography>
               </Box>
+              {purchaseLines.length > 0 && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="warning"
+                  startIcon={<AddShoppingCartOutlined />}
+                  onClick={() => raiseIndent(purchaseLines[0])}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  Raise indents
+                </Button>
+              )}
             </Stack>
             {purchaseLines.length > 0 && (
               <>
@@ -1369,6 +1401,7 @@ function MrpTab({ items, notify }) {
                         <TableCell>Material</TableCell>
                         <TableCell align="right">Shortage to buy</TableCell>
                         <TableCell align="right">Reorder pt</TableCell>
+                        <TableCell align="right">Action</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1380,6 +1413,17 @@ function MrpTab({ items, notify }) {
                             {num(l.shortage)} {l.uom}
                           </TableCell>
                           <TableCell align="right">{num(l.reorder_point)}</TableCell>
+                          <TableCell align="right">
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<AddShoppingCartOutlined />}
+                              onClick={() => raiseIndent(l)}
+                              sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
+                            >
+                              Raise Indent
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -1646,6 +1690,7 @@ function LinesMachinesTab({ notify }) {
 // ===========================================================================
 function PlantDashboardTab({ items, itemsLoading, notify }) {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [stock, setStock] = useState([]);
   const [low, setLow] = useState([]);
   const [lines, setLines] = useState([]);
@@ -1739,13 +1784,14 @@ function PlantDashboardTab({ items, itemsLoading, notify }) {
                   <TableCell align="right">On hand</TableCell>
                   <TableCell align="right">Reorder pt</TableCell>
                   <TableCell align="right">Shortage</TableCell>
+                  <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {busy && <TableSkeleton cols={5} rows={4} />}
+                {busy && <TableSkeleton cols={6} rows={4} />}
                 {!busy && low.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, color: 'success.main' }}>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: 'success.main' }}>
                       <CheckCircleOutlineRounded sx={{ verticalAlign: 'middle', mr: 0.5 }} /> All stock above reorder levels.
                     </TableCell>
                   </TableRow>
@@ -1759,6 +1805,29 @@ function PlantDashboardTab({ items, itemsLoading, notify }) {
                       <TableCell align="right">{num(r.reorder_point)}</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>
                         {num(r.shortage)}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<AddShoppingCartOutlined />}
+                          onClick={() =>
+                            navigate('/purchase-flow/raise-indent', {
+                              state: {
+                                inventoryPrefill: {
+                                  itemCode: r.code,
+                                  itemName: r.name,
+                                  qty: r.shortage ?? r.suggest_purchase,
+                                  vendorCode: null,
+                                  vendorName: null,
+                                },
+                              },
+                            })
+                          }
+                          sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
+                        >
+                          Indent
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -2387,6 +2456,8 @@ function WorkOrdersTab({ items, notify }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [openWoId, setOpenWoId] = useState(null);
+  // Status filter: 'open' hides completed (done) WOs, 'done' shows only completed, 'all' shows everything.
+  const [statusFilter, setStatusFilter] = useState('open');
   // lazy kitting shortfall: per-WO cache + in-flight set + open drawer WO
   const [shortageByWo, setShortageByWo] = useState({});
   const [shortageLoading, setShortageLoading] = useState({});
@@ -2465,6 +2536,14 @@ function WorkOrdersTab({ items, notify }) {
     [shortageByWo, checkShortage]
   );
 
+  // Apply the status filter. 'done' is treated as completed; null status is treated as open.
+  const visibleWos = useMemo(() => {
+    if (statusFilter === 'all') return wos;
+    if (statusFilter === 'done') return wos.filter((wo) => wo.status === 'done');
+    // 'open' — everything that isn't completed (cancelled is also hidden here).
+    return wos.filter((wo) => wo.status !== 'done' && wo.status !== 'cancelled');
+  }, [wos, statusFilter]);
+
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }} flexWrap="wrap" gap={1}>
@@ -2476,9 +2555,28 @@ function WorkOrdersTab({ items, notify }) {
             Release jobs to the floor — click a WO to run its stages, issue material &amp; record QC
           </Typography>
         </Box>
-        <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew} disabled={!finished.length}>
-          New work order
-        </Button>
+        <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={statusFilter}
+            onChange={(_e, v) => v && setStatusFilter(v)}
+            aria-label="Work order status filter"
+          >
+            <ToggleButton value="open" sx={{ textTransform: 'none' }}>
+              Open
+            </ToggleButton>
+            <ToggleButton value="done" sx={{ textTransform: 'none' }}>
+              Done
+            </ToggleButton>
+            <ToggleButton value="all" sx={{ textTransform: 'none' }}>
+              All
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew} disabled={!finished.length}>
+            New work order
+          </Button>
+        </Stack>
       </Stack>
       <Divider />
       <TableContainer sx={{ maxHeight: 600 }}>
@@ -2520,8 +2618,17 @@ function WorkOrdersTab({ items, notify }) {
                 </TableCell>
               </TableRow>
             )}
+            {!loading && wos.length > 0 && visibleWos.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  {statusFilter === 'done'
+                    ? 'No completed work orders yet.'
+                    : 'No open work orders — switch the filter to “All” or “Done” to see completed jobs.'}
+                </TableCell>
+              </TableRow>
+            )}
             {!loading &&
-              wos.map((wo) => (
+              visibleWos.map((wo) => (
                 <TableRow key={wo.id} hover sx={{ cursor: 'pointer' }} onClick={() => setOpenWoId(wo.id)}>
                   <TableCell sx={{ fontWeight: 700 }}>{wo.wo_number}</TableCell>
                   <TableCell>

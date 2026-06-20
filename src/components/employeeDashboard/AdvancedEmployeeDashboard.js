@@ -181,51 +181,21 @@ const AdvancedEmployeeDashboard = () => {
       setEmployees(employeesData);
       
       if (!canManageEmployeeRecords) {
-        // Restrict non-CEO users to their own profile
-        // Try multiple matching strategies to support both mock and real logins
+        // Restrict non-management users to their own profile.
         const currentEmail = (user?.email || '').toLowerCase().trim();
-        const currentRole = (user?.role || '').toLowerCase().trim();
 
-        // Try exact email match first
-        let selfEmp = (employeesData || []).find(emp => 
+        // Match by email — exact first, then by the prefix before @.
+        let selfEmp = (employeesData || []).find(emp =>
           (emp.Email || '').toLowerCase().trim() === currentEmail
         );
-        
-        // If not found and it's a mock user, try matching by role/designation
-        if (!selfEmp && currentEmail.includes('mock')) {
-          // Clean up the role for matching (remove spaces and special chars)
-          const roleKeywords = currentRole.toLowerCase().split(' ').filter(word => word.length > 2);
-          
-          selfEmp = (employeesData || []).find(emp => {
-            const designation = (emp.Designation || '').toLowerCase();
-            const department = (emp.Department || '').toLowerCase();
-            const email = (emp.Email || '').toLowerCase();
-            
-            // Check if any role keyword matches designation, department, or email
-            return roleKeywords.some(keyword => 
-              designation.includes(keyword) || 
-              department.includes(keyword) ||
-              email.includes(keyword)
-            );
-          });
-          
-          // If still not found, try matching the full role string
-          if (!selfEmp) {
-            selfEmp = (employeesData || []).find(emp => 
-              (emp.Designation || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '') ||
-              (emp.Department || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '')
-            );
-          }
-        }
-        
-        // If still not found, try partial email match (before @)
-        if (!selfEmp) {
-          const emailPrefix = currentEmail.split('@')[0].replace('mock.', '');
-          selfEmp = (employeesData || []).find(emp => 
+
+        if (!selfEmp && currentEmail) {
+          const emailPrefix = currentEmail.split('@')[0];
+          selfEmp = (employeesData || []).find(emp =>
             (emp.Email || '').toLowerCase().includes(emailPrefix)
           );
         }
-        
+
         if (selfEmp) {
           setFilteredEmployees([selfEmp]);
           setSelectedEmployee(selfEmp);
@@ -268,51 +238,22 @@ const AdvancedEmployeeDashboard = () => {
   };
 
   const filterAndSearchEmployees = () => {
-    // For non-CEO users, only show their own profile - don't apply other filters
+    // For non-management users, only show their own profile - don't apply other filters
     if (!canManageEmployeeRecords) {
       const currentEmail = (user?.email || '').toLowerCase().trim();
-      const currentRole = (user?.role || '').toLowerCase().trim();
-      
-      // Try exact email match first
-      let selfEmp = employees.find(emp => 
+
+      // Match by email — exact first, then by the prefix before @.
+      let selfEmp = employees.find(emp =>
         (emp.Email || '').toLowerCase().trim() === currentEmail
       );
-      
-      // If not found and it's a mock user, try matching by role/designation
-      if (!selfEmp && currentEmail.includes('mock')) {
-        // Clean up the role for matching (remove spaces and special chars)
-        const roleKeywords = currentRole.toLowerCase().split(' ').filter(word => word.length > 2);
-        
-        selfEmp = employees.find(emp => {
-          const designation = (emp.Designation || '').toLowerCase();
-          const department = (emp.Department || '').toLowerCase();
-          const email = (emp.Email || '').toLowerCase();
-          
-          // Check if any role keyword matches designation, department, or email
-          return roleKeywords.some(keyword => 
-            designation.includes(keyword) || 
-            department.includes(keyword) ||
-            email.includes(keyword)
-          );
-        });
-        
-        // If still not found, try matching the full role string
-        if (!selfEmp) {
-          selfEmp = employees.find(emp => 
-            (emp.Designation || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '') ||
-            (emp.Department || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '')
-          );
-        }
-      }
-      
-      // If still not found, try partial email match (before @)
-      if (!selfEmp) {
-        const emailPrefix = currentEmail.split('@')[0].replace('mock.', '');
-        selfEmp = employees.find(emp => 
+
+      if (!selfEmp && currentEmail) {
+        const emailPrefix = currentEmail.split('@')[0];
+        selfEmp = employees.find(emp =>
           (emp.Email || '').toLowerCase().includes(emailPrefix)
         );
       }
-      
+
       setFilteredEmployees(selfEmp ? [selfEmp] : []);
       setPage(0);
       return;
