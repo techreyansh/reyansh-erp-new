@@ -35,7 +35,7 @@ import {
   TaskAltOutlined,
 } from "@mui/icons-material";
 import { supabase } from "../../lib/supabaseClient";
-import { getCurrentWeekStart, getPersonScore } from "../../services/misService";
+import { getCurrentWeekStart, personScore as getPersonPerfScore } from "../../services/perfService";
 import {
   isTaskOverdue,
   listMyTasks,
@@ -87,11 +87,30 @@ const PRIORITY_COLORS = {
   low: "info",
 };
 
-const BAND_COLORS = {
-  GREEN: "success",
-  AMBER: "warning",
-  RED: "error",
+// Performance Review band model — mirrors PerformanceReview.js.
+// outstanding & rising_star → GREEN, consistent → AMBER, needs_attention → RED,
+// no_data → GREY.
+const PERF_BANDS = {
+  outstanding: { label: "Outstanding Achiever", paletteKey: "success" },
+  rising_star: { label: "Rising Star", paletteKey: "success" },
+  consistent: { label: "Consistent Contributor", paletteKey: "warning" },
+  needs_attention: { label: "Needs Attention", paletteKey: "error" },
+  no_data: { label: "No data yet", paletteKey: "grey" },
 };
+
+function perfBandMeta(band) {
+  return PERF_BANDS[band] || PERF_BANDS.no_data;
+}
+
+// New performance categories (compact bars on the dashboard card).
+const PERF_CATEGORIES = [
+  { key: "work_completed", label: "Work Completed" },
+  { key: "on_time", label: "On Time" },
+  { key: "checklist", label: "Checklist" },
+  { key: "workflow", label: "Workflow" },
+  { key: "meeting", label: "Meeting" },
+  { key: "manager", label: "Manager" },
+];
 
 // ---------------------------------------------------------------------------
 // Task categorization: overdue / today / upcoming (next 7d)
@@ -161,11 +180,14 @@ function ScoreCard({ score, loading, theme, onOpen }) {
     );
   }
 
-  const final = Number(score?.final_score ?? 0);
-  const band = score?.band || "AMBER";
-  const bandColor = theme.palette[BAND_COLORS[band] || "warning"].main;
-  const pillars = score?.pillars || {};
-  const sayDo = score?.say_do;
+  const band = score?.band || "no_data";
+  const meta = perfBandMeta(band);
+  const hasData = band !== "no_data" && score?.score != null;
+  const bandColor =
+    meta.paletteKey === "grey"
+      ? theme.palette.text.disabled
+      : theme.palette[meta.paletteKey]?.main || theme.palette.text.disabled;
+  const categories = score?.categories || {};
 
   return (
     <Card
@@ -184,7 +206,7 @@ function ScoreCard({ score, loading, theme, onOpen }) {
       <CardContent sx={{ py: 2, "&:last-child": { pb: 2 } }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            My MIS Score
+            My Performance Score
           </Typography>
           <Box sx={{ p: 0.75, borderRadius: 2, bgcolor: alpha(bandColor, 0.12), color: bandColor, display: "flex" }}>
             <EmojiEventsOutlined fontSize="small" />
@@ -193,23 +215,34 @@ function ScoreCard({ score, loading, theme, onOpen }) {
 
         <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mt: 0.5 }}>
           <Typography variant="h3" sx={{ fontWeight: 800, lineHeight: 1, letterSpacing: "-0.03em", color: bandColor }}>
-            {score ? final : "—"}
+            {hasData ? Math.round(Number(score.score)) : "—"}
           </Typography>
-          <Typography variant="body2" color="text.secondary">/ 100</Typography>
-          <Chip label={band} size="small" color={BAND_COLORS[band] || "warning"} sx={{ height: 20, fontWeight: 700, fontSize: "0.65rem" }} />
+          {hasData && <Typography variant="body2" color="text.secondary">/ 100</Typography>}
+          <Chip
+            label={meta.label}
+            size="small"
+            sx={{
+              height: 20,
+              fontWeight: 700,
+              fontSize: "0.65rem",
+              bgcolor: alpha(bandColor, 0.14),
+              color: bandColor,
+              border: `1px solid ${alpha(bandColor, 0.4)}`,
+            }}
+          />
         </Stack>
 
-        {sayDo != null && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            Say/Do: <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>{Math.round(Number(sayDo))}%</Box>
+        {hasData ? (
+          <Stack spacing={1} sx={{ mt: 1.5 }}>
+            {PERF_CATEGORIES.map((c) => (
+              <PillarBar key={c.key} label={c.label} value={categories?.[c.key]?.pct} />
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            No data yet for this week.
           </Typography>
         )}
-
-        <Stack spacing={1} sx={{ mt: 1.5 }}>
-          <PillarBar label="Tasks" value={pillars?.tasks?.score} />
-          <PillarBar label="Checklist" value={pillars?.checklist?.score} />
-          <PillarBar label="Reschedule" value={pillars?.reschedule?.score} />
-        </Stack>
       </CardContent>
     </Card>
   );
@@ -455,7 +488,7 @@ function MyDayDashboard({ email }) {
     }
     try {
       const [scoreRes, taskRes, checklistRes] = await Promise.all([
-        getPersonScore(email, getCurrentWeekStart()),
+        getPersonPerfScore(email, getCurrentWeekStart()),
         listMyTasks(email),
         taskComplianceService.getMyChecklistsToday(email),
       ]);
@@ -614,7 +647,7 @@ function MyDayDashboard({ email }) {
           mb: 2,
         }}
       >
-        <ScoreCard score={score} loading={loading} theme={theme} onOpen={() => navigate("/mis/executive-meeting")} />
+        <ScoreCard score={score} loading={loading} theme={theme} onOpen={() => navigate("/performance")} />
         <SummaryCard
           label="My Tasks"
           icon={AssignmentTurnedInOutlined}
