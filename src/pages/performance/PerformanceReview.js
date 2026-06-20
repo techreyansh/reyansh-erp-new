@@ -4,9 +4,14 @@ import {
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   IconButton,
   LinearProgress,
+  MenuItem,
   Paper,
   Skeleton,
   Slider,
@@ -35,6 +40,10 @@ import {
   SaveRounded,
   GroupsRounded,
   WarningAmberRounded,
+  AccountTreeRounded,
+  PlayArrowRounded,
+  PersonOutlineRounded,
+  DoneAllRounded,
 } from '@mui/icons-material';
 import {
   getCurrentWeekStart,
@@ -47,6 +56,14 @@ import {
   addCommitment,
   setCommitmentStatus,
   departmentDashboard,
+  listWorkflows,
+  listInstances,
+  createInstance,
+  listSteps,
+  updateStep,
+  completeStep,
+  setInstanceStatus,
+  listOwners,
 } from '../../services/perfService';
 import { usePermissions } from '../../context/PermissionContext';
 import { useAuth } from '../../context/AuthContext';
@@ -858,6 +875,653 @@ function DepartmentsView({ departments, loading, weekStart }) {
 }
 
 // ---------------------------------------------------------------------------
+// WORKFLOWS VIEW — process accountability.
+// LEFT: open instances (progress + overdue) + templates to start from.
+// RIGHT: the step chain for a selected instance — owner / due / status / done.
+// ---------------------------------------------------------------------------
+
+/** Today as 'YYYY-MM-DD' (local) — for overdue comparisons. */
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** A step is overdue when it has a due_date before today and isn't done. */
+function isStepOverdue(step) {
+  if (!step || step.status === 'done' || !step.due_date) return false;
+  return String(step.due_date) < todayISO();
+}
+
+const STEP_STATUS_META = {
+  pending: { label: 'Pending', paletteKey: 'grey' },
+  done: { label: 'Done', paletteKey: 'success' },
+  blocked: { label: 'Blocked', paletteKey: 'error' },
+};
+
+/** Compute {done, total, pct, overdue} from a step array. */
+function stepProgress(steps) {
+  const list = Array.isArray(steps) ? steps : [];
+  const total = list.length;
+  const done = list.filter((s) => s.status === 'done').length;
+  const overdue = list.filter(isStepOverdue).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return { done, total, pct, overdue };
+}
+
+function ownerLabel(owners, email) {
+  if (!email) return null;
+  const found = owners.find((o) => o.email && o.email.toLowerCase() === String(email).toLowerCase());
+  return found?.full_name || String(email).split('@')[0];
+}
+
+/** LEFT — one open-process card with progress bar + overdue flag. */
+function InstanceCard({ instance, workflowName, progress, selected, onSelect }) {
+  const theme = useTheme();
+  const accent = progress.overdue > 0
+    ? theme.palette.error.main
+    : progress.pct === 100
+    ? theme.palette.success.main
+    : theme.palette.primary.main;
+  return (
+    <Paper
+      variant="outlined"
+      onClick={() => onSelect(instance)}
+      sx={{
+        borderRadius: 2,
+        p: 1.5,
+        cursor: 'pointer',
+        borderColor: selected ? accent : 'divider',
+        bgcolor: selected ? alpha(accent, 0.06) : 'background.paper',
+        transition: 'border-color 0.18s ease, background-color 0.18s ease',
+        '&:hover': { borderColor: alpha(accent, 0.5) },
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Box sx={{ width: 4, alignSelf: 'stretch', borderRadius: 2, bgcolor: accent, flexShrink: 0 }} />
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }} noWrap>
+            {instance.title || instance.reference || 'Untitled process'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+            {workflowName || 'Workflow'}
+            {instance.reference ? ` · ${instance.reference}` : ''}
+          </Typography>
+        </Box>
+        {progress.overdue > 0 && (
+          <Chip
+            icon={<WarningAmberRounded sx={{ fontSize: '0.9rem' }} />}
+            label={progress.overdue}
+            size="small"
+            color="error"
+            sx={{ fontWeight: 700, flexShrink: 0 }}
+          />
+        )}
+      </Stack>
+      <Box sx={{ mt: 1 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {progress.done}/{progress.total} steps done
+          </Typography>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: accent }}>
+            {progress.pct}%
+          </Typography>
+        </Stack>
+        <LinearProgress
+          variant="determinate"
+          value={progress.pct}
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            bgcolor: alpha(accent, 0.14),
+            '& .MuiLinearProgress-bar': { borderRadius: 3, bgcolor: accent },
+          }}
+        />
+      </Box>
+    </Paper>
+  );
+}
+
+/** RIGHT — one step row: seq, name, owner picker, due, status, mark-done. */
+function StepRow({ step, owners, canEdit, onAssignOwner, onSetDue, onComplete, busy }) {
+  const theme = useTheme();
+  const overdue = isStepOverdue(step);
+  const meta = STEP_STATUS_META[step.status] || STEP_STATUS_META.pending;
+  const statusColor = meta.paletteKey === 'grey'
+    ? theme.palette.text.disabled
+    : theme.palette[meta.paletteKey]?.main || theme.palette.text.secondary;
+  const done = step.status === 'done';
+  const accent = overdue ? theme.palette.error.main : done ? theme.palette.success.main : theme.palette.text.disabled;
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        p: 1.5,
+        borderLeft: `4px solid ${accent}`,
+        bgcolor: overdue ? alpha(theme.palette.error.main, 0.04) : 'background.paper',
+      }}
+    >
+      <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            bgcolor: alpha(statusColor, 0.14),
+            color: statusColor,
+            flexShrink: 0,
+            mt: 0.25,
+          }}
+        >
+          {done ? <CheckCircleRounded sx={{ fontSize: '1.1rem' }} /> : step.seq}
+        </Box>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              {step.name}
+            </Typography>
+            <Chip
+              label={meta.label}
+              size="small"
+              sx={{ bgcolor: alpha(statusColor, 0.16), color: statusColor, fontWeight: 700, height: 20 }}
+            />
+            {overdue && (
+              <Chip
+                icon={<WarningAmberRounded sx={{ fontSize: '0.85rem' }} />}
+                label="Overdue"
+                size="small"
+                color="error"
+                sx={{ fontWeight: 700, height: 20 }}
+              />
+            )}
+          </Stack>
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }}>
+            <TextField
+              select
+              size="small"
+              label="Owner"
+              value={step.owner_email || ''}
+              onChange={(e) => onAssignOwner(step.id, e.target.value || null)}
+              disabled={!canEdit || busy}
+              sx={{ minWidth: 180, flex: 1 }}
+              InputProps={{ startAdornment: <PersonOutlineRounded sx={{ fontSize: '1.1rem', mr: 0.5, color: 'text.disabled' }} /> }}
+            >
+              <MenuItem value="">
+                <em>Unassigned</em>
+              </MenuItem>
+              {owners.map((o) => (
+                <MenuItem key={o.email} value={o.email}>
+                  {o.full_name || o.email}
+                </MenuItem>
+              ))}
+              {/* Preserve a previously-set owner not in the current roster. */}
+              {step.owner_email && !owners.some((o) => o.email && o.email.toLowerCase() === String(step.owner_email).toLowerCase()) && (
+                <MenuItem value={step.owner_email}>{step.owner_email}</MenuItem>
+              )}
+            </TextField>
+            <TextField
+              type="date"
+              size="small"
+              label="Due"
+              value={step.due_date || ''}
+              onChange={(e) => onSetDue(step.id, e.target.value || null)}
+              disabled={!canEdit || busy}
+              InputLabelProps={{ shrink: true }}
+              sx={{ minWidth: 150 }}
+              error={overdue}
+            />
+            <Button
+              variant={done ? 'outlined' : 'contained'}
+              color={done ? 'inherit' : 'success'}
+              size="small"
+              startIcon={done ? undefined : <CheckCircleRounded />}
+              onClick={() => onComplete(step.id, !done)}
+              disabled={!canEdit || busy}
+              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5, whiteSpace: 'nowrap' }}
+            >
+              {done ? 'Re-open' : 'Mark done'}
+            </Button>
+          </Stack>
+
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+            {step.owner_email ? `Owner: ${ownerLabel(owners, step.owner_email)}` : 'No owner assigned'}
+            {step.completed_at ? ` · completed ${shortDate(String(step.completed_at).slice(0, 10))}` : ''}
+          </Typography>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+/** RIGHT pane — the full instance step chain + completion control. */
+function InstanceDetail({ instance, workflowName, steps, loading, owners, canEdit, busyStepId, onAssignOwner, onSetDue, onComplete, onCompleteProcess, completingProcess }) {
+  const progress = stepProgress(steps);
+  const allDone = progress.total > 0 && progress.done === progress.total;
+  const completed = instance?.status === 'completed';
+
+  if (loading) {
+    return (
+      <Stack spacing={2}>
+        <Skeleton variant="rounded" height={80} />
+        {[1, 2, 3].map((n) => <Skeleton key={n} variant="rounded" height={110} />)}
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack spacing={2}>
+      {/* Instance header */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, sm: 2.5 } }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.5}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
+              {instance.title || instance.reference || 'Untitled process'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {workflowName || 'Workflow'}
+              {instance.reference ? ` · ${instance.reference}` : ''}
+            </Typography>
+          </Box>
+          <Chip
+            label={completed ? 'Completed' : 'Open'}
+            size="small"
+            color={completed ? 'success' : 'info'}
+            variant={completed ? 'filled' : 'outlined'}
+            sx={{ fontWeight: 700, flexShrink: 0 }}
+          />
+        </Stack>
+        <Box sx={{ mt: 1.5 }}>
+          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              {progress.done}/{progress.total} steps done
+              {progress.overdue > 0 ? ` · ${progress.overdue} overdue` : ''}
+            </Typography>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>{progress.pct}%</Typography>
+          </Stack>
+          <LinearProgress
+            variant="determinate"
+            value={progress.pct}
+            sx={{ height: 8, borderRadius: 4, '& .MuiLinearProgress-bar': { borderRadius: 4 } }}
+            color={progress.overdue > 0 ? 'error' : allDone ? 'success' : 'primary'}
+          />
+        </Box>
+      </Paper>
+
+      {/* Step chain */}
+      {steps.length === 0 ? (
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, p: 3, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            This process has no steps.
+          </Typography>
+        </Paper>
+      ) : (
+        <Stack spacing={1.25}>
+          {steps.map((step) => (
+            <StepRow
+              key={step.id}
+              step={step}
+              owners={owners}
+              canEdit={canEdit && !completed}
+              busy={busyStepId === step.id}
+              onAssignOwner={onAssignOwner}
+              onSetDue={onSetDue}
+              onComplete={onComplete}
+            />
+          ))}
+        </Stack>
+      )}
+
+      {/* Completion control */}
+      {!completed && allDone && canEdit && (
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<DoneAllRounded />}
+          onClick={onCompleteProcess}
+          disabled={completingProcess}
+          sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 1.5, alignSelf: 'flex-start' }}
+        >
+          {completingProcess ? 'Completing…' : 'Mark process completed'}
+        </Button>
+      )}
+    </Stack>
+  );
+}
+
+/** Dialog to start a new process from a template. */
+function NewProcessDialog({ open, onClose, workflows, presetWorkflowId, onCreate, creating }) {
+  const [workflowId, setWorkflowId] = useState('');
+  const [reference, setReference] = useState('');
+  const [title, setTitle] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setWorkflowId(presetWorkflowId || '');
+      setReference('');
+      setTitle('');
+    }
+  }, [open, presetWorkflowId]);
+
+  const submit = () => {
+    if (!workflowId) return;
+    onCreate({ workflowId, reference: reference.trim() || null, title: title.trim() || null });
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ fontWeight: 800 }}>Start a new process</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <TextField
+            select
+            label="Workflow template"
+            value={workflowId}
+            onChange={(e) => setWorkflowId(e.target.value)}
+            fullWidth
+          >
+            {workflows.length === 0 ? (
+              <MenuItem value="" disabled>No templates available</MenuItem>
+            ) : (
+              workflows.map((w) => (
+                <MenuItem key={w.id} value={w.id}>
+                  {w.name} ({Array.isArray(w.steps) ? w.steps.length : 0} steps)
+                </MenuItem>
+              ))
+            )}
+          </TextField>
+          <TextField
+            label="Reference"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="e.g. order #, complaint ref"
+            fullWidth
+          />
+          <TextField
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="A short name for this process"
+            fullWidth
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} sx={{ textTransform: 'none', fontWeight: 600 }}>Cancel</Button>
+        <Button
+          variant="contained"
+          onClick={submit}
+          disabled={!workflowId || creating}
+          sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 1.5 }}
+        >
+          {creating ? 'Starting…' : 'Start process'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function WorkflowsView({ canManage, notify }) {
+  const [workflows, setWorkflows] = useState([]);
+  const [instances, setInstances] = useState([]);
+  const [instancesLoading, setInstancesLoading] = useState(true);
+  const [owners, setOwners] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [steps, setSteps] = useState([]);
+  const [stepsLoading, setStepsLoading] = useState(false);
+  const [stepsByInstance, setStepsByInstance] = useState({}); // id → steps[] for left-pane progress
+  const [busyStepId, setBusyStepId] = useState(null);
+  const [completingProcess, setCompletingProcess] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [presetWorkflowId, setPresetWorkflowId] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  const workflowName = useCallback(
+    (workflowId) => workflows.find((w) => w.id === workflowId)?.name || 'Workflow',
+    [workflows],
+  );
+
+  // Load templates + owners once.
+  useEffect(() => {
+    let active = true;
+    listWorkflows().then((rows) => { if (active) setWorkflows(rows); });
+    listOwners().then((rows) => { if (active) setOwners(rows); });
+    return () => { active = false; };
+  }, []);
+
+  // Load open instances, then fetch each one's steps for left-pane progress.
+  const reloadInstances = useCallback(() => {
+    setInstancesLoading(true);
+    return listInstances('open').then(async (rows) => {
+      setInstances(rows);
+      const map = {};
+      await Promise.all(
+        rows.map(async (inst) => {
+          map[inst.id] = await listSteps(inst.id);
+        }),
+      );
+      setStepsByInstance(map);
+      setInstancesLoading(false);
+      return rows;
+    });
+  }, []);
+
+  useEffect(() => {
+    reloadInstances();
+  }, [reloadInstances]);
+
+  // Load the selected instance's steps into the working copy.
+  const loadSteps = useCallback((instanceId) => {
+    if (!instanceId) { setSteps([]); return; }
+    setStepsLoading(true);
+    listSteps(instanceId).then((rows) => {
+      setSteps(rows);
+      setStepsByInstance((m) => ({ ...m, [instanceId]: rows }));
+      setStepsLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selectedId) loadSteps(selectedId);
+    else setSteps([]);
+  }, [selectedId, loadSteps]);
+
+  const selectedInstance = useMemo(
+    () => instances.find((i) => i.id === selectedId) || null,
+    [instances, selectedId],
+  );
+
+  const handleAssignOwner = useCallback(async (stepId, ownerEmail) => {
+    setBusyStepId(stepId);
+    const res = await updateStep(stepId, { owner_email: ownerEmail });
+    setBusyStepId(null);
+    if (res.ok) loadSteps(selectedId);
+    else notify('Could not assign owner.', 'error');
+  }, [selectedId, loadSteps, notify]);
+
+  const handleSetDue = useCallback(async (stepId, dueDate) => {
+    setBusyStepId(stepId);
+    const res = await updateStep(stepId, { due_date: dueDate });
+    setBusyStepId(null);
+    if (res.ok) loadSteps(selectedId);
+    else notify('Could not set due date.', 'error');
+  }, [selectedId, loadSteps, notify]);
+
+  const handleComplete = useCallback(async (stepId, done) => {
+    setBusyStepId(stepId);
+    const res = await completeStep(stepId, done);
+    setBusyStepId(null);
+    if (res.ok) {
+      notify(done ? 'Step marked done' : 'Step re-opened');
+      loadSteps(selectedId);
+    } else {
+      notify('Could not update step.', 'error');
+    }
+  }, [selectedId, loadSteps, notify]);
+
+  const handleCompleteProcess = useCallback(async () => {
+    if (!selectedId) return;
+    setCompletingProcess(true);
+    const res = await setInstanceStatus(selectedId, 'completed');
+    setCompletingProcess(false);
+    if (res.ok) {
+      notify('Process completed');
+      setSelectedId(null);
+      reloadInstances();
+    } else {
+      notify('Could not complete process.', 'error');
+    }
+  }, [selectedId, notify, reloadInstances]);
+
+  const handleCreate = useCallback(async ({ workflowId, reference, title }) => {
+    setCreating(true);
+    const res = await createInstance({ workflowId, reference, title });
+    setCreating(false);
+    if (res.ok && res.row) {
+      notify('Process started');
+      setDialogOpen(false);
+      await reloadInstances();
+      setSelectedId(res.row.id);
+    } else {
+      notify(res.error || 'Could not start process.', 'error');
+    }
+  }, [notify, reloadInstances]);
+
+  const openDialog = useCallback((workflowId) => {
+    setPresetWorkflowId(workflowId || '');
+    setDialogOpen(true);
+  }, []);
+
+  return (
+    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 380px) minmax(0, 1fr)' }, alignItems: 'start' }}>
+      {/* LEFT — instances + templates */}
+      <Stack spacing={2} sx={{ minWidth: 0 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Active processes</Typography>
+          {canManage && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddRounded />}
+              onClick={() => openDialog('')}
+              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
+            >
+              New process
+            </Button>
+          )}
+        </Stack>
+
+        <Stack spacing={1}>
+          {instancesLoading ? (
+            [1, 2, 3].map((n) => <Skeleton key={n} variant="rounded" height={92} />)
+          ) : instances.length === 0 ? (
+            <Paper variant="outlined" sx={{ borderRadius: 2.5, p: 3, textAlign: 'center' }}>
+              <AccountTreeRounded sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                No active processes — start one from a template.
+              </Typography>
+            </Paper>
+          ) : (
+            instances.map((inst) => (
+              <InstanceCard
+                key={inst.id}
+                instance={inst}
+                workflowName={workflowName(inst.workflow_id)}
+                progress={stepProgress(stepsByInstance[inst.id])}
+                selected={inst.id === selectedId}
+                onSelect={(i) => setSelectedId(i.id)}
+              />
+            ))
+          )}
+        </Stack>
+
+        {/* Templates affordance */}
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, p: 1.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'text.secondary' }}>
+            Templates
+          </Typography>
+          <Stack spacing={1} sx={{ mt: 1 }}>
+            {workflows.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">No workflow templates.</Typography>
+            ) : (
+              workflows.map((w) => (
+                <Stack key={w.id} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>{w.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {Array.isArray(w.steps) ? w.steps.length : 0} steps
+                    </Typography>
+                  </Box>
+                  {canManage && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<PlayArrowRounded />}
+                      onClick={() => openDialog(w.id)}
+                      sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5, flexShrink: 0 }}
+                    >
+                      Start
+                    </Button>
+                  )}
+                </Stack>
+              ))
+            )}
+          </Stack>
+        </Paper>
+      </Stack>
+
+      {/* RIGHT — selected instance step chain */}
+      <Box sx={{ minWidth: 0 }}>
+        {!selectedInstance ? (
+          <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 4, sm: 8 }, textAlign: 'center' }}>
+            <AccountTreeRounded sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+              Select a process
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Pick an active process to see its accountability chain — who owns each step and when it's due.
+            </Typography>
+          </Paper>
+        ) : (
+          <InstanceDetail
+            instance={selectedInstance}
+            workflowName={workflowName(selectedInstance.workflow_id)}
+            steps={steps}
+            loading={stepsLoading}
+            owners={owners}
+            canEdit={canManage}
+            busyStepId={busyStepId}
+            onAssignOwner={handleAssignOwner}
+            onSetDue={handleSetDue}
+            onComplete={handleComplete}
+            onCompleteProcess={handleCompleteProcess}
+            completingProcess={completingProcess}
+          />
+        )}
+      </Box>
+
+      <NewProcessDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        workflows={workflows}
+        presetWorkflowId={presetWorkflowId}
+        onCreate={handleCreate}
+        creating={creating}
+      />
+    </Box>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // PAGE
 // ---------------------------------------------------------------------------
 export default function PerformanceReview() {
@@ -870,7 +1534,7 @@ export default function PerformanceReview() {
   // CEO / super-admin gate for manager edits + lock.
   const canManage = hasFullAccess || ['CEO', 'SUPER_ADMIN', 'SUPERADMIN'].includes(String(roleCode || '').toUpperCase());
 
-  const [view, setView] = useState('weekly'); // 'weekly' | 'departments'
+  const [view, setView] = useState('weekly'); // 'weekly' | 'departments' | 'workflows'
   const [weekStart, setWeekStart] = useState(getCurrentWeekStart());
   const [departments, setDepartments] = useState([]);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
@@ -1052,22 +1716,27 @@ export default function PerformanceReview() {
             <ToggleButton value="departments" aria-label="Departments">
               Departments
             </ToggleButton>
+            <ToggleButton value="workflows" aria-label="Workflows">
+              Workflows
+            </ToggleButton>
           </ToggleButtonGroup>
-          <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Tooltip title="Previous week">
-              <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
-                <ChevronLeftRounded />
-              </IconButton>
-            </Tooltip>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 150, textAlign: 'center' }}>
-              Week of {weekLabel(weekStart)}
-            </Typography>
-            <Tooltip title="Next week">
-              <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
-                <ChevronRightRounded />
-              </IconButton>
-            </Tooltip>
-          </Paper>
+          {view !== 'workflows' && (
+            <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Previous week">
+                <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
+                  <ChevronLeftRounded />
+                </IconButton>
+              </Tooltip>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, minWidth: 150, textAlign: 'center' }}>
+                Week of {weekLabel(weekStart)}
+              </Typography>
+              <Tooltip title="Next week">
+                <IconButton size="small" onClick={() => goWeek(1)} aria-label="Next week">
+                  <ChevronRightRounded />
+                </IconButton>
+              </Tooltip>
+            </Paper>
+          )}
           {view === 'weekly' && canManage && (
             <Button
               variant="contained"
@@ -1082,7 +1751,9 @@ export default function PerformanceReview() {
         </Stack>
       </Stack>
 
-      {view === 'departments' ? (
+      {view === 'workflows' ? (
+        <WorkflowsView canManage={canManage} notify={notify} />
+      ) : view === 'departments' ? (
         <DepartmentsView departments={departments} loading={departmentsLoading} weekStart={weekStart} />
       ) : (
         <>

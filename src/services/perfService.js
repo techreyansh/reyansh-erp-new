@@ -295,6 +295,229 @@ export async function departmentDashboard(weekStart) {
   return data ?? null;
 }
 
+// ---------------------------------------------------------------------------
+// WORKFLOWS — process accountability. A workflow template (perf_workflows) has
+// an ordered steps[] of {seq, name, owner_role}. Starting a process clones that
+// template into a perf_workflow_instances row + one perf_workflow_steps row per
+// template step. Step completion feeds each owner's Workflow score (10%), so
+// owner_email / due_date / completed_at must stay accurate.
+// ---------------------------------------------------------------------------
+
+const WORKFLOW_INSTANCE_STATUSES = ['open', 'completed', 'cancelled'];
+const WORKFLOW_STEP_STATUSES = ['pending', 'done', 'blocked'];
+
+/**
+ * Active workflow templates, ordered by name.
+ * @returns {Promise<Array<{ id, name, description, steps, is_active }>>}
+ */
+export async function listWorkflows() {
+  const { data, error } = await supabase
+    .from('perf_workflows')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+  if (error) {
+    console.error('[perfService] listWorkflows failed:', error.message);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Upsert a workflow template (by id when present, else insert).
+ * @returns {Promise<{ ok: boolean, row: (object|null), error: (string|null) }>}
+ */
+export async function saveWorkflow(w) {
+  if (!w || !w.name) return { ok: false, row: null, error: 'Missing workflow name.' };
+  const row = {
+    name: String(w.name).trim(),
+    description: w.description == null ? null : String(w.description),
+    steps: Array.isArray(w.steps) ? w.steps : [],
+    is_active: w.is_active == null ? true : Boolean(w.is_active),
+  };
+  if (w.id) row.id = w.id;
+  const { data, error } = await supabase
+    .from('perf_workflows')
+    .upsert(row)
+    .select()
+    .maybeSingle();
+  if (error) {
+    console.error('[perfService] saveWorkflow failed:', error.message);
+    return { ok: false, row: null, error: error.message };
+  }
+  return { ok: true, row: data || null, error: null };
+}
+
+/**
+ * Workflow instances, newest first. Optionally filter by status.
+ * @returns {Promise<Array<{ id, workflow_id, reference, title, status, created_at }>>}
+ */
+export async function listInstances(status) {
+  let query = supabase
+    .from('perf_workflow_instances')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (status && WORKFLOW_INSTANCE_STATUSES.includes(status)) {
+    query = query.eq('status', status);
+  }
+  const { data, error } = await query;
+  if (error) {
+    console.error('[perfService] listInstances failed:', error.message);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Start a new process: insert the instance, then clone the template's steps[]
+ * into perf_workflow_steps (one row per step; owner/due unset, status 'pending').
+ * @returns {Promise<{ ok: boolean, row: (object|null), error: (string|null) }>}
+ */
+export async function createInstance({ workflowId, reference, title }) {
+  if (!workflowId) return { ok: false, row: null, error: 'Pick a workflow template.' };
+
+  // Read the template so we can clone its step chain.
+  const { data: wf, error: wfErr } = await supabase
+    .from('perf_workflows')
+    .select('id, name, steps')
+    .eq('id', workflowId)
+    .maybeSingle();
+  if (wfErr) {
+    console.error('[perfService] createInstance template lookup failed:', wfErr.message);
+    return { ok: false, row: null, error: wfErr.message };
+  }
+  if (!wf) return { ok: false, row: null, error: 'Workflow template not found.' };
+
+  const { data: instance, error: insErr } = await supabase
+    .from('perf_workflow_instances')
+    .insert({
+      workflow_id: workflowId,
+      reference: reference ? String(reference).trim() : null,
+      title: title ? String(title).trim() : null,
+      status: 'open',
+    })
+    .select()
+    .maybeSingle();
+  if (insErr || !instance) {
+    console.error('[perfService] createInstance insert failed:', insErr?.message);
+    return { ok: false, row: null, error: insErr?.message || 'Could not create process.' };
+  }
+
+  const template = Array.isArray(wf.steps) ? wf.steps : [];
+  if (template.length) {
+    const stepRows = template
+      .slice()
+      .sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0))
+      .map((s, i) => ({
+        instance_id: instance.id,
+        seq: s.seq != null ? Number(s.seq) : i + 1,
+        name: s.name ? String(s.name) : `Step ${i + 1}`,
+        owner_email: null,
+        due_date: null,
+        status: 'pending',
+      }));
+    const { error: stepErr } = await supabase.from('perf_workflow_steps').insert(stepRows);
+    if (stepErr) {
+      console.error('[perfService] createInstance step clone failed:', stepErr.message);
+      // Instance exists but steps failed — surface the error; UI can retry/inspect.
+      return { ok: false, row: instance, error: stepErr.message };
+    }
+  }
+
+  return { ok: true, row: instance, error: null };
+}
+
+/**
+ * Steps of an instance, ordered by seq (the accountability chain).
+ * @returns {Promise<Array<{ id, instance_id, seq, name, owner_email, due_date, completed_at, status }>>}
+ */
+export async function listSteps(instanceId) {
+  if (!instanceId) return [];
+  const { data, error } = await supabase
+    .from('perf_workflow_steps')
+    .select('*')
+    .eq('instance_id', instanceId)
+    .order('seq', { ascending: true });
+  if (error) {
+    console.error('[perfService] listSteps failed:', error.message);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Patch a step (e.g. { owner_email, due_date }). owner_email is normalised.
+ * @returns {Promise<{ ok: boolean, error: (string|null) }>}
+ */
+export async function updateStep(stepId, patch) {
+  if (!stepId || !patch || typeof patch !== 'object') {
+    return { ok: false, error: 'Invalid step id or patch.' };
+  }
+  const clean = {};
+  if ('owner_email' in patch) clean.owner_email = normEmail(patch.owner_email);
+  if ('due_date' in patch) clean.due_date = patch.due_date || null;
+  if ('name' in patch) clean.name = patch.name == null ? null : String(patch.name);
+  if ('status' in patch && WORKFLOW_STEP_STATUSES.includes(patch.status)) clean.status = patch.status;
+  if (Object.keys(clean).length === 0) return { ok: true, error: null };
+  const { error } = await supabase.from('perf_workflow_steps').update(clean).eq('id', stepId);
+  if (error) {
+    console.error('[perfService] updateStep failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, error: null };
+}
+
+/**
+ * Mark a step done (stamps completed_at) or re-open it (clears completed_at).
+ * @returns {Promise<{ ok: boolean, error: (string|null) }>}
+ */
+export async function completeStep(stepId, done = true) {
+  if (!stepId) return { ok: false, error: 'Missing step id.' };
+  const patch = done
+    ? { status: 'done', completed_at: new Date().toISOString() }
+    : { status: 'pending', completed_at: null };
+  const { error } = await supabase.from('perf_workflow_steps').update(patch).eq('id', stepId);
+  if (error) {
+    console.error('[perfService] completeStep failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, error: null };
+}
+
+/**
+ * Set an instance's lifecycle status ('open'|'completed'|'cancelled').
+ * @returns {Promise<{ ok: boolean, error: (string|null) }>}
+ */
+export async function setInstanceStatus(id, status) {
+  if (!id || !WORKFLOW_INSTANCE_STATUSES.includes(status)) {
+    return { ok: false, error: 'Invalid instance id or status.' };
+  }
+  const { error } = await supabase.from('perf_workflow_instances').update({ status }).eq('id', id);
+  if (error) {
+    console.error('[perfService] setInstanceStatus failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, error: null };
+}
+
+/**
+ * Roster of employees usable as step owners, as { email, full_name, department }.
+ * Backed by the employees master. Never throws — returns [] so owner pickers
+ * degrade to the raw email.
+ */
+export async function listOwners() {
+  const { data, error } = await supabase
+    .from('employees')
+    .select('email, full_name, department')
+    .not('email', 'is', null)
+    .order('full_name', { ascending: true });
+  if (error) {
+    console.error('[perfService] listOwners failed:', error.message);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
 const perfService = {
   weekStartOf,
   getCurrentWeekStart,
@@ -308,5 +531,14 @@ const perfService = {
   addCommitment,
   setCommitmentStatus,
   departmentDashboard,
+  listWorkflows,
+  saveWorkflow,
+  listInstances,
+  createInstance,
+  listSteps,
+  updateStep,
+  completeStep,
+  setInstanceStatus,
+  listOwners,
 };
 export default perfService;
