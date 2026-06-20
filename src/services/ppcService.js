@@ -140,11 +140,20 @@ async function listStock() {
     await supabase
       .from('ppc_stock')
       .select(
-        'id, item_id, on_hand, reorder_point, safety_stock, lead_time_days, location, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost)'
+        'id, item_id, on_hand, reorder_point, safety_stock, lead_time_days, location, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost)'
       ),
     'List stock'
   );
   return data || [];
+}
+
+/**
+ * Recompute ABC (value) / XYZ (demand-variability) classification for all stock
+ * rows. Returns the count of items reclassified.
+ */
+async function recomputeClassification() {
+  const data = unwrap(await supabase.rpc('ppc_recompute_classification'), 'Recompute classification');
+  return data;
 }
 
 /** Insert or update a stock row keyed on the unique item_id. */
@@ -595,6 +604,19 @@ async function getWorkOrder(id) {
   };
 }
 
+/**
+ * Kitting shortfall for a work order: per-material required vs. issued vs. on-hand.
+ * Returns [{ item_id, code, name, uom, qty_required, qty_issued, on_hand, shortfall }].
+ */
+async function woShortage(woId) {
+  if (!woId) return [];
+  const data = unwrap(
+    await supabase.rpc('ppc_wo_shortage', { p_wo_id: woId }),
+    'Work order shortage'
+  );
+  return data ?? [];
+}
+
 /** Patch a stage's 4-M assignment fields (machine, operator, method sheet). */
 async function updateStage(stageId, patch) {
   if (!stageId) throw new Error('Update stage: no stage selected');
@@ -676,6 +698,7 @@ const ppcService = {
   deleteBomLine,
   // stock
   listStock,
+  recomputeClassification,
   upsertStock,
   receiveStock,
   adjustStock,
@@ -703,6 +726,7 @@ const ppcService = {
   createWorkOrderForCustomer,
   listWorkOrdersForOrderCycle,
   getWorkOrder,
+  woShortage,
   updateStage,
   advanceStage,
   issueMaterial,

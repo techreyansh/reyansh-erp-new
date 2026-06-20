@@ -232,6 +232,17 @@ export default function InventoryDashboard() {
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
   }, [reorder]);
 
+  // ABC classification breakdown (counts by abc_class; nulls → Unclassified) -
+  const abcCounts = useMemo(() => {
+    const acc = { A: 0, B: 0, C: 0, Unclassified: 0 };
+    stock.forEach((s) => {
+      const cls = String(s?.abc_class || '').toUpperCase();
+      if (cls === 'A' || cls === 'B' || cls === 'C') acc[cls] += 1;
+      else acc.Unclassified += 1;
+    });
+    return acc;
+  }, [stock]);
+
   // Chart data -------------------------------------------------------------
   const shortageChart = useMemo(
     () =>
@@ -312,6 +323,44 @@ export default function InventoryDashboard() {
         {kpiCards.map((c) => (
           <StatCard key={c.label} {...c} />
         ))}
+      </Box>
+
+      {/* Stock classification card */}
+      <Box sx={{ mb: 3 }}>
+        <Panel title="Stock classification" subtitle="Items by ABC value class">
+          {stock.length ? (
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+              {[
+                { key: 'A', label: 'Class A', accent: theme.palette.error.main },
+                { key: 'B', label: 'Class B', accent: theme.palette.warning.main },
+                { key: 'C', label: 'Class C', accent: theme.palette.success.main },
+                { key: 'Unclassified', label: 'Unclassified', accent: theme.palette.text.disabled },
+              ].map((c) => (
+                <Box
+                  key={c.key}
+                  sx={{
+                    flex: '1 1 120px',
+                    minWidth: 110,
+                    borderRadius: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    bgcolor: `${c.accent}0f`,
+                    px: 1.5,
+                    py: 1.25,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: c.accent, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {c.label}
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                    {num(abcCounts[c.key])}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          ) : (
+            <Empty label="No stock yet — add items and run ABC/XYZ classification in PPC." />
+          )}
+        </Panel>
       </Box>
 
       {/* Shortage chart */}

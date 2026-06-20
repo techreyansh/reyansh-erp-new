@@ -104,6 +104,41 @@ function typeChipColor(type) {
   }
 }
 
+/** ABC class (value criticality) → MUI chip color. */
+function abcChipColor(cls) {
+  switch (String(cls || '').toUpperCase()) {
+    case 'A':
+      return 'error';
+    case 'B':
+      return 'warning';
+    case 'C':
+      return 'default';
+    default:
+      return 'default';
+  }
+}
+
+/** Two small chips: ABC (filled, color-coded) + XYZ (outlined). Shows "—" when unset. */
+function ClassChips({ abc, xyz }) {
+  if (!abc && !xyz) {
+    return (
+      <Typography variant="caption" color="text.disabled">
+        —
+      </Typography>
+    );
+  }
+  return (
+    <Stack direction="row" spacing={0.5} alignItems="center">
+      {abc ? (
+        <Chip size="small" color={abcChipColor(abc)} label={String(abc).toUpperCase()} sx={{ height: 20, minWidth: 26, fontWeight: 700 }} />
+      ) : null}
+      {xyz ? (
+        <Chip size="small" variant="outlined" label={String(xyz).toUpperCase()} sx={{ height: 20, minWidth: 26, fontWeight: 700 }} />
+      ) : null}
+    </Stack>
+  );
+}
+
 function EmptyState({ icon: Icon, title, hint, action }) {
   return (
     <Box sx={{ textAlign: 'center', py: 6, px: 2 }}>
@@ -745,6 +780,7 @@ function MaterialsTab({ items, notify }) {
   const [dispatchRow, setDispatchRow] = useState(null);
   const [historyRow, setHistoryRow] = useState(null);
   const [moving, setMoving] = useState(false);
+  const [classifying, setClassifying] = useState(false);
 
   const blankReceive = { qty: '', vendorName: '', vendorCode: '', unitCost: '', reference: '', note: '' };
   const blankAdjust = { newQty: '', reason: '' };
@@ -807,6 +843,19 @@ function MaterialsTab({ items, notify }) {
       notify(e.message, 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const recompute = async () => {
+    setClassifying(true);
+    try {
+      const count = await ppcService.recomputeClassification();
+      await load();
+      notify(`Classified ${num(count)} items`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setClassifying(false);
     }
   };
 
@@ -902,6 +951,15 @@ function MaterialsTab({ items, notify }) {
             label={loading ? 'Low stock…' : `${low.length} low / reorder`}
             sx={{ fontWeight: 700 }}
           />
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={classifying ? <CircularProgress size={16} /> : <TuneRounded />}
+            onClick={recompute}
+            disabled={classifying || loading || stock.length === 0}
+          >
+            Recompute ABC/XYZ
+          </Button>
           <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew} disabled={itemsWithoutStock.length === 0}>
             Set stock
           </Button>
@@ -918,16 +976,17 @@ function MaterialsTab({ items, notify }) {
               <TableCell align="right">Reorder pt</TableCell>
               <TableCell align="right">Safety</TableCell>
               <TableCell align="right">Lead (d)</TableCell>
+              <TableCell align="center">ABC/XYZ</TableCell>
               <TableCell>Location</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading && <TableSkeleton cols={9} />}
+            {loading && <TableSkeleton cols={10} />}
             {!loading && stock.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} sx={{ p: 0, border: 0 }}>
+                <TableCell colSpan={10} sx={{ p: 0, border: 0 }}>
                   <EmptyState
                     icon={Inventory2Outlined}
                     title="No stock records yet"
@@ -964,6 +1023,9 @@ function MaterialsTab({ items, notify }) {
                     <TableCell align="right">{num(row.reorder_point)}</TableCell>
                     <TableCell align="right">{num(row.safety_stock)}</TableCell>
                     <TableCell align="right">{num(row.lead_time_days)}</TableCell>
+                    <TableCell align="center">
+                      <ClassChips abc={row.abc_class} xyz={row.xyz_class} />
+                    </TableCell>
                     <TableCell>{row.location || '—'}</TableCell>
                     <TableCell align="center">
                       {reorder ? (
@@ -2202,6 +2264,120 @@ function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
   );
 }
 
+/**
+ * Lazy kitting-readiness cell for a WO row. Nothing fires on mount — the user
+ * clicks "Check" (or it is reused after the drawer opens) to call woShortage.
+ * `state` is the cached shortage rows for this WO (undefined = not checked).
+ */
+function MaterialsReadinessCell({ state, loading, onCheck, onView }) {
+  if (loading) {
+    return <CircularProgress size={16} />;
+  }
+  if (!state) {
+    return (
+      <Button size="small" variant="text" startIcon={<Inventory2Outlined fontSize="small" />} onClick={onCheck} sx={{ textTransform: 'none' }}>
+        Check
+      </Button>
+    );
+  }
+  const shortCount = state.filter((r) => num(r.shortfall) > 0).length;
+  return shortCount > 0 ? (
+    <Chip
+      size="small"
+      color="error"
+      icon={<WarningAmberRounded />}
+      label={`${shortCount} short`}
+      onClick={onView}
+      sx={{ fontWeight: 700, cursor: 'pointer' }}
+    />
+  ) : (
+    <Chip
+      size="small"
+      color="success"
+      variant="outlined"
+      icon={<CheckCircleOutlineRounded />}
+      label="Ready"
+      onClick={onView}
+      sx={{ fontWeight: 600, cursor: 'pointer' }}
+    />
+  );
+}
+
+/** Drawer listing the kitting shortfall (required / issued / on-hand / short) for one WO. */
+function ShortfallDrawer({ wo, rows, onClose }) {
+  const list = rows || [];
+  const shortCount = list.filter((r) => num(r.shortfall) > 0).length;
+  return (
+    <Drawer anchor="right" open={!!wo} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 520, md: 620 }, maxWidth: '100%' } }}>
+      <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
+              Material shortfall
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {wo?.wo_number} · {wo?.item?.code || ''} {wo?.item?.name ? `· ${wo.item.name}` : ''}
+            </Typography>
+          </Box>
+          <IconButton onClick={onClose} size="small">
+            <CloseRounded fontSize="small" />
+          </IconButton>
+        </Stack>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+          {shortCount > 0 ? (
+            <Chip size="small" color="error" icon={<WarningAmberRounded />} label={`${shortCount} item${shortCount === 1 ? '' : 's'} short`} sx={{ fontWeight: 700 }} />
+          ) : (
+            <Chip size="small" color="success" variant="outlined" icon={<CheckCircleOutlineRounded />} label="Fully kitted" sx={{ fontWeight: 700 }} />
+          )}
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: '70vh' }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow sx={headRowSx}>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Material</TableCell>
+                  <TableCell align="right">Required</TableCell>
+                  <TableCell align="right">Issued</TableCell>
+                  <TableCell align="right">On hand</TableCell>
+                  <TableCell align="right">Shortfall</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {list.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                      No material lines for this work order.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {list.map((r) => {
+                  const short = num(r.shortfall) > 0;
+                  return (
+                    <TableRow key={r.item_id} hover sx={short ? { bgcolor: (t) => t.palette.error.lighter || `${t.palette.error.main}14` } : undefined}>
+                      <TableCell sx={{ fontWeight: 600 }}>{r.code || '—'}</TableCell>
+                      <TableCell>{r.name || '—'}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>
+                        {num(r.qty_required)} {r.uom || ''}
+                      </TableCell>
+                      <TableCell align="right">{num(r.qty_issued)}</TableCell>
+                      <TableCell align="right">{num(r.on_hand)}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: short ? 'error.main' : 'success.main' }}>
+                        {short ? num(r.shortfall) : 0}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
+    </Drawer>
+  );
+}
+
 function WorkOrdersTab({ items, notify }) {
   const finished = useMemo(() => items.filter((i) => FINISHED_TYPES.includes(i.item_type) && i.is_active), [items]);
   const [wos, setWos] = useState([]);
@@ -2211,6 +2387,10 @@ function WorkOrdersTab({ items, notify }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [openWoId, setOpenWoId] = useState(null);
+  // lazy kitting shortfall: per-WO cache + in-flight set + open drawer WO
+  const [shortageByWo, setShortageByWo] = useState({});
+  const [shortageLoading, setShortageLoading] = useState({});
+  const [shortfallWo, setShortfallWo] = useState(null);
 
   const blank = { itemId: '', qty: '100', lineId: '', due: '' };
   const [form, setForm] = useState(blank);
@@ -2257,6 +2437,34 @@ function WorkOrdersTab({ items, notify }) {
     }
   };
 
+  // Lazily fetch (or refresh) the kitting shortfall for one WO. Caches the result.
+  const checkShortage = useCallback(
+    async (woId) => {
+      if (!woId || shortageLoading[woId]) return [];
+      setShortageLoading((m) => ({ ...m, [woId]: true }));
+      try {
+        const rows = await ppcService.woShortage(woId);
+        setShortageByWo((m) => ({ ...m, [woId]: rows }));
+        return rows;
+      } catch (e) {
+        notify(e.message, 'error');
+        return [];
+      } finally {
+        setShortageLoading((m) => ({ ...m, [woId]: false }));
+      }
+    },
+    [shortageLoading, notify]
+  );
+
+  // Open the shortfall drawer — uses cached rows if present, else fetches first.
+  const viewShortfall = useCallback(
+    async (wo) => {
+      setShortfallWo(wo);
+      if (!shortageByWo[wo.id]) await checkShortage(wo.id);
+    },
+    [shortageByWo, checkShortage]
+  );
+
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }} flexWrap="wrap" gap={1}>
@@ -2283,15 +2491,16 @@ function WorkOrdersTab({ items, notify }) {
               <TableCell align="right">Qty</TableCell>
               <TableCell>Line</TableCell>
               <TableCell align="center">Status</TableCell>
+              <TableCell align="center">Materials</TableCell>
               <TableCell>Due</TableCell>
               <TableCell align="right">Produced / Scrap</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading && <TableSkeleton cols={8} />}
+            {loading && <TableSkeleton cols={9} />}
             {!loading && wos.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} sx={{ p: 0, border: 0 }}>
+                <TableCell colSpan={9} sx={{ p: 0, border: 0 }}>
                   <EmptyState
                     icon={AssignmentOutlined}
                     title="No work orders yet — create one"
@@ -2348,6 +2557,14 @@ function WorkOrdersTab({ items, notify }) {
                   <TableCell>{wo.line?.name || '—'}</TableCell>
                   <TableCell align="center">
                     <Chip size="small" color={woStatusColor(wo.status)} label={woStatusLabel(wo.status)} sx={{ fontWeight: 700 }} />
+                  </TableCell>
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                    <MaterialsReadinessCell
+                      state={shortageByWo[wo.id]}
+                      loading={!!shortageLoading[wo.id]}
+                      onCheck={() => checkShortage(wo.id)}
+                      onView={() => viewShortfall(wo)}
+                    />
                   </TableCell>
                   <TableCell>{fmtDate(wo.due_date)}</TableCell>
                   <TableCell align="right">
@@ -2406,6 +2623,10 @@ function WorkOrdersTab({ items, notify }) {
 
       {openWoId && (
         <WorkOrderDrawer woId={openWoId} machines={machines} notify={notify} onChanged={load} onClose={() => setOpenWoId(null)} />
+      )}
+
+      {shortfallWo && (
+        <ShortfallDrawer wo={shortfallWo} rows={shortageByWo[shortfallWo.id]} onClose={() => setShortfallWo(null)} />
       )}
     </Paper>
   );

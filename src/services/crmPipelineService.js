@@ -25,9 +25,8 @@ export const STAGES = [
 export const CYCLE_STAGES = [
   { key: "order_taking", label: "Order Taking" },
   { key: "order_received", label: "Order Received" },
-  { key: "dispatch", label: "Dispatch" },
-  { key: "keep_informed", label: "Keep Informed" },
-  { key: "invoicing", label: "Invoicing" },
+  { key: "production", label: "Production / Batches" },
+  { key: "dispatch", label: "Dispatch & Invoicing" },
   { key: "payment_followup", label: "Payment Follow-up" },
   { key: "closed", label: "Closed" },
 ];
@@ -386,6 +385,26 @@ export async function moveFollowupStage(item, toStage) {
   return data;
 }
 
+/**
+ * Repeat-customer reorder & retention analytics (one row per recurring customer).
+ *
+ * Backed by the `crm_customer_analytics` RPC (RLS-scoped server-side). Each row:
+ *   { client_code, company_name, owner_email, order_count, last_order, first_order,
+ *     total_value, value_12mo, cadence_days, recency_days, next_expected,
+ *     due_status (new|ok|due_soon|due|overdue), churn_score }
+ *
+ * Never throws — returns [] on error so the dashboard widget degrades gracefully.
+ */
+export async function getCustomerAnalytics() {
+  try {
+    const { data, error } = await supabase.rpc("crm_customer_analytics");
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -415,6 +434,7 @@ const crmPipelineService = {
   rescheduleFollowup,
   completeFollowup,
   moveFollowupStage,
+  getCustomerAnalytics,
   getCurrentUserEmail,
 };
 
