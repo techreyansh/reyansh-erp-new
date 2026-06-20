@@ -71,6 +71,7 @@ import {
   ExpandMore,
   MarkEmailRead as CampaignIcon,
   ReceiptLong as ReceiptLongIcon,
+  Forum as ForumIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
@@ -272,6 +273,7 @@ const Header = () => {
         { subheader: "Sales & Clients", label: "Client Orders", path: "/client-orders", icon: <OrderIcon />, roles: ["Customer Relations Manager", "Sales Executive", "CEO"] },
         { subheader: "Sales & Clients", label: "Sales Order Ingestion", path: "/po-ingestion", icon: <Input />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Sales & Clients", label: "Sales Flow", path: "/sales-flow", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Engage", label: "KIT — Keep In Touch", path: "/kit", icon: <ForumIcon />, roles: crmModuleRoles },
         { subheader: "Tools", label: "Email Campaigns", path: "/crm/campaigns", icon: <CampaignIcon />, roles: crmModuleRoles },
         { subheader: "Tools", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
         { subheader: "Tools", label: "CRM Guide", path: "/crm/guide", icon: <HelpIcon />, roles: crmModuleRoles },
