@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { buildAppTheme } from "./theme/buildAppTheme";
 import { ThemeModeProvider, useThemeMode } from "./context/ThemeModeContext";
+import VersionGate from "./components/common/VersionGate";
 import { setGlobalErrorNotifier } from "./lib/supabaseErrorHandler";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionProvider, usePermissions } from "./context/PermissionContext";
@@ -864,6 +865,7 @@ function ThemedApp() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <VersionGate />
       <GlobalErrorToaster>
         <AppShell />
       </GlobalErrorToaster>
