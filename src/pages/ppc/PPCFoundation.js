@@ -74,6 +74,7 @@ import {
   LocalShippingOutlined,
   HistoryRounded,
   AddShoppingCartOutlined,
+  MoveToInboxOutlined,
 } from '@mui/icons-material';
 import ppcService, {
   ITEM_TYPES,
@@ -85,6 +86,7 @@ import ppcService, {
   STAGE_STATUS_COLOR,
 } from '../../services/ppcService';
 import { StatCard, GridBox, inrFull } from '../../components/common/kit';
+import LegacyBomImporter from '../../components/ppc/LegacyBomImporter';
 
 // ---------------------------------------------------------------------------
 // small shared helpers
@@ -193,6 +195,7 @@ function ItemsBomTab({ items, loading, error, reloadItems, notify }) {
   const [selectedId, setSelectedId] = useState(null);
   const [itemDialog, setItemDialog] = useState(null); // null | {} (new) | item (edit)
   const [saving, setSaving] = useState(false);
+  const [importerOpen, setImporterOpen] = useState(false);
 
   const selected = useMemo(() => items.find((i) => i.id === selectedId) || null, [items, selectedId]);
 
@@ -269,9 +272,19 @@ function ItemsBomTab({ items, loading, error, reloadItems, notify }) {
               Finished products, sub-assemblies, components & raw materials
             </Typography>
           </Box>
-          <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew}>
-            New item
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MoveToInboxOutlined />}
+              onClick={() => setImporterOpen(true)}
+            >
+              Import legacy BOMs
+            </Button>
+            <Button variant="contained" size="small" startIcon={<AddRounded />} onClick={openNew}>
+              New item
+            </Button>
+          </Stack>
         </Stack>
         <Divider />
         {error && (
@@ -343,6 +356,14 @@ function ItemsBomTab({ items, loading, error, reloadItems, notify }) {
 
       {/* BOM editor */}
       <BomEditor selected={selected} items={items} notify={notify} />
+
+      {/* Legacy BOM importer */}
+      <LegacyBomImporter
+        open={importerOpen}
+        onClose={() => setImporterOpen(false)}
+        onImported={reloadItems}
+        notify={notify}
+      />
 
       {/* Item dialog */}
       <Dialog open={!!itemDialog} onClose={() => setItemDialog(null)} maxWidth="sm" fullWidth>

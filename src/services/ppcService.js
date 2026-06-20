@@ -684,6 +684,30 @@ async function shopfloor(lineId) {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------------------------------------------------------------------------
+// Legacy BOM importer (one-time migration tool)
+// ---------------------------------------------------------------------------
+
+/**
+ * Pull the legacy BOM source bundle for the guided importer.
+ * Returns { boms, issues, already_imported }.
+ */
+export async function legacyBomSource() {
+  const { data, error } = await supabase.rpc('ppc_legacy_bom_source');
+  if (error) throw error;
+  return data || { boms: [], issues: [], already_imported: 0 };
+}
+
+/**
+ * Import a parsed/deduped legacy-BOM payload. Idempotent on the backend
+ * (re-running upserts/links, never duplicates). Returns { items, boms, stock } counts.
+ */
+export async function importBom(payload) {
+  const { data, error } = await supabase.rpc('ppc_import_bom', { payload });
+  if (error) throw error;
+  return data || { items: 0, boms: 0, stock: 0 };
+}
+
 const ppcService = {
   // items
   listItems,
@@ -732,6 +756,9 @@ const ppcService = {
   issueMaterial,
   recordQc,
   shopfloor,
+  // legacy import
+  legacyBomSource,
+  importBom,
   // constants
   ITEM_TYPES,
   FINISHED_TYPES,
