@@ -70,6 +70,7 @@ import {
   ExpandLess,
   ExpandMore,
   MarkEmailRead as CampaignIcon,
+  ReceiptLong as ReceiptLongIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
@@ -265,6 +266,7 @@ const Header = () => {
         { subheader: "Pipelines", label: "New Customer Pipeline", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
         { subheader: "Pipelines", label: "Repeat Customer Pipeline", path: "/crm-pipeline?view=recurring", icon: <PeopleIcon />, roles: crmModuleRoles },
         { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "Payments / Collections", path: "/crm/collections", icon: <ReceiptLongIcon />, roles: crmModuleRoles },
         { subheader: "Sales & Clients", label: "Products", path: "/products", icon: <ProductIcon />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Sales & Clients", label: "Clients", path: "/clients", icon: <ListAlt />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Sales & Clients", label: "Prospects Clients", path: "/prospects-clients", icon: <ListAlt />, roles: ["Customer Relations Manager", "CEO"] },

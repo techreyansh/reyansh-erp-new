@@ -18,6 +18,10 @@ ALTER TABLE public.finance_invoices ADD COLUMN IF NOT EXISTS notes text;
 ALTER TABLE public.finance_invoices ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 ALTER TABLE public.finance_invoices ADD COLUMN IF NOT EXISTS balance numeric
   GENERATED ALWAYS AS (COALESCE(amount,0) - COALESCE(amount_received,0)) STORED;
+-- AR invoices can be standalone (manual / from dispatch), not always tied to a
+-- sales order or a customer uuid — relax the legacy NOT NULLs.
+ALTER TABLE public.finance_invoices ALTER COLUMN sales_order_id DROP NOT NULL;
+ALTER TABLE public.finance_invoices ALTER COLUMN customer_id DROP NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_fin_inv_customer ON public.finance_invoices(customer_code);
 CREATE INDEX IF NOT EXISTS idx_fin_inv_due ON public.finance_invoices(due_date);
 
@@ -72,7 +76,7 @@ BEGIN
   VALUES (COALESCE(NULLIF(p_invoice_number,''), 'INV-'||to_char(now(),'YYMMDDHH24MISS')),
      p_customer_code, p_customer_name, COALESCE(p_invoice_date, current_date), p_amount, v_terms,
      COALESCE(p_invoice_date, current_date) + (v_terms || ' days')::interval,
-     p_dispatch_id, p_po_ref, p_owner, 'open')
+     p_dispatch_id, p_po_ref, p_owner, 'ISSUED')
   RETURNING * INTO v_row;
   RETURN v_row;
 END;
@@ -90,7 +94,7 @@ BEGIN
   VALUES (p_invoice_id, p_amount, COALESCE(p_paid_on, current_date), p_method, p_note, v_email);
   UPDATE public.finance_invoices
      SET amount_received = COALESCE(amount_received,0) + p_amount, updated_at = now(),
-         status = CASE WHEN COALESCE(amount,0) - (COALESCE(amount_received,0)+p_amount) <= 0 THEN 'paid' ELSE 'partial' END
+         status = CASE WHEN COALESCE(amount,0) - (COALESCE(amount_received,0)+p_amount) <= 0 THEN 'PAID' ELSE 'PARTIAL' END
    WHERE id = p_invoice_id RETURNING * INTO v_row;
   IF NOT FOUND THEN RAISE EXCEPTION 'Invoice not found'; END IF;
   RETURN v_row;

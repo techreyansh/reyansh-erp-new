@@ -31,6 +31,7 @@ import {
   LocalShippingOutlined,
   NotificationsActiveOutlined,
   PaidOutlined,
+  PaymentsOutlined,
   ReceiptLongOutlined,
   RefreshRounded,
   TrendingUpOutlined,
@@ -49,6 +50,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../context/PermissionContext";
 import LoadingScreen from "../components/common/LoadingScreen";
@@ -120,6 +122,182 @@ const allActions = [
   { key: "reports", title: "Reports", description: "Operational snapshots and performance summaries.", path: "/ppc/reports", icon: BarChartOutlined },
 ];
 
+const COLLECTIONS_PATH = "/crm/collections";
+
+/** Short, human due-date label for a collections row. */
+function formatDueDate(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
+}
+
+/**
+ * "Overdue & due payments" — surfaces outstanding AR straight on the home page
+ * for the CEO and Sales/CRM reps so collections don't slip. Fetches once on
+ * mount via the `ar_collections` RPC; degrades to an empty/clean state on error.
+ *
+ * @param {string|null} ownerEmail  null → all owners (CEO); else this rep's own.
+ */
+function CollectionsPanel({ ownerEmail }) {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [rows, setRows] = useState(null); // null = loading
+  const MAX_ROWS = 6;
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc("ar_collections", { p_owner: ownerEmail });
+        if (error) throw error;
+        if (active) setRows(Array.isArray(data) ? data : []);
+      } catch (e) {
+        // Degrade silently — show a clean empty state rather than break the home.
+        if (active) setRows([]);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // ownerEmail is the only input; fetch once per owner.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownerEmail]);
+
+  const openCollections = () => navigate(COLLECTIONS_PATH);
+
+  const loading = rows === null;
+  const list = rows || [];
+  const visible = list.slice(0, MAX_ROWS);
+  const extra = Math.max(0, list.length - visible.length);
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{ borderRadius: 2.5, p: { xs: 1.5, sm: 2 }, height: "100%", display: "flex", flexDirection: "column" }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <PaymentsOutlined sx={{ fontSize: 20, color: "primary.main" }} />
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Overdue &amp; due payments
+          </Typography>
+          {!loading && list.length > 0 && (
+            <Chip
+              label={list.length}
+              size="small"
+              sx={{
+                height: 20,
+                fontWeight: 700,
+                fontSize: "0.65rem",
+                color: "primary.main",
+                bgcolor: alpha(theme.palette.primary.main, 0.12),
+              }}
+            />
+          )}
+        </Stack>
+        <Typography
+          variant="caption"
+          onClick={openCollections}
+          sx={{ color: "primary.main", fontWeight: 700, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+        >
+          Open collections
+        </Typography>
+      </Stack>
+
+      {loading ? (
+        <Stack spacing={1} sx={{ px: 1.25 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="rounded" height={36} />
+          ))}
+        </Stack>
+      ) : list.length === 0 ? (
+        <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", py: 3, px: 2 }}>
+          <Typography variant="body2" sx={{ color: "success.main", textAlign: "center", fontWeight: 600 }}>
+            No overdue payments — collections are clean.
+          </Typography>
+        </Box>
+      ) : (
+        <Stack spacing={0.25}>
+          {visible.map((r) => {
+            const overdue = Number(r.days_past_due) > 0;
+            return (
+              <Box
+                key={r.id}
+                role="button"
+                tabIndex={0}
+                onClick={openCollections}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openCollections();
+                  }
+                }}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) auto",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 1.25,
+                  py: 0.9,
+                  borderRadius: 1.5,
+                  cursor: "pointer",
+                  transition: "background-color 0.15s ease",
+                  "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.08) },
+                }}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 0 }} noWrap>
+                    {r.customer_name || "—"}
+                  </Typography>
+                  <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.25 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {inrCompact(r.balance)}
+                    </Typography>
+                    {r.due_date && (
+                      <Typography variant="caption" color="text.secondary">
+                        {" · due "}
+                        {formatDueDate(r.due_date)}
+                      </Typography>
+                    )}
+                  </Stack>
+                </Box>
+                <Chip
+                  label={overdue ? `${r.days_past_due}d overdue` : "due"}
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: "0.62rem",
+                    fontWeight: 700,
+                    flexShrink: 0,
+                    color: overdue ? "error.main" : "text.secondary",
+                    bgcolor: overdue ? alpha(theme.palette.error.main, 0.12) : "action.hover",
+                  }}
+                />
+              </Box>
+            );
+          })}
+          {extra > 0 && (
+            <Typography
+              variant="caption"
+              onClick={openCollections}
+              sx={{
+                px: 1.25,
+                pt: 0.5,
+                color: "text.secondary",
+                cursor: "pointer",
+                "&:hover": { color: "primary.main", textDecoration: "underline" },
+              }}
+            >
+              +{extra} more
+            </Typography>
+          )}
+        </Stack>
+      )}
+    </Paper>
+  );
+}
+
 function WelcomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -138,6 +316,10 @@ function WelcomePage() {
   const showSalesAnalytics = accessBucket === "full" || accessBucket === "sales";
   // Anything that needs the executive summary fetched.
   const needsSummary = showExecAnalytics || showSalesAnalytics;
+  // Collections reminder — CEO + Sales/CRM only (kept off lighter views).
+  const showCollections = accessBucket === "full" || accessBucket === "sales";
+  // CEO/super-admin see all outstanding AR (null owner); reps see only theirs.
+  const collectionsOwner = accessBucket === "full" ? null : user?.email || "";
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -316,10 +498,18 @@ function WelcomePage() {
         </Grid>
 
         {/* My Follow-ups — CRM next-actions, visible without opening the CRM.
-            Self-empties if nothing is scheduled, so it's safe to always render. */}
-        <Box sx={{ mb: 3 }}>
-          <MyFollowups email={user?.email} />
-        </Box>
+            Self-empties if nothing is scheduled, so it's safe to always render.
+            Paired with the Collections reminder for CEO + Sales/CRM. */}
+        <Grid container spacing={2} sx={{ mb: 3 }} alignItems="stretch">
+          <Grid item xs={12} md={showCollections ? 7 : 12}>
+            <MyFollowups email={user?.email} />
+          </Grid>
+          {showCollections && (
+            <Grid item xs={12} md={5}>
+              <CollectionsPanel ownerEmail={collectionsOwner} />
+            </Grid>
+          )}
+        </Grid>
 
         {/* Executive analytics — revenue + department health (CEO only) */}
         {showExecAnalytics && (

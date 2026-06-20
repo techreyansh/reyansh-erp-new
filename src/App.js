@@ -120,6 +120,7 @@ const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub")
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const CRMPipelineBoard = lazy(() => import("./pages/crm/CRMPipelineBoard"));
+const CollectionsPage = lazy(() => import("./pages/crm/CollectionsPage"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/ChecklistTemplateAdmin"));
@@ -747,6 +748,14 @@ function AppContent() {
                     element={
                       <ProtectedRouteGate>
                         <Navigate to="/crm/dashboard" replace />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/collections"
+                    element={
+                      <ProtectedRouteGate>
+                        <CollectionsPage />
                       </ProtectedRouteGate>
                     }
                   />
