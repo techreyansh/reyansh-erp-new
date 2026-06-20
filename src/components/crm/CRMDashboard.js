@@ -11,6 +11,8 @@ import {
   Paper,
   Skeleton,
   Stack,
+  Tab,
+  Tabs,
   Typography,
   useTheme,
 } from '@mui/material';
@@ -27,7 +29,15 @@ import {
   WarningAmberRounded,
 } from '@mui/icons-material';
 import { usePermissions } from '../../context/PermissionContext';
-import { getCustomerAnalytics, getCurrentUserEmail } from '../../services/crmPipelineService';
+import {
+  getCustomerAnalytics,
+  getCurrentUserEmail,
+  prospectDashboard,
+  clientDashboard,
+  listAssignableUsers,
+  PROSPECT_STAGES,
+  CLIENT_STAGES,
+} from '../../services/crmPipelineService';
 import {
   Area,
   AreaChart,
@@ -100,8 +110,330 @@ const Empty = ({ label = 'No data yet' }) => (
   </Stack>
 );
 
+// Display name from an email — uses the resolved name map if available, else the
+// email's local-part (prefix before @), title-cased lightly.
+function ownerDisplay(email, nameMap) {
+  if (!email) return 'Unassigned';
+  const resolved = nameMap && nameMap[String(email).toLowerCase()];
+  if (resolved) return resolved;
+  const prefix = String(email).split('@')[0] || email;
+  return prefix.replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const KpiGrid = ({ children }) => (
+  <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(3,1fr)' } }}>
+    {children}
+  </Box>
+);
+
+const KpiSkeletons = ({ n = 6 }) => (
+  <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(3,1fr)' } }}>
+    {[...Array(n)].map((_, i) => (
+      <Skeleton key={i} variant="rounded" height={96} />
+    ))}
+  </Box>
+);
+
+// ---------------------------------------------------------------------------
+// PROSPECTS TAB
+// ---------------------------------------------------------------------------
+function ProspectsTab() {
+  const theme = useTheme();
+  const COLORS = [
+    theme.palette.primary.main,
+    theme.palette.primary.dark,
+    theme.palette.warning.main,
+    theme.palette.primary.light,
+    theme.palette.success.main,
+    theme.palette.error.main,
+    theme.palette.info.dark,
+    theme.palette.text.secondary,
+  ];
+  const axis = { fontSize: 12, fill: theme.palette.text.secondary };
+  const grid = theme.palette.divider;
+
+  const [d, setD] = useState(null);
+  const [nameMap, setNameMap] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    (async () => {
+      try {
+        const [dash, users] = await Promise.all([prospectDashboard(), listAssignableUsers()]);
+        if (!alive) return;
+        setD(dash || null);
+        const map = {};
+        (Array.isArray(users) ? users : []).forEach((u) => {
+          if (u && u.email) map[String(u.email).toLowerCase()] = u.full_name || null;
+        });
+        setNameMap(map);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const funnel = useMemo(() => {
+    const f = (d && d.funnel) || {};
+    return PROSPECT_STAGES.map((st, i) => ({
+      name: st.label,
+      value: Number(f[st.key]) || 0,
+      fill: COLORS[i % COLORS.length],
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d]);
+
+  const byOwner = useMemo(() => {
+    const rows = (d && Array.isArray(d.by_owner) ? d.by_owner : [])
+      .map((r) => ({ name: ownerDisplay(r.owner_email, nameMap), value: Number(r.n) || 0 }))
+      .sort((a, b) => b.value - a.value);
+    return rows;
+  }, [d, nameMap]);
+
+  if (loading) {
+    return (
+      <Box>
+        <KpiSkeletons n={6} />
+        <Skeleton variant="rounded" height={320} />
+      </Box>
+    );
+  }
+
+  if (!d) {
+    return <Empty label="Prospect dashboard is unavailable right now." />;
+  }
+
+  const followupsDue = Number(d.followups_due) || 0;
+  const kpis = [
+    { label: 'Total Prospects', value: d.total_prospects ?? 0, sub: 'In pipeline', icon: GroupsOutlined, accent: theme.palette.primary.main },
+    { label: 'New This Month', value: d.new_this_month ?? 0, sub: 'Added this month', icon: TrendingUpRounded, accent: theme.palette.primary.light },
+    { label: 'Follow-ups Due', value: followupsDue, sub: `${d.followups_open ?? 0} open`, icon: WarningAmberRounded, accent: followupsDue > 0 ? theme.palette.error.main : theme.palette.success.main },
+    { label: 'Pipeline Value', value: inrCompact(d.pipeline_value), sub: 'Total open', icon: ReceiptLongOutlined, accent: theme.palette.primary.dark },
+    { label: 'Weighted Pipeline', value: inrCompact(d.weighted_pipeline), sub: 'Probability-weighted', icon: AccountBalanceWalletOutlined, accent: theme.palette.warning.main },
+    { label: 'Conversion Rate', value: `${Number(d.conversion_rate) || 0}%`, sub: `${d.converted ?? 0} converted`, icon: EmojiEventsOutlined, accent: theme.palette.success.main },
+  ];
+
+  const funnelHasData = funnel.some((f) => f.value > 0);
+
+  return (
+    <Box>
+      <KpiGrid>
+        {kpis.map((c) => (
+          <StatCard key={c.label} {...c} />
+        ))}
+      </KpiGrid>
+
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
+        <Panel title="Stage-wise Funnel" subtitle="Lead → Converted · prospect lifecycle" height={360}>
+          {funnelHasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart layout="vertical" data={funnel} margin={{ top: 4, right: 28, left: 8, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={grid} horizontal={false} />
+                <XAxis type="number" tick={axis} tickLine={false} axisLine={{ stroke: grid }} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" tick={axis} tickLine={false} axisLine={false} width={120} />
+                <RTooltip cursor={{ fill: `${theme.palette.primary.main}10` }} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={22}>
+                  {funnel.map((e) => (
+                    <Cell key={e.name} fill={e.fill} />
+                  ))}
+                  <LabelList dataKey="value" position="right" fill={theme.palette.text.primary} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <Empty label="No prospects in any stage yet." />
+          )}
+        </Panel>
+
+        <Panel title="Prospects by Salesperson" subtitle="Owned prospect count" height={360}>
+          {byOwner.length ? (
+            <Stack spacing={1.25} sx={{ height: '100%', overflow: 'auto', pr: 0.5 }}>
+              {byOwner.map((o, i) => {
+                const max = byOwner[0]?.value || 1;
+                return (
+                  <Box key={o.name + i}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                        <Avatar sx={{ width: 26, height: 26, fontSize: 12, fontWeight: 700, bgcolor: COLORS[i % COLORS.length] }}>
+                          {(o.name[0] || '?').toUpperCase()}
+                        </Avatar>
+                        <Typography variant="body2" noWrap sx={{ fontWeight: 500, maxWidth: 150 }}>
+                          {o.name}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{o.value}</Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={Math.min((o.value / max) * 100, 100)}
+                      sx={{ mt: 0.5, height: 6, borderRadius: 3, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: COLORS[i % COLORS.length] } }}
+                    />
+                  </Box>
+                );
+              })}
+            </Stack>
+          ) : (
+            <Empty label="No prospects assigned yet." />
+          )}
+        </Panel>
+      </Box>
+    </Box>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CLIENTS TAB
+// ---------------------------------------------------------------------------
+function ClientsTab() {
+  const theme = useTheme();
+  const COLORS = [
+    theme.palette.primary.main,
+    theme.palette.primary.light,
+    theme.palette.success.main,
+    theme.palette.text.secondary,
+    theme.palette.warning.main,
+    theme.palette.error.main,
+  ];
+  const axis = { fontSize: 12, fill: theme.palette.text.secondary };
+  const grid = theme.palette.divider;
+
+  const [d, setD] = useState(null);
+  const [nameMap, setNameMap] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    (async () => {
+      try {
+        const [dash, users] = await Promise.all([clientDashboard(), listAssignableUsers()]);
+        if (!alive) return;
+        setD(dash || null);
+        const map = {};
+        (Array.isArray(users) ? users : []).forEach((u) => {
+          if (u && u.email) map[String(u.email).toLowerCase()] = u.full_name || null;
+        });
+        setNameMap(map);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const lifecycle = useMemo(() => {
+    const bs = (d && d.by_stage) || {};
+    return CLIENT_STAGES.map((st, i) => ({
+      name: st.label,
+      value: Number(bs[st.key]) || 0,
+      fill: COLORS[i % COLORS.length],
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d]);
+
+  const topCustomers = useMemo(
+    () => (d && Array.isArray(d.top_customers) ? d.top_customers : []),
+    [d],
+  );
+
+  if (loading) {
+    return (
+      <Box>
+        <KpiSkeletons n={6} />
+        <Skeleton variant="rounded" height={320} />
+      </Box>
+    );
+  }
+
+  if (!d) {
+    return <Empty label="Client dashboard is unavailable right now." />;
+  }
+
+  const revenueTotal = Number(d.revenue_total) || 0;
+  const kpis = [
+    { label: 'Total Active Clients', value: d.total_clients ?? 0, sub: 'On the books', icon: GroupsOutlined, accent: theme.palette.primary.main },
+    { label: 'Key Accounts', value: d.key_accounts ?? 0, sub: 'Strategic clients', icon: EmojiEventsOutlined, accent: theme.palette.success.main },
+    { label: 'Dormant Clients', value: d.dormant ?? 0, sub: 'Inactive', icon: WarningAmberRounded, accent: (Number(d.dormant) || 0) > 0 ? theme.palette.warning.dark : theme.palette.success.main },
+    { label: 'Revenue Total', value: revenueTotal > 0 ? inrCompact(revenueTotal) : '—', sub: revenueTotal > 0 ? 'Lifetime billed' : 'No revenue recorded yet', icon: PaidOutlined, accent: theme.palette.primary.dark },
+    { label: 'Outstanding', value: inrCompact(d.outstanding), sub: 'To collect', icon: AccountBalanceWalletOutlined, accent: theme.palette.warning.main },
+    { label: 'Overdue', value: inrCompact(d.overdue), sub: 'Past due', icon: ReportProblemOutlined, accent: theme.palette.error.main },
+  ];
+
+  const lifecycleHasData = lifecycle.some((l) => l.value > 0);
+
+  return (
+    <Box>
+      <KpiGrid>
+        {kpis.map((c) => (
+          <StatCard key={c.label} {...c} />
+        ))}
+      </KpiGrid>
+
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } }}>
+        <Panel title="Clients by Lifecycle" subtitle="Active · Repeat · Key · Dormant" height={320}>
+          {lifecycleHasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={lifecycle} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
+                <XAxis dataKey="name" tick={axis} tickLine={false} axisLine={{ stroke: grid }} />
+                <YAxis tick={axis} tickLine={false} axisLine={false} allowDecimals={false} />
+                <RTooltip cursor={{ fill: `${theme.palette.primary.main}10` }} contentStyle={{ borderRadius: 12, border: `1px solid ${grid}` }} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={48}>
+                  {lifecycle.map((e) => (
+                    <Cell key={e.name} fill={e.fill} />
+                  ))}
+                  <LabelList dataKey="value" position="top" fill={theme.palette.text.secondary} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <Empty label="No clients on the books yet." />
+          )}
+        </Panel>
+
+        <Panel title="Top Customers" subtitle="By lifetime revenue" height={320}>
+          {topCustomers.length ? (
+            <Stack divider={<Divider />} sx={{ height: '100%', overflow: 'auto' }}>
+              {topCustomers.map((c, i) => (
+                <Stack key={c.customer_code || c.company_name || i} direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} sx={{ py: 1 }}>
+                  <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0 }}>
+                    <Avatar sx={{ width: 28, height: 28, fontSize: 12, fontWeight: 700, bgcolor: COLORS[i % COLORS.length] }}>
+                      {i + 1}
+                    </Avatar>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 600, maxWidth: 200 }}>
+                        {c.company_name || c.customer_code || 'Customer'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', maxWidth: 200 }}>
+                        {c.customer_code || '—'} · {ownerDisplay(c.owner_email, nameMap)}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    {inrCompact(c.revenue)}
+                  </Typography>
+                </Stack>
+              ))}
+            </Stack>
+          ) : (
+            <Empty label={revenueTotal > 0 ? 'No top customers yet.' : 'No revenue recorded yet'} />
+          )}
+        </Panel>
+      </Box>
+    </Box>
+  );
+}
+
 export default function CRMDashboard({ data, loading }) {
   const theme = useTheme();
+  const [tab, setTab] = useState('overview');
   const COLORS = [
     theme.palette.primary.main,
     theme.palette.primary.dark,
@@ -212,12 +544,47 @@ export default function CRMDashboard({ data, loading }) {
     };
   }, [scopedAnalytics]);
 
+  const TabsBar = (
+    <Tabs
+      value={tab}
+      onChange={(_e, v) => setTab(v)}
+      sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
+      textColor="primary"
+      indicatorColor="primary"
+    >
+      <Tab value="overview" label="Overview" sx={{ fontWeight: 700, textTransform: 'none' }} />
+      <Tab value="prospects" label="Prospects" sx={{ fontWeight: 700, textTransform: 'none' }} />
+      <Tab value="clients" label="Clients" sx={{ fontWeight: 700, textTransform: 'none' }} />
+    </Tabs>
+  );
+
+  if (tab === 'prospects') {
+    return (
+      <Box>
+        {TabsBar}
+        <ProspectsTab />
+      </Box>
+    );
+  }
+
+  if (tab === 'clients') {
+    return (
+      <Box>
+        {TabsBar}
+        <ClientsTab />
+      </Box>
+    );
+  }
+
   if (loading && !data) {
     return (
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', lg: 'repeat(4,1fr)' } }}>
-        {[...Array(8)].map((_, i) => (
-          <Skeleton key={i} variant="rounded" height={96} />
-        ))}
+      <Box>
+        {TabsBar}
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', lg: 'repeat(4,1fr)' } }}>
+          {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={96} />
+          ))}
+        </Box>
       </Box>
     );
   }
@@ -235,6 +602,7 @@ export default function CRMDashboard({ data, loading }) {
 
   return (
     <Box>
+      {TabsBar}
       {/* KPI row */}
       <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' } }}>
         {kpiCards.map((c) => (

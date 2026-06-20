@@ -595,6 +595,49 @@ export async function getCustomerAnalytics() {
 }
 
 /**
+ * Prospect CRM dashboard aggregates (server-side, RLS-scoped).
+ *
+ * Backed by the `crm_prospect_dashboard` RPC. Returns a single jsonb object:
+ *   { total_prospects, new_this_month, followups_due, followups_open,
+ *     pipeline_value, weighted_pipeline, converted, conversion_rate,
+ *     funnel:{ lead, contacted, meeting_scheduled, qualified, sample_sent,
+ *              quotation_sent, negotiation, converted },
+ *     by_owner:[{ owner_email, n }] }
+ *
+ * Never throws — returns null on error so the dashboard tab degrades gracefully.
+ */
+export async function prospectDashboard() {
+  try {
+    const { data, error } = await supabase.rpc("crm_prospect_dashboard");
+    if (error) return null;
+    return data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Client CRM dashboard aggregates (server-side, RLS-scoped).
+ *
+ * Backed by the `crm_client_dashboard` RPC. Returns a single jsonb object:
+ *   { total_clients, by_stage:{ active, repeat_business, key_account, dormant },
+ *     key_accounts, dormant, revenue_total,
+ *     top_customers:[{ company_name, customer_code, revenue, owner_email }],
+ *     outstanding, overdue }
+ *
+ * Never throws — returns null on error so the dashboard tab degrades gracefully.
+ */
+export async function clientDashboard() {
+  try {
+    const { data, error } = await supabase.rpc("crm_client_dashboard");
+    if (error) return null;
+    return data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Active users assignable as pipeline owners, with resolved display name.
  *
  * Backed by the `crm_assignable_users` RPC. Returns a jsonb array of
@@ -709,6 +752,8 @@ const crmPipelineService = {
   completeFollowup,
   moveFollowupStage,
   getCustomerAnalytics,
+  prospectDashboard,
+  clientDashboard,
   listAssignableUsers,
   getCurrentUserEmail,
   listAllCollaborators,
