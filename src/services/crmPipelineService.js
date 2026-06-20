@@ -430,6 +430,58 @@ export async function getCurrentUserEmail() {
   return data?.user?.email || null;
 }
 
+/**
+ * All lead collaborators (co-working) across the pipeline.
+ *
+ * Returns a flat list of { pipeline_id, email } rows so the board can build a
+ * pipeline_id → [emails] map. Never throws — returns [] on error so the board
+ * degrades gracefully (chips simply don't render).
+ */
+export async function listAllCollaborators() {
+  try {
+    const { data, error } = await supabase
+      .from("crm_pipeline_collaborators")
+      .select("pipeline_id, email");
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Add a collaborator to a lead. Email is lowercased to match the table's unique
+ * index on (pipeline_id, lower(email)). A duplicate insert is treated as success
+ * (the collaborator is already there). Other errors are thrown.
+ */
+export async function addCollaborator(pipelineId, email) {
+  let addedBy = null;
+  try {
+    addedBy = await getCurrentUserEmail();
+  } catch {
+    addedBy = null;
+  }
+  const { error } = await supabase.from("crm_pipeline_collaborators").insert({
+    pipeline_id: pipelineId,
+    email: String(email || "").toLowerCase(),
+    added_by_email: addedBy,
+  });
+  // 23505 = unique_violation: collaborator already present, treat as success.
+  if (error && error.code !== "23505") throw error;
+  return true;
+}
+
+/** Remove a collaborator from a lead (case-insensitive email match). */
+export async function removeCollaborator(pipelineId, email) {
+  const { error } = await supabase
+    .from("crm_pipeline_collaborators")
+    .delete()
+    .eq("pipeline_id", pipelineId)
+    .eq("email", String(email || "").toLowerCase());
+  throwIf(error);
+  return true;
+}
+
 const crmPipelineService = {
   STAGES,
   CYCLE_STAGES,
@@ -455,6 +507,9 @@ const crmPipelineService = {
   getCustomerAnalytics,
   listAssignableUsers,
   getCurrentUserEmail,
+  listAllCollaborators,
+  addCollaborator,
+  removeCollaborator,
 };
 
 export default crmPipelineService;

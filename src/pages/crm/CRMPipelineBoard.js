@@ -34,6 +34,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
+import GroupIcon from "@mui/icons-material/Group";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -60,6 +61,9 @@ import {
   updateCompany,
   listAssignableUsers,
   getCurrentUserEmail,
+  listAllCollaborators,
+  addCollaborator,
+  removeCollaborator,
 } from "../../services/crmPipelineService";
 import ppcService from "../../services/ppcService";
 
@@ -134,6 +138,47 @@ const userOptionLabel = (u) => {
   return u.email || "";
 };
 
+/* Small collaborator chips for cards: up to 3 names + "+N" overflow. Renders
+   nothing when there are no collaborators. stopPropagation so a chip click does
+   not bubble up to open the drawer. */
+function CollaboratorChips({ emails, userMap }) {
+  const list = emails || [];
+  if (list.length === 0) return null;
+  const shown = list.slice(0, 3);
+  const extra = list.length - shown.length;
+  return (
+    <Stack
+      direction="row"
+      spacing={0.5}
+      alignItems="center"
+      flexWrap="wrap"
+      useFlexGap
+      onClick={(e) => e.stopPropagation()}
+    >
+      {shown.map((email) => (
+        <Chip
+          key={email}
+          size="small"
+          variant="outlined"
+          color="secondary"
+          icon={<GroupIcon sx={{ fontSize: 12 }} />}
+          label={ownerLabel(email, userMap)}
+          sx={{ height: 20, maxWidth: 120, "& .MuiChip-label": { px: 0.5, fontSize: 10.5 } }}
+        />
+      ))}
+      {extra > 0 && (
+        <Chip
+          size="small"
+          variant="outlined"
+          color="secondary"
+          label={`+${extra}`}
+          sx={{ height: 20, "& .MuiChip-label": { px: 0.5, fontSize: 10.5, fontWeight: 700 } }}
+        />
+      )}
+    </Stack>
+  );
+}
+
 /* Lightweight lead score derived purely from stage progression (no extra table).
    Earlier stages = colder, later stages = hotter. Returns a % plus a Hot/Warm/Cold band. */
 const leadScoreForStage = (stageKey) => {
@@ -160,7 +205,7 @@ const leadScoreForStage = (stageKey) => {
 /* Card component (shared shape for board columns)                          */
 /* ----------------------------------------------------------------------- */
 
-function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages, currentStageKey, userMap }) {
+function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages, currentStageKey, userMap, collaborators }) {
   const theme = useTheme();
   const [moveAnchor, setMoveAnchor] = useState(null);
   // Tracks whether a drag just occurred so the trailing click doesn't open the drawer.
@@ -235,6 +280,7 @@ function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages,
               sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
             />
           )}
+          <CollaboratorChips emails={collaborators} userMap={userMap} />
           {company.value != null && Number(company.value) > 0 && (
             <Chip
               size="small"
@@ -663,7 +709,7 @@ function LogNextActionDialog({ open, move, onClose, onSaved, onError }) {
 /* Company drawer                                                           */
 /* ----------------------------------------------------------------------- */
 
-function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
+function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collaborators, onCollaboratorsChanged }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -744,6 +790,55 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
       product_category: editProductCategory.trim() || null,
     });
     setSavingProfile(false);
+  };
+
+  const [savingCollab, setSavingCollab] = useState(false);
+
+  // Lowercased collaborator emails for this lead (from the board's collabMap).
+  const collabEmails = useMemo(
+    () => (collaborators || []).map((e) => String(e).toLowerCase()),
+    [collaborators]
+  );
+
+  // Selected user objects for the multi-select value: resolve each collaborator
+  // email to a known user, or fall back to a synthetic { email } so the chip
+  // still renders a label.
+  const collabValue = useMemo(
+    () =>
+      collabEmails.map(
+        (email) =>
+          (userMap && userMap.get(email)) || {
+            email,
+            full_name: null,
+            department: null,
+          }
+      ),
+    [collabEmails, userMap]
+  );
+
+  // Diff the new selection against the current collaborators and apply the
+  // adds/removes, then refresh the board's collaborator map so chips update.
+  const onChangeCollaborators = async (selected) => {
+    const nextEmails = (selected || [])
+      .map((u) => String(u?.email || "").toLowerCase())
+      .filter(Boolean);
+    const prevSet = new Set(collabEmails);
+    const nextSet = new Set(nextEmails);
+    const toAdd = nextEmails.filter((e) => !prevSet.has(e));
+    const toRemove = collabEmails.filter((e) => !nextSet.has(e));
+    if (toAdd.length === 0 && toRemove.length === 0) return;
+    setSavingCollab(true);
+    try {
+      await Promise.all([
+        ...toAdd.map((e) => addCollaborator(id, e)),
+        ...toRemove.map((e) => removeCollaborator(id, e)),
+      ]);
+      await onCollaboratorsChanged?.();
+    } catch (e) {
+      setErr(e?.message || "Failed to update collaborators.");
+    } finally {
+      setSavingCollab(false);
+    }
   };
 
   // Assign / unassign the owner. Pass an email to assign, or null/"" to clear.
@@ -1012,6 +1107,32 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
                     Unassign
                   </Button>
                 )}
+
+                <Divider sx={{ my: 0.5 }} />
+
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  Collaborators (co-working)
+                </Typography>
+                <Autocomplete
+                  multiple
+                  size="small"
+                  disabled={savingCollab}
+                  options={users || []}
+                  value={collabValue}
+                  onChange={(_, v) => onChangeCollaborators(v)}
+                  getOptionLabel={(o) => userOptionLabel(o)}
+                  isOptionEqualToValue={(o, v) =>
+                    String(o?.email || "").toLowerCase() ===
+                    String(v?.email || "").toLowerCase()
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Collaborators"
+                      placeholder="Add co-workers"
+                    />
+                  )}
+                />
               </Stack>
             </Box>
 
@@ -1360,7 +1481,7 @@ function CreateWorkOrderDialog({ open, onClose, cycle, onCreated, onError }) {
 /* Recurring order-cycle card                                               */
 /* ----------------------------------------------------------------------- */
 
-function OrderCycleCard({ cycle, onMove, theme, onNotify, onDragStart, onDragEnd }) {
+function OrderCycleCard({ cycle, onMove, theme, onNotify, onDragStart, onDragEnd, userMap, collaborators }) {
   const [moveAnchor, setMoveAnchor] = useState(null);
   const [woDialogOpen, setWoDialogOpen] = useState(false);
   const [workOrders, setWorkOrders] = useState([]);
@@ -1426,6 +1547,7 @@ function OrderCycleCard({ cycle, onMove, theme, onNotify, onDragStart, onDragEnd
             label={days == null ? "—" : `${days}d`}
             sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
           />
+          <CollaboratorChips emails={collaborators} userMap={userMap} />
         </Stack>
 
         {/* Linked work orders */}
@@ -1541,6 +1663,8 @@ export default function CRMPipelineBoard() {
   const [recurring, setRecurring] = useState([]);
   const [cycles, setCycles] = useState([]);
   const [assignableUsers, setAssignableUsers] = useState([]);
+  // Flat list of { pipeline_id, email } collaborator rows (co-working leads).
+  const [collaboratorRows, setCollaboratorRows] = useState([]);
 
   const [addOpen, setAddOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
@@ -1559,18 +1683,20 @@ export default function CRMPipelineBoard() {
     setLoading(true);
     setErr(null);
     try {
-      const [p, r, c, email, users] = await Promise.all([
+      const [p, r, c, email, users, collabs] = await Promise.all([
         listProspects(),
         listRecurring(),
         listOrderCycles(),
         getCurrentUserEmail(),
         listAssignableUsers(),
+        listAllCollaborators(),
       ]);
       setProspects(p);
       setRecurring(r);
       setCycles(c);
       setCurrentEmail(email);
       setAssignableUsers(users);
+      setCollaboratorRows(collabs);
     } catch (e) {
       setErr(e?.message || "Failed to load pipeline.");
     } finally {
@@ -1585,15 +1711,40 @@ export default function CRMPipelineBoard() {
   // Lowercased email→user map for name lookups (display) and picker value.
   const userMap = useMemo(() => buildUserMap(assignableUsers), [assignableUsers]);
 
+  // pipeline_id → [lowercased collaborator emails]. Empty map is fine; cards and
+  // scope checks simply find no collaborators.
+  const collabMap = useMemo(() => {
+    const map = new Map();
+    (collaboratorRows || []).forEach((row) => {
+      if (!row || row.pipeline_id == null || !row.email) return;
+      const key = row.pipeline_id;
+      const email = String(row.email).toLowerCase();
+      const arr = map.get(key);
+      if (arr) arr.push(email);
+      else map.set(key, [email]);
+    });
+    return map;
+  }, [collaboratorRows]);
+
+  // Re-fetch just the collaborator rows after an add/remove so chips update
+  // without reloading the whole board.
+  const refreshCollaborators = useCallback(async () => {
+    const collabs = await listAllCollaborators();
+    setCollaboratorRows(collabs);
+  }, []);
+
   const matchesScope = useCallback(
     (row) => {
       if (scope === "all") return true;
       if (!currentEmail) return true;
       // 'my' scope: a rep sees rows they own plus unassigned (claimable) leads.
       const owner = row?.owner_email;
-      return owner === currentEmail || owner == null || owner === "";
+      if (owner === currentEmail || owner == null || owner === "") return true;
+      // …and co-worked leads where the rep is a collaborator.
+      const collabs = collabMap.get(row?.id) || [];
+      return collabs.includes(String(currentEmail).toLowerCase());
     },
-    [scope, currentEmail]
+    [scope, currentEmail, collabMap]
   );
 
   const matchesSearch = useCallback(
@@ -1793,6 +1944,7 @@ export default function CRMPipelineBoard() {
             empty={filteredProspects.length === 0}
             scope={scope}
             userMap={userMap}
+            collabMap={collabMap}
           />
         ) : (
           <RecurringView
@@ -1807,6 +1959,7 @@ export default function CRMPipelineBoard() {
             onDragEnd={handleDragEnd}
             onDropCard={handleDropCycle}
             userMap={userMap}
+            collabMap={collabMap}
           />
         )}
       </Box>
@@ -1825,6 +1978,8 @@ export default function CRMPipelineBoard() {
         onChanged={loadAll}
         users={assignableUsers}
         userMap={userMap}
+        collaborators={drawerId ? collabMap.get(drawerId) || [] : []}
+        onCollaboratorsChanged={refreshCollaborators}
       />
 
       <LogNextActionDialog
@@ -1860,7 +2015,7 @@ export default function CRMPipelineBoard() {
   );
 }
 
-function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd, onDropCard, empty, scope, userMap }) {
+function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd, onDropCard, empty, scope, userMap, collabMap }) {
   if (empty) {
     return (
       <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
@@ -1892,6 +2047,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
               stages={STAGES}
               currentStageKey={company.stage}
               userMap={userMap}
+              collaborators={(collabMap && collabMap.get(company.id)) || []}
             />
           )}
         />
@@ -1900,8 +2056,27 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
   );
 }
 
-function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify, onDragStart, onDragEnd, onDropCard, userMap }) {
+function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify, onDragStart, onDragEnd, onDropCard, userMap, collabMap }) {
   const cycleCount = cycles.length;
+
+  // Cycles live in a separate table keyed by customer_code; map that back to the
+  // owning recurring pipeline row's id so we can look up its collaborators.
+  const pipelineIdByCustomerCode = useMemo(() => {
+    const map = new Map();
+    (customers || []).forEach((c) => {
+      if (c && c.customer_code) map.set(c.customer_code, c.id);
+    });
+    return map;
+  }, [customers]);
+
+  const collabsForCycle = useCallback(
+    (cycle) => {
+      if (!collabMap || !cycle?.customer_code) return [];
+      const pid = pipelineIdByCustomerCode.get(cycle.customer_code);
+      return (pid && collabMap.get(pid)) || [];
+    },
+    [collabMap, pipelineIdByCustomerCode]
+  );
   return (
     <Stack spacing={2} sx={{ height: "100%" }}>
       {/* Per-customer summary */}
@@ -1941,6 +2116,7 @@ function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen
                   {c.owner_email && (
                     <Chip size="small" label={ownerLabel(c.owner_email, userMap)} sx={{ height: 20 }} />
                   )}
+                  <CollaboratorChips emails={collabMap && collabMap.get(c.id)} userMap={userMap} />
                 </Stack>
               </Paper>
             ))}
@@ -1974,6 +2150,8 @@ function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen
                     onNotify={onNotify}
                     onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
+                    userMap={userMap}
+                    collaborators={collabsForCycle(cycle)}
                   />
                 )}
               />
