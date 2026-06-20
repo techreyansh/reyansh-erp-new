@@ -1,13 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Grid,
+  Link,
   Paper,
   Skeleton,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -15,6 +25,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
   useTheme,
 } from '@mui/material';
@@ -24,6 +35,7 @@ import {
   TrendingUpOutlined,
   AccessTimeOutlined,
   AddShoppingCartOutlined,
+  StorefrontOutlined,
 } from '@mui/icons-material';
 import {
   Bar,
@@ -104,6 +116,33 @@ export default function InventoryDashboard() {
   const [stock, setStock] = useState([]);
   const [items, setItems] = useState([]);
 
+  // Link-vendor dialog + snackbar -----------------------------------------
+  const emptyVendorForm = {
+    vendor_name: '',
+    vendor_code: '',
+    lead_time_days: 7,
+    unit_cost: '',
+    moq: '',
+    is_preferred: true,
+  };
+  const [vendorDialog, setVendorDialog] = useState({ open: false, row: null });
+  const [vendorForm, setVendorForm] = useState(emptyVendorForm);
+  const [savingVendor, setSavingVendor] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const loadBoards = async () => {
+    const [r, e, s, it] = await Promise.all([
+      ppcService.reorderBoard().catch(() => []),
+      ppcService.excessStock(120).catch(() => []),
+      ppcService.listStock().catch(() => []),
+      ppcService.listItems().catch(() => []),
+    ]);
+    setReorder(Array.isArray(r) ? r : []);
+    setExcess(Array.isArray(e) ? e : []);
+    setStock(Array.isArray(s) ? s : []);
+    setItems(Array.isArray(it) ? it : []);
+  };
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -128,6 +167,60 @@ export default function InventoryDashboard() {
       active = false;
     };
   }, []);
+
+  // Open the Link Vendor dialog for a given reorder row. Pre-fills from the
+  // row when a vendor is already linked (so the same dialog edits it).
+  const openVendorDialog = (row) => {
+    setVendorForm({
+      vendor_name: row.vendor_name || '',
+      vendor_code: row.vendor_code || '',
+      lead_time_days: row.vendor_lead_time != null ? row.vendor_lead_time : 7,
+      unit_cost: row.vendor_unit_cost != null ? row.vendor_unit_cost : '',
+      moq: '',
+      is_preferred: true,
+    });
+    setVendorDialog({ open: true, row });
+  };
+
+  const closeVendorDialog = () => {
+    if (savingVendor) return;
+    setVendorDialog({ open: false, row: null });
+  };
+
+  const handleVendorSubmit = async () => {
+    const row = vendorDialog.row;
+    if (!row || !vendorForm.vendor_name.trim()) {
+      setSnackbar({ open: true, message: 'Vendor name is required', severity: 'error' });
+      return;
+    }
+    setSavingVendor(true);
+    try {
+      await ppcService.upsertItemVendor({
+        item_id: row.item_id,
+        vendor_name: vendorForm.vendor_name,
+        vendor_code: vendorForm.vendor_code,
+        lead_time_days: vendorForm.lead_time_days,
+        unit_cost: vendorForm.unit_cost,
+        moq: vendorForm.moq,
+        is_preferred: vendorForm.is_preferred,
+      });
+      setVendorDialog({ open: false, row: null });
+      await loadBoards();
+      setSnackbar({
+        open: true,
+        message: `Vendor "${vendorForm.vendor_name.trim()}" linked to ${row.code || 'item'}`,
+        severity: 'success',
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: 'Could not link vendor: ' + (err?.message || 'Unknown error'),
+        severity: 'error',
+      });
+    } finally {
+      setSavingVendor(false);
+    }
+  };
 
   // KPIs -------------------------------------------------------------------
   const avgCover = useMemo(() => {
@@ -295,18 +388,32 @@ export default function InventoryDashboard() {
                       <TableCell align="right">{num(r.suggested_qty)}</TableCell>
                       <TableCell>
                         {r.vendor_name ? (
-                          <Typography variant="body2">
-                            {r.vendor_name}
-                            {r.vendor_lead_time != null && (
-                              <Typography component="span" variant="caption" color="text.secondary">
-                                {' '}· {r.vendor_lead_time}d
-                              </Typography>
-                            )}
-                          </Typography>
+                          <Link
+                            component="button"
+                            type="button"
+                            underline="hover"
+                            onClick={() => openVendorDialog(r)}
+                            sx={{ textAlign: 'left', color: 'text.primary', fontWeight: 500 }}
+                          >
+                            <Typography variant="body2" component="span">
+                              {r.vendor_name}
+                              {r.vendor_lead_time != null && (
+                                <Typography component="span" variant="caption" color="text.secondary">
+                                  {' '}· {r.vendor_lead_time}d
+                                </Typography>
+                              )}
+                            </Typography>
+                          </Link>
                         ) : (
-                          <Typography variant="caption" color="text.disabled">
+                          <Button
+                            size="small"
+                            variant="text"
+                            startIcon={<StorefrontOutlined fontSize="small" />}
+                            onClick={() => openVendorDialog(r)}
+                            sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
+                          >
                             No vendor — link one
-                          </Typography>
+                          </Button>
                         )}
                       </TableCell>
                       <TableCell align="right">
@@ -314,7 +421,20 @@ export default function InventoryDashboard() {
                           size="small"
                           variant="outlined"
                           startIcon={<AddShoppingCartOutlined />}
-                          onClick={() => navigate('/purchase-flow')}
+                          onClick={() =>
+                            navigate('/purchase-flow/raise-indent', {
+                              state: {
+                                inventoryPrefill: {
+                                  itemCode: r.code,
+                                  itemName: r.name,
+                                  qty: r.suggested_qty,
+                                  vendorCode: r.vendor_code,
+                                  vendorName: r.vendor_name,
+                                  unitCost: r.vendor_unit_cost,
+                                },
+                              },
+                            })
+                          }
                           sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
                         >
                           Raise Indent
@@ -378,6 +498,107 @@ export default function InventoryDashboard() {
           )}
         </Panel>
       </Box>
+
+      {/* Link Vendor dialog ------------------------------------------------ */}
+      <Dialog open={vendorDialog.open} onClose={closeVendorDialog} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          {vendorDialog.row?.vendor_name ? 'Edit Vendor' : 'Link Vendor'}
+          {vendorDialog.row && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+              {vendorDialog.row.code} · {vendorDialog.row.name}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Grid container spacing={2} sx={{ mt: 0 }}>
+            <Grid item xs={12} sm={7}>
+              <TextField
+                label="Vendor name"
+                value={vendorForm.vendor_name}
+                onChange={(e) => setVendorForm((f) => ({ ...f, vendor_name: e.target.value }))}
+                required
+                fullWidth
+                autoFocus
+              />
+            </Grid>
+            <Grid item xs={12} sm={5}>
+              <TextField
+                label="Vendor code"
+                value={vendorForm.vendor_code}
+                onChange={(e) => setVendorForm((f) => ({ ...f, vendor_code: e.target.value }))}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Lead time (days)"
+                type="number"
+                value={vendorForm.lead_time_days}
+                onChange={(e) => setVendorForm((f) => ({ ...f, lead_time_days: e.target.value }))}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Unit cost"
+                type="number"
+                value={vendorForm.unit_cost}
+                onChange={(e) => setVendorForm((f) => ({ ...f, unit_cost: e.target.value }))}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="MOQ"
+                type="number"
+                value={vendorForm.moq}
+                onChange={(e) => setVendorForm((f) => ({ ...f, moq: e.target.value }))}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={vendorForm.is_preferred}
+                    onChange={(e) => setVendorForm((f) => ({ ...f, is_preferred: e.target.checked }))}
+                  />
+                }
+                label="Set as preferred vendor"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={closeVendorDialog} disabled={savingVendor} sx={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleVendorSubmit}
+            disabled={savingVendor || !vendorForm.vendor_name.trim()}
+            sx={{ textTransform: 'none' }}
+          >
+            {savingVendor ? 'Saving…' : 'Save Vendor'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

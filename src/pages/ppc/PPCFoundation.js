@@ -27,6 +27,9 @@ import {
   Divider,
   Drawer,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Paper,
   Skeleton,
@@ -62,6 +65,11 @@ import {
   PlayArrowRounded,
   DoneRounded,
   CloseRounded,
+  MoreVertRounded,
+  AddBoxOutlined,
+  TuneRounded,
+  LocalShippingOutlined,
+  HistoryRounded,
 } from '@mui/icons-material';
 import ppcService, {
   ITEM_TYPES,
@@ -563,6 +571,167 @@ function BomEditor({ selected, items, notify }) {
 // ===========================================================================
 // TAB 2 — Materials & Store
 // ===========================================================================
+/** Stock transaction type → MUI chip color + human label. */
+const STOCK_TXN_META = {
+  receipt: { color: 'success', label: 'Receipt' },
+  receive: { color: 'success', label: 'Receipt' },
+  issue: { color: 'error', label: 'Issue' },
+  dispatch: { color: 'error', label: 'Dispatch' },
+  adjust: { color: 'warning', label: 'Adjust' },
+  adjustment: { color: 'warning', label: 'Adjust' },
+};
+
+function stockTxnColor(type) {
+  return STOCK_TXN_META[String(type || '').toLowerCase()]?.color || 'default';
+}
+function stockTxnLabel(type) {
+  return STOCK_TXN_META[String(type || '').toLowerCase()]?.label || String(type || '—').replace(/_/g, ' ');
+}
+
+/** Per-row actions menu for the stock table (Receive / Adjust / Dispatch / History). */
+function StockRowMenu({ row, onReceive, onAdjust, onDispatch, onHistory }) {
+  const [anchor, setAnchor] = useState(null);
+  const close = () => setAnchor(null);
+  const pick = (fn) => () => {
+    close();
+    fn(row);
+  };
+  return (
+    <>
+      <IconButton size="small" onClick={(e) => setAnchor(e.currentTarget)}>
+        <MoreVertRounded fontSize="small" />
+      </IconButton>
+      <Menu anchorEl={anchor} open={!!anchor} onClose={close}>
+        <MenuItem onClick={pick(onReceive)}>
+          <ListItemIcon>
+            <AddBoxOutlined fontSize="small" color="success" />
+          </ListItemIcon>
+          <ListItemText>Receive</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={pick(onAdjust)}>
+          <ListItemIcon>
+            <TuneRounded fontSize="small" color="warning" />
+          </ListItemIcon>
+          <ListItemText>Adjust</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={pick(onDispatch)}>
+          <ListItemIcon>
+            <LocalShippingOutlined fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Dispatch</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={pick(onHistory)}>
+          <ListItemIcon>
+            <HistoryRounded fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>History</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
+  );
+}
+
+/** Stock-movement history drawer for a single item. */
+function StockHistoryDrawer({ row, onClose, notify }) {
+  const [txns, setTxns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const itemId = row?.item_id;
+
+  const load = useCallback(async () => {
+    if (!itemId) return;
+    setLoading(true);
+    try {
+      setTxns(await ppcService.listStockTransactions(itemId));
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [itemId, notify]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <Drawer anchor="right" open={!!row} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 480, md: 560 }, maxWidth: '100%' } }}>
+      <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
+              Stock history
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {row?.item?.code || '—'} · {row?.item?.name || ''}
+            </Typography>
+          </Box>
+          <IconButton onClick={onClose} size="small">
+            <CloseRounded fontSize="small" />
+          </IconButton>
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+        <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: '70vh' }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow sx={headRowSx}>
+                  <TableCell>When</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell align="right">Δ Qty</TableCell>
+                  <TableCell align="right">On hand</TableCell>
+                  <TableCell>Notes / By</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading && <TableSkeleton cols={5} rows={4} />}
+                {!loading && txns.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                      No stock movements recorded yet.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  txns.map((t) => {
+                    const delta = num(t.quantity_delta);
+                    return (
+                      <TableRow key={t.id} hover>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{fmtDate(t.created_at)}</TableCell>
+                        <TableCell>
+                          <Chip size="small" color={stockTxnColor(t.transaction_type)} label={stockTxnLabel(t.transaction_type)} sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, color: delta < 0 ? 'error.main' : delta > 0 ? 'success.main' : 'text.secondary' }}>
+                          {delta > 0 ? `+${delta}` : delta}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700 }}>
+                          {num(t.on_hand_after)}
+                        </TableCell>
+                        <TableCell>
+                          {t.notes && (
+                            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                              {t.notes}
+                            </Typography>
+                          )}
+                          {t.created_by_email && (
+                            <Typography variant="caption" color="text.secondary">
+                              {t.created_by_email}
+                            </Typography>
+                          )}
+                          {!t.notes && !t.created_by_email && '—'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
+    </Drawer>
+  );
+}
+
 function MaterialsTab({ items, notify }) {
   const theme = useTheme();
   const [stock, setStock] = useState([]);
@@ -570,6 +739,19 @@ function MaterialsTab({ items, notify }) {
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(null);
   const [saving, setSaving] = useState(false);
+  // stock-movement dialogs (each holds the target stock row, or null)
+  const [receiveRow, setReceiveRow] = useState(null);
+  const [adjustRow, setAdjustRow] = useState(null);
+  const [dispatchRow, setDispatchRow] = useState(null);
+  const [historyRow, setHistoryRow] = useState(null);
+  const [moving, setMoving] = useState(false);
+
+  const blankReceive = { qty: '', vendorName: '', vendorCode: '', unitCost: '', reference: '', note: '' };
+  const blankAdjust = { newQty: '', reason: '' };
+  const blankDispatch = { qty: '', customer: '', reference: '' };
+  const [receiveForm, setReceiveForm] = useState(blankReceive);
+  const [adjustForm, setAdjustForm] = useState(blankAdjust);
+  const [dispatchForm, setDispatchForm] = useState(blankDispatch);
 
   const blank = { item_id: '', on_hand: '0', reorder_point: '0', safety_stock: '0', lead_time_days: '0', location: '' };
   const [form, setForm] = useState(blank);
@@ -628,6 +810,78 @@ function MaterialsTab({ items, notify }) {
     }
   };
 
+  // --- stock-movement openers ---
+  const openReceive = (row) => {
+    setReceiveForm(blankReceive);
+    setReceiveRow(row);
+  };
+  const openAdjust = (row) => {
+    setAdjustForm({ newQty: String(row.on_hand ?? '0'), reason: '' });
+    setAdjustRow(row);
+  };
+  const openDispatch = (row) => {
+    setDispatchForm(blankDispatch);
+    setDispatchRow(row);
+  };
+
+  // --- stock-movement submits ---
+  const submitReceive = async () => {
+    if (!receiveRow) return;
+    if (!(Number(receiveForm.qty) > 0)) {
+      notify('Enter a quantity greater than 0.', 'warning');
+      return;
+    }
+    setMoving(true);
+    try {
+      const res = await ppcService.receiveStock(receiveRow.item_id, receiveForm);
+      setReceiveRow(null);
+      await load();
+      notify(`Received ${num(receiveForm.qty)} — on hand ${num(res?.on_hand)}`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setMoving(false);
+    }
+  };
+
+  const submitAdjust = async () => {
+    if (!adjustRow) return;
+    if (!(Number(adjustForm.newQty) >= 0) || adjustForm.newQty === '') {
+      notify('Enter a valid on-hand quantity (0 or more).', 'warning');
+      return;
+    }
+    setMoving(true);
+    try {
+      const res = await ppcService.adjustStock(adjustRow.item_id, adjustForm.newQty, adjustForm.reason);
+      setAdjustRow(null);
+      await load();
+      notify(`Adjusted — on hand ${num(res?.on_hand)}`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setMoving(false);
+    }
+  };
+
+  const submitDispatch = async () => {
+    if (!dispatchRow) return;
+    if (!(Number(dispatchForm.qty) > 0)) {
+      notify('Enter a quantity greater than 0.', 'warning');
+      return;
+    }
+    setMoving(true);
+    try {
+      const res = await ppcService.dispatchStock(dispatchRow.item_id, dispatchForm);
+      setDispatchRow(null);
+      await load();
+      notify(`Dispatched ${num(dispatchForm.qty)} — on hand ${num(res?.on_hand)}`, 'success');
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setMoving(false);
+    }
+  };
+
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }} flexWrap="wrap" gap={1}>
@@ -666,7 +920,7 @@ function MaterialsTab({ items, notify }) {
               <TableCell align="right">Lead (d)</TableCell>
               <TableCell>Location</TableCell>
               <TableCell align="center">Status</TableCell>
-              <TableCell align="right">Edit</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -719,9 +973,20 @@ function MaterialsTab({ items, notify }) {
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton size="small" onClick={() => openEdit(row)}>
-                        <EditOutlined fontSize="small" />
-                      </IconButton>
+                      <Stack direction="row" spacing={0.25} justifyContent="flex-end">
+                        <Tooltip title="Edit stock levels">
+                          <IconButton size="small" onClick={() => openEdit(row)}>
+                            <EditOutlined fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <StockRowMenu
+                          row={row}
+                          onReceive={openReceive}
+                          onAdjust={openAdjust}
+                          onDispatch={openDispatch}
+                          onHistory={setHistoryRow}
+                        />
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 );
@@ -769,6 +1034,117 @@ function MaterialsTab({ items, notify }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Receive dialog */}
+      <Dialog open={!!receiveRow} onClose={() => setReceiveRow(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Receive stock
+          {receiveRow ? ` — ${receiveRow.item?.code || ''}` : ''}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {receiveRow?.item?.name} · current on hand {num(receiveRow?.on_hand)} {receiveRow?.item?.uom || ''}
+            </Typography>
+            <TextField
+              label="Quantity received"
+              type="number"
+              value={receiveForm.qty}
+              onChange={(e) => setReceiveForm({ ...receiveForm, qty: e.target.value })}
+              fullWidth
+              required
+              autoFocus
+            />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Vendor name" value={receiveForm.vendorName} onChange={(e) => setReceiveForm({ ...receiveForm, vendorName: e.target.value })} fullWidth />
+              <TextField label="Vendor code" value={receiveForm.vendorCode} onChange={(e) => setReceiveForm({ ...receiveForm, vendorCode: e.target.value })} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Unit cost (₹)" type="number" value={receiveForm.unitCost} onChange={(e) => setReceiveForm({ ...receiveForm, unitCost: e.target.value })} fullWidth />
+              <TextField label="Reference" value={receiveForm.reference} onChange={(e) => setReceiveForm({ ...receiveForm, reference: e.target.value })} fullWidth helperText="PO / GRN no." />
+            </Stack>
+            <TextField label="Note" value={receiveForm.note} onChange={(e) => setReceiveForm({ ...receiveForm, note: e.target.value })} fullWidth multiline minRows={2} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReceiveRow(null)} disabled={moving}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="success" onClick={submitReceive} disabled={moving} startIcon={moving ? <CircularProgress size={16} color="inherit" /> : <AddBoxOutlined />}>
+            Receive
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Adjust dialog */}
+      <Dialog open={!!adjustRow} onClose={() => setAdjustRow(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          Adjust stock
+          {adjustRow ? ` — ${adjustRow.item?.code || ''}` : ''}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Set the corrected on-hand quantity (e.g. after a cycle count). Current {num(adjustRow?.on_hand)} {adjustRow?.item?.uom || ''}.
+            </Typography>
+            <TextField
+              label="New on-hand qty"
+              type="number"
+              value={adjustForm.newQty}
+              onChange={(e) => setAdjustForm({ ...adjustForm, newQty: e.target.value })}
+              fullWidth
+              required
+              autoFocus
+            />
+            <TextField label="Reason" value={adjustForm.reason} onChange={(e) => setAdjustForm({ ...adjustForm, reason: e.target.value })} fullWidth multiline minRows={2} helperText="Why is this adjustment needed?" />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAdjustRow(null)} disabled={moving}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="warning" onClick={submitAdjust} disabled={moving} startIcon={moving ? <CircularProgress size={16} color="inherit" /> : <TuneRounded />}>
+            Adjust
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dispatch dialog */}
+      <Dialog open={!!dispatchRow} onClose={() => setDispatchRow(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          Dispatch stock
+          {dispatchRow ? ` — ${dispatchRow.item?.code || ''}` : ''}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {dispatchRow?.item?.name} · available {num(dispatchRow?.on_hand)} {dispatchRow?.item?.uom || ''}
+            </Typography>
+            <TextField
+              label="Quantity to dispatch"
+              type="number"
+              value={dispatchForm.qty}
+              onChange={(e) => setDispatchForm({ ...dispatchForm, qty: e.target.value })}
+              fullWidth
+              required
+              autoFocus
+            />
+            <TextField label="Customer" value={dispatchForm.customer} onChange={(e) => setDispatchForm({ ...dispatchForm, customer: e.target.value })} fullWidth />
+            <TextField label="Reference" value={dispatchForm.reference} onChange={(e) => setDispatchForm({ ...dispatchForm, reference: e.target.value })} fullWidth helperText="DC / invoice no." />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDispatchRow(null)} disabled={moving}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="error" onClick={submitDispatch} disabled={moving} startIcon={moving ? <CircularProgress size={16} color="inherit" /> : <LocalShippingOutlined />}>
+            Dispatch
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* History drawer */}
+      {historyRow && <StockHistoryDrawer row={historyRow} notify={notify} onClose={() => setHistoryRow(null)} />}
     </Paper>
   );
 }

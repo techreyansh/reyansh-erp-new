@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import { useLocation } from 'react-router-dom';
+import {
   TextField, 
   Button, 
   Box, 
@@ -55,6 +56,7 @@ import AdvancedPagination from '../flowManagement/AdvancedPagination';
 
 const RaiseIndent = () => {
   const theme = useTheme();
+  const location = useLocation();
   const [indents, setIndents] = useState([{ itemCode: '', item: '', quantity: '', specifications: '' }]);
   const [allIndents, setAllIndents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -174,6 +176,47 @@ const RaiseIndent = () => {
     } catch (error) {
     }
   };
+
+  // Pre-fill from the Inventory dashboard "Raise Indent" action.
+  // Navigated here via navigate('/purchase-flow/raise-indent', { state: { inventoryPrefill } }).
+  // Defensive: only act when state is present; never break the normal flow.
+  useEffect(() => {
+    const prefill = location.state?.inventoryPrefill;
+    if (!prefill) return;
+
+    const itemCode = prefill.itemCode || '';
+    const itemName = prefill.itemName || '';
+    const qty = prefill.qty != null && prefill.qty !== '' ? String(prefill.qty) : '';
+
+    // Prefill the indent line. Specifications are filled later from stock/vendor
+    // sheets once those load (handled by the existing auto-fill effect), but we
+    // seed item code, name and qty here so the line is ready to submit.
+    setIndents([
+      {
+        itemCode,
+        item: itemName,
+        quantity: qty,
+        specifications: '',
+      },
+    ]);
+
+    setMaterialIntentInfo({
+      itemCode,
+      itemName,
+      vendorCode: prefill.vendorCode || '',
+      vendorName: prefill.vendorName || '',
+      unitCost: prefill.unitCost,
+      fromInventory: true,
+    });
+
+    const vendorBit = prefill.vendorName ? ` (vendor ${prefill.vendorName})` : '';
+    setSnackbar({
+      open: true,
+      message: `Pre-filled from Inventory: ${itemName || itemCode} × ${qty || '?'}${vendorBit}`,
+      severity: 'info',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Check for material intent data from kitting sheet or stock management
   useEffect(() => {
@@ -547,7 +590,12 @@ const RaiseIndent = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <InfoIcon color="primary" />
             <Typography variant="body1" color="primary">
-              {materialIntentInfo.multipleItems ? (
+              {materialIntentInfo.fromInventory ? (
+                <>
+                  <strong>From Inventory:</strong> This indent is pre-filled from the reorder board for{' '}
+                  <strong>{materialIntentInfo.itemName}</strong> ({materialIntentInfo.itemCode}).
+                </>
+              ) : materialIntentInfo.multipleItems ? (
                 <>
                   <strong>Bulk Reorder:</strong> {materialIntentInfo.count} item(s) pre-filled from inventory selection.
                 </>
@@ -559,7 +607,19 @@ const RaiseIndent = () => {
               )}
             </Typography>
           </Box>
-          {!materialIntentInfo.multipleItems && (
+          {materialIntentInfo.fromInventory ? (
+            (materialIntentInfo.vendorName || materialIntentInfo.unitCost != null) && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {materialIntentInfo.vendorName && (
+                  <>Preferred vendor: {materialIntentInfo.vendorName}
+                    {materialIntentInfo.vendorCode ? ` (${materialIntentInfo.vendorCode})` : ''}</>
+                )}
+                {materialIntentInfo.unitCost != null && materialIntentInfo.unitCost !== '' && (
+                  <> {materialIntentInfo.vendorName ? '| ' : ''}Unit cost: {materialIntentInfo.unitCost}</>
+                )}
+              </Typography>
+            )
+          ) : !materialIntentInfo.multipleItems && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               Requested by: {materialIntentInfo.requestedBy} | Department: {materialIntentInfo.department} | Priority: {materialIntentInfo.priority}
             </Typography>

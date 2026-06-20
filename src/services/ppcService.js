@@ -164,6 +164,72 @@ async function upsertStock(payload) {
 }
 
 // ---------------------------------------------------------------------------
+// Stock movements (RPC) — receive, adjust, dispatch + transaction history
+// ---------------------------------------------------------------------------
+
+/** Receive stock against an item (auto-creates the stock row). Returns { ok, item_id, on_hand }. */
+async function receiveStock(itemId, { qty, vendorCode, vendorName, unitCost, reference, note } = {}) {
+  if (!itemId) throw new Error('Receive stock: an item must be selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_receive_stock', {
+      p_item_id: itemId,
+      p_qty: Number(qty) || 0,
+      p_vendor_code: vendorCode?.trim() || null,
+      p_vendor_name: vendorName?.trim() || null,
+      p_unit_cost: unitCost != null && unitCost !== '' ? Number(unitCost) : null,
+      p_reference: reference?.trim() || null,
+      p_note: note?.trim() || null,
+    }),
+    'Receive stock'
+  );
+  return data || null;
+}
+
+/** Set an item's on-hand to an exact quantity (cycle count / correction). Returns { ok, item_id, on_hand }. */
+async function adjustStock(itemId, newQty, reason) {
+  if (!itemId) throw new Error('Adjust stock: an item must be selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_adjust_stock', {
+      p_item_id: itemId,
+      p_new_qty: Number(newQty) || 0,
+      p_reason: reason?.trim() || null,
+    }),
+    'Adjust stock'
+  );
+  return data || null;
+}
+
+/** Dispatch / issue stock out to a customer (decrements on-hand). Returns { ok, item_id, on_hand }. */
+async function dispatchStock(itemId, { qty, customer, reference } = {}) {
+  if (!itemId) throw new Error('Dispatch stock: an item must be selected');
+  const data = unwrap(
+    await supabase.rpc('ppc_dispatch_stock', {
+      p_item_id: itemId,
+      p_qty: Number(qty) || 0,
+      p_customer: customer?.trim() || null,
+      p_reference: reference?.trim() || null,
+    }),
+    'Dispatch stock'
+  );
+  return data || null;
+}
+
+/** Recent stock transactions for an item, newest first. */
+async function listStockTransactions(itemId) {
+  if (!itemId) return [];
+  const data = unwrap(
+    await supabase
+      .from('ppc_stock_transactions')
+      .select('*')
+      .eq('item_id', itemId)
+      .order('created_at', { ascending: false })
+      .limit(100),
+    'List stock transactions'
+  );
+  return data ?? [];
+}
+
+// ---------------------------------------------------------------------------
 // Lines & Machines
 // ---------------------------------------------------------------------------
 async function listLines() {
@@ -611,6 +677,10 @@ const ppcService = {
   // stock
   listStock,
   upsertStock,
+  receiveStock,
+  adjustStock,
+  dispatchStock,
+  listStockTransactions,
   // lines / machines
   listLines,
   createLine,
