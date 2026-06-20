@@ -35,6 +35,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
@@ -210,6 +211,15 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey, userMa
               color="primary"
               variant="outlined"
               sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11, fontWeight: 700 } }}
+            />
+          )}
+          {company.city && (
+            <Chip
+              size="small"
+              icon={<PlaceIcon sx={{ fontSize: 12 }} />}
+              label={company.city}
+              variant="outlined"
+              sx={{ height: 22, maxWidth: 120, "& .MuiChip-label": { px: 0.5, fontSize: 11 } }}
             />
           )}
           {score && (
@@ -493,6 +503,12 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
   const [ownerEmail, setOwnerEmail] = useState("");
   const [savingDeal, setSavingDeal] = useState(false);
 
+  // Imported CRM fields (editable)
+  const [editIndustry, setEditIndustry] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editProductCategory, setEditProductCategory] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+
   // Activity form
   const [actType, setActType] = useState("note");
   const [actSubject, setActSubject] = useState("");
@@ -511,6 +527,9 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
       setEditNextAction(d.company?.next_action ?? "");
       setEditNextDate(d.company?.next_action_date ?? "");
       setOwnerEmail(d.company?.owner_email ?? "");
+      setEditIndustry(d.company?.industry ?? "");
+      setEditCity(d.company?.city ?? "");
+      setEditProductCategory(d.company?.product_category ?? "");
     } catch (e) {
       setErr(e?.message || "Failed to load company.");
     } finally {
@@ -542,6 +561,16 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
       next_action_date: editNextDate || null,
     });
     setSavingDeal(false);
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    await saveField({
+      industry: editIndustry.trim() || null,
+      city: editCity.trim() || null,
+      product_category: editProductCategory.trim() || null,
+    });
+    setSavingProfile(false);
   };
 
   // Assign / unassign the owner. Pass an email to assign, or null/"" to clear.
@@ -649,6 +678,82 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
                 <InfoRow label="Phone" value={company.phone} />
                 <InfoRow label="Email" value={company.email} />
                 <InfoRow label="Source" value={company.source} />
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            {/* Editable: imported company profile (industry / city / product) */}
+            <Box>
+              <SectionTitle>Company profile</SectionTitle>
+              {(company.industry || company.city || company.product_category) && (
+                <Stack
+                  direction="row"
+                  spacing={0.75}
+                  alignItems="center"
+                  sx={{ mt: 0.75 }}
+                  flexWrap="wrap"
+                  useFlexGap
+                >
+                  {company.industry && (
+                    <Chip
+                      size="small"
+                      label={company.industry}
+                      variant="outlined"
+                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
+                    />
+                  )}
+                  {company.city && (
+                    <Chip
+                      size="small"
+                      icon={<PlaceIcon sx={{ fontSize: 14 }} />}
+                      label={company.city}
+                      variant="outlined"
+                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
+                    />
+                  )}
+                  {company.product_category && (
+                    <Chip
+                      size="small"
+                      label={company.product_category}
+                      variant="outlined"
+                      color="primary"
+                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
+                    />
+                  )}
+                </Stack>
+              )}
+              <Stack spacing={1.5} sx={{ mt: 1 }}>
+                <TextField
+                  label="Industry"
+                  size="small"
+                  value={editIndustry}
+                  onChange={(e) => setEditIndustry(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="City"
+                  size="small"
+                  value={editCity}
+                  onChange={(e) => setEditCity(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="Product category"
+                  size="small"
+                  value={editProductCategory}
+                  onChange={(e) => setEditProductCategory(e.target.value)}
+                  fullWidth
+                />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  disabled={savingProfile}
+                  onClick={saveProfile}
+                  sx={{ alignSelf: "flex-start", px: 2.5 }}
+                >
+                  {savingProfile ? "Saving…" : "Save profile"}
+                </Button>
               </Stack>
             </Box>
 
