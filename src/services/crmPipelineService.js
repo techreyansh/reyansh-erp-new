@@ -41,7 +41,9 @@ export const CLIENT_STAGES = [
   { key: "active", label: "Active Client" },
   { key: "repeat_business", label: "Repeat Business" },
   { key: "key_account", label: "Key Account" },
+  { key: "growth_account", label: "Growth Account" },
   { key: "dormant", label: "Dormant" },
+  { key: "inactive", label: "Inactive" },
 ];
 
 /** Ordered recurring-customer order-cycle stages. */

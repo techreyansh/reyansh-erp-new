@@ -31,8 +31,6 @@ import ProfilePage from "./components/common/ProfilePage";
 import SettingsPage from "./components/common/SettingsPage";
 import HelpPage from "./components/common/HelpPage";
 import SalesOrderIngestion from "./components/poIngestion/POIngestion";
-import ClientManager from "./components/common/ClientManager";
-import ProspectsClientManager from "./components/common/ProspectsClientManager";
 import FlowManagement from "./components/flowManagement/FlowManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RootRedirect from "./components/auth/RootRedirect";
@@ -107,7 +105,6 @@ import MoldingDashboardNavigation from './components/molding/MoldingDashboardNav
 import PowerCordMasterNavigation from './components/molding/PowerCordMasterNavigation';
 import ProductionPlanningNavigation from './components/molding/ProductionPlanningNavigation';
 import ProductionManagementNavigation from './components/molding/ProductionManagementNavigation';
-import ClientDashboard from './components/clientDashboard/ClientDashboard';
 import DocumentLibrary from './components/DocumentLibrary/DocumentLibrary';
 
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
@@ -261,22 +258,17 @@ function AppContent() {
                     </ProtectedRouteGate>
                   } />
 
+                  {/* Legacy clients2-backed screens retired — redirect to the unified CRM master board */}
                   <Route path="/clients" element={
-                    <ProtectedRouteGate>
-                      <ClientManager />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=clients" replace />
                   } />
 
                   <Route path="/prospects-clients" element={
-                    <ProtectedRouteGate>
-                      <ProspectsClientManager />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=prospects" replace />
                   } />
 
                   <Route path="/client-dashboard" element={
-                    <ProtectedRouteGate>
-                      <ClientDashboard />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=clients" replace />
                   } />
 
                   <Route path="/products" element={

@@ -33,7 +33,6 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard,
-  ListAlt,
   Assignment,
   Person,
   ExitToApp,
@@ -256,7 +255,6 @@ const Header = () => {
         { subheader: "Command Centers", label: "CEO Master Control", path: "/ceo-command", icon: <SecurityIcon />, roles: ["CEO"] },
         { subheader: "Command Centers", label: "Plant Command", path: "/plant-command", icon: <Dashboard />, roles: ["CEO", "Production Manager", "Process Coordinator", "QC Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "Management / HOD"] },
         { subheader: "Command Centers", label: "Main Dashboard", path: "/dashboard", icon: <Dashboard />, roles: ["CEO", "Process Coordinator"] },
-        { subheader: "Dashboards", label: "Client Dashboard", path: "/client-dashboard", icon: <Dashboard />, roles: ["Customer Relations Manager", "CEO", "Store Manager"] },
       ],
     },
     {
@@ -270,8 +268,6 @@ const Header = () => {
         { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
         { subheader: "Insights", label: "Payments / Collections", path: "/crm/collections", icon: <ReceiptLongIcon />, roles: crmModuleRoles },
         { subheader: "Sales & Clients", label: "Products", path: "/products", icon: <ProductIcon />, roles: ["Customer Relations Manager", "CEO"] },
-        { subheader: "Sales & Clients", label: "Clients", path: "/clients", icon: <ListAlt />, roles: ["Customer Relations Manager", "CEO"] },
-        { subheader: "Sales & Clients", label: "Prospects Clients", path: "/prospects-clients", icon: <ListAlt />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Sales & Clients", label: "Client Orders", path: "/client-orders", icon: <OrderIcon />, roles: ["Customer Relations Manager", "Sales Executive", "CEO"] },
         { subheader: "Sales & Clients", label: "Sales Order Ingestion", path: "/po-ingestion", icon: <Input />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Sales & Clients", label: "Sales Flow", path: "/sales-flow", icon: <TrendingUp />, roles: crmModuleRoles },
