@@ -131,7 +131,7 @@ const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
 const MISHome = lazy(() => import("./pages/mis/MISHome"));
-const MISExecutiveMeeting = lazy(() => import("./pages/mis/MISExecutiveMeeting"));
+const PerformanceReview = lazy(() => import("./pages/performance/PerformanceReview"));
 const PPCFoundation = lazy(() => import("./pages/ppc/PPCFoundation"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
@@ -783,9 +783,15 @@ function AppContent() {
                       <MISHome />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/performance" element={
+                    <ProtectedRouteGate>
+                      <PerformanceReview />
+                    </ProtectedRouteGate>
+                  } />
+                  {/* EM Executive Meeting was rebuilt as the Performance Review system. */}
                   <Route path="/mis/executive-meeting" element={
                     <ProtectedRouteGate>
-                      <MISExecutiveMeeting />
+                      <PerformanceReview />
                     </ProtectedRouteGate>
                   } />
 

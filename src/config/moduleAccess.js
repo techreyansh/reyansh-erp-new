@@ -34,6 +34,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/accountability', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/mis' || path.startsWith('/mis/'), moduleKey: MODULE_KEYS.REPORTS },
+  { test: (path) => path === '/performance' || path.startsWith('/performance/'), moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
 ];
 

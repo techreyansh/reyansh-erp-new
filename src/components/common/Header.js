@@ -321,8 +321,8 @@ const Header = () => {
         { subheader: "Checklists", label: "My Checklist", path: "/task-checklist", icon: <Assignment />, roles: ["all"] },
         { subheader: "Checklists", label: "Checklist Templates", path: "/checklist-templates", icon: <TableChart />, roles: ["CEO", "Management / HOD", "Process Coordinator"] },
         { subheader: "Checklists", label: "Checklist Compliance", path: "/task-compliance-admin", icon: <TableChart />, roles: ["CEO", "HR Manager", "Management / HOD", "Process Coordinator"] },
+        { subheader: "MIS & Accountability", label: "Performance Review", path: "/performance", icon: <TrendingUp />, roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"] },
         { subheader: "MIS & Accountability", label: "MIS Home", path: "/mis", icon: <Analytics />, roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"] },
-        { subheader: "MIS & Accountability", label: "EM Executive Meeting", path: "/mis/executive-meeting", icon: <Assignment />, roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"] },
       ],
     },
     {
