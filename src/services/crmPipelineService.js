@@ -703,6 +703,75 @@ export async function rfmDashboard(ownerEmail = null) {
   return data || null;
 }
 
+/**
+ * Monthly rep target-vs-actual scorecard (server-side, RLS-scoped).
+ *
+ * Backed by the `crm_rep_scorecard(p_month date)` RPC. `month` may be a Date or a
+ * 'YYYY-MM-01' string; it is normalized to a 'YYYY-MM-DD' date string. Returns an
+ * array (sorted by achievement desc) of:
+ *   { email, full_name, department, role, target_value, target_new_accounts,
+ *     target_orders, notes, actual_value, actual_orders, actual_new_accounts,
+ *     achievement_pct (null when no target set) }
+ *
+ * Throws on error so the caller can surface it via the global Snackbar handler.
+ *
+ * @param {Date|string} month  a Date or 'YYYY-MM-01' string
+ * @returns {Promise<Array<object>>}
+ */
+export async function repScorecard(month) {
+  const p_month = typeof month === 'string' ? month : month.toISOString().slice(0, 10);
+  const { data, error } = await supabase.rpc('crm_rep_scorecard', { p_month });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Upsert one rep's target for a given month (managers only — RLS enforced).
+ *
+ * Backed by the `crm_set_rep_target` RPC. `month` may be a Date or any date string
+ * in the month (server normalizes to month-first). Returns the upserted row.
+ *
+ * Throws on error so the caller can surface it via the global Snackbar handler.
+ */
+export async function setRepTarget({ ownerEmail, month, value = 0, newAccounts = 0, orders = 0, notes = null }) {
+  const p_month = typeof month === 'string' ? month : month.toISOString().slice(0, 10);
+  const { data, error } = await supabase.rpc('crm_set_rep_target', {
+    p_owner_email: ownerEmail,
+    p_month,
+    p_value: value,
+    p_new_accounts: newAccounts,
+    p_orders: orders,
+    p_notes: notes,
+  });
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Share-of-Wallet dashboard for the client base (server-side, RLS-scoped).
+ *
+ * Backed by the `crm_wallet_dashboard(p_owner_email text)` RPC. Pass `null` for
+ * CEO/managers (all clients) or the rep's email to scope to their own accounts —
+ * mirror how the dashboard already decides the owner scope. Returns a single
+ * jsonb object:
+ *   { total_clients, accounts_with_potential, total_potential, captured_value,
+ *     capture_rate, total_untapped,
+ *     top_untapped:[{ company_name, customer_code, owner_email, industry, city,
+ *                     value_12mo, annual_potential, untapped, capture_pct }] }
+ *
+ * Throws on error so the caller can surface it via the global Snackbar handler.
+ *
+ * @param {string|null} ownerEmail  rep email, or null for all clients
+ * @returns {Promise<object|null>}
+ */
+export async function walletDashboard(ownerEmail = null) {
+  const { data, error } = await supabase.rpc('crm_wallet_dashboard', {
+    p_owner_email: ownerEmail || null,
+  });
+  if (error) throw error;
+  return data || null;
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -805,6 +874,9 @@ const crmPipelineService = {
   listAssignableUsers,
   repWorklist,
   rfmDashboard,
+  repScorecard,
+  setRepTarget,
+  walletDashboard,
   getCurrentUserEmail,
   listAllCollaborators,
   addCollaborator,

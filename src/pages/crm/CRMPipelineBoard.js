@@ -1140,7 +1140,7 @@ function ActivityCard({ activity, userMap, onChanged, onError, onNotify }) {
 /* A "+ Add {field}" affordance for empty editable fields                   */
 /* ----------------------------------------------------------------------- */
 
-function EditableField({ label, value, onSave, type = "text", multiline = false }) {
+function EditableField({ label, value, onSave, type = "text", multiline = false, helper, display }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? "");
   const [busy, setBusy] = useState(false);
@@ -1186,14 +1186,21 @@ function EditableField({ label, value, onSave, type = "text", multiline = false 
 
   if (value === null || value === undefined || value === "") {
     return (
-      <Button
-        size="small"
-        startIcon={<AddIcon sx={{ fontSize: 16 }} />}
-        onClick={begin}
-        sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
-      >
-        Add {label.toLowerCase()}
-      </Button>
+      <Box>
+        <Button
+          size="small"
+          startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+          onClick={begin}
+          sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
+        >
+          Add {label.toLowerCase()}
+        </Button>
+        {helper && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+            {helper}
+          </Typography>
+        )}
+      </Box>
     );
   }
 
@@ -1204,8 +1211,13 @@ function EditableField({ label, value, onSave, type = "text", multiline = false 
           {label}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: "break-word" }}>
-          {value}
+          {display != null ? display : value}
         </Typography>
+        {helper && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+            {helper}
+          </Typography>
+        )}
       </Box>
       <IconButton size="small" onClick={begin} sx={{ flexShrink: 0 }}>
         <EditIcon sx={{ fontSize: 15 }} />
@@ -1266,6 +1278,7 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     company &&
     (company.account_type === "prospect" ||
       (company.account_type == null && company.kind !== "recurring"));
+  const isClient = company && company.account_type === "client";
 
   const saveField = async (patch) => {
     try {
@@ -1659,6 +1672,25 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                     value={company.payment_terms}
                     onSave={(v) => saveField({ payment_terms: v })}
                   />
+                  {isClient && (
+                    <EditableField
+                      label="Annual potential (₹)"
+                      type="number"
+                      value={company.annual_potential ?? null}
+                      display={
+                        company.annual_potential != null
+                          ? inrCompact(company.annual_potential)
+                          : null
+                      }
+                      helper="Estimated total yearly spend this customer could give us — drives share-of-wallet."
+                      onSave={(v) =>
+                        saveField({
+                          annual_potential:
+                            v == null || v === "" ? null : Number(v),
+                        })
+                      }
+                    />
+                  )}
                 </Stack>
               </Box>
 

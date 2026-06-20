@@ -8,13 +8,25 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  IconButton,
   LinearProgress,
   Paper,
   Skeleton,
   Stack,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
   alpha,
@@ -23,8 +35,12 @@ import {
 import {
   AccountBalanceWalletOutlined,
   AutorenewRounded,
+  ChevronLeftRounded,
+  ChevronRightRounded,
+  EditOutlined,
   EmojiEventsOutlined,
   EventRepeatRounded,
+  FlagOutlined,
   GroupsOutlined,
   PaidOutlined,
   PlaylistAddCheckRounded,
@@ -43,6 +59,9 @@ import {
   clientDashboard,
   listAssignableUsers,
   rfmDashboard,
+  repScorecard,
+  setRepTarget,
+  walletDashboard,
   PROSPECT_STAGES,
   CLIENT_STAGES,
 } from '../../services/crmPipelineService';
@@ -297,7 +316,7 @@ function ProspectsTab() {
 // ---------------------------------------------------------------------------
 // CLIENTS TAB
 // ---------------------------------------------------------------------------
-function ClientsTab() {
+function ClientsTab({ ownerScope }) {
   const theme = useTheme();
   const COLORS = [
     theme.palette.primary.main,
@@ -313,6 +332,11 @@ function ClientsTab() {
   const [d, setD] = useState(null);
   const [nameMap, setNameMap] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Share-of-Wallet dashboard, scoped exactly like RfmTab (null for CEO/managers,
+  // else the rep's email). Loaded in its own effect so a wallet error never
+  // blocks the rest of the clients view.
+  const [wallet, setWallet] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -335,6 +359,21 @@ function ClientsTab() {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const w = await walletDashboard(ownerScope);
+        if (alive) setWallet(w || null);
+      } catch {
+        if (alive) setWallet(null);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [ownerScope]);
 
   const lifecycle = useMemo(() => {
     const bs = (d && d.by_stage) || {};
@@ -434,6 +473,161 @@ function ClientsTab() {
             <Empty label={revenueTotal > 0 ? 'No top customers yet.' : 'No revenue recorded yet'} />
           )}
         </Panel>
+      </Box>
+
+      {/* ---------------- Share of Wallet ---------------- */}
+      <Box sx={{ mt: 4 }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>Share of Wallet</Typography>
+          <Typography variant="caption" color="text.secondary">
+            How much of each client&apos;s yearly spend we capture vs. their estimated potential
+          </Typography>
+        </Box>
+        {(() => {
+          if (!wallet) {
+            return <Empty label="Share-of-wallet is unavailable right now." />;
+          }
+          const accountsWith = Number(wallet.accounts_with_potential) || 0;
+          if (accountsWith === 0) {
+            return (
+              <Paper
+                variant="outlined"
+                sx={{
+                  borderRadius: 2.5,
+                  p: { xs: 2, sm: 3 },
+                  textAlign: 'center',
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
+                }}
+              >
+                <AccountBalanceWalletOutlined sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  No annual potential set yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 460, mx: 'auto', mt: 0.5 }}>
+                  Set an &apos;Annual potential&apos; on your client accounts (in the account drawer) to
+                  unlock share-of-wallet.
+                </Typography>
+              </Paper>
+            );
+          }
+          const captureRate = Number(wallet.capture_rate) || 0;
+          const captureAccent =
+            captureRate >= 50
+              ? theme.palette.success.main
+              : captureRate >= 25
+              ? theme.palette.warning.main
+              : theme.palette.error.main;
+          const topUntapped = Array.isArray(wallet.top_untapped) ? wallet.top_untapped : [];
+          const totalClients = Number(wallet.total_clients) || 0;
+          return (
+            <Box>
+              {/* SOW KPI row */}
+              <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' } }}>
+                <StatCard
+                  label="Accounts with potential"
+                  value={`${accountsWith}/${totalClients}`}
+                  sub="Clients with a target set"
+                  icon={GroupsOutlined}
+                  accent={theme.palette.primary.main}
+                />
+                <StatCard
+                  label="Wallet capture"
+                  value={`${Math.round(captureRate)}%`}
+                  sub="Captured ÷ potential"
+                  icon={TrendingUpRounded}
+                  accent={captureAccent}
+                />
+                <StatCard
+                  label="Untapped opportunity"
+                  value={inrCompact(wallet.total_untapped)}
+                  sub="Headroom left to win"
+                  icon={WarningAmberRounded}
+                  accent={theme.palette.warning.main}
+                />
+                <StatCard
+                  label="Total potential"
+                  value={inrCompact(wallet.total_potential)}
+                  sub="Estimated yearly spend"
+                  icon={PaidOutlined}
+                  accent={theme.palette.primary.dark}
+                />
+              </Box>
+
+              {/* Biggest untapped accounts */}
+              <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+                <Box sx={{ px: 2, py: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Biggest untapped accounts</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Clients with the most headroom between current spend and potential
+                  </Typography>
+                </Box>
+                <Divider />
+                {topUntapped.length ? (
+                  <Stack divider={<Divider />} sx={{ maxHeight: 420, overflow: 'auto' }}>
+                    {topUntapped.map((r, i) => {
+                      const capturePct = Math.min(100, Number(r.capture_pct) || 0);
+                      const meta = [r.customer_code, r.industry, r.city].filter(Boolean).join(' · ');
+                      return (
+                        <Box key={r.customer_code || r.company_name || i} sx={{ px: 2, py: 1.25 }}>
+                          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography variant="body2" noWrap sx={{ fontWeight: 600, maxWidth: 240 }}>
+                                {r.company_name || r.customer_code || 'Customer'}
+                              </Typography>
+                              {meta && (
+                                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', maxWidth: 240 }}>
+                                  {meta}
+                                </Typography>
+                              )}
+                            </Box>
+                            <Stack direction="row" spacing={2} alignItems="center" sx={{ flexShrink: 0 }}>
+                              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>12-mo</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{inrCompact(r.value_12mo)}</Typography>
+                              </Box>
+                              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Potential</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{inrCompact(r.annual_potential)}</Typography>
+                              </Box>
+                              <Box sx={{ textAlign: 'right' }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Untapped</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 800, color: theme.palette.warning.dark }}>
+                                  {inrCompact(r.untapped)}
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          </Stack>
+                          <LinearProgress
+                            variant="determinate"
+                            value={capturePct}
+                            sx={{
+                              mt: 0.75,
+                              height: 5,
+                              borderRadius: 3,
+                              bgcolor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                bgcolor:
+                                  capturePct >= 50
+                                    ? theme.palette.success.main
+                                    : capturePct >= 25
+                                    ? theme.palette.warning.main
+                                    : theme.palette.error.main,
+                              },
+                            }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                ) : (
+                  <Box sx={{ py: 4 }}>
+                    <Empty label="No untapped accounts — every client is at potential." />
+                  </Box>
+                )}
+              </Paper>
+            </Box>
+          );
+        })()}
       </Box>
     </Box>
   );
@@ -801,6 +995,426 @@ function RfmTab({ ownerScope }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// TARGETS TAB
+// ---------------------------------------------------------------------------
+// Month helpers — pure JS Date math, no extra deps. A month is stored as a
+// 'YYYY-MM-01' string in state; we step by parsing the parts, not by mutating a
+// Date (avoids timezone drift on the day-of-month).
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function currentMonthStr() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}-01`;
+}
+
+function stepMonth(monthStr, delta) {
+  const [y, m] = monthStr.split('-').map(Number);
+  // m is 1-based; build a 0-based index, add delta, re-derive y/m.
+  const idx = (y * 12 + (m - 1)) + delta;
+  const ny = Math.floor(idx / 12);
+  const nm = (idx % 12) + 1;
+  return `${ny}-${String(nm).padStart(2, '0')}-01`;
+}
+
+function monthLabel(monthStr) {
+  const [y, m] = monthStr.split('-').map(Number);
+  return `${MONTH_NAMES[m - 1]} ${y}`;
+}
+
+// Soft stepping caps relative to the current month: ~12 months back, ~3 forward.
+function monthsFromNow(monthStr) {
+  const [y, m] = monthStr.split('-').map(Number);
+  const now = new Date();
+  return (y * 12 + (m - 1)) - (now.getFullYear() * 12 + now.getMonth());
+}
+
+// Threshold accent for an achievement % — green ≥100, amber ≥70, red below.
+function achievementColor(theme, pct) {
+  const n = Number(pct) || 0;
+  if (n >= 100) return theme.palette.success.main;
+  if (n >= 70) return theme.palette.warning.main;
+  return theme.palette.error.main;
+}
+
+function TargetEditDialog({ open, row, onClose, onSaved, month, theme }) {
+  const [value, setValue] = useState('');
+  const [newAccounts, setNewAccounts] = useState('');
+  const [orders, setOrders] = useState('');
+  const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState(null);
+
+  useEffect(() => {
+    if (open && row) {
+      setValue(row.target_value != null ? String(row.target_value) : '');
+      setNewAccounts(row.target_new_accounts != null ? String(row.target_new_accounts) : '');
+      setOrders(row.target_orders != null ? String(row.target_orders) : '');
+      setNotes(row.notes || '');
+      setErr(null);
+    }
+  }, [open, row]);
+
+  const handleSave = async () => {
+    if (!row) return;
+    setSaving(true);
+    setErr(null);
+    try {
+      await setRepTarget({
+        ownerEmail: row.email,
+        month,
+        value: Number(value) || 0,
+        newAccounts: Math.round(Number(newAccounts) || 0),
+        orders: Math.round(Number(orders) || 0),
+        notes: notes.trim() ? notes.trim() : null,
+      });
+      await onSaved();
+      onClose();
+    } catch (e) {
+      setErr(e?.message || 'Could not save the target.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ fontWeight: 800 }}>
+        Set target
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 500 }}>
+          {row ? `${row.full_name || row.email} · ${monthLabel(month)}` : ''}
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          {err && (
+            <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 2, borderColor: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.06) }}>
+              <Typography variant="body2" color="error">{err}</Typography>
+            </Paper>
+          )}
+          <TextField
+            label="Revenue target (₹)"
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            fullWidth
+            size="small"
+            inputProps={{ min: 0 }}
+          />
+          <TextField
+            label="New clients target"
+            type="number"
+            value={newAccounts}
+            onChange={(e) => setNewAccounts(e.target.value)}
+            fullWidth
+            size="small"
+            inputProps={{ min: 0 }}
+          />
+          <TextField
+            label="Orders target"
+            type="number"
+            value={orders}
+            onChange={(e) => setOrders(e.target.value)}
+            fullWidth
+            size="small"
+            inputProps={{ min: 0 }}
+          />
+          <TextField
+            label="Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} disabled={saving} sx={{ textTransform: 'none' }}>Cancel</Button>
+        <Button onClick={handleSave} variant="contained" disabled={saving} sx={{ textTransform: 'none', fontWeight: 700 }}>
+          {saving ? 'Saving…' : 'Save target'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function TargetsTab({ seesAll, myEmail }) {
+  const theme = useTheme();
+  const [month, setMonth] = useState(currentMonthStr);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editRow, setEditRow] = useState(null);
+
+  const load = async (mStr) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await repScorecard(mStr);
+      setRows(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e?.message || 'Could not load the scorecard.');
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    (async () => {
+      try {
+        const data = await repScorecard(month);
+        if (!alive) return;
+        setRows(Array.isArray(data) ? data : []);
+      } catch (e) {
+        if (alive) {
+          setError(e?.message || 'Could not load the scorecard.');
+          setRows([]);
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [month]);
+
+  const fromNow = monthsFromNow(month);
+  const canGoBack = fromNow > -12;
+  const canGoForward = fromNow < 3;
+
+  const summary = useMemo(() => {
+    const teamTarget = rows.reduce((s, r) => s + (Number(r.target_value) || 0), 0);
+    const teamActual = rows.reduce((s, r) => s + (Number(r.actual_value) || 0), 0);
+    const teamAch = teamTarget > 0 ? (teamActual / teamTarget) * 100 : null;
+    const withTarget = rows.filter((r) => (Number(r.target_value) || 0) > 0 || r.achievement_pct != null);
+    const onTarget = rows.filter((r) => r.achievement_pct != null && Number(r.achievement_pct) >= 100);
+    return {
+      teamTarget,
+      teamActual,
+      teamAch,
+      onTargetCount: onTarget.length,
+      withTargetCount: withTarget.length,
+    };
+  }, [rows]);
+
+  const stepperHeader = (
+    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
+      <Box>
+        <Typography variant="h6" sx={{ fontWeight: 800 }}>Monthly Targets &amp; Scorecard</Typography>
+        <Typography variant="caption" color="text.secondary">
+          Revenue, conversions and orders vs target by rep.
+        </Typography>
+      </Box>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={0.5}
+        sx={{ border: 1, borderColor: 'divider', borderRadius: 2, px: 0.5, py: 0.25 }}
+      >
+        <IconButton
+          size="small"
+          aria-label="Previous month"
+          disabled={!canGoBack || loading}
+          onClick={() => setMonth((m) => stepMonth(m, -1))}
+        >
+          <ChevronLeftRounded />
+        </IconButton>
+        <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 132, textAlign: 'center' }}>
+          {monthLabel(month)}
+        </Typography>
+        <IconButton
+          size="small"
+          aria-label="Next month"
+          disabled={!canGoForward || loading}
+          onClick={() => setMonth((m) => stepMonth(m, 1))}
+        >
+          <ChevronRightRounded />
+        </IconButton>
+      </Stack>
+    </Stack>
+  );
+
+  if (loading) {
+    return (
+      <Box>
+        {stepperHeader}
+        <KpiSkeletons n={4} />
+        <Skeleton variant="rounded" height={320} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box>
+        {stepperHeader}
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, borderColor: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.06) }}>
+          <Typography variant="subtitle2" color="error" sx={{ fontWeight: 700 }}>Couldn’t load targets</Typography>
+          <Typography variant="body2" color="text.secondary">{error}</Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
+  const teamAchAccent = summary.teamAch == null ? theme.palette.text.secondary : achievementColor(theme, summary.teamAch);
+
+  return (
+    <Box>
+      {stepperHeader}
+
+      {/* Summary KPIs */}
+      <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' } }}>
+        <StatCard label="Team target" value={inrCompact(summary.teamTarget)} sub="Sum of rep targets" icon={FlagOutlined} accent={theme.palette.primary.main} />
+        <StatCard label="Team actual" value={inrCompact(summary.teamActual)} sub="Booked this month" icon={PaidOutlined} accent={theme.palette.primary.dark} />
+        <StatCard
+          label="Team achievement"
+          value={summary.teamAch == null ? '—' : `${Math.round(summary.teamAch)}%`}
+          sub={summary.teamAch == null ? 'No targets set' : 'Actual ÷ target'}
+          icon={TrendingUpRounded}
+          accent={teamAchAccent}
+        />
+        <StatCard
+          label="Reps on target"
+          value={`${summary.onTargetCount}/${summary.withTargetCount}`}
+          sub="≥100% of target"
+          icon={EmojiEventsOutlined}
+          accent={theme.palette.success.main}
+        />
+      </Box>
+
+      {/* Scorecard table */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Rep scorecard</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {monthLabel(month)} · {seesAll ? 'all reps' : 'your standing'}
+          </Typography>
+        </Box>
+        <Divider />
+        {rows.length ? (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>Rep</TableCell>
+                  <TableCell sx={{ fontWeight: 700, minWidth: 180 }}>Revenue</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="center">Achievement</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="center">New clients</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="center">Orders</TableCell>
+                  {seesAll && <TableCell sx={{ fontWeight: 700 }} align="right">Target</TableCell>}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((r) => {
+                  const hasTarget = (Number(r.target_value) || 0) > 0 || r.achievement_pct != null;
+                  const pct = r.achievement_pct == null ? null : Number(r.achievement_pct);
+                  const barPct = Math.min(100, pct || 0);
+                  const accent = achievementColor(theme, pct);
+                  const isMe = myEmail && r.email && String(r.email).toLowerCase() === String(myEmail).toLowerCase();
+                  return (
+                    <TableRow
+                      key={r.email}
+                      hover
+                      sx={{
+                        bgcolor: isMe ? alpha(theme.palette.primary.main, 0.07) : 'inherit',
+                        opacity: hasTarget ? 1 : 0.62,
+                      }}
+                    >
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                          {r.full_name || ownerDisplay(r.email)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                          {[r.department, r.role].filter(Boolean).join(' · ') || r.email}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {hasTarget ? (
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {inrCompact(r.actual_value)} <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500 }}>/ {inrCompact(r.target_value)}</Box>
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={barPct}
+                              sx={{ mt: 0.5, height: 6, borderRadius: 3, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: accent } }}
+                            />
+                          </Box>
+                        ) : (
+                          <Typography variant="body2" color="text.disabled">— no target</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {pct == null ? (
+                          <Typography variant="body2" color="text.disabled">—</Typography>
+                        ) : (
+                          <Chip
+                            label={`${Math.round(pct)}%`}
+                            size="small"
+                            sx={{ bgcolor: alpha(accent, 0.14), color: accent, fontWeight: 700 }}
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="body2">
+                          {Number(r.actual_new_accounts) || 0}
+                          <Box component="span" sx={{ color: 'text.secondary' }}> / {Number(r.target_new_accounts) || 0}</Box>
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="body2">
+                          {Number(r.actual_orders) || 0}
+                          <Box component="span" sx={{ color: 'text.secondary' }}> / {Number(r.target_orders) || 0}</Box>
+                        </Typography>
+                      </TableCell>
+                      {seesAll && (
+                        <TableCell align="right">
+                          <Tooltip title="Edit target" arrow>
+                            <IconButton size="small" onClick={() => setEditRow(r)} aria-label={`Edit target for ${r.full_name || r.email}`}>
+                              <EditOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Box sx={{ py: 6 }}>
+            <Empty label="No reps found." />
+          </Box>
+        )}
+      </Paper>
+
+      {seesAll && (
+        <TargetEditDialog
+          open={Boolean(editRow)}
+          row={editRow}
+          month={month}
+          theme={theme}
+          onClose={() => setEditRow(null)}
+          onSaved={() => load(month)}
+        />
+      )}
+    </Box>
+  );
+}
+
 export default function CRMDashboard({ data, loading }) {
   const theme = useTheme();
   const [tab, setTab] = useState('overview');
@@ -931,6 +1545,7 @@ export default function CRMDashboard({ data, loading }) {
       <Tab value="prospects" label="Prospects" sx={{ fontWeight: 700, textTransform: 'none' }} />
       <Tab value="clients" label="Clients" sx={{ fontWeight: 700, textTransform: 'none' }} />
       <Tab value="rfm" label="RFM & Retention" sx={{ fontWeight: 700, textTransform: 'none' }} />
+      <Tab value="targets" label="Targets" sx={{ fontWeight: 700, textTransform: 'none' }} />
     </Tabs>
   );
 
@@ -947,7 +1562,7 @@ export default function CRMDashboard({ data, loading }) {
     return (
       <Box>
         {TabsBar}
-        <ClientsTab />
+        <ClientsTab ownerScope={ownerScope} />
       </Box>
     );
   }
@@ -957,6 +1572,15 @@ export default function CRMDashboard({ data, loading }) {
       <Box>
         {TabsBar}
         <RfmTab ownerScope={ownerScope} />
+      </Box>
+    );
+  }
+
+  if (tab === 'targets') {
+    return (
+      <Box>
+        {TabsBar}
+        <TargetsTab seesAll={seesAll} myEmail={myEmail} />
       </Box>
     );
   }
