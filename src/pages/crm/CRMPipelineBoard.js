@@ -57,6 +57,7 @@ import {
   assignOwner,
   addCompany,
   updateCompany,
+  listAssignableUsers,
   getCurrentUserEmail,
 } from "../../services/crmPipelineService";
 import ppcService from "../../services/ppcService";
@@ -105,6 +106,33 @@ const initials = (email) => {
   return String(email).trim().slice(0, 2).toUpperCase();
 };
 
+/* Build a lowercased email→user lookup map from the assignable-users list. */
+const buildUserMap = (users) => {
+  const map = new Map();
+  (users || []).forEach((u) => {
+    if (u && u.email) map.set(String(u.email).toLowerCase(), u);
+  });
+  return map;
+};
+
+/* Resolve an owner email to a human display name. Falls back to the email's
+   local-part if the user isn't in the map (or the map hasn't loaded yet). */
+const ownerLabel = (email, userMap) => {
+  if (!email) return "";
+  const u = userMap && userMap.get(String(email).toLowerCase());
+  if (u && u.full_name) return u.full_name;
+  return String(email).split("@")[0];
+};
+
+/* Label for an assignable user in the owner picker. */
+const userOptionLabel = (u) => {
+  if (!u) return "";
+  if (u.full_name) {
+    return u.department ? `${u.full_name} — ${u.department}` : u.full_name;
+  }
+  return u.email || "";
+};
+
 /* Lightweight lead score derived purely from stage progression (no extra table).
    Earlier stages = colder, later stages = hotter. Returns a % plus a Hot/Warm/Cold band. */
 const leadScoreForStage = (stageKey) => {
@@ -131,7 +159,7 @@ const leadScoreForStage = (stageKey) => {
 /* Card component (shared shape for board columns)                          */
 /* ----------------------------------------------------------------------- */
 
-function PipelineCard({ company, onOpen, onMove, stages, currentStageKey }) {
+function PipelineCard({ company, onOpen, onMove, stages, currentStageKey, userMap }) {
   const theme = useTheme();
   const [moveAnchor, setMoveAnchor] = useState(null);
   const days = daysSince(company.stage_entered_at);
@@ -163,7 +191,7 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey }) {
             <Chip
               size="small"
               icon={<PersonIcon sx={{ fontSize: 14 }} />}
-              label={company.owner_email.split("@")[0]}
+              label={ownerLabel(company.owner_email, userMap)}
               sx={{ height: 22, maxWidth: 140, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
             />
           ) : (
@@ -452,7 +480,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
 /* Company drawer                                                           */
 /* ----------------------------------------------------------------------- */
 
-function CompanyDrawer({ id, open, onClose, onChanged }) {
+function CompanyDrawer({ id, open, onClose, onChanged, users, userMap }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -516,9 +544,12 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
     setSavingDeal(false);
   };
 
-  const saveOwner = async () => {
+  // Assign / unassign the owner. Pass an email to assign, or null/"" to clear.
+  const saveOwner = async (email) => {
+    const next = email == null ? "" : String(email).trim();
+    setOwnerEmail(next);
     try {
-      await assignOwner(id, ownerEmail.trim());
+      await assignOwner(id, next || null);
       await load();
       onChanged?.();
     } catch (e) {
@@ -666,19 +697,43 @@ function CompanyDrawer({ id, open, onClose, onChanged }) {
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   Owner
                 </Typography>
-                <Stack direction="row" spacing={1} alignItems="flex-end">
-                  <TextField
-                    label="Owner email"
+                <Autocomplete
+                  size="small"
+                  options={users || []}
+                  value={
+                    ownerEmail
+                      ? (userMap && userMap.get(String(ownerEmail).toLowerCase())) || {
+                          email: ownerEmail,
+                          full_name: null,
+                          department: null,
+                        }
+                      : null
+                  }
+                  onChange={(_, v) => saveOwner(v ? v.email : null)}
+                  getOptionLabel={(o) => userOptionLabel(o)}
+                  isOptionEqualToValue={(o, v) =>
+                    String(o?.email || "").toLowerCase() ===
+                    String(v?.email || "").toLowerCase()
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Owner"
+                      placeholder="Unassigned"
+                    />
+                  )}
+                />
+                {ownerEmail && (
+                  <Button
                     size="small"
-                    value={ownerEmail}
-                    onChange={(e) => setOwnerEmail(e.target.value)}
-                    fullWidth
-                    placeholder="unassigned"
-                  />
-                  <Button size="small" variant="outlined" onClick={saveOwner}>
-                    Assign
+                    variant="text"
+                    color="inherit"
+                    onClick={() => saveOwner(null)}
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    Unassign
                   </Button>
-                </Stack>
+                )}
               </Stack>
             </Box>
 
@@ -1188,6 +1243,7 @@ export default function CRMPipelineBoard() {
   const [prospects, setProspects] = useState([]);
   const [recurring, setRecurring] = useState([]);
   const [cycles, setCycles] = useState([]);
+  const [assignableUsers, setAssignableUsers] = useState([]);
 
   const [addOpen, setAddOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
@@ -1201,16 +1257,18 @@ export default function CRMPipelineBoard() {
     setLoading(true);
     setErr(null);
     try {
-      const [p, r, c, email] = await Promise.all([
+      const [p, r, c, email, users] = await Promise.all([
         listProspects(),
         listRecurring(),
         listOrderCycles(),
         getCurrentUserEmail(),
+        listAssignableUsers(),
       ]);
       setProspects(p);
       setRecurring(r);
       setCycles(c);
       setCurrentEmail(email);
+      setAssignableUsers(users);
     } catch (e) {
       setErr(e?.message || "Failed to load pipeline.");
     } finally {
@@ -1221,6 +1279,9 @@ export default function CRMPipelineBoard() {
   useEffect(() => {
     loadAll();
   }, [loadAll]);
+
+  // Lowercased email→user map for name lookups (display) and picker value.
+  const userMap = useMemo(() => buildUserMap(assignableUsers), [assignableUsers]);
 
   const matchesScope = useCallback(
     (row) => {
@@ -1376,6 +1437,7 @@ export default function CRMPipelineBoard() {
             onMove={handleMoveStage}
             empty={filteredProspects.length === 0}
             scope={scope}
+            userMap={userMap}
           />
         ) : (
           <RecurringView
@@ -1386,6 +1448,7 @@ export default function CRMPipelineBoard() {
             onMove={handleMoveCycle}
             onOpen={(id) => setDrawerId(id)}
             onNotify={notify}
+            userMap={userMap}
           />
         )}
       </Box>
@@ -1402,6 +1465,8 @@ export default function CRMPipelineBoard() {
         open={Boolean(drawerId)}
         onClose={() => setDrawerId(null)}
         onChanged={loadAll}
+        users={assignableUsers}
+        userMap={userMap}
       />
 
       <Snackbar
@@ -1425,7 +1490,7 @@ export default function CRMPipelineBoard() {
   );
 }
 
-function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope }) {
+function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope, userMap }) {
   if (empty) {
     return (
       <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
@@ -1453,6 +1518,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope }) {
               onMove={onMove}
               stages={STAGES}
               currentStageKey={company.stage}
+              userMap={userMap}
             />
           )}
         />
@@ -1461,7 +1527,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope }) {
   );
 }
 
-function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify }) {
+function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify, userMap }) {
   const cycleCount = cycles.length;
   return (
     <Stack spacing={2} sx={{ height: "100%" }}>
@@ -1500,7 +1566,7 @@ function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen
                     </Typography>
                   )}
                   {c.owner_email && (
-                    <Chip size="small" label={c.owner_email.split("@")[0]} sx={{ height: 20 }} />
+                    <Chip size="small" label={ownerLabel(c.owner_email, userMap)} sx={{ height: 20 }} />
                   )}
                 </Stack>
               </Paper>

@@ -405,6 +405,24 @@ export async function getCustomerAnalytics() {
   }
 }
 
+/**
+ * Active users assignable as pipeline owners, with resolved display name.
+ *
+ * Backed by the `crm_assignable_users` RPC. Returns a jsonb array of
+ *   { email, full_name, department, role }
+ * Never throws — returns [] on error so the owner picker degrades gracefully
+ * (falls back to the raw email prefix for display).
+ */
+export async function listAssignableUsers() {
+  try {
+    const { data, error } = await supabase.rpc("crm_assignable_users");
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -435,6 +453,7 @@ const crmPipelineService = {
   completeFollowup,
   moveFollowupStage,
   getCustomerAnalytics,
+  listAssignableUsers,
   getCurrentUserEmail,
 };
 
