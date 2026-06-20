@@ -40,6 +40,20 @@ import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import CallIcon from "@mui/icons-material/Call";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import EmailIcon from "@mui/icons-material/Email";
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
@@ -56,6 +70,12 @@ import {
   moveStage,
   moveOrderCycle,
   addActivity,
+  updateActivity,
+  deleteActivity,
+  markActivityComplete,
+  duplicateActivity,
+  listContacts,
+  convertToClient,
   assignOwner,
   addCompany,
   updateCompany,
@@ -709,31 +729,502 @@ function LogNextActionDialog({ open, move, onClose, onSaved, onError }) {
 /* Company drawer                                                           */
 /* ----------------------------------------------------------------------- */
 
-function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collaborators, onCollaboratorsChanged }) {
+/* ----------------------------------------------------------------------- */
+/* Activity helpers (type colors + follow-up status)                        */
+/* ----------------------------------------------------------------------- */
+
+const ACTIVITY_TYPE_LABELS = ACTIVITY_TYPES.reduce((acc, t) => {
+  acc[t.key] = t.label;
+  return acc;
+}, {});
+
+// Per-type accent palettes (resolved against the live theme at render time).
+const activityTypeColor = (theme, type) => {
+  const p = theme.palette;
+  const map = {
+    call: p.info?.main,
+    email: p.primary?.main,
+    meeting: p.secondary?.main,
+    note: p.text?.secondary,
+    sample: p.warning?.main,
+    quotation: p.success?.main,
+    whatsapp: "#25D366",
+  };
+  return map[type] || p.primary?.main;
+};
+
+// Classify an activity for its status chip. Overdue/Due-today are derived from
+// the follow-up date when the activity is still open.
+const activityStatus = (a) => {
+  if (a?.status === "completed") return "completed";
+  if (a?.status === "cancelled") return "cancelled";
+  const d = a?.next_follow_up_date;
+  if (d) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(d);
+    due.setHours(0, 0, 0, 0);
+    if (due < today) return "overdue";
+    if (due.getTime() === today.getTime()) return "due_today";
+  }
+  return "open";
+};
+
+const STATUS_META = {
+  completed: { label: "Completed", color: "success" },
+  overdue: { label: "Overdue", color: "error" },
+  due_today: { label: "Due today", color: "warning" },
+  open: { label: "Open", color: "default" },
+  cancelled: { label: "Cancelled", color: "default" },
+};
+
+/* ----------------------------------------------------------------------- */
+/* A single activity timeline card (with inline editor + per-card actions)  */
+/* ----------------------------------------------------------------------- */
+
+function ActivityCard({ activity, userMap, onChanged, onError, onNotify }) {
   const theme = useTheme();
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [rescheduleAnchor, setRescheduleAnchor] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  // Inline-edit draft state.
+  const [eType, setEType] = useState(activity.activity_type || "note");
+  const [eSubject, setESubject] = useState(activity.subject || "");
+  const [eBody, setEBody] = useState(activity.body || "");
+  const [eFollowUp, setEFollowUp] = useState(activity.next_follow_up_date || "");
+  const [eOutcome, setEOutcome] = useState(activity.outcome || "");
+  const [rDate, setRDate] = useState(activity.next_follow_up_date || "");
+
+  const status = activityStatus(activity);
+  const meta = STATUS_META[status] || STATUS_META.open;
+  const accent = activityTypeColor(theme, activity.activity_type);
+  const isCompleted = activity.status === "completed";
+
+  const closeMenu = () => setMenuAnchor(null);
+
+  const beginEdit = () => {
+    setEType(activity.activity_type || "note");
+    setESubject(activity.subject || "");
+    setEBody(activity.body || "");
+    setEFollowUp(activity.next_follow_up_date || "");
+    setEOutcome(activity.outcome || "");
+    setEditing(true);
+    closeMenu();
+  };
+
+  const saveEdit = async () => {
+    setBusy(true);
+    try {
+      await updateActivity(activity.id, {
+        activity_type: eType,
+        subject: eSubject.trim() || null,
+        body: eBody.trim() || null,
+        next_follow_up_date: eFollowUp || null,
+        outcome: eOutcome.trim() || null,
+      });
+      setEditing(false);
+      await onChanged?.();
+      onNotify?.("Activity updated.", "success");
+    } catch (e) {
+      onError?.(e?.message || "Failed to update activity.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doDelete = async () => {
+    setBusy(true);
+    try {
+      await deleteActivity(activity.id);
+      setConfirmDelete(false);
+      await onChanged?.();
+      onNotify?.("Activity deleted.", "success");
+    } catch (e) {
+      onError?.(e?.message || "Failed to delete activity.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggleComplete = async () => {
+    closeMenu();
+    setBusy(true);
+    try {
+      await markActivityComplete(activity.id, !isCompleted);
+      await onChanged?.();
+      onNotify?.(isCompleted ? "Marked as open." : "Marked complete.", "success");
+    } catch (e) {
+      onError?.(e?.message || "Failed to update status.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doReschedule = async () => {
+    setBusy(true);
+    try {
+      await updateActivity(activity.id, { next_follow_up_date: rDate || null });
+      setRescheduleAnchor(null);
+      await onChanged?.();
+      onNotify?.("Follow-up rescheduled.", "success");
+    } catch (e) {
+      onError?.(e?.message || "Failed to reschedule.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doDuplicate = async () => {
+    closeMenu();
+    setBusy(true);
+    try {
+      await duplicateActivity(activity);
+      await onChanged?.();
+      onNotify?.("Activity duplicated.", "success");
+    } catch (e) {
+      onError?.(e?.message || "Failed to duplicate.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.25,
+        borderRadius: 2,
+        borderLeft: `3px solid ${accent}`,
+        opacity: isCompleted ? 0.78 : 1,
+        position: "relative",
+      }}
+    >
+      {editing ? (
+        <Stack spacing={1.25}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+            <TextField
+              select
+              label="Type"
+              size="small"
+              value={eType}
+              onChange={(e) => setEType(e.target.value)}
+              sx={{ minWidth: 130 }}
+            >
+              {ACTIVITY_TYPES.map((t) => (
+                <MenuItem key={t.key} value={t.key}>
+                  {t.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Subject"
+              size="small"
+              value={eSubject}
+              onChange={(e) => setESubject(e.target.value)}
+              fullWidth
+            />
+          </Stack>
+          <TextField
+            label="Notes"
+            size="small"
+            value={eBody}
+            onChange={(e) => setEBody(e.target.value)}
+            multiline
+            minRows={2}
+            fullWidth
+          />
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+            <TextField
+              label="Follow-up date"
+              type="date"
+              size="small"
+              value={eFollowUp || ""}
+              onChange={(e) => setEFollowUp(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+            <TextField
+              label="Outcome"
+              size="small"
+              value={eOutcome}
+              onChange={(e) => setEOutcome(e.target.value)}
+              fullWidth
+            />
+          </Stack>
+          <Stack direction="row" spacing={1} justifyContent="flex-end">
+            <Button size="small" color="inherit" onClick={() => setEditing(false)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button size="small" variant="contained" onClick={saveEdit} disabled={busy}>
+              {busy ? "Saving…" : "Save"}
+            </Button>
+          </Stack>
+        </Stack>
+      ) : (
+        <>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0, flexWrap: "wrap" }} useFlexGap>
+              <Chip
+                size="small"
+                label={ACTIVITY_TYPE_LABELS[activity.activity_type] || activity.activity_type}
+                sx={{
+                  height: 20,
+                  fontWeight: 700,
+                  color: accent,
+                  bgcolor: alpha(accent, 0.12),
+                  "& .MuiChip-label": { px: 0.9, fontSize: 11 },
+                }}
+              />
+              <Chip
+                size="small"
+                label={meta.label}
+                color={meta.color}
+                variant={meta.color === "default" ? "outlined" : "filled"}
+                sx={{ height: 20, "& .MuiChip-label": { px: 0.9, fontSize: 11, fontWeight: 600 } }}
+              />
+            </Stack>
+            <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)} disabled={busy}>
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+
+          {activity.subject && (
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, mt: 0.5, textDecoration: isCompleted ? "line-through" : "none", cursor: "pointer" }}
+              onClick={beginEdit}
+            >
+              {activity.subject}
+            </Typography>
+          )}
+          {activity.body && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                mt: 0.25,
+              }}
+            >
+              {activity.body}
+            </Typography>
+          )}
+          {activity.outcome && (
+            <Typography variant="caption" sx={{ display: "block", mt: 0.25, fontStyle: "italic" }} color="text.secondary">
+              Outcome: {activity.outcome}
+            </Typography>
+          )}
+
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.6 }} flexWrap="wrap" useFlexGap>
+            <Typography variant="caption" color="text.secondary">
+              by {ownerLabel(activity.owner_email, userMap)} · {fmtDateTime(activity.activity_at)}
+            </Typography>
+            {activity.next_follow_up_date && (
+              <Chip
+                size="small"
+                icon={<ScheduleIcon sx={{ fontSize: 13 }} />}
+                label={fmtDate(activity.next_follow_up_date)}
+                variant="outlined"
+                color={status === "overdue" ? "error" : status === "due_today" ? "warning" : "default"}
+                sx={{ height: 20, "& .MuiChip-label": { px: 0.6, fontSize: 11 } }}
+              />
+            )}
+          </Stack>
+        </>
+      )}
+
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
+        <MenuItem onClick={beginEdit} sx={{ fontSize: 13 }}>
+          <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+        </MenuItem>
+        <MenuItem onClick={toggleComplete} sx={{ fontSize: 13 }}>
+          <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} /> {isCompleted ? "Mark open" : "Mark complete"}
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            setRDate(activity.next_follow_up_date || "");
+            setRescheduleAnchor(e.currentTarget);
+            closeMenu();
+          }}
+          sx={{ fontSize: 13 }}
+        >
+          <EventRepeatIcon fontSize="small" sx={{ mr: 1 }} /> Reschedule
+        </MenuItem>
+        <MenuItem onClick={doDuplicate} sx={{ fontSize: 13 }}>
+          <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} /> Duplicate
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            setConfirmDelete(true);
+            closeMenu();
+          }}
+          sx={{ fontSize: 13, color: "error.main" }}
+        >
+          <DeleteOutlineIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+        </MenuItem>
+      </Menu>
+
+      {/* Reschedule popover (quick date) */}
+      <Menu
+        anchorEl={rescheduleAnchor}
+        open={Boolean(rescheduleAnchor)}
+        onClose={() => setRescheduleAnchor(null)}
+      >
+        <Box sx={{ p: 1.5, width: 220 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            Reschedule follow-up
+          </Typography>
+          <TextField
+            type="date"
+            size="small"
+            value={rDate || ""}
+            onChange={(e) => setRDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            sx={{ mt: 1 }}
+          />
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 1.25 }}>
+            <Button size="small" color="inherit" onClick={() => setRescheduleAnchor(null)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button size="small" variant="contained" onClick={doReschedule} disabled={busy}>
+              Save
+            </Button>
+          </Stack>
+        </Box>
+      </Menu>
+
+      {/* Delete confirm */}
+      <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}>
+        <DialogTitle>Delete activity?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This will remove the activity. A copy is kept in the change history.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setConfirmDelete(false)} disabled={busy}>
+            Cancel
+          </Button>
+          <Button color="error" variant="contained" onClick={doDelete} disabled={busy}>
+            {busy ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/* A "+ Add {field}" affordance for empty editable fields                   */
+/* ----------------------------------------------------------------------- */
+
+function EditableField({ label, value, onSave, type = "text", multiline = false }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? "");
+  const [busy, setBusy] = useState(false);
+
+  const begin = () => {
+    setDraft(value ?? "");
+    setEditing(true);
+  };
+  const commit = async () => {
+    setBusy(true);
+    try {
+      await onSave(draft.trim() === "" ? null : draft.trim());
+      setEditing(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <Stack direction="row" spacing={0.75} alignItems="flex-start">
+        <TextField
+          label={label}
+          size="small"
+          type={type}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          multiline={multiline}
+          minRows={multiline ? 2 : undefined}
+          autoFocus
+          fullWidth
+          InputLabelProps={type === "date" ? { shrink: true } : undefined}
+        />
+        <Button size="small" variant="contained" onClick={commit} disabled={busy} sx={{ mt: 0.25, minWidth: 0, px: 1.5 }}>
+          {busy ? "…" : "Save"}
+        </Button>
+        <Button size="small" color="inherit" onClick={() => setEditing(false)} disabled={busy} sx={{ mt: 0.25, minWidth: 0, px: 1 }}>
+          ✕
+        </Button>
+      </Stack>
+    );
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return (
+      <Button
+        size="small"
+        startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+        onClick={begin}
+        sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
+      >
+        Add {label.toLowerCase()}
+      </Button>
+    );
+  }
+
+  return (
+    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+          {label}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: "break-word" }}>
+          {value}
+        </Typography>
+      </Box>
+      <IconButton size="small" onClick={begin} sx={{ flexShrink: 0 }}>
+        <EditIcon sx={{ fontSize: 15 }} />
+      </IconButton>
+    </Stack>
+  );
+}
+
+function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collaborators, onCollaboratorsChanged }) {
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [contacts, setContacts] = useState([]);
   const [err, setErr] = useState(null);
+  const [snack, setSnack] = useState(null);
 
-  // Editable fields
-  const [editValue, setEditValue] = useState("");
-  const [editNextAction, setEditNextAction] = useState("");
-  const [editNextDate, setEditNextDate] = useState("");
+  // Owner state (kept for the picker).
   const [ownerEmail, setOwnerEmail] = useState("");
-  const [savingDeal, setSavingDeal] = useState(false);
 
-  // Imported CRM fields (editable)
-  const [editIndustry, setEditIndustry] = useState("");
-  const [editCity, setEditCity] = useState("");
-  const [editProductCategory, setEditProductCategory] = useState("");
-  const [savingProfile, setSavingProfile] = useState(false);
+  // Header menu + busy flags.
+  const [headerMenu, setHeaderMenu] = useState(null);
+  const [stageAnchor, setStageAnchor] = useState(null);
+  const [converting, setConverting] = useState(false);
 
-  // Activity form
+  // Compact composer state.
   const [actType, setActType] = useState("note");
   const [actSubject, setActSubject] = useState("");
   const [actBody, setActBody] = useState("");
   const [actFollowUp, setActFollowUp] = useState("");
   const [savingAct, setSavingAct] = useState(false);
+
+  const notify = useCallback((message, severity = "info") => {
+    setSnack({ message, severity });
+  }, []);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -742,13 +1233,9 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     try {
       const d = await getCompany(id);
       setDetail(d);
-      setEditValue(d.company?.value ?? "");
-      setEditNextAction(d.company?.next_action ?? "");
-      setEditNextDate(d.company?.next_action_date ?? "");
       setOwnerEmail(d.company?.owner_email ?? "");
-      setEditIndustry(d.company?.industry ?? "");
-      setEditCity(d.company?.city ?? "");
-      setEditProductCategory(d.company?.product_category ?? "");
+      const c = await listContacts(id);
+      setContacts(c || []);
     } catch (e) {
       setErr(e?.message || "Failed to load company.");
     } finally {
@@ -761,6 +1248,10 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
   }, [open, id, load]);
 
   const company = detail?.company;
+  const isProspect =
+    company &&
+    (company.account_type === "prospect" ||
+      (company.account_type == null && company.kind !== "recurring"));
 
   const saveField = async (patch) => {
     try {
@@ -772,37 +1263,13 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     }
   };
 
-  const saveDeal = async () => {
-    setSavingDeal(true);
-    await saveField({
-      value: editValue === "" ? null : Number(editValue),
-      next_action: editNextAction || null,
-      next_action_date: editNextDate || null,
-    });
-    setSavingDeal(false);
-  };
-
-  const saveProfile = async () => {
-    setSavingProfile(true);
-    await saveField({
-      industry: editIndustry.trim() || null,
-      city: editCity.trim() || null,
-      product_category: editProductCategory.trim() || null,
-    });
-    setSavingProfile(false);
-  };
-
   const [savingCollab, setSavingCollab] = useState(false);
 
-  // Lowercased collaborator emails for this lead (from the board's collabMap).
   const collabEmails = useMemo(
     () => (collaborators || []).map((e) => String(e).toLowerCase()),
     [collaborators]
   );
 
-  // Selected user objects for the multi-select value: resolve each collaborator
-  // email to a known user, or fall back to a synthetic { email } so the chip
-  // still renders a label.
   const collabValue = useMemo(
     () =>
       collabEmails.map(
@@ -816,8 +1283,6 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     [collabEmails, userMap]
   );
 
-  // Diff the new selection against the current collaborators and apply the
-  // adds/removes, then refresh the board's collaborator map so chips update.
   const onChangeCollaborators = async (selected) => {
     const nextEmails = (selected || [])
       .map((u) => String(u?.email || "").toLowerCase())
@@ -841,7 +1306,6 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     }
   };
 
-  // Assign / unassign the owner. Pass an email to assign, or null/"" to clear.
   const saveOwner = async (email) => {
     const next = email == null ? "" : String(email).trim();
     setOwnerEmail(next);
@@ -875,12 +1339,100 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
       setActType("note");
       await load();
       onChanged?.();
+      notify("Activity logged.", "success");
     } catch (e) {
       setErr(e?.message || "Failed to add activity.");
     } finally {
       setSavingAct(false);
     }
   };
+
+  // Quick action helpers.
+  const digits = (s) => String(s || "").replace(/[^\d+]/g, "");
+  const phone = company?.phone || (contacts.find((c) => c.is_primary) || contacts[0] || {}).phone;
+  const email = company?.email || (contacts.find((c) => c.is_primary) || contacts[0] || {}).email;
+
+  const quickNote = () => {
+    setActType("note");
+    setActSubject("");
+    setActBody("");
+    document.getElementById("crm-activity-composer")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  const quickFollowUp = () => {
+    setActType("call");
+    setActFollowUp(new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+    document.getElementById("crm-activity-composer")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const handleConvert = async () => {
+    setHeaderMenu(null);
+    setConverting(true);
+    try {
+      await convertToClient(id, null);
+      await load();
+      onChanged?.();
+      notify("Converted to client.", "success");
+    } catch (e) {
+      setErr(e?.message || "Failed to convert to client.");
+    } finally {
+      setConverting(false);
+    }
+  };
+
+  const moveToStage = async (toStage) => {
+    setStageAnchor(null);
+    setHeaderMenu(null);
+    try {
+      await moveStage(id, toStage, null);
+      await load();
+      onChanged?.();
+      notify("Stage updated.", "success");
+    } catch (e) {
+      setErr(e?.message || "Failed to move stage.");
+    }
+  };
+
+  // Follow-up summary counts (from activities).
+  const followCounts = useMemo(() => {
+    const acts = detail?.activities || [];
+    let open = 0;
+    let dueToday = 0;
+    let overdue = 0;
+    let completed = 0;
+    acts.forEach((a) => {
+      const s = activityStatus(a);
+      if (s === "completed") completed += 1;
+      else if (s === "overdue") overdue += 1;
+      else if (s === "due_today") dueToday += 1;
+      else if (a.next_follow_up_date) open += 1;
+    });
+    return { open, dueToday, overdue, completed };
+  }, [detail]);
+
+  const stageChip = company
+    ? (isProspect
+        ? company.prospect_stage || company.stage
+        : company.client_stage || company.stage)
+    : null;
+  const stageChipLabel = STAGE_LABELS[stageChip] || CYCLE_STAGE_LABELS[stageChip] || stageChip;
+
+  const QuickAction = ({ icon, label, onClick, href, color = "default", disabled }) => (
+    <Tooltip title={label}>
+      <span>
+        <IconButton
+          size="small"
+          onClick={onClick}
+          href={href}
+          component={href ? "a" : "button"}
+          disabled={disabled}
+          color={color}
+          sx={{ border: 1, borderColor: "divider", borderRadius: 1.5 }}
+        >
+          {icon}
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
 
   return (
     <Drawer
@@ -889,260 +1441,407 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: { xs: "100%", sm: 460 },
+          width: { xs: "100%", sm: 560, md: 920 },
           maxWidth: "100%",
           top: { xs: 56, sm: 64 },
           height: { xs: "calc(100% - 56px)", sm: "calc(100% - 64px)" },
-          overflowY: "auto",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         },
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+      {/* ---------------- HEADER ---------------- */}
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: (t) => alpha(t.palette.primary.main, 0.04),
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
-              {company?.company_name || (loading ? "Loading…" : "Company")}
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+              <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
+                {company?.company_name || (loading ? "Loading…" : "Company")}
+              </Typography>
+              {company && stageChipLabel && (
+                <Chip size="small" label={stageChipLabel} color="primary" sx={{ height: 22 }} />
+              )}
+              {company && !isProspect && (
+                <Chip size="small" label="Client" color="success" variant="outlined" sx={{ height: 22 }} />
+              )}
+            </Stack>
             {company && (
-              <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.5 }} flexWrap="wrap" useFlexGap>
-                <Chip
-                  size="small"
-                  label={STAGE_LABELS[company.stage] || company.stage}
-                  color="primary"
-                  sx={{ height: 22 }}
-                />
-                {company.customer_code && (
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ mt: 0.5 }}
+                flexWrap="wrap"
+                useFlexGap
+                divider={<Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: "text.disabled" }} />}
+              >
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <PersonIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="caption" color="text.secondary">
-                    {company.customer_code}
+                    {ownerLabel(company.owner_email, userMap) || "Unassigned"}
+                  </Typography>
+                </Stack>
+                {company.contact_person && (
+                  <Typography variant="caption" color="text.secondary">
+                    {company.contact_person}
+                  </Typography>
+                )}
+                {phone && (
+                  <Typography variant="caption" color="text.secondary">
+                    {phone}
+                  </Typography>
+                )}
+                {email && (
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {email}
+                  </Typography>
+                )}
+                {company.city && (
+                  <Typography variant="caption" color="text.secondary">
+                    {company.city}
+                  </Typography>
+                )}
+                {company.industry && (
+                  <Typography variant="caption" color="text.secondary">
+                    {company.industry}
                   </Typography>
                 )}
               </Stack>
             )}
           </Box>
-          <IconButton onClick={onClose} size="small">
-            <CloseIcon />
-          </IconButton>
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            {company && (
+              <IconButton size="small" onClick={(e) => setHeaderMenu(e.currentTarget)}>
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <IconButton onClick={onClose} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
         </Stack>
 
-        {err && (
-          <Alert severity="error" sx={{ mt: 1.5 }} onClose={() => setErr(null)}>
-            {err}
-          </Alert>
-        )}
-
-        {loading && !company ? (
-          <Stack spacing={1.5} sx={{ mt: 2 }}>
-            <Skeleton variant="rounded" height={80} />
-            <Skeleton variant="rounded" height={120} />
-            <Skeleton variant="rounded" height={120} />
-          </Stack>
-        ) : company ? (
-          <Stack spacing={2.5} sx={{ mt: 2 }}>
-            {/* Contact info */}
-            <Box>
-              <SectionTitle>Contact</SectionTitle>
-              <Stack spacing={0.25} sx={{ mt: 0.5 }}>
-                <InfoRow label="Person" value={company.contact_person} />
-                <InfoRow label="Phone" value={company.phone} />
-                <InfoRow label="Email" value={company.email} />
-                <InfoRow label="Source" value={company.source} />
-              </Stack>
-            </Box>
-
-            <Divider />
-
-            {/* Editable: imported company profile (industry / city / product) */}
-            <Box>
-              <SectionTitle>Company profile</SectionTitle>
-              {(company.industry || company.city || company.product_category) && (
-                <Stack
-                  direction="row"
-                  spacing={0.75}
-                  alignItems="center"
-                  sx={{ mt: 0.75 }}
-                  flexWrap="wrap"
-                  useFlexGap
-                >
-                  {company.industry && (
-                    <Chip
-                      size="small"
-                      label={company.industry}
-                      variant="outlined"
-                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
-                    />
-                  )}
-                  {company.city && (
-                    <Chip
-                      size="small"
-                      icon={<PlaceIcon sx={{ fontSize: 14 }} />}
-                      label={company.city}
-                      variant="outlined"
-                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
-                    />
-                  )}
-                  {company.product_category && (
-                    <Chip
-                      size="small"
-                      label={company.product_category}
-                      variant="outlined"
-                      color="primary"
-                      sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: 11 } }}
-                    />
-                  )}
-                </Stack>
-              )}
-              <Stack spacing={1.5} sx={{ mt: 1 }}>
-                <TextField
-                  label="Industry"
-                  size="small"
-                  value={editIndustry}
-                  onChange={(e) => setEditIndustry(e.target.value)}
-                  fullWidth
-                />
-                <TextField
-                  label="City"
-                  size="small"
-                  value={editCity}
-                  onChange={(e) => setEditCity(e.target.value)}
-                  fullWidth
-                />
-                <TextField
-                  label="Product category"
-                  size="small"
-                  value={editProductCategory}
-                  onChange={(e) => setEditProductCategory(e.target.value)}
-                  fullWidth
-                />
-                <Button
-                  variant="outlined"
-                  size="small"
-                  disabled={savingProfile}
-                  onClick={saveProfile}
-                  sx={{ alignSelf: "flex-start", px: 2.5 }}
-                >
-                  {savingProfile ? "Saving…" : "Save profile"}
-                </Button>
-              </Stack>
-            </Box>
-
-            <Divider />
-
-            {/* Editable: value + next action + assign owner */}
-            <Box>
-              <SectionTitle>Deal & next action</SectionTitle>
-              <Stack spacing={1.5} sx={{ mt: 1 }}>
-                <TextField
-                  label="Value (₹)"
-                  type="number"
-                  size="small"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  fullWidth
-                />
-                <TextField
-                  label="Next action"
-                  size="small"
-                  value={editNextAction}
-                  onChange={(e) => setEditNextAction(e.target.value)}
-                  fullWidth
-                />
-                <TextField
-                  label="Next action date"
-                  type="date"
-                  size="small"
-                  value={editNextDate || ""}
-                  onChange={(e) => setEditNextDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  disabled={savingDeal}
-                  onClick={saveDeal}
-                  sx={{ alignSelf: "flex-start", px: 2.5 }}
-                >
-                  {savingDeal ? "Saving…" : "Save changes"}
-                </Button>
-
-                <Divider sx={{ my: 0.5 }} />
-
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Owner
-                </Typography>
-                <Autocomplete
-                  size="small"
-                  options={users || []}
-                  value={
-                    ownerEmail
-                      ? (userMap && userMap.get(String(ownerEmail).toLowerCase())) || {
-                          email: ownerEmail,
-                          full_name: null,
-                          department: null,
-                        }
-                      : null
-                  }
-                  onChange={(_, v) => saveOwner(v ? v.email : null)}
-                  getOptionLabel={(o) => userOptionLabel(o)}
-                  isOptionEqualToValue={(o, v) =>
-                    String(o?.email || "").toLowerCase() ===
-                    String(v?.email || "").toLowerCase()
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Owner"
-                      placeholder="Unassigned"
-                    />
-                  )}
-                />
-                {ownerEmail && (
+        {/* Quick actions */}
+        {company && (
+          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
+            <QuickAction
+              icon={<CallIcon fontSize="small" />}
+              label="Call"
+              href={phone ? `tel:${digits(phone)}` : undefined}
+              disabled={!phone}
+              color="info"
+            />
+            <QuickAction
+              icon={<WhatsAppIcon fontSize="small" />}
+              label="WhatsApp"
+              href={phone ? `https://wa.me/${digits(phone).replace(/^\+/, "")}` : undefined}
+              disabled={!phone}
+            />
+            <QuickAction
+              icon={<EmailIcon fontSize="small" />}
+              label="Email"
+              href={email ? `mailto:${email}` : undefined}
+              disabled={!email}
+              color="primary"
+            />
+            <QuickAction icon={<NoteAddIcon fontSize="small" />} label="Add note" onClick={quickNote} />
+            <QuickAction icon={<EventAvailableIcon fontSize="small" />} label="Schedule follow-up" onClick={quickFollowUp} />
+            <QuickAction
+              icon={<RequestQuoteIcon fontSize="small" />}
+              label="Create quotation"
+              onClick={() => notify("Quotation builder coming soon.", "info")}
+            />
+            {isProspect && (
+              <Tooltip title="Convert to client">
+                <span>
                   <Button
                     size="small"
-                    variant="text"
-                    color="inherit"
-                    onClick={() => saveOwner(null)}
-                    sx={{ alignSelf: "flex-start" }}
+                    variant="contained"
+                    color="success"
+                    startIcon={<HowToRegIcon fontSize="small" />}
+                    onClick={handleConvert}
+                    disabled={converting}
+                    sx={{ ml: "auto" }}
                   >
-                    Unassign
+                    {converting ? "Converting…" : "Convert to client"}
                   </Button>
-                )}
+                </span>
+              </Tooltip>
+            )}
+          </Stack>
+        )}
+      </Box>
 
-                <Divider sx={{ my: 0.5 }} />
+      {err && (
+        <Alert severity="error" sx={{ m: 1.5, mb: 0 }} onClose={() => setErr(null)}>
+          {err}
+        </Alert>
+      )}
 
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Collaborators (co-working)
-                </Typography>
-                <Autocomplete
-                  multiple
-                  size="small"
-                  disabled={savingCollab}
-                  options={users || []}
-                  value={collabValue}
-                  onChange={(_, v) => onChangeCollaborators(v)}
-                  getOptionLabel={(o) => userOptionLabel(o)}
-                  isOptionEqualToValue={(o, v) =>
-                    String(o?.email || "").toLowerCase() ===
-                    String(v?.email || "").toLowerCase()
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Collaborators"
-                      placeholder="Add co-workers"
-                    />
+      {/* ---------------- BODY (side-panel layout) ---------------- */}
+      {loading && !company ? (
+        <Box sx={{ p: 2 }}>
+          <Stack spacing={1.5}>
+            <Skeleton variant="rounded" height={80} />
+            <Skeleton variant="rounded" height={120} />
+            <Skeleton variant="rounded" height={200} />
+          </Stack>
+        </Box>
+      ) : company ? (
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            overflow: { xs: "auto", md: "hidden" },
+          }}
+        >
+          {/* LEFT PANEL (~30%) */}
+          <Box
+            sx={{
+              width: { xs: "100%", md: "32%" },
+              borderRight: { md: 1 },
+              borderColor: { md: "divider" },
+              p: 2,
+              overflowY: { md: "auto" },
+            }}
+          >
+            <Stack spacing={2.5}>
+              {/* Company information */}
+              <Box>
+                <SectionTitle>Company information</SectionTitle>
+                <Stack spacing={1} sx={{ mt: 1 }}>
+                  <EditableField label="Industry" value={company.industry} onSave={(v) => saveField({ industry: v })} />
+                  <EditableField label="City" value={company.city} onSave={(v) => saveField({ city: v })} />
+                  <EditableField
+                    label="Product category"
+                    value={company.product_category}
+                    onSave={(v) => saveField({ product_category: v })}
+                  />
+                  <EditableField label="GSTIN" value={company.gstin} onSave={(v) => saveField({ gstin: v })} />
+                  <EditableField label="PAN" value={company.pan} onSave={(v) => saveField({ pan: v })} />
+                  <EditableField
+                    label="Payment terms"
+                    value={company.payment_terms}
+                    onSave={(v) => saveField({ payment_terms: v })}
+                  />
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              {/* Contacts */}
+              <Box>
+                <SectionTitle>Contacts</SectionTitle>
+                <Stack spacing={0.75} sx={{ mt: 1 }}>
+                  {contacts.length === 0 ? (
+                    <>
+                      {company.contact_person && (
+                        <Paper variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {company.contact_person}
+                          </Typography>
+                          {(company.phone || company.email) && (
+                            <Typography variant="caption" color="text.secondary">
+                              {[company.phone, company.email].filter(Boolean).join(" · ")}
+                            </Typography>
+                          )}
+                        </Paper>
+                      )}
+                      <Button
+                        size="small"
+                        startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+                        onClick={() => notify("Contact management coming soon.", "info")}
+                        sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
+                      >
+                        Add contact
+                      </Button>
+                    </>
+                  ) : (
+                    contacts.map((c) => (
+                      <Paper key={c.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {c.full_name}
+                          </Typography>
+                          {c.is_primary && (
+                            <Chip size="small" label="Primary" color="primary" sx={{ height: 18, "& .MuiChip-label": { px: 0.7, fontSize: 10 } }} />
+                          )}
+                        </Stack>
+                        {c.designation && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                            {[c.designation, c.department].filter(Boolean).join(" · ")}
+                          </Typography>
+                        )}
+                        {(c.phone || c.email) && (
+                          <Typography variant="caption" color="text.secondary">
+                            {[c.phone, c.email].filter(Boolean).join(" · ")}
+                          </Typography>
+                        )}
+                      </Paper>
+                    ))
                   )}
-                />
-              </Stack>
-            </Box>
+                </Stack>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            {/* Activities */}
-            <Box>
-              <SectionTitle>Add activity</SectionTitle>
-              <Stack spacing={1.25} sx={{ mt: 1 }}>
-                <Stack direction="row" spacing={1}>
+              {/* Documents (stub) */}
+              <Box>
+                <SectionTitle>Documents</SectionTitle>
+                <Stack spacing={0.5} sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <DescriptionIcon sx={{ fontSize: 14 }} /> No documents yet.
+                  </Typography>
+                  <Button
+                    size="small"
+                    startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => notify("Document upload coming soon.", "info")}
+                    sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
+                  >
+                    Add document
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              {/* Owner + collaborators */}
+              <Box>
+                <SectionTitle>Ownership</SectionTitle>
+                <Stack spacing={1.25} sx={{ mt: 1 }}>
+                  <Autocomplete
+                    size="small"
+                    options={users || []}
+                    value={
+                      ownerEmail
+                        ? (userMap && userMap.get(String(ownerEmail).toLowerCase())) || {
+                            email: ownerEmail,
+                            full_name: null,
+                            department: null,
+                          }
+                        : null
+                    }
+                    onChange={(_, v) => saveOwner(v ? v.email : null)}
+                    getOptionLabel={(o) => userOptionLabel(o)}
+                    isOptionEqualToValue={(o, v) =>
+                      String(o?.email || "").toLowerCase() === String(v?.email || "").toLowerCase()
+                    }
+                    renderInput={(params) => <TextField {...params} label="Owner" placeholder="Unassigned" />}
+                  />
+                  {ownerEmail && (
+                    <Button size="small" variant="text" color="inherit" onClick={() => saveOwner(null)} sx={{ alignSelf: "flex-start" }}>
+                      Unassign
+                    </Button>
+                  )}
+                  <Autocomplete
+                    multiple
+                    size="small"
+                    disabled={savingCollab}
+                    options={users || []}
+                    value={collabValue}
+                    onChange={(_, v) => onChangeCollaborators(v)}
+                    getOptionLabel={(o) => userOptionLabel(o)}
+                    isOptionEqualToValue={(o, v) =>
+                      String(o?.email || "").toLowerCase() === String(v?.email || "").toLowerCase()
+                    }
+                    renderInput={(params) => <TextField {...params} label="Collaborators" placeholder="Add co-workers" />}
+                  />
+                </Stack>
+              </Box>
+
+              {/* Stage timeline (kept) */}
+              {detail.history && detail.history.length > 0 && (
+                <>
+                  <Divider />
+                  <Box>
+                    <SectionTitle>Stage timeline</SectionTitle>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      {detail.history.map((h) => (
+                        <Stack key={h.id} direction="row" spacing={1} alignItems="flex-start" sx={{ fontSize: 13 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "primary.main", flexShrink: 0, mt: 0.5 }} />
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography variant="body2">
+                              {h.from_stage ? (STAGE_LABELS[h.from_stage] || h.from_stage) : "New"}
+                              {"  →  "}
+                              <strong>{STAGE_LABELS[h.to_stage] || h.to_stage}</strong>
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {ownerLabel(h.moved_by_email, userMap) || "—"} · {fmtDateTime(h.moved_at)}
+                              {h.note ? ` · ${h.note}` : ""}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </Box>
+                </>
+              )}
+
+              {/* Order cycles (recurring only) */}
+              {company.kind === "recurring" && (
+                <>
+                  <Divider />
+                  <Box>
+                    <SectionTitle>Order cycles</SectionTitle>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      {detail.orderCycles.length === 0 ? (
+                        <Typography variant="caption" color="text.secondary">
+                          No order cycles.
+                        </Typography>
+                      ) : (
+                        detail.orderCycles.map((oc) => (
+                          <Paper key={oc.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {oc.order_number || oc.order_ref || "—"}
+                              </Typography>
+                              <Chip size="small" label={CYCLE_STAGE_LABELS[oc.cycle_stage] || oc.cycle_stage} sx={{ height: 20 }} />
+                            </Stack>
+                            <Typography variant="caption" color="text.secondary">
+                              {inrFull(oc.amount)} · {fmtDate(oc.order_date)}
+                            </Typography>
+                          </Paper>
+                        ))
+                      )}
+                    </Stack>
+                  </Box>
+                </>
+              )}
+            </Stack>
+          </Box>
+
+          {/* RIGHT PANEL (~70%) — activity timeline */}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              p: 2,
+              overflowY: { md: "auto" },
+              bgcolor: (t) => alpha(t.palette.text.primary, 0.015),
+            }}
+          >
+            {/* Follow-up summary */}
+            <Stack direction="row" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+              <Chip size="small" label={`Open ${followCounts.open}`} variant="outlined" />
+              <Chip size="small" label={`Due today ${followCounts.dueToday}`} color="warning" variant={followCounts.dueToday ? "filled" : "outlined"} />
+              <Chip size="small" label={`Overdue ${followCounts.overdue}`} color="error" variant={followCounts.overdue ? "filled" : "outlined"} />
+              <Chip size="small" label={`Completed ${followCounts.completed}`} color="success" variant={followCounts.completed ? "filled" : "outlined"} />
+            </Stack>
+
+            {/* Compact composer */}
+            <Paper id="crm-activity-composer" variant="outlined" sx={{ p: 1.5, borderRadius: 2, mb: 2 }}>
+              <Stack spacing={1.25}>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
                   <TextField
                     select
                     label="Type"
@@ -1166,7 +1865,7 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                   />
                 </Stack>
                 <TextField
-                  label="Note"
+                  label="Notes"
                   size="small"
                   value={actBody}
                   onChange={(e) => setActBody(e.target.value)}
@@ -1176,7 +1875,7 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                 />
                 <Stack direction="row" spacing={1} alignItems="center">
                   <TextField
-                    label="Next follow-up"
+                    label="Follow-up date"
                     type="date"
                     size="small"
                     value={actFollowUp}
@@ -1184,133 +1883,78 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                     InputLabelProps={{ shrink: true }}
                     fullWidth
                   />
-                  <Button variant="contained" size="small" onClick={submitActivity} disabled={savingAct}>
-                    {savingAct ? "…" : "Log"}
+                  <Button variant="contained" size="small" onClick={submitActivity} disabled={savingAct} sx={{ whiteSpace: "nowrap" }}>
+                    {savingAct ? "Saving…" : "Save activity"}
                   </Button>
                 </Stack>
               </Stack>
+            </Paper>
 
-              <Stack spacing={1} sx={{ mt: 1.5 }}>
-                {detail.activities.length === 0 ? (
-                  <Typography variant="caption" color="text.secondary">
-                    No activities yet.
-                  </Typography>
-                ) : (
-                  detail.activities.map((a) => (
-                    <Paper key={a.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Chip
-                          size="small"
-                          label={a.activity_type}
-                          sx={{ height: 20, textTransform: "capitalize" }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {fmtDateTime(a.activity_at)}
-                        </Typography>
-                      </Stack>
-                      {a.subject && (
-                        <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
-                          {a.subject}
-                        </Typography>
-                      )}
-                      {a.body && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                          {a.body}
-                        </Typography>
-                      )}
-                      {a.next_follow_up_date && (
-                        <Typography variant="caption" color="primary.main" sx={{ display: "block", mt: 0.25 }}>
-                          Follow up: {fmtDate(a.next_follow_up_date)}
-                        </Typography>
-                      )}
-                    </Paper>
-                  ))
-                )}
-              </Stack>
-            </Box>
+            {/* Timeline */}
+            <SectionTitle>Activity timeline</SectionTitle>
+            <Stack spacing={1.25} sx={{ mt: 1 }}>
+              {detail.activities.length === 0 ? (
+                <Typography variant="caption" color="text.secondary">
+                  No activities yet. Log the first interaction above.
+                </Typography>
+              ) : (
+                detail.activities.map((a) => (
+                  <ActivityCard
+                    key={a.id}
+                    activity={a}
+                    userMap={userMap}
+                    onChanged={load}
+                    onError={(m) => setErr(m)}
+                    onNotify={notify}
+                  />
+                ))
+              )}
+            </Stack>
+          </Box>
+        </Box>
+      ) : null}
 
-            <Divider />
+      {/* Header overflow menu: stage move + create work order */}
+      <Menu anchorEl={headerMenu} open={Boolean(headerMenu)} onClose={() => setHeaderMenu(null)}>
+        <MenuItem onClick={(e) => setStageAnchor(e.currentTarget)} sx={{ fontSize: 13 }}>
+          <ArrowForwardIcon fontSize="small" sx={{ mr: 1 }} /> Move stage
+        </MenuItem>
+        {isProspect && (
+          <MenuItem onClick={handleConvert} disabled={converting} sx={{ fontSize: 13 }}>
+            <HowToRegIcon fontSize="small" sx={{ mr: 1 }} /> Convert to client
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setHeaderMenu(null);
+            notify("Open a recurring order cycle to create a work order.", "info");
+          }}
+          sx={{ fontSize: 13 }}
+        >
+          <PrecisionManufacturingIcon fontSize="small" sx={{ mr: 1 }} /> Create work order
+        </MenuItem>
+      </Menu>
 
-            {/* Stage timeline */}
-            <Box>
-              <SectionTitle>Stage timeline</SectionTitle>
-              <Stack spacing={1} sx={{ mt: 1 }}>
-                {detail.history.length === 0 ? (
-                  <Typography variant="caption" color="text.secondary">
-                    No stage changes yet.
-                  </Typography>
-                ) : (
-                  detail.history.map((h) => (
-                    <Stack
-                      key={h.id}
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      sx={{ fontSize: 13 }}
-                    >
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          bgcolor: "primary.main",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography variant="body2">
-                          {h.from_stage ? (STAGE_LABELS[h.from_stage] || h.from_stage) : "New"}
-                          {"  →  "}
-                          <strong>{STAGE_LABELS[h.to_stage] || h.to_stage}</strong>
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {h.moved_by_email || "—"} · {fmtDateTime(h.moved_at)}
-                          {h.note ? ` · ${h.note}` : ""}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  ))
-                )}
-              </Stack>
-            </Box>
+      <StageMoveMenu
+        anchorEl={stageAnchor}
+        stages={company?.kind === "recurring" ? CYCLE_STAGES : STAGES}
+        currentStageKey={company?.stage}
+        onClose={() => setStageAnchor(null)}
+        onPick={(toStage) => moveToStage(toStage)}
+      />
 
-            {/* Order cycles (recurring only) */}
-            {company.kind === "recurring" && (
-              <>
-                <Divider />
-                <Box>
-                  <SectionTitle>Order cycles</SectionTitle>
-                  <Stack spacing={1} sx={{ mt: 1 }}>
-                    {detail.orderCycles.length === 0 ? (
-                      <Typography variant="caption" color="text.secondary">
-                        No order cycles.
-                      </Typography>
-                    ) : (
-                      detail.orderCycles.map((oc) => (
-                        <Paper key={oc.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {oc.order_number || oc.order_ref || "—"}
-                            </Typography>
-                            <Chip
-                              size="small"
-                              label={CYCLE_STAGE_LABELS[oc.cycle_stage] || oc.cycle_stage}
-                              sx={{ height: 20 }}
-                            />
-                          </Stack>
-                          <Typography variant="caption" color="text.secondary">
-                            {inrFull(oc.amount)} · {fmtDate(oc.order_date)}
-                          </Typography>
-                        </Paper>
-                      ))
-                    )}
-                  </Stack>
-                </Box>
-              </>
-            )}
-          </Stack>
-        ) : null}
-      </Box>
+      <Snackbar
+        open={Boolean(snack)}
+        autoHideDuration={4000}
+        onClose={() => setSnack(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        {snack ? (
+          <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(null)} sx={{ width: "100%" }}>
+            {snack.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Drawer>
   );
 }
@@ -1323,19 +1967,6 @@ function SectionTitle({ children }) {
     >
       {children}
     </Typography>
-  );
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <Stack direction="row" spacing={1} justifyContent="space-between">
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="body2" sx={{ fontWeight: 500, textAlign: "right", wordBreak: "break-word" }}>
-        {value || "—"}
-      </Typography>
-    </Stack>
   );
 }
 

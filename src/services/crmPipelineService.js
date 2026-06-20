@@ -168,6 +168,124 @@ export async function addActivity(payload) {
   return data;
 }
 
+/** Patch an existing activity row (subject/body/type/follow-up/outcome…). */
+export async function updateActivity(id, patch) {
+  const { data, error } = await supabase
+    .from("crm_pipeline_activity")
+    .update(patch || {})
+    .eq("id", id)
+    .select("*")
+    .single();
+  throwIf(error);
+  return data;
+}
+
+/** Delete an activity row (DB trigger writes the audit history). */
+export async function deleteActivity(id) {
+  const { error } = await supabase
+    .from("crm_pipeline_activity")
+    .delete()
+    .eq("id", id);
+  throwIf(error);
+  return true;
+}
+
+/** Toggle an activity's completion state. */
+export async function markActivityComplete(id, done = true) {
+  const { data, error } = await supabase
+    .from("crm_pipeline_activity")
+    .update({
+      status: done ? "completed" : "open",
+      completed_at: done ? new Date().toISOString() : null,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  throwIf(error);
+  return data;
+}
+
+/**
+ * Insert a fresh copy of an activity (new id, status 'open', activity_at = now).
+ * Only the user-meaningful columns are copied so DB-managed fields stay clean.
+ */
+export async function duplicateActivity(activity) {
+  if (!activity) return null;
+  const payload = {
+    pipeline_id: activity.pipeline_id,
+    activity_type: activity.activity_type || "note",
+    subject: activity.subject ?? null,
+    body: activity.body ?? null,
+    owner_email: activity.owner_email ?? null,
+    next_follow_up_date: activity.next_follow_up_date ?? null,
+    outcome: activity.outcome ?? null,
+    status: "open",
+    activity_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from("crm_pipeline_activity")
+    .insert(payload)
+    .select("*")
+    .single();
+  throwIf(error);
+  return data;
+}
+
+/** Change history for a single activity (most recent first). */
+export async function listActivityAudit(activityId) {
+  try {
+    const { data, error } = await supabase
+      .from("crm_activity_audit")
+      .select("*")
+      .eq("activity_id", activityId)
+      .order("changed_at", { ascending: false });
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Contacts attached to an account (primary contact first). Degrades to []. */
+export async function listContacts(accountId) {
+  try {
+    const { data, error } = await supabase
+      .from("crm_account_contacts")
+      .select("*")
+      .eq("account_id", accountId)
+      .order("is_primary", { ascending: false });
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Addresses (billing/shipping) attached to an account. Degrades to []. */
+export async function listAddresses(accountId) {
+  try {
+    const { data, error } = await supabase
+      .from("crm_account_addresses")
+      .select("*")
+      .eq("account_id", accountId)
+      .order("address_type", { ascending: true });
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Convert a prospect into a client in place via the server-side RPC. */
+export async function convertToClient(accountId, clientCode) {
+  const { data, error } = await supabase.rpc("crm_convert_to_client", {
+    p_account_id: accountId,
+    p_client_code: clientCode || null,
+  });
+  throwIf(error);
+  return data;
+}
+
 /** Assign / reassign an owner. */
 export async function assignOwner(id, email) {
   const { data, error } = await supabase.rpc("crm_assign_owner", {
@@ -495,6 +613,14 @@ const crmPipelineService = {
   getCompany,
   moveStage,
   addActivity,
+  updateActivity,
+  deleteActivity,
+  markActivityComplete,
+  duplicateActivity,
+  listActivityAudit,
+  listContacts,
+  listAddresses,
+  convertToClient,
   assignOwner,
   addCompany,
   updateCompany,
