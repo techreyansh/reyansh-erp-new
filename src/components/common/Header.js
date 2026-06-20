@@ -262,8 +262,8 @@ const Header = () => {
       label: "CRM & Sales",
       icon: <CRMIcon />,
       items: [
-        { subheader: "Pipelines", label: "New Customer Pipeline", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Pipelines", label: "Repeat Customer Pipeline", path: "/crm-pipeline?view=recurring", icon: <PeopleIcon />, roles: crmModuleRoles },
+        { subheader: "Pipelines", label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Pipelines", label: "Client Management", path: "/crm-pipeline?view=clients", icon: <PeopleIcon />, roles: crmModuleRoles },
         { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
         { subheader: "Insights", label: "Payments / Collections", path: "/crm/collections", icon: <ReceiptLongIcon />, roles: crmModuleRoles },
         { subheader: "Sales & Clients", label: "Products", path: "/products", icon: <ProductIcon />, roles: ["Customer Relations Manager", "CEO"] },

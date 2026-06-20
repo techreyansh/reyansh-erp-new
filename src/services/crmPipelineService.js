@@ -21,6 +21,29 @@ export const STAGES = [
   { key: "recurring_client", label: "Recurring Client" },
 ];
 
+/**
+ * Ordered prospect lifecycle stages (the new 8-stage prospect kanban).
+ * Backed by crm_pipeline.prospect_stage on the unified master.
+ */
+export const PROSPECT_STAGES = [
+  { key: "lead", label: "Lead" },
+  { key: "contacted", label: "Contacted" },
+  { key: "meeting_scheduled", label: "Meeting Scheduled" },
+  { key: "qualified", label: "Qualified" },
+  { key: "sample_sent", label: "Sample Sent" },
+  { key: "quotation_sent", label: "Quotation Sent" },
+  { key: "negotiation", label: "Negotiation" },
+  { key: "converted", label: "Converted" },
+];
+
+/** Client lifecycle stages, backed by crm_pipeline.client_stage. */
+export const CLIENT_STAGES = [
+  { key: "active", label: "Active Client" },
+  { key: "repeat_business", label: "Repeat Business" },
+  { key: "key_account", label: "Key Account" },
+  { key: "dormant", label: "Dormant" },
+];
+
 /** Ordered recurring-customer order-cycle stages. */
 export const CYCLE_STAGES = [
   { key: "order_taking", label: "Order Taking" },
@@ -38,6 +61,16 @@ export const STAGE_LABELS = STAGES.reduce((acc, s) => {
 }, {});
 
 export const CYCLE_STAGE_LABELS = CYCLE_STAGES.reduce((acc, s) => {
+  acc[s.key] = s.label;
+  return acc;
+}, {});
+
+export const PROSPECT_STAGE_LABELS = PROSPECT_STAGES.reduce((acc, s) => {
+  acc[s.key] = s.label;
+  return acc;
+}, {});
+
+export const CLIENT_STAGE_LABELS = CLIENT_STAGES.reduce((acc, s) => {
   acc[s.key] = s.label;
   return acc;
 }, {});
@@ -79,15 +112,26 @@ export async function listPipeline() {
   return data || [];
 }
 
+/** Prospects on the unified master (account_type = 'prospect'). */
 export async function listProspects() {
   const { data, error } = await supabase
     .from("crm_pipeline")
     .select("*")
-    .eq("is_active", true)
-    .eq("kind", "prospect")
+    .eq("account_type", "prospect")
     .order("stage_entered_at", { ascending: true });
   throwIf(error);
-  return data || [];
+  return data ?? [];
+}
+
+/** Clients on the unified master (account_type = 'client'). */
+export async function listClients() {
+  const { data, error } = await supabase
+    .from("crm_pipeline")
+    .select("*")
+    .eq("account_type", "client")
+    .order("company_name", { ascending: true });
+  throwIf(error);
+  return data ?? [];
 }
 
 export async function listRecurring() {
@@ -153,6 +197,33 @@ export async function moveStage(id, toStage, note) {
     p_to_stage: toStage,
     p_note: note || null,
   });
+  throwIf(error);
+  return data;
+}
+
+/**
+ * Move a prospect to another prospect_stage on the master. Direct table update
+ * (RLS covers it); there is no dedicated prospect_stage RPC yet.
+ */
+export async function moveProspectStage(id, stageKey) {
+  const { data, error } = await supabase
+    .from("crm_pipeline")
+    .update({ prospect_stage: stageKey, stage_entered_at: new Date().toISOString() })
+    .eq("id", id)
+    .select("*")
+    .single();
+  throwIf(error);
+  return data;
+}
+
+/** Update a client's client_stage on the master. Direct table update (RLS covers it). */
+export async function updateClientStage(id, stageKey) {
+  const { data, error } = await supabase
+    .from("crm_pipeline")
+    .update({ client_stage: stageKey, stage_entered_at: new Date().toISOString() })
+    .eq("id", id)
+    .select("*")
+    .single();
   throwIf(error);
   return data;
 }
@@ -602,16 +673,23 @@ export async function removeCollaborator(pipelineId, email) {
 
 const crmPipelineService = {
   STAGES,
+  PROSPECT_STAGES,
+  CLIENT_STAGES,
   CYCLE_STAGES,
   STAGE_LABELS,
+  PROSPECT_STAGE_LABELS,
+  CLIENT_STAGE_LABELS,
   CYCLE_STAGE_LABELS,
   ACTIVITY_TYPES,
   SOURCES,
   listPipeline,
   listProspects,
+  listClients,
   listRecurring,
   getCompany,
   moveStage,
+  moveProspectStage,
+  updateClientStage,
   addActivity,
   updateActivity,
   deleteActivity,

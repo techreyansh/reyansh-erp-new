@@ -18,9 +18,16 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Select,
   Skeleton,
   Snackbar,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -57,17 +64,23 @@ import DescriptionIcon from "@mui/icons-material/Description";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
-  STAGES,
+  PROSPECT_STAGES,
+  CLIENT_STAGES,
   CYCLE_STAGES,
   STAGE_LABELS,
+  PROSPECT_STAGE_LABELS,
+  CLIENT_STAGE_LABELS,
   CYCLE_STAGE_LABELS,
   ACTIVITY_TYPES,
   SOURCES,
   listProspects,
+  listClients,
   listRecurring,
   listOrderCycles,
   getCompany,
   moveStage,
+  moveProspectStage,
+  updateClientStage,
   moveOrderCycle,
   addActivity,
   updateActivity,
@@ -202,9 +215,9 @@ function CollaboratorChips({ emails, userMap }) {
 /* Lightweight lead score derived purely from stage progression (no extra table).
    Earlier stages = colder, later stages = hotter. Returns a % plus a Hot/Warm/Cold band. */
 const leadScoreForStage = (stageKey) => {
-  const idx = STAGES.findIndex((s) => s.key === stageKey);
+  const idx = PROSPECT_STAGES.findIndex((s) => s.key === stageKey);
   if (idx < 0) return null;
-  const denom = Math.max(1, STAGES.length - 1);
+  const denom = Math.max(1, PROSPECT_STAGES.length - 1);
   const pct = Math.round((idx / denom) * 100);
   let band = "Cold";
   let color = "default";
@@ -232,7 +245,7 @@ function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages,
   const draggedRef = React.useRef(false);
   const days = daysSince(company.stage_entered_at);
   const overdue = isPast(company.next_action_date);
-  const score = leadScoreForStage(company.stage);
+  const score = leadScoreForStage(company.prospect_stage || company.stage);
 
   return (
     <Paper
@@ -246,7 +259,7 @@ function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages,
         } catch {
           /* some browsers restrict dataTransfer access */
         }
-        onDragStart?.(company.id, company.stage);
+        onDragStart?.(company.id, company.prospect_stage ?? company.stage);
       }}
       onDragEnd={() => {
         onDragEnd?.();
@@ -515,7 +528,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
     email: "",
     source: "",
     value: "",
-    stage: STAGES[0].key,
+    stage: PROSPECT_STAGES[0].key,
   };
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
@@ -538,7 +551,8 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
         email: form.email.trim() || null,
         source: form.source || null,
         value: form.value === "" ? null : Number(form.value),
-        stage: form.stage,
+        prospect_stage: form.stage,
+        account_type: "prospect",
         kind: "prospect",
         owner_email: currentEmail || null,
         is_active: true,
@@ -589,7 +603,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
             />
           </Stack>
           <TextField select label="Stage" value={form.stage} onChange={set("stage")} fullWidth>
-            {STAGES.map((s) => (
+            {PROSPECT_STAGES.map((s) => (
               <MenuItem key={s.key} value={s.key}>
                 {s.label}
               </MenuItem>
@@ -1383,7 +1397,13 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     setStageAnchor(null);
     setHeaderMenu(null);
     try {
-      await moveStage(id, toStage, null);
+      if (company?.kind === "recurring") {
+        await moveStage(id, toStage, null);
+      } else if (isProspect) {
+        await moveProspectStage(id, toStage);
+      } else {
+        await updateClientStage(id, toStage);
+      }
       await load();
       onChanged?.();
       notify("Stage updated.", "success");
@@ -1414,7 +1434,12 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
         ? company.prospect_stage || company.stage
         : company.client_stage || company.stage)
     : null;
-  const stageChipLabel = STAGE_LABELS[stageChip] || CYCLE_STAGE_LABELS[stageChip] || stageChip;
+  const stageChipLabel =
+    PROSPECT_STAGE_LABELS[stageChip] ||
+    CLIENT_STAGE_LABELS[stageChip] ||
+    STAGE_LABELS[stageChip] ||
+    CYCLE_STAGE_LABELS[stageChip] ||
+    stageChip;
 
   const QuickAction = ({ icon, label, onClick, href, color = "default", disabled }) => (
     <Tooltip title={label}>
@@ -1771,9 +1796,19 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                           <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "primary.main", flexShrink: 0, mt: 0.5 }} />
                           <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography variant="body2">
-                              {h.from_stage ? (STAGE_LABELS[h.from_stage] || h.from_stage) : "New"}
+                              {h.from_stage
+                                ? PROSPECT_STAGE_LABELS[h.from_stage] ||
+                                  CLIENT_STAGE_LABELS[h.from_stage] ||
+                                  STAGE_LABELS[h.from_stage] ||
+                                  h.from_stage
+                                : "New"}
                               {"  →  "}
-                              <strong>{STAGE_LABELS[h.to_stage] || h.to_stage}</strong>
+                              <strong>
+                                {PROSPECT_STAGE_LABELS[h.to_stage] ||
+                                  CLIENT_STAGE_LABELS[h.to_stage] ||
+                                  STAGE_LABELS[h.to_stage] ||
+                                  h.to_stage}
+                              </strong>
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
                               {ownerLabel(h.moved_by_email, userMap) || "—"} · {fmtDateTime(h.moved_at)}
@@ -1937,8 +1972,20 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
 
       <StageMoveMenu
         anchorEl={stageAnchor}
-        stages={company?.kind === "recurring" ? CYCLE_STAGES : STAGES}
-        currentStageKey={company?.stage}
+        stages={
+          company?.kind === "recurring"
+            ? CYCLE_STAGES
+            : isProspect
+            ? PROSPECT_STAGES
+            : CLIENT_STAGES
+        }
+        currentStageKey={
+          company?.kind === "recurring"
+            ? company?.stage
+            : isProspect
+            ? company?.prospect_stage
+            : company?.client_stage
+        }
         onClose={() => setStageAnchor(null)}
         onPick={(toStage) => moveToStage(toStage)}
       />
@@ -2269,10 +2316,12 @@ export default function CRMPipelineBoard() {
   const theme = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // View is driven by the URL (?view=prospects | ?view=recurring) so the two CRM
-  // nav links deep-link straight to the right pipeline. Default 'prospects'.
-  const urlView = searchParams.get("view") === "recurring" ? "recurring" : "prospects";
-  const view = urlView; // 'prospects' (New Customers) | 'recurring' (Repeat Customers)
+  // View is driven by the URL so the two CRM nav links deep-link straight to the
+  // right mode. ?view=prospects → Prospects kanban; ?view=clients (or the legacy
+  // ?view=recurring) → Clients table. Default 'prospects'.
+  const rawView = searchParams.get("view");
+  const view =
+    rawView === "clients" || rawView === "recurring" ? "clients" : "prospects";
 
   const setView = useCallback(
     (next) => {
@@ -2283,14 +2332,21 @@ export default function CRMPipelineBoard() {
     },
     [view, searchParams, setSearchParams]
   );
+
+  // Within the Clients view: 'accounts' (table) | 'cycles' (order-cycle kanban).
+  const [clientTab, setClientTab] = useState("accounts");
+
   const [scope, setScope] = useState("my"); // 'my' | 'all'
   const [search, setSearch] = useState("");
+  // Client-stage filter (Clients table). "" = all stages.
+  const [clientStageFilter, setClientStageFilter] = useState("");
 
   const [currentEmail, setCurrentEmail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
   const [prospects, setProspects] = useState([]);
+  const [clients, setClients] = useState([]);
   const [recurring, setRecurring] = useState([]);
   const [cycles, setCycles] = useState([]);
   const [assignableUsers, setAssignableUsers] = useState([]);
@@ -2314,8 +2370,9 @@ export default function CRMPipelineBoard() {
     setLoading(true);
     setErr(null);
     try {
-      const [p, r, c, email, users, collabs] = await Promise.all([
+      const [p, cl, r, c, email, users, collabs] = await Promise.all([
         listProspects(),
+        listClients(),
         listRecurring(),
         listOrderCycles(),
         getCurrentUserEmail(),
@@ -2323,6 +2380,7 @@ export default function CRMPipelineBoard() {
         listAllCollaborators(),
       ]);
       setProspects(p);
+      setClients(cl);
       setRecurring(r);
       setCycles(c);
       setCurrentEmail(email);
@@ -2382,7 +2440,8 @@ export default function CRMPipelineBoard() {
     (row) => {
       const q = search.trim().toLowerCase();
       if (!q) return true;
-      return String(row.company_name || "").toLowerCase().includes(q);
+      return [row.company_name, row.customer_code, row.city, row.gstin]
+        .some((f) => String(f || "").toLowerCase().includes(q));
     },
     [search]
   );
@@ -2394,13 +2453,26 @@ export default function CRMPipelineBoard() {
 
   const prospectsByStage = useMemo(() => {
     const map = {};
-    STAGES.forEach((s) => (map[s.key] = []));
+    PROSPECT_STAGES.forEach((s) => (map[s.key] = []));
     filteredProspects.forEach((r) => {
-      if (!map[r.stage]) map[r.stage] = [];
-      map[r.stage].push(r);
+      const key = r.prospect_stage || PROSPECT_STAGES[0].key;
+      if (!map[key]) map[key] = [];
+      map[key].push(r);
     });
     return map;
   }, [filteredProspects]);
+
+  // Clients: scope + search + client_stage filter, for the table view.
+  const filteredClients = useMemo(
+    () =>
+      clients.filter(
+        (r) =>
+          matchesScope(r) &&
+          matchesSearch(r) &&
+          (!clientStageFilter || r.client_stage === clientStageFilter)
+      ),
+    [clients, matchesScope, matchesSearch, clientStageFilter]
+  );
 
   // Recurring: order cycles filtered by scope + search (match against company_name).
   const filteredCycles = useMemo(
@@ -2423,22 +2495,36 @@ export default function CRMPipelineBoard() {
     [recurring, matchesScope, matchesSearch]
   );
 
-  // Move a prospect, then prompt to log the move + plan a next action.
+  // Move a prospect to a new prospect_stage, then prompt to log the move + plan a
+  // next action. Uses the direct prospect_stage mover (not the legacy RPC).
   const handleMoveStage = async (id, toStage) => {
     const company = prospects.find((p) => p.id === id);
-    if (company && company.stage === toStage) return; // no-op
+    if (company && company.prospect_stage === toStage) return; // no-op
     try {
-      await moveStage(id, toStage, null);
+      await moveProspectStage(id, toStage);
       await loadAll();
       setPendingMove({
         kind: "prospect",
         id,
         companyName: company?.company_name || "Company",
         toStage,
-        stageLabel: STAGE_LABELS[toStage] || toStage,
+        stageLabel: PROSPECT_STAGE_LABELS[toStage] || toStage,
       });
     } catch (e) {
       setErr(e?.message || "Move failed.");
+    }
+  };
+
+  // Change a client's client_stage inline from the table.
+  const handleClientStageChange = async (id, toStage) => {
+    const client = clients.find((c) => c.id === id);
+    if (client && client.client_stage === toStage) return; // no-op
+    try {
+      await updateClientStage(id, toStage);
+      await loadAll();
+      notify("Client stage updated.", "success");
+    } catch (e) {
+      setErr(e?.message || "Failed to update client stage.");
     }
   };
 
@@ -2507,20 +2593,32 @@ export default function CRMPipelineBoard() {
         <Stack direction="row" spacing={1.5} alignItems="center">
           <TrendingUpIcon color="primary" />
           <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>
-            {view === "recurring" ? "Repeat Customer Pipeline" : "New Customer Pipeline"}
+            {view === "clients" ? "Client Management" : "Prospect Management"}
           </Typography>
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ sm: "center" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ sm: "center" }} flexWrap="wrap" useFlexGap>
           <ToggleButtonGroup
             size="small"
             exclusive
             value={view}
             onChange={(_, v) => v && setView(v)}
           >
-            <ToggleButton value="prospects">New Customers</ToggleButton>
-            <ToggleButton value="recurring">Repeat Customers</ToggleButton>
+            <ToggleButton value="prospects">Prospects</ToggleButton>
+            <ToggleButton value="clients">Clients</ToggleButton>
           </ToggleButtonGroup>
+
+          {view === "clients" && (
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={clientTab}
+              onChange={(_, v) => v && setClientTab(v)}
+            >
+              <ToggleButton value="accounts">Accounts table</ToggleButton>
+              <ToggleButton value="cycles">Order cycles</ToggleButton>
+            </ToggleButtonGroup>
+          )}
 
           <ToggleButtonGroup
             size="small"
@@ -2531,6 +2629,24 @@ export default function CRMPipelineBoard() {
             <ToggleButton value="my">My pipeline</ToggleButton>
             <ToggleButton value="all">All</ToggleButton>
           </ToggleButtonGroup>
+
+          {view === "clients" && clientTab === "accounts" && (
+            <TextField
+              select
+              size="small"
+              label="Client stage"
+              value={clientStageFilter}
+              onChange={(e) => setClientStageFilter(e.target.value)}
+              sx={{ minWidth: 160 }}
+            >
+              <MenuItem value="">All stages</MenuItem>
+              {CLIENT_STAGES.map((s) => (
+                <MenuItem key={s.key} value={s.key}>
+                  {s.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
 
           <TextField
             size="small"
@@ -2577,7 +2693,7 @@ export default function CRMPipelineBoard() {
             userMap={userMap}
             collabMap={collabMap}
           />
-        ) : (
+        ) : clientTab === "cycles" ? (
           <RecurringView
             theme={theme}
             cyclesByStage={cyclesByStage}
@@ -2591,6 +2707,15 @@ export default function CRMPipelineBoard() {
             onDropCard={handleDropCycle}
             userMap={userMap}
             collabMap={collabMap}
+          />
+        ) : (
+          <ClientsTable
+            theme={theme}
+            clients={filteredClients}
+            scope={scope}
+            userMap={userMap}
+            onOpen={(id) => setDrawerId(id)}
+            onStageChange={handleClientStageChange}
           />
         )}
       </Box>
@@ -2661,7 +2786,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
   }
   return (
     <Box sx={{ display: "flex", gap: 1.5, overflowX: "auto", height: "100%", pb: 1 }}>
-      {STAGES.map((stage) => (
+      {PROSPECT_STAGES.map((stage) => (
         <KanbanColumn
           key={stage.key}
           stage={stage}
@@ -2675,8 +2800,8 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
               onMove={onMove}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
-              stages={STAGES}
-              currentStageKey={company.stage}
+              stages={PROSPECT_STAGES}
+              currentStageKey={company.prospect_stage}
               userMap={userMap}
               collaborators={(collabMap && collabMap.get(company.id)) || []}
             />
@@ -2684,6 +2809,136 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
         />
       ))}
     </Box>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/* Clients table (dense, scannable) — the Client Management mode            */
+/* ----------------------------------------------------------------------- */
+
+/* Inline client-stage picker rendered as a chip-styled Select in the table. */
+function ClientStageSelect({ row, onStageChange }) {
+  const value = row.client_stage || "";
+  return (
+    <Select
+      size="small"
+      variant="standard"
+      disableUnderline
+      value={value}
+      displayEmpty
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => {
+        e.stopPropagation();
+        onStageChange(row.id, e.target.value);
+      }}
+      renderValue={(v) => (
+        <Chip
+          size="small"
+          label={CLIENT_STAGE_LABELS[v] || "Set stage"}
+          color={v ? "primary" : "default"}
+          variant={v ? "filled" : "outlined"}
+          sx={{ height: 22, "& .MuiChip-label": { px: 0.9, fontSize: 11, fontWeight: 600 } }}
+        />
+      )}
+      sx={{ "& .MuiSelect-select": { py: 0, pr: "20px !important" } }}
+    >
+      {CLIENT_STAGES.map((s) => (
+        <MenuItem key={s.key} value={s.key} sx={{ fontSize: 13 }}>
+          {s.label}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+
+function ClientsTable({ theme, clients, scope, userMap, onOpen, onStageChange }) {
+  if (!clients || clients.length === 0) {
+    return (
+      <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          No clients {scope === "my" ? "assigned to you" : "yet"}
+        </Typography>
+        <Typography variant="body2">
+          Convert a prospect or switch to the "All" view to see more.
+        </Typography>
+      </Box>
+    );
+  }
+
+  const headSx = {
+    fontWeight: 700,
+    fontSize: 12,
+    color: "text.secondary",
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    whiteSpace: "nowrap",
+    bgcolor: alpha(theme.palette.text.primary, 0.03),
+  };
+  const cellSx = { fontSize: 13, whiteSpace: "nowrap" };
+
+  return (
+    <TableContainer
+      component={Paper}
+      variant="outlined"
+      sx={{ height: "100%", borderRadius: 2, overflow: "auto" }}
+    >
+      <Table size="small" stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={headSx}>Code</TableCell>
+            <TableCell sx={headSx}>Company</TableCell>
+            <TableCell sx={headSx}>Industry</TableCell>
+            <TableCell sx={headSx}>City</TableCell>
+            <TableCell sx={headSx}>GST</TableCell>
+            <TableCell sx={headSx}>Salesperson</TableCell>
+            <TableCell sx={headSx}>Payment terms</TableCell>
+            <TableCell sx={{ ...headSx, textAlign: "right" }}>Credit limit</TableCell>
+            <TableCell sx={headSx}>Client stage</TableCell>
+            <TableCell sx={headSx}>Last contact</TableCell>
+            <TableCell sx={{ ...headSx, textAlign: "right" }}>Value</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {clients.map((c) => (
+            <TableRow
+              key={c.id}
+              hover
+              onClick={() => onOpen(c.id)}
+              sx={{ cursor: "pointer" }}
+            >
+              <TableCell sx={{ ...cellSx, fontWeight: 600 }}>
+                {c.customer_code || "—"}
+              </TableCell>
+              <TableCell sx={{ ...cellSx, fontWeight: 700 }}>
+                {c.company_name || "—"}
+              </TableCell>
+              <TableCell sx={cellSx}>{c.industry || "—"}</TableCell>
+              <TableCell sx={cellSx}>{c.city || "—"}</TableCell>
+              <TableCell sx={cellSx}>{c.gstin || "—"}</TableCell>
+              <TableCell sx={cellSx}>
+                {ownerLabel(c.owner_email, userMap) || "Unassigned"}
+              </TableCell>
+              <TableCell sx={cellSx}>{c.payment_terms || "—"}</TableCell>
+              <TableCell sx={{ ...cellSx, textAlign: "right" }}>
+                {c.credit_limit != null && c.credit_limit !== ""
+                  ? inrFull(c.credit_limit)
+                  : "—"}
+              </TableCell>
+              <TableCell sx={cellSx}>
+                <ClientStageSelect row={c} onStageChange={onStageChange} />
+              </TableCell>
+              <TableCell sx={cellSx}>{fmtDate(c.last_contact_date)}</TableCell>
+              <TableCell sx={{ ...cellSx, textAlign: "right", fontWeight: 600 }}>
+                {(() => {
+                  const v = c.total_value != null ? c.total_value : c.value;
+                  return v != null && Number(v) > 0 ? inrFull(v) : "—";
+                })()}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
