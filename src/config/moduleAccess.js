@@ -17,7 +17,7 @@ export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
 const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/home' || path === '/welcome' || path === '/dashboard', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/ceo-command' || path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES },
-  { test: (path) => path === '/employee-dashboard', moduleKey: MODULE_KEYS.EMPLOYEES },
+  { test: (path) => path === '/employee-dashboard' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/profile' || path === '/help', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug', moduleKey: MODULE_KEYS.SETTINGS },
   { test: (path) => path.split('?')[0].startsWith('/crm-pipeline'), moduleKey: MODULE_KEYS.CRM },
@@ -51,7 +51,7 @@ export function normalizeModuleKey(value) {
 const ROUTE_ACTION_RULES = [
   { test: (path) => path === '/task-scheduler', moduleKey: MODULE_KEYS.TASKS, action: 'create' },
   { test: (path) => path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
-  { test: (path) => path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/access-management' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },

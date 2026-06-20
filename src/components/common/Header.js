@@ -254,7 +254,6 @@ const Header = () => {
         { subheader: "Command Centers", label: "CEO Master Control", path: "/ceo-command", icon: <SecurityIcon />, roles: ["CEO"] },
         { subheader: "Command Centers", label: "Plant Command", path: "/plant-command", icon: <Dashboard />, roles: ["CEO", "Production Manager", "Process Coordinator", "QC Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "Management / HOD"] },
         { subheader: "Command Centers", label: "Main Dashboard", path: "/dashboard", icon: <Dashboard />, roles: ["CEO", "Process Coordinator"] },
-        { subheader: "Dashboards", label: "Employee Dashboard", path: "/employee-dashboard", icon: <EmployeeIcon />, roles: ["CEO", "HR Manager"] },
         { subheader: "Dashboards", label: "Client Dashboard", path: "/client-dashboard", icon: <Dashboard />, roles: ["Customer Relations Manager", "CEO", "Store Manager"] },
       ],
     },
@@ -332,7 +331,7 @@ const Header = () => {
         { subheader: "Master Data", label: "Master Data Hub", path: "/master-data", icon: <GridOnOutlined />, roles: ["CEO", "Management / HOD", "HR Manager"], moduleKey: "employees", requireEdit: true },
         { subheader: "Master Data", label: "Document Library", path: "/document-library", icon: <Storage />, roles: ["CEO"] },
         { subheader: "Finance", label: "Costing", path: "/costing", icon: <CostingIcon />, roles: ["CEO"] },
-        { subheader: "Access", label: "Employee Access Management", path: "/access-management", icon: <SecurityIcon />, roles: ["CEO"] },
+        { subheader: "People", label: "Employee Management", path: "/employee-management", icon: <EmployeeIcon />, roles: ["CEO", "HR Manager", "Management / HOD"] },
         ...systemItems,
       ],
     },
@@ -776,19 +775,19 @@ const Header = () => {
                     <ListItemText primary="Profile" />
                   </MenuItem>
                   
-                  {/* Employee Dashboard / My Dashboard - Always visible for all users */}
-                  <MenuItem 
+                  {/* Managers -> Employee Management; everyone else -> their own profile */}
+                  <MenuItem
                     onClick={() => {
                       handleProfileMenuClose();
-                      navigate('/employee-dashboard');
-                    }} 
+                      navigate(canManageEmployees ? '/employee-management' : '/profile');
+                    }}
                     sx={{ py: 1.5 }}
                   >
                     <ListItemIcon sx={{ minWidth: 36 }}>
                       <EmployeeIcon sx={{ fontSize: 20 }} />
                     </ListItemIcon>
-                    <ListItemText 
-                      primary={canManageEmployees ? 'Employee Dashboard' : 'My Dashboard'}
+                    <ListItemText
+                      primary={canManageEmployees ? 'Employee Management' : 'My Profile'}
                     />
                   </MenuItem>
                   

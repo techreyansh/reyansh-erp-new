@@ -125,6 +125,7 @@ const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/Emp
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
 const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/ChecklistTemplateAdmin"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
+const EmployeeManagement = lazy(() => import("./pages/employees/EmployeeManagement"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -233,10 +234,14 @@ function AppContent() {
                   <Route path="/accountability" element={
                     <Navigate to="/mis/executive-meeting" replace />
                   } />
+                  <Route path="/employee-management" element={
+                    <ProtectedRouteGate>
+                      <EmployeeManagement />
+                    </ProtectedRouteGate>
+                  } />
+                  {/* Access Management is now a tab inside Employee Management */}
                   <Route path="/access-management" element={
-                    <CEOOnlyRoute>
-                      <AccessManagementPage />
-                    </CEOOnlyRoute>
+                    <Navigate to="/employee-management" replace />
                   } />
                   <Route path="/profile" element={
                     <ProtectedRouteGate>
@@ -700,13 +705,10 @@ function AppContent() {
                     }
                   />
 
+                  {/* Employee Dashboard consolidated into Employee Management (Admin) */}
                   <Route
                     path="/employee-dashboard"
-                    element={
-                      <ProtectedRouteGate>
-                        <AdvancedEmployeeDashboard />
-                      </ProtectedRouteGate>
-                    }
+                    element={<Navigate to="/employee-management" replace />}
                   />
 
                   <Route
