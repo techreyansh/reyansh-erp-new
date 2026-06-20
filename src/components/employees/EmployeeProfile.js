@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert, Avatar, Box, Button, Card, CardContent, Checkbox, Chip, Collapse,
-  Divider, FormControl, FormControlLabel, Grid, IconButton, InputLabel,
-  Menu, MenuItem, Paper, Select, Snackbar, Stack, Switch, Tab, Tabs,
-  TextField, Tooltip, Typography, alpha,
+  Alert, Avatar, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress,
+  Collapse, Divider, FormControl, FormControlLabel, Grid, IconButton, InputLabel,
+  LinearProgress, Menu, MenuItem, Paper, Select, Snackbar, Stack, Switch, Tab, Tabs,
+  TextField, Tooltip, Typography, alpha, useTheme,
 } from '@mui/material';
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RTooltip, CartesianGrid,
+} from 'recharts';
 import {
   ArrowBack, Edit as EditIcon, MoreVert, Save as SaveIcon, FlashOn,
   ExpandMore, ExpandLess, Block, ContentCopy, VerifiedUser, Visibility,
@@ -22,6 +25,9 @@ import {
   listEmployeePermissionOverrides, listEmployees, listModules,
   saveEmployee, saveEmployeeModuleAccess, setEmployeeActive,
 } from '../../services/rbacService';
+import {
+  personScore, listCommitments, getCurrentWeekStart, addWeeks,
+} from '../../services/perfService';
 
 // ---- Access matrix config (lifted from EmployeeManagement) -----------------
 const ROLE_PRESETS = {
@@ -176,6 +182,323 @@ function ComingSoonPanel({ icon: Icon, title, line }) {
         <Chip size="small" variant="outlined" label="Coming soon — future-ready" sx={{ mt: 2 }} />
       </CardContent>
     </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PERFORMANCE TAB — live weekly scorecard for this employee, sourced from the
+// Performance Review system (perfService). All data is keyed on employee.email.
+// ---------------------------------------------------------------------------
+
+// Category config: key → label + weight% + which raw-count fields to surface.
+const PERF_CATEGORIES = [
+  { key: 'work_completed', label: 'Work Completed', weight: 40 },
+  { key: 'on_time', label: 'On Time', weight: 25 },
+  { key: 'checklist', label: 'Checklist', weight: 15 },
+  { key: 'workflow', label: 'Workflow', weight: 10 },
+  { key: 'meeting', label: 'Meeting', weight: 5 },
+  { key: 'manager', label: 'Manager', weight: 5 },
+];
+
+// Band metadata. The RPC returns a band key; if absent we derive one from the
+// numeric score using the documented thresholds (>=90 / >=75 / >=60 / <60).
+const PERF_BANDS = {
+  outstanding: { label: 'Outstanding Achiever', paletteKey: 'success' },
+  rising_star: { label: 'Rising Star', paletteKey: 'success' },
+  consistent: { label: 'Consistent Contributor', paletteKey: 'warning' },
+  needs_attention: { label: 'Needs Attention', paletteKey: 'error' },
+  no_data: { label: 'No data', paletteKey: 'grey' },
+};
+
+const PERF_COMMIT_STATUS = {
+  committed: { label: 'Committed', color: 'info' },
+  delivered: { label: 'Delivered', color: 'success' },
+  missed: { label: 'Missed', color: 'error' },
+  carried_over: { label: 'Carried over', color: 'warning' },
+};
+
+function perfBandKey(score) {
+  if (score?.band && PERF_BANDS[score.band]) return score.band;
+  const n = score?.score;
+  if (n == null) return 'no_data';
+  if (n >= 90) return 'outstanding';
+  if (n >= 75) return 'rising_star';
+  if (n >= 60) return 'consistent';
+  return 'needs_attention';
+}
+
+function perfBandColor(theme, bandKey) {
+  const meta = PERF_BANDS[bandKey] || PERF_BANDS.no_data;
+  if (meta.paletteKey === 'grey') return theme.palette.text.disabled;
+  return theme.palette[meta.paletteKey]?.main || theme.palette.text.disabled;
+}
+
+function perfCatSub(key, data) {
+  if (!data) return '';
+  if (key === 'work_completed' && (data.done != null || data.due != null)) {
+    return `${data.done ?? 0}/${data.due ?? 0} done`;
+  }
+  if (key === 'on_time' && data.on_time != null) return `${data.on_time} on time`;
+  if ((key === 'checklist' || key === 'workflow') && (data.ok != null || data.due != null)) {
+    return `${data.ok ?? 0}/${data.due ?? 0} ok`;
+  }
+  return '';
+}
+
+function perfWeekLabel(weekStart) {
+  const [y, m, d] = String(weekStart).split('-').map(Number);
+  if (!y) return String(weekStart || '');
+  const dt = new Date(y, (m || 1) - 1, d || 1);
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
+function PerfCategoryRow({ cfg, data }) {
+  const theme = useTheme();
+  const pct = data && data.pct != null ? Math.max(0, Math.min(100, Number(data.pct))) : null;
+  const hasData = pct != null;
+  const accent = !hasData
+    ? theme.palette.text.disabled
+    : pct >= 80
+    ? theme.palette.success.main
+    : pct >= 60
+    ? theme.palette.warning.main
+    : theme.palette.error.main;
+  const sub = perfCatSub(cfg.key, data);
+
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2, p: 1.5 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 0.75 }}>
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'text.secondary' }}
+        >
+          {cfg.label}
+        </Typography>
+        <Chip label={`weight ${cfg.weight}%`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 600 }} />
+      </Stack>
+      <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <LinearProgress
+            variant="determinate"
+            value={hasData ? pct : 0}
+            sx={{
+              height: 8, borderRadius: 4, bgcolor: alpha(accent, 0.14),
+              '& .MuiLinearProgress-bar': { borderRadius: 4, bgcolor: accent },
+            }}
+          />
+        </Box>
+        <Typography variant="subtitle2" sx={{ fontWeight: 800, minWidth: 56, textAlign: 'right', color: hasData ? 'text.primary' : 'text.disabled' }}>
+          {hasData ? `${pct}%` : 'no data'}
+        </Typography>
+      </Stack>
+      {sub && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>{sub}</Typography>
+      )}
+    </Paper>
+  );
+}
+
+function PerformanceTab({ employee }) {
+  const theme = useTheme();
+  const email = employee?.email || null;
+  const weekStart = useMemo(() => getCurrentWeekStart(), []);
+
+  const [loading, setLoading] = useState(true);
+  const [score, setScore] = useState(null);
+  const [trend, setTrend] = useState([]);
+  const [commitments, setCommitments] = useState([]);
+
+  useEffect(() => {
+    if (!email) { setLoading(false); return; }
+    let active = true;
+    setLoading(true);
+    (async () => {
+      // Last ~6 weeks (current + 5 back) for the trend, plus this week's commitments.
+      const weeks = [0, 1, 2, 3, 4, 5].map((n) => addWeeks(weekStart, -n));
+      const [scores, commits] = await Promise.all([
+        Promise.all(weeks.map((w) => personScore(email, w))),
+        listCommitments(email, weekStart),
+      ]);
+      if (!active) return;
+      setScore(scores[0] || null);
+      const series = weeks
+        .map((w, i) => ({ week: w, label: perfWeekLabel(w), score: scores[i]?.score }))
+        .filter((p) => p.score != null)
+        .reverse(); // oldest → newest, left → right
+      setTrend(series);
+      setCommitments(Array.isArray(commits) ? commits : []);
+      setLoading(false);
+    })().catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [email, weekStart]);
+
+  if (!email) {
+    return (
+      <ComingSoonPanel
+        icon={TrendingUp}
+        title="Performance"
+        line="This employee has no email on file, so their performance scorecard can't be loaded."
+      />
+    );
+  }
+
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ borderRadius: 3 }}>
+        <CardContent sx={{ py: 8, textAlign: 'center' }}>
+          <CircularProgress size={32} />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            Loading performance data…
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const hasScore = score && score.score != null;
+  const bandKey = perfBandKey(score);
+  const accent = perfBandColor(theme, bandKey);
+  const bandLabel = (PERF_BANDS[bandKey] || PERF_BANDS.no_data).label;
+  const cats = (score && score.categories) || {};
+
+  return (
+    <Grid container spacing={2.5}>
+      {/* a) Current-week score header */}
+      <Grid item xs={12}>
+        <Card variant="outlined" sx={{ borderRadius: 3 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <TrendingUp color="action" />
+              <Typography variant="h6" fontWeight={700}>Performance</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Chip size="small" variant="outlined" label={`Week of ${perfWeekLabel(weekStart)}`} />
+            </Stack>
+
+            {!hasScore ? (
+              <Alert severity="info" variant="outlined">
+                No performance data yet for this week.
+              </Alert>
+            ) : (
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ sm: 'center' }}>
+                <Box
+                  sx={{
+                    width: 104, height: 104, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    bgcolor: alpha(accent, 0.12), border: `2px solid ${alpha(accent, 0.5)}`,
+                  }}
+                >
+                  <Typography variant="h3" sx={{ fontWeight: 800, lineHeight: 1, color: accent }}>
+                    {score.score}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">/ 100</Typography>
+                </Box>
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Chip
+                    label={bandLabel}
+                    sx={{
+                      fontWeight: 700, letterSpacing: '0.02em',
+                      bgcolor: alpha(accent, 0.14), color: accent, border: `1px solid ${alpha(accent, 0.4)}`,
+                    }}
+                  />
+                  {score.manager_remarks && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, fontStyle: 'italic' }}>
+                      “{score.manager_remarks}”
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* b) Category breakdown */}
+      {hasScore && (
+        <Grid item xs={12} md={7}>
+          <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={700} mb={1.5}>Category breakdown</Typography>
+              <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+                {PERF_CATEGORIES.map((cfg) => (
+                  <PerfCategoryRow key={cfg.key} cfg={cfg} data={cats[cfg.key]} />
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      )}
+
+      {/* c) Trend over the last ~6 weeks */}
+      <Grid item xs={12} md={hasScore ? 5 : 12}>
+        <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={700} mb={1.5}>Score trend</Typography>
+            {trend.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                Not enough history yet — weekly scores will chart here over time.
+              </Typography>
+            ) : (
+              <Box sx={{ width: '100%', height: 220 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trend} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: theme.palette.text.secondary }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: theme.palette.text.secondary }} />
+                    <RTooltip
+                      contentStyle={{
+                        background: theme.palette.background.paper,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 8, fontSize: 12,
+                      }}
+                    />
+                    <Line
+                      type="monotone" dataKey="score" name="Score"
+                      stroke={theme.palette.primary.main} strokeWidth={2}
+                      dot={{ r: 3, fill: theme.palette.primary.main }} activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* d) This week's commitments */}
+      <Grid item xs={12}>
+        <Card variant="outlined" sx={{ borderRadius: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={700} mb={1.5}>This week&apos;s commitments</Typography>
+            {commitments.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                No commitments recorded for this week.
+              </Typography>
+            ) : (
+              <Stack spacing={1.25}>
+                {commitments.map((c) => {
+                  const meta = PERF_COMMIT_STATUS[c.status] || { label: c.status || '—', color: 'default' };
+                  return (
+                    <Paper key={c.id} variant="outlined" sx={{ borderRadius: 2, p: 1.5 }}>
+                      <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
+                        <Typography variant="body2" fontWeight={600} sx={{ flex: 1, minWidth: 0 }}>
+                          {c.title || 'Untitled commitment'}
+                        </Typography>
+                        {c.due_date && (
+                          <Typography variant="caption" color="text.secondary">
+                            due {perfWeekLabel(c.due_date)}
+                          </Typography>
+                        )}
+                        <Chip size="small" label={meta.label} color={meta.color} variant="outlined" sx={{ fontWeight: 600 }} />
+                      </Stack>
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
   );
 }
 
@@ -928,13 +1251,7 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
       )}
 
       {/* ---------------- TAB 6: PERFORMANCE ---------------- */}
-      {tab === 6 && (
-        <ComingSoonPanel
-          icon={TrendingUp}
-          title="Performance"
-          line="Goals, reviews and ratings for this employee will appear here."
-        />
-      )}
+      {tab === 6 && <PerformanceTab employee={employee} />}
 
       {/* ---------------- TAB 7: ACTIVITY ---------------- */}
       {tab === 7 && (

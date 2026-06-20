@@ -13,6 +13,8 @@ import {
   Snackbar,
   Stack,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
   alpha,
@@ -31,6 +33,8 @@ import {
   CheckCircleRounded,
   TaskAltRounded,
   SaveRounded,
+  GroupsRounded,
+  WarningAmberRounded,
 } from '@mui/icons-material';
 import {
   getCurrentWeekStart,
@@ -42,6 +46,7 @@ import {
   listCommitments,
   addCommitment,
   setCommitmentStatus,
+  departmentDashboard,
 } from '../../services/perfService';
 import { usePermissions } from '../../context/PermissionContext';
 import { useAuth } from '../../context/AuthContext';
@@ -161,6 +166,18 @@ function BandChip({ band, size = 'small' }) {
       }}
     />
   );
+}
+
+/**
+ * Resolve an accent color from a raw 0–100 score using the same thresholds the
+ * department dashboard uses: >=75 green, 60–74 amber, <60 red, null grey.
+ */
+function scoreColor(theme, score) {
+  if (score == null) return theme.palette.text.disabled;
+  const n = Number(score);
+  if (n >= 75) return theme.palette.success.main;
+  if (n >= 60) return theme.palette.warning.main;
+  return theme.palette.error.main;
 }
 
 // ---------------------------------------------------------------------------
@@ -636,6 +653,211 @@ function EmployeeReview({ person, score, loading, canEdit, commitments, commitme
 }
 
 // ---------------------------------------------------------------------------
+// DEPARTMENTS VIEW — summary KPIs + a grid of department cards.
+// ---------------------------------------------------------------------------
+
+/** A compact summary KPI tile for the departments header strip. */
+function DeptStat({ label, value, icon, tone }) {
+  const theme = useTheme();
+  const color =
+    tone === 'success' ? theme.palette.success.main :
+    tone === 'error' ? theme.palette.error.main :
+    theme.palette.primary.main;
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 1.5, sm: 2 }, flex: 1, minWidth: 160 }}>
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: alpha(color, 0.12),
+            color,
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>
+            {value}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap>
+            {label}
+          </Typography>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+/** One department card: name, members, big team score, bar, attention chip, top performers. */
+function DepartmentCard({ dept }) {
+  const theme = useTheme();
+  const score = dept.team_score;
+  const accent = scoreColor(theme, score);
+  const needs = Number(dept.needs_attention) || 0;
+  const top = Array.isArray(dept.top_performers) ? dept.top_performers : [];
+
+  return (
+    <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, sm: 2.5 }, height: '100%' }}>
+      <Stack spacing={1.5} sx={{ height: '100%' }}>
+        {/* Header — name + members */}
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800 }} noWrap>
+              {dept.department || 'Unassigned'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {Number(dept.members) || 0} {Number(dept.members) === 1 ? 'member' : 'members'}
+            </Typography>
+          </Box>
+          <Chip
+            label={needs > 0 ? `${needs} need attention` : 'All on track'}
+            size="small"
+            color={needs > 0 ? 'error' : 'success'}
+            variant={needs > 0 ? 'filled' : 'outlined'}
+            sx={{ fontWeight: 700, flexShrink: 0 }}
+          />
+        </Stack>
+
+        {/* Big team score + bar */}
+        <Box>
+          <Stack direction="row" alignItems="baseline" spacing={1}>
+            <Typography variant="h3" sx={{ fontWeight: 800, lineHeight: 1, color: accent }}>
+              {score == null ? '—' : Math.round(Number(score))}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              team score / 100
+            </Typography>
+          </Stack>
+          <LinearProgress
+            variant="determinate"
+            value={score == null ? 0 : Math.max(0, Math.min(100, Number(score)))}
+            sx={{
+              mt: 1,
+              height: 8,
+              borderRadius: 4,
+              bgcolor: alpha(accent, 0.14),
+              '& .MuiLinearProgress-bar': { borderRadius: 4, bgcolor: accent },
+            }}
+          />
+        </Box>
+
+        <Divider />
+
+        {/* Top performers mini-list */}
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'text.secondary', display: 'block', mb: 0.75 }}
+          >
+            Top performers
+          </Typography>
+          {top.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No scored members yet.
+            </Typography>
+          ) : (
+            <Stack spacing={0.75}>
+              {top.map((p, i) => {
+                const pColor = scoreColor(theme, p.score);
+                return (
+                  <Stack key={`${p.full_name}-${i}`} direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 0 }} noWrap>
+                      {p.full_name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 800, color: pColor, flexShrink: 0 }}>
+                      {p.score == null ? '—' : Math.round(Number(p.score))}
+                    </Typography>
+                  </Stack>
+                );
+              })}
+            </Stack>
+          )}
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+function DepartmentsView({ departments, loading, weekStart }) {
+  // Sort by team_score desc, nulls last.
+  const sorted = useMemo(() => {
+    const rows = Array.isArray(departments) ? [...departments] : [];
+    rows.sort((a, b) => {
+      const sa = a.team_score == null ? null : Number(a.team_score);
+      const sb = b.team_score == null ? null : Number(b.team_score);
+      if (sa == null && sb == null) return 0;
+      if (sa == null) return 1;
+      if (sb == null) return -1;
+      return sb - sa;
+    });
+    return rows;
+  }, [departments]);
+
+  const kpis = useMemo(() => {
+    const rows = Array.isArray(departments) ? departments : [];
+    const scored = rows.filter((d) => d.team_score != null);
+    const sum = scored.reduce((a, d) => a + (Number(d.team_score) || 0), 0);
+    const needs = rows.reduce((a, d) => a + (Number(d.needs_attention) || 0), 0);
+    return {
+      total: rows.length,
+      avg: scored.length ? Math.round(sum / scored.length) : null,
+      needs,
+    };
+  }, [departments]);
+
+  if (loading) {
+    return (
+      <Stack spacing={2}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          {[1, 2, 3].map((n) => <Skeleton key={n} variant="rounded" height={76} sx={{ flex: 1 }} />)}
+        </Stack>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' } }}>
+          {[1, 2, 3, 4, 5, 6].map((n) => <Skeleton key={n} variant="rounded" height={240} />)}
+        </Box>
+      </Stack>
+    );
+  }
+
+  if (sorted.length === 0) {
+    return (
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 4, sm: 8 }, textAlign: 'center' }}>
+        <GroupsRounded sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+          No department data for this week
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Nothing to roll up for week of {weekLabel(weekStart)}.
+        </Typography>
+      </Paper>
+    );
+  }
+
+  return (
+    <Stack spacing={2}>
+      {/* Summary KPIs */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <DeptStat label="Departments" value={kpis.total} icon={<GroupsRounded />} />
+        <DeptStat label="Company avg score" value={kpis.avg == null ? '—' : kpis.avg} icon={<TrendingUpRounded />} tone="success" />
+        <DeptStat label="Need attention" value={kpis.needs} icon={<WarningAmberRounded />} tone={kpis.needs > 0 ? 'error' : 'success'} />
+      </Stack>
+
+      {/* Department cards grid */}
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' }, alignItems: 'stretch' }}>
+        {sorted.map((dept, i) => (
+          <DepartmentCard key={dept.department || `dept-${i}`} dept={dept} />
+        ))}
+      </Box>
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // PAGE
 // ---------------------------------------------------------------------------
 export default function PerformanceReview() {
@@ -648,7 +870,10 @@ export default function PerformanceReview() {
   // CEO / super-admin gate for manager edits + lock.
   const canManage = hasFullAccess || ['CEO', 'SUPER_ADMIN', 'SUPERADMIN'].includes(String(roleCode || '').toUpperCase());
 
+  const [view, setView] = useState('weekly'); // 'weekly' | 'departments'
   const [weekStart, setWeekStart] = useState(getCurrentWeekStart());
+  const [departments, setDepartments] = useState([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [roster, setRoster] = useState([]);
   const [rosterLoading, setRosterLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
@@ -716,6 +941,19 @@ export default function PerformanceReview() {
     });
     return () => { active = false; };
   }, [selectedEmail, weekStart]);
+
+  // Load department dashboard when on the Departments view (or week changes).
+  useEffect(() => {
+    if (view !== 'departments') return undefined;
+    let active = true;
+    setDepartmentsLoading(true);
+    departmentDashboard(weekStart).then((data) => {
+      if (!active) return;
+      setDepartments(Array.isArray(data) ? data : []);
+      setDepartmentsLoading(false);
+    });
+    return () => { active = false; };
+  }, [view, weekStart]);
 
   const stats = useMemo(() => {
     const scored = roster.filter((r) => r.score != null);
@@ -800,6 +1038,21 @@ export default function PerformanceReview() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+          <ToggleButtonGroup
+            value={view}
+            exclusive
+            size="small"
+            onChange={(_e, v) => { if (v) setView(v); }}
+            aria-label="Performance view"
+            sx={{ '& .MuiToggleButton-root': { textTransform: 'none', fontWeight: 700, px: 1.5 } }}
+          >
+            <ToggleButton value="weekly" aria-label="Weekly Review">
+              Weekly Review
+            </ToggleButton>
+            <ToggleButton value="departments" aria-label="Departments">
+              Departments
+            </ToggleButton>
+          </ToggleButtonGroup>
           <Paper variant="outlined" sx={{ borderRadius: 2, px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Tooltip title="Previous week">
               <IconButton size="small" onClick={() => goWeek(-1)} aria-label="Previous week">
@@ -815,7 +1068,7 @@ export default function PerformanceReview() {
               </IconButton>
             </Tooltip>
           </Paper>
-          {canManage && (
+          {view === 'weekly' && canManage && (
             <Button
               variant="contained"
               startIcon={<LockOutlined />}
@@ -829,6 +1082,10 @@ export default function PerformanceReview() {
         </Stack>
       </Stack>
 
+      {view === 'departments' ? (
+        <DepartmentsView departments={departments} loading={departmentsLoading} weekStart={weekStart} />
+      ) : (
+        <>
       {/* Band legend */}
       <Paper variant="outlined" sx={{ borderRadius: 2, px: 2, py: 1, mb: 2 }}>
         <Stack direction="row" spacing={2.5} alignItems="center" flexWrap="wrap" useFlexGap>
@@ -922,6 +1179,8 @@ export default function PerformanceReview() {
           )}
         </Box>
       </Box>
+        </>
+      )}
 
       <Snackbar
         open={snackbar.open}
