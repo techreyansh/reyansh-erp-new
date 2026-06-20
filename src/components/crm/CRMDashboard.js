@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Avatar,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -13,16 +15,21 @@ import {
   Stack,
   Tab,
   Tabs,
+  Tooltip,
   Typography,
+  alpha,
   useTheme,
 } from '@mui/material';
 import {
   AccountBalanceWalletOutlined,
   AutorenewRounded,
   EmojiEventsOutlined,
+  EventRepeatRounded,
   GroupsOutlined,
   PaidOutlined,
+  PlaylistAddCheckRounded,
   ReceiptLongOutlined,
+  ReplayRounded,
   ReportProblemOutlined,
   RequestQuoteOutlined,
   TrendingUpRounded,
@@ -35,6 +42,7 @@ import {
   prospectDashboard,
   clientDashboard,
   listAssignableUsers,
+  rfmDashboard,
   PROSPECT_STAGES,
   CLIENT_STAGES,
 } from '../../services/crmPipelineService';
@@ -431,6 +439,368 @@ function ClientsTab() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// RFM & RETENTION TAB
+// ---------------------------------------------------------------------------
+// Segment key → label + color maps. Copied verbatim from
+// src/pages/crm/RepWorklist.js so the two screens stay visually identical
+// (same segment ordering, labels and theme-resolved colors).
+const RFM_SEGMENTS = [
+  { key: 'champion', label: 'Champion' },
+  { key: 'loyal', label: 'Loyal' },
+  { key: 'potential', label: 'Potential' },
+  { key: 'at_risk', label: 'At Risk' },
+  { key: 'hibernating', label: 'Hibernating' },
+  { key: 'new', label: 'New' },
+];
+
+// Resolve a segment key → a concrete theme color (mirrors RepWorklist.js).
+function rfmSegmentColor(theme, key) {
+  switch (key) {
+    case 'champion':
+      return theme.palette.success.main;
+    case 'loyal':
+      return theme.palette.primary.main;
+    case 'potential':
+      return theme.palette.secondary.main;
+    case 'at_risk':
+      return theme.palette.error.main;
+    case 'hibernating':
+      return theme.palette.warning.main;
+    case 'new':
+    default:
+      return theme.palette.text.secondary;
+  }
+}
+
+const RFM_SEGMENT_LABELS = RFM_SEGMENTS.reduce((acc, s) => {
+  acc[s.key] = s.label;
+  return acc;
+}, {});
+
+function RfmTab({ ownerScope }) {
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  const [d, setD] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    (async () => {
+      try {
+        const dash = await rfmDashboard(ownerScope);
+        if (!alive) return;
+        setD(dash || null);
+      } catch {
+        if (alive) setD(null);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [ownerScope]);
+
+  // Build a lookup of the sparse grid: `${r}_${f}` → { count, value }.
+  const gridMap = useMemo(() => {
+    const m = {};
+    const cells = d && Array.isArray(d.grid) ? d.grid : [];
+    cells.forEach((c) => {
+      m[`${c.r_score}_${c.f_score}`] = {
+        count: Number(c.count) || 0,
+        value: Number(c.value) || 0,
+      };
+    });
+    return m;
+  }, [d]);
+
+  const maxCellCount = useMemo(() => {
+    let max = 0;
+    Object.values(gridMap).forEach((c) => {
+      if (c.count > max) max = c.count;
+    });
+    return max;
+  }, [gridMap]);
+
+  const segments = useMemo(
+    () => (d && Array.isArray(d.segments) ? d.segments : []),
+    [d],
+  );
+
+  const totalSegValue = useMemo(
+    () => segments.reduce((sum, s) => sum + (Number(s.total_value) || 0), 0),
+    [segments],
+  );
+
+  if (loading) {
+    return (
+      <Box>
+        <KpiSkeletons n={5} />
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } }}>
+          <Skeleton variant="rounded" height={360} />
+          <Skeleton variant="rounded" height={360} />
+        </Box>
+      </Box>
+    );
+  }
+
+  if (!d) {
+    return <Empty label="No client analytics yet — RFM needs order history." />;
+  }
+
+  const stats = d.stats || {};
+  const cadence = stats.avg_cadence_days != null ? `${Math.round(Number(stats.avg_cadence_days))}d` : '—';
+
+  const kpis = [
+    {
+      label: 'Total Clients',
+      value: d.total_clients ?? 0,
+      sub: `${stats.with_orders ?? 0} with orders`,
+      icon: GroupsOutlined,
+      accent: theme.palette.primary.main,
+    },
+    {
+      label: 'Repeat Rate',
+      value: `${Number(stats.repeat_rate) || 0}%`,
+      sub: '≥2 orders',
+      icon: ReplayRounded,
+      accent: theme.palette.success.main,
+    },
+    {
+      label: 'On-time Reorder',
+      value: `${Number(stats.on_time_rate) || 0}%`,
+      sub: 'of customers with orders',
+      icon: EventRepeatRounded,
+      accent: theme.palette.info.main,
+    },
+    {
+      label: 'At-risk Value',
+      value: inrCompact(stats.at_risk_value),
+      sub: '12-mo value of overdue accounts',
+      icon: ReportProblemOutlined,
+      accent: theme.palette.error.main,
+    },
+    {
+      label: 'Avg Reorder Cadence',
+      value: cadence,
+      sub: 'Between orders',
+      icon: AutorenewRounded,
+      accent: theme.palette.warning.main,
+    },
+  ];
+
+  const hasGrid = maxCellCount > 0 || Object.keys(gridMap).length > 0;
+
+  return (
+    <Box>
+      {/* KPI row */}
+      <Box sx={{ display: 'grid', gap: 2, mb: 3, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', md: 'repeat(5,1fr)' } }}>
+        {kpis.map((c) => (
+          <StatCard key={c.label} {...c} />
+        ))}
+      </Box>
+
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } }}>
+        {/* RFM grid heatmap */}
+        <Panel
+          title="RFM grid"
+          subtitle="High-R = ordered recently / on-cadence · High-F = orders frequently"
+          height="auto"
+        >
+          {hasGrid ? (
+            <Box>
+              <Stack direction="row" spacing={1}>
+                {/* Vertical "Recency →" axis label */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    writingMode: 'vertical-rl',
+                    transform: 'rotate(180deg)',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    color: 'text.secondary',
+                  }}
+                >
+                  Recency →
+                </Box>
+
+                <Box sx={{ flex: 1 }}>
+                  {/* 5 rows: r = 5 (top) … 1 (bottom) */}
+                  {[5, 4, 3, 2, 1].map((r) => (
+                    <Stack key={r} direction="row" spacing={0.75} sx={{ mb: 0.75 }}>
+                      <Box
+                        sx={{
+                          width: 16,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {r}
+                      </Box>
+                      {/* 5 cols: f = 1 (left) … 5 (right) */}
+                      {[1, 2, 3, 4, 5].map((f) => {
+                        const cell = gridMap[`${r}_${f}`] || { count: 0, value: 0 };
+                        const ratio = maxCellCount > 0 ? cell.count / maxCellCount : 0;
+                        // Floor so 0-count cells read as a faint divider tint;
+                        // populated cells scale up to a strong primary fill.
+                        const intensity = cell.count > 0 ? 0.12 + ratio * 0.68 : 0.04;
+                        const bg = alpha(theme.palette.primary.main, intensity);
+                        const strong = intensity >= 0.45;
+                        return (
+                          <Tooltip
+                            key={f}
+                            title={`R${r} · F${f} — ${cell.count} clients · ${inrCompact(cell.value)}`}
+                            arrow
+                          >
+                            <Box
+                              sx={{
+                                flex: 1,
+                                aspectRatio: '1 / 1',
+                                minWidth: 0,
+                                borderRadius: 1,
+                                bgcolor: bg,
+                                border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                color: strong
+                                  ? theme.palette.getContrastText(theme.palette.primary.main)
+                                  : theme.palette.text.primary,
+                              }}
+                            >
+                              {cell.count || ''}
+                            </Box>
+                          </Tooltip>
+                        );
+                      })}
+                    </Stack>
+                  ))}
+
+                  {/* Frequency column labels */}
+                  <Stack direction="row" spacing={0.75} sx={{ mt: 0.25 }}>
+                    <Box sx={{ width: 16 }} />
+                    {[1, 2, 3, 4, 5].map((f) => (
+                      <Box
+                        key={f}
+                        sx={{
+                          flex: 1,
+                          textAlign: 'center',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {f}
+                      </Box>
+                    ))}
+                  </Stack>
+
+                  {/* Horizontal "Frequency →" axis label */}
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      mt: 0.5,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    Frequency →
+                  </Box>
+                </Box>
+              </Stack>
+
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+                Top-right = best customers (recent + frequent); bottom-left = lapsing.
+              </Typography>
+            </Box>
+          ) : (
+            <Empty label="No scored clients yet — RFM needs order history." />
+          )}
+        </Panel>
+
+        {/* Segment summary */}
+        <Panel
+          title="Segments"
+          subtitle="Client base grouped by RFM segment · by value"
+          height="auto"
+        >
+          {segments.length ? (
+            <Box>
+              <Stack divider={<Divider />}>
+                {segments.map((seg, i) => {
+                  const c = rfmSegmentColor(theme, seg.segment);
+                  const label = RFM_SEGMENT_LABELS[seg.segment] || seg.segment;
+                  const share = totalSegValue > 0 ? ((Number(seg.total_value) || 0) / totalSegValue) * 100 : 0;
+                  const recency = seg.avg_recency != null ? `${Math.round(Number(seg.avg_recency))}d` : '—';
+                  const freq = `${(Number(seg.avg_frequency) || 0).toFixed(1)} orders`;
+                  return (
+                    <Box key={seg.segment || i} sx={{ py: 1.25 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: c, flexShrink: 0 }} />
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                              {label}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {seg.count ?? 0} clients · {freq} · {recency}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {inrCompact(seg.total_value)}
+                        </Typography>
+                      </Stack>
+                      <LinearProgress
+                        variant="determinate"
+                        value={Math.min(share, 100)}
+                        sx={{
+                          mt: 0.75,
+                          height: 6,
+                          borderRadius: 3,
+                          bgcolor: 'action.hover',
+                          '& .MuiLinearProgress-bar': { bgcolor: c },
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
+              </Stack>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<PlaylistAddCheckRounded />}
+                onClick={() => navigate('/crm/worklist')}
+                sx={{ mt: 1, textTransform: 'none' }}
+              >
+                Work these accounts in the Daily Worklist
+              </Button>
+            </Box>
+          ) : (
+            <Empty label="No client analytics yet — RFM needs order history." />
+          )}
+        </Panel>
+      </Box>
+    </Box>
+  );
+}
+
 export default function CRMDashboard({ data, loading }) {
   const theme = useTheme();
   const [tab, setTab] = useState('overview');
@@ -481,6 +851,11 @@ export default function CRMDashboard({ data, loading }) {
 
   const seesAll =
     hasFullAccess || ['CEO', 'SUPER_ADMIN', 'SUPERADMIN'].includes(String(roleCode || '').toUpperCase());
+
+  // Owner scope for the RPC-backed RFM tab — reuse the SAME decision as the
+  // reorder/retention section above: CEO/managers (seesAll) pass null for the
+  // whole client base; a rep passes their own email.
+  const ownerScope = seesAll ? null : myEmail;
 
   const scopedAnalytics = useMemo(() => {
     if (seesAll) return analytics;
@@ -555,6 +930,7 @@ export default function CRMDashboard({ data, loading }) {
       <Tab value="overview" label="Overview" sx={{ fontWeight: 700, textTransform: 'none' }} />
       <Tab value="prospects" label="Prospects" sx={{ fontWeight: 700, textTransform: 'none' }} />
       <Tab value="clients" label="Clients" sx={{ fontWeight: 700, textTransform: 'none' }} />
+      <Tab value="rfm" label="RFM & Retention" sx={{ fontWeight: 700, textTransform: 'none' }} />
     </Tabs>
   );
 
@@ -572,6 +948,15 @@ export default function CRMDashboard({ data, loading }) {
       <Box>
         {TabsBar}
         <ClientsTab />
+      </Box>
+    );
+  }
+
+  if (tab === 'rfm') {
+    return (
+      <Box>
+        {TabsBar}
+        <RfmTab ownerScope={ownerScope} />
       </Box>
     );
   }

@@ -33,6 +33,7 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $
            NULLIF(x->>'next_expected','')::date AS next_expected,
            (x->>'due_status')             AS due_status,
            (x->>'churn_score')::numeric   AS churn_score,
+           (x->>'total_value')::numeric   AS hist_value,
            (x->>'value_12mo')::numeric    AS value_12mo
     FROM jsonb_array_elements(public.crm_customer_analytics()) x
   ),
@@ -55,7 +56,7 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $
   ),
   rfm AS (
     SELECT acct.id,
-           ntile(5) OVER (ORDER BY acct.monetary NULLS FIRST) AS m_score,
+           ntile(5) OVER (ORDER BY GREATEST(acct.monetary, COALESCE(an.hist_value,0)) NULLS FIRST) AS m_score,
            CASE WHEN an.order_count IS NULL THEN 1
                 WHEN an.order_count >= 10 THEN 5 WHEN an.order_count >= 6 THEN 4
                 WHEN an.order_count >= 3 THEN 3 WHEN an.order_count >= 2 THEN 2 ELSE 1 END AS f_score,
@@ -66,7 +67,8 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $
   joined AS (
     SELECT acct.id, acct.customer_code, acct.company_name, acct.owner_email,
            acct.contact_person, acct.phone, acct.email, acct.city, acct.industry,
-           acct.product_category, acct.client_stage, acct.monetary,
+           acct.product_category, acct.client_stage,
+           GREATEST(acct.monetary, COALESCE(an.hist_value,0)) AS monetary,
            an.order_count, an.last_order, an.cadence_days, an.recency_days,
            an.next_expected, COALESCE(an.due_status,'new') AS due_status,
            an.churn_score, an.value_12mo,

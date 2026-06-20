@@ -677,6 +677,32 @@ export async function repWorklist(ownerEmail = null) {
   return Array.isArray(data) ? data : [];
 }
 
+/**
+ * RFM & retention dashboard for the client base (server-side, RLS-scoped).
+ *
+ * Backed by the `crm_rfm_dashboard(p_owner_email text)` RPC. Pass `null` for
+ * CEO/managers (all clients) or the rep's email to scope to their own accounts —
+ * mirror how the dashboard already decides the owner scope. Returns a single
+ * jsonb object:
+ *   { total_clients,
+ *     segments:[{ segment, count, total_value, avg_recency, avg_frequency, avg_value }],
+ *     grid:[{ r_score, f_score, count, value }],   // sparse — non-empty cells only
+ *     stats:{ repeat_rate, on_time_rate, avg_cadence_days, at_risk_value,
+ *             with_orders, champions_value_pct } }
+ *
+ * Throws on error so the caller can surface it via the global Snackbar handler.
+ *
+ * @param {string|null} ownerEmail  rep email, or null for all clients
+ * @returns {Promise<object|null>}
+ */
+export async function rfmDashboard(ownerEmail = null) {
+  const { data, error } = await supabase.rpc('crm_rfm_dashboard', {
+    p_owner_email: ownerEmail || null,
+  });
+  if (error) throw error;
+  return data || null;
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -778,6 +804,7 @@ const crmPipelineService = {
   clientDashboard,
   listAssignableUsers,
   repWorklist,
+  rfmDashboard,
   getCurrentUserEmail,
   listAllCollaborators,
   addCollaborator,
