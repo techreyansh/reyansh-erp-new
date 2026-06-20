@@ -114,7 +114,21 @@ export const sanitizeEmployeeData = (employeeData) => {
       sanitized[field] = sanitized[field].trim();
     }
   });
-  
+
+  // GraduationYear is an INTEGER column — coerce to a number or null (never "").
+  if (sanitized.GraduationYear === '' || sanitized.GraduationYear === undefined) {
+    sanitized.GraduationYear = null;
+  } else if (typeof sanitized.GraduationYear === 'string') {
+    const yr = parseInt(sanitized.GraduationYear, 10);
+    sanitized.GraduationYear = Number.isNaN(yr) ? null : yr;
+  }
+
+  // Any remaining empty string breaks typed (integer/date) columns — send null.
+  // (Defaults below still apply because `!null` is true.)
+  Object.keys(sanitized).forEach((k) => {
+    if (sanitized[k] === '') sanitized[k] = null;
+  });
+
   // Ensure required fields have defaults
   if (!sanitized.Status) sanitized.Status = 'Active';
   if (!sanitized.EmployeeType) sanitized.EmployeeType = 'Full-time';
