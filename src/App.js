@@ -121,6 +121,7 @@ const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashbo
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
 const CRMPipelineBoard = lazy(() => import("./pages/crm/CRMPipelineBoard"));
 const CollectionsPage = lazy(() => import("./pages/crm/CollectionsPage"));
+const RepWorklist = lazy(() => import("./pages/crm/RepWorklist"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
@@ -759,6 +760,14 @@ function AppContent() {
                     element={
                       <ProtectedRouteGate>
                         <CollectionsPage />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/worklist"
+                    element={
+                      <ProtectedRouteGate>
+                        <RepWorklist />
                       </ProtectedRouteGate>
                     }
                   />

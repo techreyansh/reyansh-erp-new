@@ -72,6 +72,7 @@ import {
   MarkEmailRead as CampaignIcon,
   ReceiptLong as ReceiptLongIcon,
   Forum as ForumIcon,
+  PlaylistAddCheck as WorklistIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
@@ -263,6 +264,7 @@ const Header = () => {
       label: "CRM & Sales",
       icon: <CRMIcon />,
       items: [
+        { subheader: "Pipelines", label: "Daily Worklist", path: "/crm/worklist", icon: <WorklistIcon />, roles: crmModuleRoles },
         { subheader: "Pipelines", label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
         { subheader: "Pipelines", label: "Client Management", path: "/crm-pipeline?view=clients", icon: <PeopleIcon />, roles: crmModuleRoles },
         { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },

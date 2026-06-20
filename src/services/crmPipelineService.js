@@ -655,6 +655,28 @@ export async function listAssignableUsers() {
   }
 }
 
+/**
+ * Prioritised "who to contact today" worklist for a sales rep (or all reps).
+ *
+ * Backed by the `crm_rep_worklist(p_owner_email text)` RPC, which returns a
+ * jsonb array of account objects already sorted by priority_score DESC. Pass
+ * `null` for CEO/managers (see all accounts) or the rep's email to scope to
+ * their own accounts. Each object carries the account's RFM/segment scores,
+ * reorder/payment/follow-up status and a `reasons` array explaining the "why".
+ *
+ * Throws on error so the caller can surface it via the global Snackbar handler.
+ *
+ * @param {string|null} ownerEmail  rep email, or null for all accounts
+ * @returns {Promise<Array<object>>}
+ */
+export async function repWorklist(ownerEmail = null) {
+  const { data, error } = await supabase.rpc("crm_rep_worklist", {
+    p_owner_email: ownerEmail || null,
+  });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 /** Current authenticated user's email (for the My / All toggle). */
 export async function getCurrentUserEmail() {
   const { data, error } = await supabase.auth.getUser();
@@ -755,6 +777,7 @@ const crmPipelineService = {
   prospectDashboard,
   clientDashboard,
   listAssignableUsers,
+  repWorklist,
   getCurrentUserEmail,
   listAllCollaborators,
   addCollaborator,
