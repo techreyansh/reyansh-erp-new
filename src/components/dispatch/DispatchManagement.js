@@ -130,12 +130,15 @@ import {
   Assessment,
   Timeline as TimelineIcon,
   ViewList,
-  ViewModule
+  ViewModule,
+  ReceiptLong
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
+import arService from '../../services/arService';
 import dispatchService from '../../services/dispatchService';
 import sheetService from '../../services/sheetService';
 import poService from '../../services/poService';
@@ -350,6 +353,20 @@ const DispatchManagement = () => {
   
   // Snackbar
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Create Invoice dialog state
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceDispatch, setInvoiceDispatch] = useState(null);
+  const [invoiceForm, setInvoiceForm] = useState({
+    customerName: '',
+    amount: '',
+    invoiceNumber: '',
+    invoiceDate: new Date().toISOString().split('T')[0],
+    termsDays: '',
+    poRef: '',
+  });
+  const [invoiceResolving, setInvoiceResolving] = useState(false);
+  const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
   
   // Real-time tracking state
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -478,6 +495,115 @@ const DispatchManagement = () => {
   const handleCloseViewDialog = () => {
     setViewDialogOpen(false);
     setSelectedDispatch(null);
+  };
+
+  const handleOpenInvoiceDialog = async (dispatch) => {
+    setInvoiceDispatch(dispatch);
+    const productName = dispatch.ProductName || dispatch.ProductCode || '';
+    const summary = [
+      productName,
+      dispatch.BatchNumber ? `Batch ${dispatch.BatchNumber}` : null,
+      dispatch.BatchSize ? `${dispatch.BatchSize} units` : null,
+    ].filter(Boolean).join(' · ');
+
+    // Try to resolve a customer name already present on the dispatch record.
+    const inlineName =
+      dispatch.ClientName || dispatch.CustomerName || dispatch.ClientCompanyName || '';
+
+    setInvoiceForm({
+      customerName: inlineName,
+      amount: '',
+      invoiceNumber: '',
+      invoiceDate: new Date().toISOString().split('T')[0],
+      termsDays: '',
+      poRef: summary,
+    });
+    setInvoiceDialogOpen(true);
+
+    // If no name on the record, look it up from clients2 by ClientCode.
+    if (!inlineName && dispatch.ClientCode) {
+      setInvoiceResolving(true);
+      try {
+        const { data, error } = await supabase
+          .from('clients2')
+          .select('"ClientName","PaymentTerms"')
+          .eq('"ClientCode"', dispatch.ClientCode)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          setInvoiceForm((prev) => ({
+            ...prev,
+            customerName: data.ClientName || prev.customerName,
+            termsDays:
+              prev.termsDays === '' && data.PaymentTerms != null
+                ? String(data.PaymentTerms)
+                : prev.termsDays,
+          }));
+        }
+      } catch (err) {
+        console.error('Error resolving customer for invoice:', err);
+      } finally {
+        setInvoiceResolving(false);
+      }
+    }
+  };
+
+  const handleCloseInvoiceDialog = () => {
+    setInvoiceDialogOpen(false);
+    setInvoiceDispatch(null);
+    setInvoiceSubmitting(false);
+  };
+
+  const handleSubmitInvoice = async () => {
+    if (!invoiceDispatch) return;
+    const amountNum = Number(invoiceForm.amount);
+    if (!invoiceForm.customerName || !(amountNum > 0)) return;
+
+    setInvoiceSubmitting(true);
+    try {
+      const result = await arService.createInvoice({
+        customerCode: invoiceDispatch.ClientCode,
+        customerName: invoiceForm.customerName,
+        invoiceNumber: invoiceForm.invoiceNumber || null,
+        invoiceDate: invoiceForm.invoiceDate || null,
+        amount: amountNum,
+        termsDays: invoiceForm.termsDays ? Number(invoiceForm.termsDays) : null,
+        poRef: invoiceForm.poRef || null,
+        dispatchId: invoiceDispatch.id,
+        owner: user?.email || null,
+      });
+
+      if (!result) {
+        throw new Error('Invoice creation failed');
+      }
+
+      const formattedAmount = amountNum.toLocaleString('en-IN');
+      setInvoiceDialogOpen(false);
+      setInvoiceDispatch(null);
+      setSnackbar({
+        open: true,
+        message: `Invoice created — ₹${formattedAmount}`,
+        severity: 'success',
+        action: (
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => navigate('/crm/collections')}
+          >
+            View Collections
+          </Button>
+        ),
+      });
+    } catch (err) {
+      console.error('Error creating invoice from dispatch:', err);
+      setSnackbar({
+        open: true,
+        message: `Failed to create invoice: ${err.message || 'Unknown error'}`,
+        severity: 'error',
+      });
+    } finally {
+      setInvoiceSubmitting(false);
+    }
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -859,6 +985,17 @@ const DispatchManagement = () => {
                             >
                               <Visibility />
                             </IconButton>
+                            {dispatch.ClientCode && (
+                              <Tooltip title="Create Invoice">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={() => handleOpenInvoiceDialog(dispatch)}
+                                >
+                                  <ReceiptLong />
+                                </IconButton>
+                              </Tooltip>
+                            )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -930,15 +1067,28 @@ const DispatchManagement = () => {
                         </Typography>
                       </Box>
 
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<Visibility />}
-                        onClick={() => handleViewDispatch(dispatch)}
-                        sx={{ borderRadius: '12px' }}
-                      >
-                        View Details
-                      </Button>
+                      <Stack spacing={1}>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          startIcon={<Visibility />}
+                          onClick={() => handleViewDispatch(dispatch)}
+                          sx={{ borderRadius: '12px' }}
+                        >
+                          View Details
+                        </Button>
+                        {dispatch.ClientCode && (
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<ReceiptLong />}
+                            onClick={() => handleOpenInvoiceDialog(dispatch)}
+                            sx={{ borderRadius: '12px' }}
+                          >
+                            Create Invoice
+                          </Button>
+                        )}
+                      </Stack>
                     </AnimatedCard>
                   </Grid>
                 ))}
@@ -1079,15 +1229,140 @@ const DispatchManagement = () => {
           </DialogActions>
         </Dialog>
 
+        {/* Create Invoice Dialog */}
+        <Dialog
+          open={invoiceDialogOpen}
+          onClose={handleCloseInvoiceDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ReceiptLong color="primary" />
+                <Typography variant="h6">Create Invoice from Dispatch</Typography>
+              </Box>
+              <IconButton onClick={handleCloseInvoiceDialog}>
+                <Close />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            {invoiceResolving && <LinearProgress sx={{ mb: 2 }} />}
+            <Grid container spacing={2} sx={{ mt: 0 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Customer"
+                  value={invoiceForm.customerName}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, customerName: e.target.value }))
+                  }
+                  required
+                  helperText={
+                    invoiceDispatch?.ClientCode
+                      ? `Client code: ${invoiceDispatch.ClientCode}`
+                      : ''
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Amount (₹)"
+                  type="number"
+                  value={invoiceForm.amount}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, amount: e.target.value }))
+                  }
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">₹</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Invoice Number"
+                  placeholder="auto if blank"
+                  value={invoiceForm.invoiceNumber}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, invoiceNumber: e.target.value }))
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Invoice Date"
+                  type="date"
+                  value={invoiceForm.invoiceDate}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, invoiceDate: e.target.value }))
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Terms Days"
+                  type="number"
+                  placeholder="from customer / 30"
+                  value={invoiceForm.termsDays}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, termsDays: e.target.value }))
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="PO / Remarks"
+                  multiline
+                  minRows={2}
+                  value={invoiceForm.poRef}
+                  onChange={(e) =>
+                    setInvoiceForm((prev) => ({ ...prev, poRef: e.target.value }))
+                  }
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseInvoiceDialog}>Cancel</Button>
+            <Button
+              variant="contained"
+              startIcon={
+                invoiceSubmitting ? <CircularProgress size={16} color="inherit" /> : <ReceiptLong />
+              }
+              disabled={
+                invoiceSubmitting ||
+                !invoiceForm.customerName ||
+                !(Number(invoiceForm.amount) > 0)
+              }
+              onClick={handleSubmitInvoice}
+            >
+              Create Invoice
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         {/* Snackbar */}
         <Snackbar
           open={snackbar.open}
-          autoHideDuration={4000}
+          autoHideDuration={6000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
           <Alert
             onClose={() => setSnackbar({ ...snackbar, open: false })}
             severity={snackbar.severity}
+            action={snackbar.action}
             sx={{ width: '100%' }}
           >
             {snackbar.message}
