@@ -334,6 +334,48 @@ export async function listContacts(accountId) {
   }
 }
 
+/** Create a contact under an account. */
+export async function addContact(accountId, c) {
+  const { data, error } = await supabase
+    .from("crm_account_contacts")
+    .insert({
+      account_id: accountId,
+      full_name: c.full_name || null,
+      designation: c.designation || null,
+      department: c.department || null,
+      phone: c.phone || null,
+      email: c.email || null,
+      is_primary: !!c.is_primary,
+      notes: c.notes || null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/** Patch an existing contact row. */
+export async function updateContact(id, patch) {
+  const { data, error } = await supabase
+    .from("crm_account_contacts")
+    .update(patch)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/** Delete a contact row. */
+export async function deleteContact(id) {
+  const { error } = await supabase
+    .from("crm_account_contacts")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+  return true;
+}
+
 /** Addresses (billing/shipping) attached to an account. Degrades to []. */
 export async function listAddresses(accountId) {
   try {
@@ -859,6 +901,9 @@ const crmPipelineService = {
   duplicateActivity,
   listActivityAudit,
   listContacts,
+  addContact,
+  updateContact,
+  deleteContact,
   listAddresses,
   convertToClient,
   assignOwner,

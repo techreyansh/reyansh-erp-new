@@ -4,6 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Container,
@@ -13,6 +14,7 @@ import {
   DialogTitle,
   Divider,
   Drawer,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   Menu,
@@ -88,6 +90,9 @@ import {
   markActivityComplete,
   duplicateActivity,
   listContacts,
+  addContact,
+  updateContact,
+  deleteContact,
   convertToClient,
   assignOwner,
   addCompany,
@@ -1140,7 +1145,7 @@ function ActivityCard({ activity, userMap, onChanged, onError, onNotify }) {
 /* A "+ Add {field}" affordance for empty editable fields                   */
 /* ----------------------------------------------------------------------- */
 
-function EditableField({ label, value, onSave, type = "text", multiline = false, helper, display }) {
+function EditableField({ label, value, onSave, type = "text", multiline = false, helper, display, allowClear = true }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? "");
   const [busy, setBusy] = useState(false);
@@ -1152,8 +1157,19 @@ function EditableField({ label, value, onSave, type = "text", multiline = false,
   const commit = async () => {
     setBusy(true);
     try {
-      await onSave(draft.trim() === "" ? null : draft.trim());
+      const trimmed = String(draft).trim();
+      await onSave(trimmed === "" ? null : trimmed);
       setEditing(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const clear = async () => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(`Clear ${label.toLowerCase()}?`)) return;
+    setBusy(true);
+    try {
+      await onSave(null);
     } finally {
       setBusy(false);
     }
@@ -1219,9 +1235,18 @@ function EditableField({ label, value, onSave, type = "text", multiline = false,
           </Typography>
         )}
       </Box>
-      <IconButton size="small" onClick={begin} sx={{ flexShrink: 0 }}>
-        <EditIcon sx={{ fontSize: 15 }} />
-      </IconButton>
+      <Stack direction="row" spacing={0.25} sx={{ flexShrink: 0 }}>
+        <IconButton size="small" onClick={begin} disabled={busy}>
+          <EditIcon sx={{ fontSize: 15 }} />
+        </IconButton>
+        {allowClear && (
+          <Tooltip title={`Clear ${label.toLowerCase()}`}>
+            <IconButton size="small" onClick={clear} disabled={busy} sx={{ color: "text.disabled" }}>
+              <DeleteOutlineIcon sx={{ fontSize: 15 }} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
     </Stack>
   );
 }
@@ -1240,6 +1265,10 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
   const [headerMenu, setHeaderMenu] = useState(null);
   const [stageAnchor, setStageAnchor] = useState(null);
   const [converting, setConverting] = useState(false);
+
+  // Contacts + edit-company dialogs.
+  const [contactDialog, setContactDialog] = useState(null); // null | "new" | contact object
+  const [editDialog, setEditDialog] = useState(false);
 
   // Compact composer state.
   const [actType, setActType] = useState("note");
@@ -1287,6 +1316,28 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
       onChanged?.();
     } catch (e) {
       setErr(e?.message || "Update failed.");
+    }
+  };
+
+  const reloadContacts = useCallback(async () => {
+    try {
+      const c = await listContacts(id);
+      setContacts(c || []);
+    } catch (e) {
+      setErr(e?.message || "Failed to reload contacts.");
+    }
+  }, [id]);
+
+  const handleDeleteContact = async (contact) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(`Delete contact ${contact.full_name || ""}?`)) return;
+    try {
+      await deleteContact(contact.id);
+      await reloadContacts();
+      onChanged?.();
+      notify("Contact deleted.", "success");
+    } catch (e) {
+      setErr(e?.message || "Failed to delete contact.");
     }
   };
 
@@ -1504,6 +1555,13 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
               <Typography variant="h6" sx={{ fontWeight: 800 }} noWrap>
                 {company?.company_name || (loading ? "Loading…" : "Company")}
               </Typography>
+              {company && (
+                <Tooltip title="Edit details">
+                  <IconButton size="small" onClick={() => setEditDialog(true)} sx={{ p: 0.25 }}>
+                    <EditIcon sx={{ fontSize: 15 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
               {company && stageChipLabel && (
                 <Chip size="small" label={stageChipLabel} color="primary" sx={{ height: 22 }} />
               )}
@@ -1656,8 +1714,26 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
             <Stack spacing={2.5}>
               {/* Company information */}
               <Box>
-                <SectionTitle>Company information</SectionTitle>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <SectionTitle>Company information</SectionTitle>
+                  <Button
+                    size="small"
+                    startIcon={<EditIcon sx={{ fontSize: 14 }} />}
+                    onClick={() => setEditDialog(true)}
+                    sx={{ textTransform: "none", minWidth: 0 }}
+                  >
+                    Edit details
+                  </Button>
+                </Stack>
                 <Stack spacing={1} sx={{ mt: 1 }}>
+                  <EditableField
+                    label="Company name"
+                    value={company.company_name}
+                    allowClear={false}
+                    onSave={(v) => saveField({ company_name: v })}
+                  />
+                  <EditableField label="Phone" value={company.phone} onSave={(v) => saveField({ phone: v })} />
+                  <EditableField label="Email" type="email" value={company.email} onSave={(v) => saveField({ email: v })} />
                   <EditableField label="Industry" value={company.industry} onSave={(v) => saveField({ industry: v })} />
                   <EditableField label="City" value={company.city} onSave={(v) => saveField({ city: v })} />
                   <EditableField
@@ -1665,12 +1741,48 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                     value={company.product_category}
                     onSave={(v) => saveField({ product_category: v })}
                   />
+                  <EditableField
+                    label="Business type"
+                    value={company.business_type}
+                    onSave={(v) => saveField({ business_type: v })}
+                  />
+                  <EditableField label="Website" value={company.website} onSave={(v) => saveField({ website: v })} />
                   <EditableField label="GSTIN" value={company.gstin} onSave={(v) => saveField({ gstin: v })} />
                   <EditableField label="PAN" value={company.pan} onSave={(v) => saveField({ pan: v })} />
                   <EditableField
                     label="Payment terms"
                     value={company.payment_terms}
                     onSave={(v) => saveField({ payment_terms: v })}
+                  />
+                  <EditableField
+                    label="Credit limit (₹)"
+                    type="number"
+                    value={company.credit_limit ?? null}
+                    display={company.credit_limit != null ? inrCompact(company.credit_limit) : null}
+                    onSave={(v) => saveField({ credit_limit: v == null || v === "" ? null : Number(v) })}
+                  />
+                  <EditableField
+                    label="Credit period (days)"
+                    type="number"
+                    value={company.credit_period ?? null}
+                    onSave={(v) => saveField({ credit_period: v == null || v === "" ? null : Number(v) })}
+                  />
+                  <EditableField
+                    label="Delivery terms"
+                    value={company.delivery_terms}
+                    onSave={(v) => saveField({ delivery_terms: v })}
+                  />
+                  <EditableField
+                    label="Lead source"
+                    value={company.lead_source}
+                    onSave={(v) => saveField({ lead_source: v })}
+                  />
+                  <EditableField
+                    label="Rating"
+                    type="number"
+                    value={company.rating ?? null}
+                    helper="1–5"
+                    onSave={(v) => saveField({ rating: v == null || v === "" ? null : Number(v) })}
                   />
                   {isClient && (
                     <EditableField
@@ -1691,6 +1803,23 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                       }
                     />
                   )}
+                  {isProspect && (
+                    <>
+                      <EditableField
+                        label="Probability (%)"
+                        type="number"
+                        value={company.probability ?? null}
+                        onSave={(v) => saveField({ probability: v == null || v === "" ? null : Number(v) })}
+                      />
+                      <EditableField
+                        label="Expected value (₹)"
+                        type="number"
+                        value={company.expected_value ?? null}
+                        display={company.expected_value != null ? inrCompact(company.expected_value) : null}
+                        onSave={(v) => saveField({ expected_value: v == null || v === "" ? null : Number(v) })}
+                      />
+                    </>
+                  )}
                 </Stack>
               </Box>
 
@@ -1700,53 +1829,60 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
               <Box>
                 <SectionTitle>Contacts</SectionTitle>
                 <Stack spacing={0.75} sx={{ mt: 1 }}>
-                  {contacts.length === 0 ? (
-                    <>
-                      {company.contact_person && (
-                        <Paper variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {company.contact_person}
-                          </Typography>
-                          {(company.phone || company.email) && (
-                            <Typography variant="caption" color="text.secondary">
-                              {[company.phone, company.email].filter(Boolean).join(" · ")}
+                  {contacts.length === 0 && company.contact_person && (
+                    <Paper variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {company.contact_person}
+                      </Typography>
+                      {(company.phone || company.email) && (
+                        <Typography variant="caption" color="text.secondary">
+                          {[company.phone, company.email].filter(Boolean).join(" · ")}
+                        </Typography>
+                      )}
+                    </Paper>
+                  )}
+                  {contacts.map((c) => (
+                    <Paper key={c.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" useFlexGap>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {c.full_name || "—"}
+                            </Typography>
+                            {c.is_primary && (
+                              <Chip size="small" label="Primary" color="primary" sx={{ height: 18, "& .MuiChip-label": { px: 0.7, fontSize: 10 } }} />
+                            )}
+                          </Stack>
+                          {(c.designation || c.department) && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                              {[c.designation, c.department].filter(Boolean).join(" · ")}
                             </Typography>
                           )}
-                        </Paper>
-                      )}
-                      <Button
-                        size="small"
-                        startIcon={<AddIcon sx={{ fontSize: 16 }} />}
-                        onClick={() => notify("Contact management coming soon.", "info")}
-                        sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
-                      >
-                        Add contact
-                      </Button>
-                    </>
-                  ) : (
-                    contacts.map((c) => (
-                      <Paper key={c.id} variant="outlined" sx={{ p: 1, borderRadius: 1.5 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {c.full_name}
-                          </Typography>
-                          {c.is_primary && (
-                            <Chip size="small" label="Primary" color="primary" sx={{ height: 18, "& .MuiChip-label": { px: 0.7, fontSize: 10 } }} />
+                          {(c.phone || c.email) && (
+                            <Typography variant="caption" color="text.secondary" sx={{ wordBreak: "break-word" }}>
+                              {[c.phone, c.email].filter(Boolean).join(" · ")}
+                            </Typography>
                           )}
+                        </Box>
+                        <Stack direction="row" spacing={0.25} sx={{ flexShrink: 0 }}>
+                          <IconButton size="small" onClick={() => setContactDialog(c)}>
+                            <EditIcon sx={{ fontSize: 15 }} />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDeleteContact(c)} sx={{ color: "text.disabled" }}>
+                            <DeleteOutlineIcon sx={{ fontSize: 15 }} />
+                          </IconButton>
                         </Stack>
-                        {c.designation && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                            {[c.designation, c.department].filter(Boolean).join(" · ")}
-                          </Typography>
-                        )}
-                        {(c.phone || c.email) && (
-                          <Typography variant="caption" color="text.secondary">
-                            {[c.phone, c.email].filter(Boolean).join(" · ")}
-                          </Typography>
-                        )}
-                      </Paper>
-                    ))
-                  )}
+                      </Stack>
+                    </Paper>
+                  ))}
+                  <Button
+                    size="small"
+                    startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => setContactDialog("new")}
+                    sx={{ justifyContent: "flex-start", color: "text.secondary", textTransform: "none", px: 0.5 }}
+                  >
+                    Add contact
+                  </Button>
                 </Stack>
               </Box>
 
@@ -1983,6 +2119,15 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
 
       {/* Header overflow menu: stage move + create work order */}
       <Menu anchorEl={headerMenu} open={Boolean(headerMenu)} onClose={() => setHeaderMenu(null)}>
+        <MenuItem
+          onClick={() => {
+            setHeaderMenu(null);
+            setEditDialog(true);
+          }}
+          sx={{ fontSize: 13 }}
+        >
+          <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit details
+        </MenuItem>
         <MenuItem onClick={(e) => setStageAnchor(e.currentTarget)} sx={{ fontSize: 13 }}>
           <ArrowForwardIcon fontSize="small" sx={{ mr: 1 }} /> Move stage
         </MenuItem>
@@ -2022,6 +2167,38 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
         onPick={(toStage) => moveToStage(toStage)}
       />
 
+      <ContactDialog
+        open={Boolean(contactDialog)}
+        contact={contactDialog === "new" ? null : contactDialog}
+        onClose={() => setContactDialog(null)}
+        onSaved={async (msg) => {
+          setContactDialog(null);
+          await reloadContacts();
+          onChanged?.();
+          notify(msg, "success");
+        }}
+        onError={(m) => setErr(m)}
+        addContact={(payload) => addContact(id, payload)}
+        updateContact={updateContact}
+      />
+
+      {company && (
+        <EditCompanyDialog
+          open={editDialog}
+          company={company}
+          isProspect={isProspect}
+          isClient={isClient}
+          onClose={() => setEditDialog(false)}
+          onSaved={async () => {
+            setEditDialog(false);
+            await load();
+            onChanged?.();
+            notify("Company details updated.", "success");
+          }}
+          onError={(m) => setErr(m)}
+        />
+      )}
+
       <Snackbar
         open={Boolean(snack)}
         autoHideDuration={4000}
@@ -2046,6 +2223,305 @@ function SectionTitle({ children }) {
     >
       {children}
     </Typography>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/* Add / edit contact dialog                                                */
+/* ----------------------------------------------------------------------- */
+
+function ContactDialog({ open, contact, onClose, onSaved, onError, addContact, updateContact }) {
+  const empty = {
+    full_name: "",
+    designation: "",
+    department: "",
+    phone: "",
+    email: "",
+    is_primary: false,
+  };
+  const [form, setForm] = useState(empty);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    if (contact) {
+      setForm({
+        full_name: contact.full_name || "",
+        designation: contact.designation || "",
+        department: contact.department || "",
+        phone: contact.phone || "",
+        email: contact.email || "",
+        is_primary: !!contact.is_primary,
+      });
+    } else {
+      setForm(empty);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, contact]);
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const submit = async () => {
+    if (!form.full_name.trim()) {
+      onError?.("Contact name is required.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        full_name: form.full_name.trim(),
+        designation: form.designation.trim() || null,
+        department: form.department.trim() || null,
+        phone: form.phone.trim() || null,
+        email: form.email.trim() || null,
+        is_primary: form.is_primary,
+      };
+      if (contact) {
+        await updateContact(contact.id, payload);
+        await onSaved?.("Contact updated.");
+      } else {
+        await addContact(payload);
+        await onSaved?.("Contact added.");
+      }
+    } catch (e) {
+      onError?.(e?.message || "Failed to save contact.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 700 }}>{contact ? "Edit contact" : "Add contact"}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 0.5 }}>
+          <TextField label="Full name" value={form.full_name} onChange={set("full_name")} required fullWidth autoFocus />
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField label="Designation" value={form.designation} onChange={set("designation")} fullWidth />
+            <TextField label="Department" value={form.department} onChange={set("department")} fullWidth />
+          </Stack>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth />
+            <TextField label="Email" type="email" value={form.email} onChange={set("email")} fullWidth />
+          </Stack>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={form.is_primary}
+                onChange={(e) => setForm((f) => ({ ...f, is_primary: e.target.checked }))}
+              />
+            }
+            label="Primary contact"
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} disabled={saving}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={submit} disabled={saving}>
+          {saving ? "Saving…" : contact ? "Save" : "Add contact"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/* Edit company dialog — comprehensive single edit surface                  */
+/* ----------------------------------------------------------------------- */
+
+const RATING_OPTIONS = ["1", "2", "3", "4", "5"];
+
+function EditCompanyDialog({ open, company, isProspect, isClient, onClose, onSaved, onError }) {
+  const str = (v) => (v == null ? "" : String(v));
+  const buildForm = (c) => ({
+    company_name: str(c.company_name),
+    phone: str(c.phone),
+    email: str(c.email),
+    industry: str(c.industry),
+    city: str(c.city),
+    product_category: str(c.product_category),
+    business_type: str(c.business_type),
+    website: str(c.website),
+    gstin: str(c.gstin),
+    pan: str(c.pan),
+    payment_terms: str(c.payment_terms),
+    credit_limit: str(c.credit_limit),
+    credit_period: str(c.credit_period),
+    delivery_terms: str(c.delivery_terms),
+    lead_source: str(c.lead_source),
+    rating: str(c.rating),
+    prospect_stage: str(c.prospect_stage),
+    client_stage: str(c.client_stage),
+    annual_potential: str(c.annual_potential),
+    probability: str(c.probability),
+    expected_value: str(c.expected_value),
+  });
+
+  const [form, setForm] = useState(() => buildForm(company || {}));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open && company) setForm(buildForm(company));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, company]);
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const submit = async () => {
+    if (!form.company_name.trim()) {
+      onError?.("Company name is required.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const textVal = (v) => {
+        const t = String(v).trim();
+        return t === "" ? null : t;
+      };
+      const numVal = (v) => {
+        const t = String(v).trim();
+        return t === "" ? null : Number(t);
+      };
+      const patch = {
+        company_name: form.company_name.trim(),
+        phone: textVal(form.phone),
+        email: textVal(form.email),
+        industry: textVal(form.industry),
+        city: textVal(form.city),
+        product_category: textVal(form.product_category),
+        business_type: textVal(form.business_type),
+        website: textVal(form.website),
+        gstin: textVal(form.gstin),
+        pan: textVal(form.pan),
+        payment_terms: textVal(form.payment_terms),
+        credit_limit: numVal(form.credit_limit),
+        credit_period: numVal(form.credit_period),
+        delivery_terms: textVal(form.delivery_terms),
+        lead_source: textVal(form.lead_source),
+        rating: numVal(form.rating),
+      };
+      if (isProspect) {
+        if (form.prospect_stage) patch.prospect_stage = form.prospect_stage;
+        patch.probability = numVal(form.probability);
+        patch.expected_value = numVal(form.expected_value);
+      }
+      if (isClient) {
+        if (form.client_stage) patch.client_stage = form.client_stage;
+        patch.annual_potential = numVal(form.annual_potential);
+      }
+      await updateCompany(company.id, patch);
+      await onSaved?.();
+    } catch (e) {
+      onError?.(e?.message || "Failed to update company.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth scroll="paper">
+      <DialogTitle sx={{ fontWeight: 700 }}>Edit company</DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={2.5} sx={{ mt: 0.5 }}>
+          <Box>
+            <SectionTitle>Company</SectionTitle>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField label="Company name" value={form.company_name} onChange={set("company_name")} required fullWidth />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth />
+                <TextField label="Email" type="email" value={form.email} onChange={set("email")} fullWidth />
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Industry" value={form.industry} onChange={set("industry")} fullWidth />
+                <TextField label="City" value={form.city} onChange={set("city")} fullWidth />
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Product category" value={form.product_category} onChange={set("product_category")} fullWidth />
+                <TextField label="Business type" value={form.business_type} onChange={set("business_type")} fullWidth />
+              </Stack>
+              <TextField label="Website" value={form.website} onChange={set("website")} fullWidth />
+            </Stack>
+          </Box>
+
+          <Box>
+            <SectionTitle>Tax &amp; terms</SectionTitle>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="GSTIN" value={form.gstin} onChange={set("gstin")} fullWidth />
+                <TextField label="PAN" value={form.pan} onChange={set("pan")} fullWidth />
+              </Stack>
+              <TextField label="Payment terms" value={form.payment_terms} onChange={set("payment_terms")} fullWidth />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Credit limit (₹)" type="number" value={form.credit_limit} onChange={set("credit_limit")} fullWidth />
+                <TextField label="Credit period (days)" type="number" value={form.credit_period} onChange={set("credit_period")} fullWidth />
+              </Stack>
+              <TextField label="Delivery terms" value={form.delivery_terms} onChange={set("delivery_terms")} fullWidth />
+            </Stack>
+          </Box>
+
+          <Box>
+            <SectionTitle>Commercial</SectionTitle>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField select label="Lead source" value={form.lead_source} onChange={set("lead_source")} fullWidth>
+                  <MenuItem value="">—</MenuItem>
+                  {SOURCES.map((s) => (
+                    <MenuItem key={s} value={s}>
+                      {s}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField select label="Rating" value={form.rating} onChange={set("rating")} fullWidth>
+                  <MenuItem value="">—</MenuItem>
+                  {RATING_OPTIONS.map((r) => (
+                    <MenuItem key={r} value={r}>
+                      {r}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+              {isProspect && (
+                <>
+                  <TextField select label="Stage" value={form.prospect_stage} onChange={set("prospect_stage")} fullWidth>
+                    {PROSPECT_STAGES.map((s) => (
+                      <MenuItem key={s.key} value={s.key}>
+                        {s.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                    <TextField label="Probability (%)" type="number" value={form.probability} onChange={set("probability")} fullWidth />
+                    <TextField label="Expected value (₹)" type="number" value={form.expected_value} onChange={set("expected_value")} fullWidth />
+                  </Stack>
+                </>
+              )}
+              {isClient && (
+                <>
+                  <TextField select label="Stage" value={form.client_stage} onChange={set("client_stage")} fullWidth>
+                    {CLIENT_STAGES.map((s) => (
+                      <MenuItem key={s.key} value={s.key}>
+                        {s.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField label="Annual potential (₹)" type="number" value={form.annual_potential} onChange={set("annual_potential")} fullWidth />
+                </>
+              )}
+            </Stack>
+          </Box>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} disabled={saving}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={submit} disabled={saving}>
+          {saving ? "Saving…" : "Save changes"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
