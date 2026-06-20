@@ -57,6 +57,11 @@ UPDATE public.crm_pipeline SET prospect_stage = CASE stage
     ELSE 'lead' END
   WHERE prospect_stage IS NULL;
 
+-- A prospect can't sit at the 'converted' stage (converting makes it a client).
+-- The legacy 'recurring_client' seed wrongly mapped PC-prospects here -> reset.
+UPDATE public.crm_pipeline SET prospect_stage = 'contacted'
+  WHERE account_type = 'prospect' AND prospect_stage = 'converted';
+
 UPDATE public.crm_pipeline SET client_stage = 'active'
   WHERE account_type = 'client' AND client_stage IS NULL;
 UPDATE public.crm_pipeline SET lead_source = COALESCE(lead_source, source) WHERE lead_source IS NULL;
