@@ -513,9 +513,13 @@ const Header = () => {
             </Box>
           )}
           {!isCompactNav && user && !permissions?.loading && (
-            <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
+            <Box sx={{
+              display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center",
+              flexWrap: "nowrap", minWidth: 0, overflowX: "auto",
+              "&::-webkit-scrollbar": { display: "none" }, scrollbarWidth: "none",
+            }}>
               {finalMenuGroups.map((group) => (
-                <Box key={group.key} sx={{ position: "relative" }}>
+                <Box key={group.key} sx={{ position: "relative", flexShrink: 0 }}>
                   <Tooltip title={group.label} placement="bottom">
                     <Button
                       color="inherit"
@@ -523,18 +527,22 @@ const Header = () => {
                       endIcon={<ArrowDropDown />}
                       onClick={(e) => handleMenuOpen(e, group.key)}
                       sx={{
-                        mx: 0.5,
-                        py: 1.25,
-                        px: 2.5,
+                        mx: 0.25,
+                        py: 1,
+                        px: 1.25,
                         borderRadius: 1.5,
                         textTransform: "none",
                         fontWeight: 500,
-                        fontSize: "0.9375rem",
+                        fontSize: "0.85rem",
+                        whiteSpace: "nowrap",
+                        lineHeight: 1.2,
                         backgroundColor: isGroupActive(group) ? theme.palette.primary.main + "14" : "transparent",
                         color: isGroupActive(group) ? theme.palette.primary.main : theme.palette.text.secondary,
                         border: "none",
                         minWidth: "auto",
                         transition: "all 0.2s ease",
+                        "& .MuiButton-startIcon": { mr: 0.5, "& svg": { fontSize: 20 } },
+                        "& .MuiButton-endIcon": { ml: 0 },
                         "&:hover": {
                           backgroundColor: theme.palette.primary.main + "0F",
                           color: theme.palette.primary.main,
