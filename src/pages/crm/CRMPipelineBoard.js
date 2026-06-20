@@ -160,9 +160,11 @@ const leadScoreForStage = (stageKey) => {
 /* Card component (shared shape for board columns)                          */
 /* ----------------------------------------------------------------------- */
 
-function PipelineCard({ company, onOpen, onMove, stages, currentStageKey, userMap }) {
+function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages, currentStageKey, userMap }) {
   const theme = useTheme();
   const [moveAnchor, setMoveAnchor] = useState(null);
+  // Tracks whether a drag just occurred so the trailing click doesn't open the drawer.
+  const draggedRef = React.useRef(false);
   const days = daysSince(company.stage_entered_at);
   const overdue = isPast(company.next_action_date);
   const score = leadScoreForStage(company.stage);
@@ -170,11 +172,33 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey, userMa
   return (
     <Paper
       variant="outlined"
-      onClick={() => onOpen(company.id)}
+      draggable
+      onDragStart={(e) => {
+        draggedRef.current = true;
+        try {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", String(company.id));
+        } catch {
+          /* some browsers restrict dataTransfer access */
+        }
+        onDragStart?.(company.id, company.stage);
+      }}
+      onDragEnd={() => {
+        onDragEnd?.();
+        // Reset the guard just after the click would have fired.
+        setTimeout(() => {
+          draggedRef.current = false;
+        }, 0);
+      }}
+      onClick={() => {
+        if (draggedRef.current) return; // ignore the click that follows a drag
+        onOpen(company.id);
+      }}
       sx={{
         p: 1.25,
         borderRadius: 2,
-        cursor: "pointer",
+        cursor: "grab",
+        "&:active": { cursor: "grabbing" },
         transition: "border-color .15s ease, box-shadow .15s ease",
         "&:hover": {
           borderColor: alpha(theme.palette.primary.main, 0.5),
@@ -187,7 +211,14 @@ function PipelineCard({ company, onOpen, onMove, stages, currentStageKey, userMa
           {company.company_name}
         </Typography>
 
-        <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          alignItems="center"
+          flexWrap="wrap"
+          useFlexGap
+          onClick={(e) => e.stopPropagation()}
+        >
           {company.owner_email ? (
             <Chip
               size="small"
@@ -306,17 +337,43 @@ function StageMoveMenu({ anchorEl, stages, currentStageKey, onClose, onPick }) {
 /* Generic Kanban board                                                     */
 /* ----------------------------------------------------------------------- */
 
-function KanbanColumn({ stage, items, theme, renderCard }) {
+function KanbanColumn({ stage, items, theme, renderCard, onDropCard }) {
   const total = items.reduce((sum, it) => sum + (Number(it.value || it.amount) || 0), 0);
+  const [isOver, setIsOver] = useState(false);
   return (
     <Box
+      onDragOver={(e) => {
+        if (!onDropCard) return;
+        e.preventDefault(); // allow the drop
+        try {
+          e.dataTransfer.dropEffect = "move";
+        } catch {
+          /* noop */
+        }
+        if (!isOver) setIsOver(true);
+      }}
+      onDragLeave={(e) => {
+        // Only clear when the pointer actually leaves the column (not a child).
+        if (!e.currentTarget.contains(e.relatedTarget)) setIsOver(false);
+      }}
+      onDrop={(e) => {
+        if (!onDropCard) return;
+        e.preventDefault();
+        setIsOver(false);
+        onDropCard(stage.key);
+      }}
       sx={{
         minWidth: 280,
         width: 280,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        bgcolor: alpha(theme.palette.text.primary, 0.03),
+        bgcolor: isOver
+          ? alpha(theme.palette.primary.main, 0.1)
+          : alpha(theme.palette.text.primary, 0.03),
+        outline: isOver ? `2px dashed ${alpha(theme.palette.primary.main, 0.5)}` : "none",
+        outlineOffset: -2,
+        transition: "background-color .15s ease",
         borderRadius: 2,
         p: 1,
         maxHeight: "100%",
@@ -480,6 +537,122 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
         </Button>
         <Button variant="contained" onClick={submit} disabled={saving}>
           {saving ? "Saving…" : "Add company"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/* Log & plan next-action dialog (shown after a stage move)                 */
+/* ----------------------------------------------------------------------- */
+
+function LogNextActionDialog({ open, move, onClose, onSaved, onError }) {
+  const [note, setNote] = useState("");
+  const [nextAction, setNextAction] = useState("");
+  const [nextDate, setNextDate] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Reset the form whenever a new move opens the dialog.
+  useEffect(() => {
+    if (open) {
+      setNote("");
+      setNextAction("");
+      setNextDate("");
+      setSaving(false);
+    }
+  }, [open, move]);
+
+  if (!move) return null;
+
+  const stageLabel = move.stageLabel || move.toStage;
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      // 1) Log an activity for the move (prospects only — order cycles have no
+      //    crm_pipeline_activity row, so we skip it for the recurring view).
+      if (move.kind === "prospect") {
+        const subject = note.trim() || `Moved to ${stageLabel}`;
+        await addActivity({
+          pipeline_id: move.id,
+          activity_type: note.trim() ? "note" : "meeting",
+          subject,
+          body: note.trim() || null,
+          activity_at: new Date().toISOString(),
+          next_follow_up_date: nextDate || null,
+        });
+        // 2) Save the planned next action so it surfaces on "My Follow-ups".
+        if (nextAction.trim() || nextDate) {
+          await updateCompany(move.id, {
+            next_action: nextAction.trim() || null,
+            next_action_date: nextDate || null,
+          });
+        }
+      }
+      onSaved?.();
+    } catch (e) {
+      onError?.(e?.message || "Failed to save activity / next action.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 700 }}>
+        Log &amp; plan next action
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+          {move.companyName} → {stageLabel}
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 0.5 }}>
+          {move.kind !== "prospect" && (
+            <Alert severity="info">
+              Stage updated. Activity logging is available on prospect cards.
+            </Alert>
+          )}
+          <TextField
+            label="What happened? (optional)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            multiline
+            minRows={2}
+            fullWidth
+            autoFocus
+            disabled={move.kind !== "prospect"}
+          />
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField
+              label="Next action"
+              value={nextAction}
+              onChange={(e) => setNextAction(e.target.value)}
+              fullWidth
+              disabled={move.kind !== "prospect"}
+            />
+            <TextField
+              label="Due date"
+              type="date"
+              value={nextDate}
+              onChange={(e) => setNextDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              disabled={move.kind !== "prospect"}
+            />
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} disabled={saving}>
+          Skip
+        </Button>
+        <Button
+          variant="contained"
+          onClick={save}
+          disabled={saving || move.kind !== "prospect"}
+        >
+          {saving ? "Saving…" : "Save"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -1187,7 +1360,7 @@ function CreateWorkOrderDialog({ open, onClose, cycle, onCreated, onError }) {
 /* Recurring order-cycle card                                               */
 /* ----------------------------------------------------------------------- */
 
-function OrderCycleCard({ cycle, onMove, theme, onNotify }) {
+function OrderCycleCard({ cycle, onMove, theme, onNotify, onDragStart, onDragEnd }) {
   const [moveAnchor, setMoveAnchor] = useState(null);
   const [woDialogOpen, setWoDialogOpen] = useState(false);
   const [workOrders, setWorkOrders] = useState([]);
@@ -1210,7 +1383,26 @@ function OrderCycleCard({ cycle, onMove, theme, onNotify }) {
   }, [loadWorkOrders]);
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 2 }}>
+    <Paper
+      variant="outlined"
+      draggable
+      onDragStart={(e) => {
+        try {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", String(cycle.id));
+        } catch {
+          /* noop */
+        }
+        onDragStart?.(cycle.id, cycle.cycle_stage);
+      }}
+      onDragEnd={() => onDragEnd?.()}
+      sx={{
+        p: 1.25,
+        borderRadius: 2,
+        cursor: "grab",
+        "&:active": { cursor: "grabbing" },
+      }}
+    >
       <Stack spacing={0.5}>
         <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
           {cycle.company_name || cycle.customer_code}
@@ -1354,6 +1546,11 @@ export default function CRMPipelineBoard() {
   const [drawerId, setDrawerId] = useState(null);
   const [snack, setSnack] = useState(null); // { message, severity }
 
+  // Drag-and-drop: stash the card currently being dragged ({ id, stage }).
+  const dragRef = React.useRef(null);
+  // After a successful stage move we prompt for an activity + next action.
+  const [pendingMove, setPendingMove] = useState(null);
+
   const notify = useCallback((message, severity = "info") => {
     setSnack({ message, severity });
   }, []);
@@ -1444,23 +1641,71 @@ export default function CRMPipelineBoard() {
     [recurring, matchesScope, matchesSearch]
   );
 
+  // Move a prospect, then prompt to log the move + plan a next action.
   const handleMoveStage = async (id, toStage) => {
+    const company = prospects.find((p) => p.id === id);
+    if (company && company.stage === toStage) return; // no-op
     try {
       await moveStage(id, toStage, null);
       await loadAll();
+      setPendingMove({
+        kind: "prospect",
+        id,
+        companyName: company?.company_name || "Company",
+        toStage,
+        stageLabel: STAGE_LABELS[toStage] || toStage,
+      });
     } catch (e) {
       setErr(e?.message || "Move failed.");
     }
   };
 
   const handleMoveCycle = async (id, toStage) => {
+    const cycle = cycles.find((c) => c.id === id);
+    if (cycle && cycle.cycle_stage === toStage) return; // no-op
     try {
       await moveOrderCycle(id, toStage, null);
       await loadAll();
+      setPendingMove({
+        kind: "recurring",
+        id,
+        companyName: cycle?.company_name || cycle?.customer_code || "Customer",
+        toStage,
+        stageLabel: CYCLE_STAGE_LABELS[toStage] || toStage,
+      });
     } catch (e) {
       setErr(e?.message || "Move failed.");
     }
   };
+
+  // Native drag handlers shared by both boards.
+  const handleDragStart = useCallback((id, stage) => {
+    dragRef.current = { id, stage };
+  }, []);
+  const handleDragEnd = useCallback(() => {
+    dragRef.current = null;
+  }, []);
+
+  // A card was dropped onto a column. Only move if the stage actually changed.
+  const handleDropProspect = useCallback(
+    (toStage) => {
+      const dragged = dragRef.current;
+      dragRef.current = null;
+      if (!dragged || dragged.stage === toStage) return;
+      handleMoveStage(dragged.id, toStage);
+    },
+    [handleMoveStage]
+  );
+
+  const handleDropCycle = useCallback(
+    (toStage) => {
+      const dragged = dragRef.current;
+      dragRef.current = null;
+      if (!dragged || dragged.stage === toStage) return;
+      handleMoveCycle(dragged.id, toStage);
+    },
+    [handleMoveCycle]
+  );
 
   const handleAddCompany = async (payload) => {
     await addCompany(payload);
@@ -1542,6 +1787,9 @@ export default function CRMPipelineBoard() {
             byStage={prospectsByStage}
             onOpen={(id) => setDrawerId(id)}
             onMove={handleMoveStage}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDropCard={handleDropProspect}
             empty={filteredProspects.length === 0}
             scope={scope}
             userMap={userMap}
@@ -1555,6 +1803,9 @@ export default function CRMPipelineBoard() {
             onMove={handleMoveCycle}
             onOpen={(id) => setDrawerId(id)}
             onNotify={notify}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDropCard={handleDropCycle}
             userMap={userMap}
           />
         )}
@@ -1574,6 +1825,18 @@ export default function CRMPipelineBoard() {
         onChanged={loadAll}
         users={assignableUsers}
         userMap={userMap}
+      />
+
+      <LogNextActionDialog
+        open={Boolean(pendingMove)}
+        move={pendingMove}
+        onClose={() => setPendingMove(null)}
+        onSaved={async () => {
+          setPendingMove(null);
+          await loadAll();
+          notify("Activity logged & next action planned.", "success");
+        }}
+        onError={(msg) => setErr(msg)}
       />
 
       <Snackbar
@@ -1597,7 +1860,7 @@ export default function CRMPipelineBoard() {
   );
 }
 
-function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope, userMap }) {
+function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd, onDropCard, empty, scope, userMap }) {
   if (empty) {
     return (
       <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
@@ -1618,11 +1881,14 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope, userMap 
           stage={stage}
           items={byStage[stage.key] || []}
           theme={theme}
+          onDropCard={onDropCard}
           renderCard={(company) => (
             <PipelineCard
               company={company}
               onOpen={onOpen}
               onMove={onMove}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
               stages={STAGES}
               currentStageKey={company.stage}
               userMap={userMap}
@@ -1634,7 +1900,7 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, empty, scope, userMap 
   );
 }
 
-function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify, userMap }) {
+function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen, onNotify, onDragStart, onDragEnd, onDropCard, userMap }) {
   const cycleCount = cycles.length;
   return (
     <Stack spacing={2} sx={{ height: "100%" }}>
@@ -1699,8 +1965,16 @@ function RecurringView({ theme, cyclesByStage, customers, cycles, onMove, onOpen
                 stage={stage}
                 items={cyclesByStage[stage.key] || []}
                 theme={theme}
+                onDropCard={onDropCard}
                 renderCard={(cycle) => (
-                  <OrderCycleCard cycle={cycle} onMove={onMove} theme={theme} onNotify={onNotify} />
+                  <OrderCycleCard
+                    cycle={cycle}
+                    onMove={onMove}
+                    theme={theme}
+                    onNotify={onNotify}
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
+                  />
                 )}
               />
             ))}
