@@ -46,6 +46,9 @@ import {
   ViewInArRounded as DrumIcon,
   TrackChangesRounded as TrackingIcon,
   InsightsRounded as ManagerIcon,
+  PaletteRounded as ColourIcon,
+  StraightenRounded as SizeIcon,
+  ScienceRounded as MaterialIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -63,6 +66,9 @@ import CableProductionCalendar from "./CableProductionCalendar";
 import CableDrumPlanning from "./CableDrumPlanning";
 import CableOrderTracking from "./CableOrderTracking";
 import CableManagerDashboard from "./CableManagerDashboard";
+import ColourMaster from "./ColourMaster";
+import SizeMaster from "./SizeMaster";
+import MaterialMaster from "./MaterialMaster";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -700,6 +706,27 @@ const CableProductionModule = () => {
       component: <MachineMaster />,
       description: "Machine specs & capacity",
       route: "/cable-production/machine-master",
+    },
+    {
+      label: "Colour Master",
+      icon: <ColourIcon />,
+      component: <ColourMaster />,
+      description: "Core & sheath colours",
+      route: "/cable-production/colour-master",
+    },
+    {
+      label: "Size Master",
+      icon: <SizeIcon />,
+      component: <SizeMaster />,
+      description: "Conductor sizes & strands",
+      route: "/cable-production/size-master",
+    },
+    {
+      label: "Material Master",
+      icon: <MaterialIcon />,
+      component: <MaterialMaster />,
+      description: "Copper, PVC & raw materials",
+      route: "/cable-production/material-master",
     },
   ];
 
