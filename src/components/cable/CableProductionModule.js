@@ -52,6 +52,7 @@ import {
   RouteRounded as RoutingIcon,
   AccountTreeRounded as BomIcon,
   TuneRounded as PresetIcon,
+  AutoFixHighRounded as WizardIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -75,6 +76,7 @@ import MaterialMaster from "./MaterialMaster";
 import RoutingTemplate from "./RoutingTemplate";
 import BomTemplate from "./BomTemplate";
 import PlanningPreset from "./PlanningPreset";
+import CableProductionPlanWizard from "./CableProductionPlanWizard";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -649,6 +651,13 @@ const CableProductionModule = () => {
       component: <MachineScheduling />,
       description: "Resource allocation",
       route: "/cable-production/machine-scheduling",
+    },
+    {
+      label: "Plan Wizard",
+      icon: <WizardIcon />,
+      component: <CableProductionPlanWizard />,
+      description: "Guided 6-step plan → release",
+      route: "/cable-production/plan-wizard",
     },
     {
       label: "Production Plans",

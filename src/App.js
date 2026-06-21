@@ -361,6 +361,11 @@ function AppContent() {
                       <CableProductionModule />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/cable-production/plan-wizard" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
                   <Route path="/cable-production/plans" element={
                     <ProtectedRouteGate>
                       <CableProductionModule />
