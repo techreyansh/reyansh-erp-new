@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import FullScreenLogoLoader from '../common/FullScreenLogoLoader';
+import { takeIntendedPath } from '../../lib/postLoginRedirect';
 
 /**
  * OAuth may return to `/` with ?code= or ?error=. All navigation runs in useEffect (hooks order stays stable).
@@ -22,7 +23,8 @@ const RootRedirect = () => {
     (async () => {
       const hasSession = await syncUserFromSupabase();
       if (cancelled) return;
-      navigate(hasSession ? '/home' : '/login', { replace: true });
+      // On sign-in, return the user to the page they originally requested (if any).
+      navigate(hasSession ? (takeIntendedPath() || '/home') : '/login', { replace: true });
     })();
 
     return () => {

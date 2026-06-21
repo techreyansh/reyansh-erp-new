@@ -4,6 +4,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import { getModuleKeyForPath, getRequiredActionForPath } from '../../config/moduleAccess';
+import { rememberIntendedPath } from '../../lib/postLoginRedirect';
 
 /**
  * Waits for auth + optional Supabase sync (fixes race: getSession has user before React state updates).
@@ -54,6 +55,8 @@ const ProtectedRoute = ({ children, moduleKey }) => {
   }
 
   if (!user) {
+    // Remember the target so OAuth sign-in returns the user here, not to /home.
+    rememberIntendedPath(location.pathname + location.search);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
