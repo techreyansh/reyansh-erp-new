@@ -43,6 +43,7 @@ import {
   InventoryRounded as MrpIcon,
   SpeedRounded as CapacityIcon,
   CalendarMonthRounded as CalendarIcon,
+  ViewInArRounded as DrumIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -57,6 +58,7 @@ import CableProductionPlans from "./CableProductionPlans";
 import CableMrpDashboard from "./CableMrpDashboard";
 import CableCapacityBoard from "./CableCapacityBoard";
 import CableProductionCalendar from "./CableProductionCalendar";
+import CableDrumPlanning from "./CableDrumPlanning";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -659,6 +661,13 @@ const CableProductionModule = () => {
       component: <CableProductionCalendar />,
       description: "Week / month schedule",
       route: "/cable-production/calendar",
+    },
+    {
+      label: "Drums",
+      icon: <DrumIcon />,
+      component: <CableDrumPlanning />,
+      description: "Multi-drum split per stage",
+      route: "/cable-production/drums",
     },
     {
       label: "Cable Master",
