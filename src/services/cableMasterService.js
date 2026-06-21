@@ -104,12 +104,39 @@ export async function deleteCable(id) {
   return true;
 }
 
+// Columns copied when duplicating a cable (everything but identity/computed-id).
+const CABLE_COPY_COLS = [
+  'cable_name', 'item_id', 'cores', 'flat_round', 'strand_construction', 'copper_area_sqmm',
+  'conductor_od', 'core_od', 'finished_od', 'colour_combination', 'insulation_thickness',
+  'sheath_thickness', 'voltage', 'standard_length_m', 'weight_per_meter', 'is_power_cord',
+  'cord_length', 'notes', 'is_active',
+];
+
+/** Duplicate a cable under a new (auto-suffixed) code. */
+export async function duplicateCable(row, newCode) {
+  const copy = {};
+  CABLE_COPY_COLS.forEach((k) => { if (row[k] !== undefined) copy[k] = row[k]; });
+  copy.cable_code = newCode || `${row.cable_code || 'CBL'}-2`;
+  copy.cable_name = row.cable_name ? `${row.cable_name} (copy)` : copy.cable_code;
+  return unwrap(await supabase.from('cable_master').insert(copy).select().single(), 'Duplicate cable');
+}
+
+/** Archive (soft-delete) / restore a cable. */
+export async function archiveCable(id, archived = true) {
+  return unwrap(
+    await supabase.from('cable_master').update({ archived_at: archived ? new Date().toISOString() : null }).eq('id', id).select().single(),
+    'Archive cable'
+  );
+}
+
 const cableMasterService = {
   toEngineCable,
   computeSpecs,
   listCables,
   saveCable,
   deleteCable,
+  duplicateCable,
+  archiveCable,
 };
 
 export default cableMasterService;
