@@ -24,6 +24,7 @@ import {
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
 import { loadEngineMachines } from "../../services/cableProductionService";
+import { listRows } from "../../services/refMasterService";
 
 // Categorical stage-identity palette (one distinct hue per production stage) — data/legend colors, kept literal so stages stay visually distinguishable.
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
@@ -56,6 +57,9 @@ export default function CableAutoPlanner() {
   const [orders, setOrders] = useState([]);
   // Machine Master (ppc_machines) → engine machines; DEFAULT_MACHINES until loaded.
   const [machines, setMachines] = useState(DEFAULT_MACHINES);
+  // Planning presets (named option sets) the planner can apply in one click.
+  const [presets, setPresets] = useState([]);
+  const [presetId, setPresetId] = useState("");
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [snack, setSnack] = useState(null);
@@ -96,6 +100,15 @@ export default function CableAutoPlanner() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { listRows("planning_preset", "code").then((r) => setPresets((r || []).filter((p) => !p.archived_at))).catch(() => {}); }, []);
+
+  // Apply a named preset to the planning options (engine unchanged).
+  const applyPreset = (id) => {
+    setPresetId(id);
+    const p = presets.find((x) => x.id === id);
+    if (!p) return;
+    setOpts((o) => ({ ...o, priority: p.priority || o.priority, mode: p.mode || o.mode, batching: !!p.batching, batchWindow: p.batch_window || o.batchWindow, checkStock: p.check_stock || o.checkStock, scope: p.scope || o.scope }));
+  };
 
   const cablesById = useMemo(() => Object.fromEntries(cables.map((c) => [c.id, c])), [cables]);
 
@@ -238,6 +251,13 @@ export default function CableAutoPlanner() {
         </Stack>
 
         <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center">
+          {presets.length > 0 && (
+            <TextField select size="small" label="Preset" value={presetId} onChange={(e) => applyPreset(e.target.value)} sx={{ width: 210 }}
+              helperText="Apply a saved planning preset">
+              <MenuItem value="">— none —</MenuItem>
+              {presets.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+            </TextField>
+          )}
           <TextField size="small" type="date" label="Plan start" InputLabelProps={{ shrink: true }}
             value={opts.startDate} onChange={(e) => setOpts({ ...opts, startDate: e.target.value })} sx={{ width: 160 }} />
           <TextField select size="small" label="Mode" value={opts.mode} onChange={(e) => setOpts({ ...opts, mode: e.target.value })} sx={{ width: 150 }}>

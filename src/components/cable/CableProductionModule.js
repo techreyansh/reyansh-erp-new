@@ -51,6 +51,7 @@ import {
   ScienceRounded as MaterialIcon,
   RouteRounded as RoutingIcon,
   AccountTreeRounded as BomIcon,
+  TuneRounded as PresetIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -73,6 +74,7 @@ import SizeMaster from "./SizeMaster";
 import MaterialMaster from "./MaterialMaster";
 import RoutingTemplate from "./RoutingTemplate";
 import BomTemplate from "./BomTemplate";
+import PlanningPreset from "./PlanningPreset";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -745,6 +747,13 @@ const CableProductionModule = () => {
       component: <BomTemplate />,
       description: "Reusable material line-sets",
       route: "/cable-production/bom-template",
+    },
+    {
+      label: "Planning Presets",
+      icon: <PresetIcon />,
+      component: <PlanningPreset />,
+      description: "One-click planner option sets",
+      route: "/cable-production/planning-presets",
     },
   ];
 
