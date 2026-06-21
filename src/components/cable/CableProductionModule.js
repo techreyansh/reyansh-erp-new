@@ -39,6 +39,8 @@ import {
   ErrorOutline as ErrorIcon,
   CableRounded as CableMasterIcon,
   PrecisionManufacturingRounded as MachineMasterIcon,
+  AssignmentRounded as ProductionPlansIcon,
+  InventoryRounded as MrpIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -49,6 +51,8 @@ import CableAutoPlanner from "./CableAutoPlanner";
 import CableJobCards from "./CableJobCards";
 import CableMaster from "./CableMaster";
 import MachineMaster from "./MachineMaster";
+import CableProductionPlans from "./CableProductionPlans";
+import CableMrpDashboard from "./CableMrpDashboard";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -623,6 +627,20 @@ const CableProductionModule = () => {
       component: <MachineScheduling />,
       description: "Resource allocation",
       route: "/cable-production/machine-scheduling",
+    },
+    {
+      label: "Production Plans",
+      icon: <ProductionPlansIcon />,
+      component: <CableProductionPlans />,
+      description: "Plan, route & release WOs",
+      route: "/cable-production/plans",
+    },
+    {
+      label: "MRP",
+      icon: <MrpIcon />,
+      component: <CableMrpDashboard />,
+      description: "Material requirement",
+      route: "/cable-production/mrp",
     },
     {
       label: "Cable Master",

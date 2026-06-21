@@ -361,6 +361,16 @@ function AppContent() {
                       <CableProductionModule />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/cable-production/plans" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/mrp" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
 
                   {/* Old Molding Route (kept for backward compatibility) */}
                   <Route path="/molding-production" element={
