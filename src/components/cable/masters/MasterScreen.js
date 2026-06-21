@@ -121,7 +121,8 @@ export default function MasterScreen({
     const v = dialog.form[ff.key];
     const common = { fullWidth: true, size: "small", label: ff.label };
     let control;
-    if (ff.type === "select") control = <TextField select {...common} value={v ?? ""} onChange={(e) => setField(ff.key, e.target.value)}>{(ff.options || []).map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}</TextField>;
+    if (ff.type === "custom") control = ff.render(v, (nv) => setField(ff.key, nv), dialog.form);
+    else if (ff.type === "select") control = <TextField select {...common} value={v ?? ""} onChange={(e) => setField(ff.key, e.target.value)}>{(ff.options || []).map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}</TextField>;
     else if (ff.type === "switch") control = <FormControlLabel control={<Switch checked={!!v} onChange={(e) => setField(ff.key, e.target.checked)} />} label={ff.label} />;
     else if (ff.type === "multiselect") control = <Autocomplete multiple freeSolo size="small" options={ff.options || []} value={v || []} onChange={(_, nv) => setField(ff.key, nv)} renderInput={(p) => <TextField {...p} label={ff.label} />} />;
     else if (ff.type === "textarea") control = <TextField {...common} multiline minRows={ff.rows || 2} value={v ?? ""} onChange={(e) => setField(ff.key, e.target.value)} />;

@@ -49,6 +49,8 @@ import {
   PaletteRounded as ColourIcon,
   StraightenRounded as SizeIcon,
   ScienceRounded as MaterialIcon,
+  RouteRounded as RoutingIcon,
+  AccountTreeRounded as BomIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -69,6 +71,8 @@ import CableManagerDashboard from "./CableManagerDashboard";
 import ColourMaster from "./ColourMaster";
 import SizeMaster from "./SizeMaster";
 import MaterialMaster from "./MaterialMaster";
+import RoutingTemplate from "./RoutingTemplate";
+import BomTemplate from "./BomTemplate";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -727,6 +731,20 @@ const CableProductionModule = () => {
       component: <MaterialMaster />,
       description: "Copper, PVC & raw materials",
       route: "/cable-production/material-master",
+    },
+    {
+      label: "Routing Template",
+      icon: <RoutingIcon />,
+      component: <RoutingTemplate />,
+      description: "Reusable stage sequences",
+      route: "/cable-production/routing-template",
+    },
+    {
+      label: "BOM Template",
+      icon: <BomIcon />,
+      component: <BomTemplate />,
+      description: "Reusable material line-sets",
+      route: "/cable-production/bom-template",
     },
   ];
 
