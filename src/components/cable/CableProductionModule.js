@@ -44,6 +44,8 @@ import {
   SpeedRounded as CapacityIcon,
   CalendarMonthRounded as CalendarIcon,
   ViewInArRounded as DrumIcon,
+  TrackChangesRounded as TrackingIcon,
+  InsightsRounded as ManagerIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -59,6 +61,8 @@ import CableMrpDashboard from "./CableMrpDashboard";
 import CableCapacityBoard from "./CableCapacityBoard";
 import CableProductionCalendar from "./CableProductionCalendar";
 import CableDrumPlanning from "./CableDrumPlanning";
+import CableOrderTracking from "./CableOrderTracking";
+import CableManagerDashboard from "./CableManagerDashboard";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -668,6 +672,20 @@ const CableProductionModule = () => {
       component: <CableDrumPlanning />,
       description: "Multi-drum split per stage",
       route: "/cable-production/drums",
+    },
+    {
+      label: "Order Tracking",
+      icon: <TrackingIcon />,
+      component: <CableOrderTracking />,
+      description: "Per-order stage workflow",
+      route: "/cable-production/tracking",
+    },
+    {
+      label: "Manager Dashboard",
+      icon: <ManagerIcon />,
+      component: <CableManagerDashboard />,
+      description: "Loading, at-risk & overdue",
+      route: "/cable-production/manager",
     },
     {
       label: "Cable Master",
