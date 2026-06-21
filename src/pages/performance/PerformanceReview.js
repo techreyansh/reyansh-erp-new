@@ -103,6 +103,7 @@ const CATEGORIES = [
   { key: 'on_time', label: 'On Time', weight: 25, counts: ['on_time'] },
   { key: 'checklist', label: 'Checklist', weight: 15, counts: ['ok', 'due'] },
   { key: 'workflow', label: 'Workflow', weight: 10, counts: ['ok', 'due'] },
+  { key: 'production', label: 'Production', weight: 15, counts: ['stages'] },
   { key: 'meeting', label: 'Meeting', weight: 5, counts: [] },
   { key: 'manager', label: 'Manager', weight: 5, counts: [] },
 ];
@@ -277,6 +278,8 @@ function CategoryRow({ cfg, data }) {
       sub = `${data.on_time} on time`;
     } else if ((cfg.key === 'checklist' || cfg.key === 'workflow') && (data.ok != null || data.due != null)) {
       sub = `${data.ok ?? 0}/${data.due ?? 0} ok`;
+    } else if (cfg.key === 'production' && data.stages != null) {
+      sub = `${data.stages} stage${data.stages === 1 ? '' : 's'}${data.scrap ? ` · ${data.scrap} scrap` : ''}`;
     }
   }
 

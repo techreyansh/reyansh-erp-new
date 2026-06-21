@@ -87,6 +87,7 @@ import ppcService, {
 } from '../../services/ppcService';
 import { StatCard, GridBox, inrFull } from '../../components/common/kit';
 import LegacyBomImporter from '../../components/ppc/LegacyBomImporter';
+import PersonPicker from '../../components/tasks/PersonPicker';
 
 // ---------------------------------------------------------------------------
 // small shared helpers
@@ -2167,13 +2168,15 @@ function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
                             </MenuItem>
                           ))}
                         </TextField>
-                        <TextField
+                        <PersonPicker
                           size="small"
                           label="Operator"
-                          value={st.operator_name || ''}
-                          onChange={(e) => setWo((p) => ({ ...p, stages: p.stages.map((s) => (s.id === st.id ? { ...s, operator_name: e.target.value } : s)) }))}
-                          onBlur={(e) => updateStageField(st, { operator_name: e.target.value || null })}
-                          fullWidth
+                          value={st.operator_email ? { email: st.operator_email, full_name: st.operator_name } : (st.operator_name || null)}
+                          onChange={(person) => {
+                            const patch = { operator_email: person?.email || null, operator_name: person?.full_name || null };
+                            setWo((p) => ({ ...p, stages: p.stages.map((s) => (s.id === st.id ? { ...s, ...patch } : s)) }));
+                            updateStageField(st, patch);
+                          }}
                         />
                         <TextField
                           size="small"

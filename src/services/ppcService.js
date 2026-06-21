@@ -608,7 +608,7 @@ async function getWorkOrder(id) {
     supabase
       .from('ppc_wo_stage')
       .select(
-        'id, work_order_id, stage_name, sequence, machine_id, operator_name, method_sheet, status, output_qty, scrap_qty, started_at, completed_at, ' +
+        'id, work_order_id, stage_name, sequence, machine_id, operator_name, operator_email, method_sheet, status, output_qty, scrap_qty, started_at, completed_at, ' +
           'machine:ppc_machines!ppc_wo_stage_machine_id_fkey(id, name)'
       )
       .eq('work_order_id', id)
@@ -653,7 +653,7 @@ async function woShortage(woId) {
 /** Patch a stage's 4-M assignment fields (machine, operator, method sheet). */
 async function updateStage(stageId, patch) {
   if (!stageId) throw new Error('Update stage: no stage selected');
-  const allowed = ['machine_id', 'operator_name', 'method_sheet'];
+  const allowed = ['machine_id', 'operator_name', 'operator_email', 'method_sheet'];
   const row = {};
   allowed.forEach((k) => {
     if (k in patch) row[k] = patch[k];
