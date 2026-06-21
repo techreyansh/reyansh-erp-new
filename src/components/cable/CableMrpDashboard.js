@@ -70,6 +70,7 @@ function KpiCard({ label, value, unit, color }) {
 export default function CableMrpDashboard() {
   const theme = useTheme();
   const [rows, setRows] = useState([]);
+  const [totals, setTotals] = useState({ required_cost: 0, shortfall_cost: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -77,8 +78,9 @@ export default function CableMrpDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const { rows: r } = await mrpDashboard();
+      const { rows: r, totals: t } = await mrpDashboard();
       setRows(r);
+      setTotals(t || { required_cost: 0, shortfall_cost: 0 });
     } catch (err) {
       setError(err.message || "Failed to load MRP data.");
     } finally {
@@ -146,17 +148,24 @@ export default function CableMrpDashboard() {
       )}
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={6} sm={3}>
           <KpiCard label="Total Copper Required" value={kpis.copper} unit="kg" color="error" />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={6} sm={3}>
           <KpiCard label="Total PVC Required" value={kpis.pvc} unit="kg" color="info" />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={6} sm={3}>
           <KpiCard
             label="Materials Short"
             value={kpis.short}
             color={kpis.short > 0 ? "warning" : "success"}
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <KpiCard
+            label="Shortfall spend"
+            value={`₹${(totals.shortfall_cost || 0).toLocaleString("en-IN")}`}
+            color={totals.shortfall_cost > 0 ? "warning" : "success"}
           />
         </Grid>
       </Grid>
@@ -177,6 +186,12 @@ export default function CableMrpDashboard() {
                   Shortfall
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align="right">
+                  Unit ₹
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }} align="right">
+                  Req. value ₹
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }} align="right">
                   Status
                 </TableCell>
               </TableRow>
@@ -184,7 +199,7 @@ export default function CableMrpDashboard() {
             <TableBody>
               {!loading && sorted.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={7}>
                     <Box sx={{ py: 4, textAlign: "center" }}>
                       <Typography color="text.secondary">
                         No material requirements from active plans.
@@ -208,6 +223,8 @@ export default function CableMrpDashboard() {
                     <TableCell align="right">{r.required}</TableCell>
                     <TableCell align="right">{r.on_hand}</TableCell>
                     <TableCell align="right">{r.shortfall}</TableCell>
+                    <TableCell align="right">{r.unit_cost ? `₹${r.unit_cost.toLocaleString("en-IN")}` : "—"}</TableCell>
+                    <TableCell align="right">{r.required_cost ? `₹${r.required_cost.toLocaleString("en-IN")}` : "—"}</TableCell>
                     <TableCell align="right">
                       {short ? (
                         <Chip

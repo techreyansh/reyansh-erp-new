@@ -96,6 +96,24 @@ export async function stockFor(codes) {
   return out;
 }
 
+// On-hand + unit cost for item codes → { code: { on_hand, unit_cost } }.
+// Cost = ppc_items.unit_cost (the item master's standard cost). Used to value
+// the MRP (Phase 5 costing integration).
+export async function stockAndCostFor(codes) {
+  if (!codes.length) return {};
+  const { data, error } = await supabase
+    .from('ppc_items')
+    .select('code, unit_cost, ppc_stock(on_hand)')
+    .in('code', codes);
+  if (error) return {};
+  const out = {};
+  (data || []).forEach((r) => {
+    const st = Array.isArray(r.ppc_stock) ? r.ppc_stock[0] : r.ppc_stock;
+    out[r.code] = { on_hand: st ? Number(st.on_hand) || 0 : 0, unit_cost: Number(r.unit_cost) || 0 };
+  });
+  return out;
+}
+
 export async function listPlans() {
   const { data, error } = await supabase
     .from('cable_production_plan')
@@ -175,14 +193,25 @@ export async function mrpDashboard() {
     });
   }
   const codes = Object.keys(agg);
-  const stock = await stockFor(codes);
-  const rows = codes.map((c) => ({
-    ...agg[c],
-    required: +agg[c].required.toFixed(1),
-    on_hand: stock[c] || 0,
-    shortfall: Math.max(0, +(agg[c].required - (stock[c] || 0)).toFixed(1)),
-  }));
-  return { rows };
+  const info = await stockAndCostFor(codes);
+  const rows = codes.map((c) => {
+    const required = +agg[c].required.toFixed(1);
+    const on_hand = info[c]?.on_hand || 0;
+    const unit_cost = info[c]?.unit_cost || 0;
+    const shortfall = Math.max(0, +(required - on_hand).toFixed(1));
+    return {
+      ...agg[c],
+      required, on_hand, unit_cost,
+      shortfall,
+      required_cost: +(required * unit_cost).toFixed(0),       // value of the full requirement
+      shortfall_cost: +(shortfall * unit_cost).toFixed(0),     // spend needed to cover the gap
+    };
+  });
+  const totals = rows.reduce((t, r) => ({
+    required_cost: t.required_cost + r.required_cost,
+    shortfall_cost: t.shortfall_cost + r.shortfall_cost,
+  }), { required_cost: 0, shortfall_cost: 0 });
+  return { rows, totals };
 }
 
 const cableProductionService = {
@@ -190,6 +219,7 @@ const cableProductionService = {
   computeRouting,
   computeMRP,
   stockFor,
+  stockAndCostFor,
   listPlans,
   savePlan,
   deletePlan,
