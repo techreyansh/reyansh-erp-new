@@ -37,6 +37,8 @@ import {
   Insights as InsightsIcon,
   Refresh as RefreshIcon,
   ErrorOutline as ErrorIcon,
+  CableRounded as CableMasterIcon,
+  PrecisionManufacturingRounded as MachineMasterIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -45,6 +47,8 @@ import CableProductionPlanning from "./CableProductionPlanning";
 import MachineScheduling from "./MachineScheduling";
 import CableAutoPlanner from "./CableAutoPlanner";
 import CableJobCards from "./CableJobCards";
+import CableMaster from "./CableMaster";
+import MachineMaster from "./MachineMaster";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -619,6 +623,20 @@ const CableProductionModule = () => {
       component: <MachineScheduling />,
       description: "Resource allocation",
       route: "/cable-production/machine-scheduling",
+    },
+    {
+      label: "Cable Master",
+      icon: <CableMasterIcon />,
+      component: <CableMaster />,
+      description: "Cable & power-cord specs",
+      route: "/cable-production/cable-master",
+    },
+    {
+      label: "Machine Master",
+      icon: <MachineMasterIcon />,
+      component: <MachineMaster />,
+      description: "Machine specs & capacity",
+      route: "/cable-production/machine-master",
     },
   ];
 

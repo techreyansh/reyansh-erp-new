@@ -305,6 +305,39 @@ async function updateMachine(id, patch) {
 }
 
 // ---------------------------------------------------------------------------
+// Cable Machine Master — full machine spec rows (Cable Production module)
+// ---------------------------------------------------------------------------
+// NOTE: listMachines() above returns a trimmed, line-joined shape for the
+// existing PPC screens. The Cable Machine Master needs every spec column
+// (speed, changeover, scrap, capacities, shift, …), so it has its own readers.
+
+/** All machine-master rows with the full spec column set, ordered by code. */
+async function listCableMachines() {
+  const data = unwrap(
+    await supabase.from('ppc_machines').select('*').order('code', { ascending: true }),
+    'List cable machines'
+  );
+  return data || [];
+}
+
+/** Patch a machine-master row by id. Returns the updated row. */
+async function updateCableMachine(id, patch) {
+  if (!id) throw new Error('Update machine: no machine selected');
+  return unwrap(
+    await supabase.from('ppc_machines').update(patch).eq('id', id).select().single(),
+    'Update cable machine'
+  );
+}
+
+/** Insert a new machine-master row. Returns the created row. */
+async function addCableMachine(row) {
+  return unwrap(
+    await supabase.from('ppc_machines').insert(row).select().single(),
+    'Add cable machine'
+  );
+}
+
+// ---------------------------------------------------------------------------
 // MRP + low stock (RPC)
 // ---------------------------------------------------------------------------
 async function runMrp(itemId, qty) {
@@ -735,6 +768,10 @@ const ppcService = {
   listMachines,
   createMachine,
   updateMachine,
+  // cable machine master (full spec rows)
+  listCableMachines,
+  updateCableMachine,
+  addCableMachine,
   // mrp
   runMrp,
   lowStock,
