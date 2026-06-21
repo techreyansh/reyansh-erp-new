@@ -337,6 +337,36 @@ async function addCableMachine(row) {
   );
 }
 
+// Spec columns copied when duplicating a machine.
+const MACHINE_SPEC_COLS = [
+  'name', 'machine_type', 'stage', 'speed_m_per_hr', 'changeover_min', 'scrap_pct',
+  'lay_reduction_pct', 'shift_start_hour', 'shift_hours', 'days_per_week',
+  'drum_capacity_m', 'core_capacity_m', 'laying_drum_capacity_m', 'is_available',
+];
+
+/** Duplicate a machine: copy its specs under a new (auto-suffixed) code. */
+async function duplicateCableMachine(row, newCode) {
+  const copy = {};
+  MACHINE_SPEC_COLS.forEach((k) => { if (row[k] !== undefined) copy[k] = row[k]; });
+  copy.code = newCode || `${row.code || 'M'}-COPY`;
+  copy.name = row.name ? `${row.name} (copy)` : copy.code;
+  copy.status = 'idle';
+  return addCableMachine(copy);
+}
+
+/** Archive (soft-delete) / restore a machine. */
+async function archiveCableMachine(id, archived = true) {
+  return updateCableMachine(id, { archived_at: archived ? new Date().toISOString() : null });
+}
+
+/** Hard-delete a machine-master row. */
+async function deleteCableMachine(id) {
+  if (!id) throw new Error('Delete machine: no machine selected');
+  const { error } = await supabase.from('ppc_machines').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  return true;
+}
+
 // ---------------------------------------------------------------------------
 // MRP + low stock (RPC)
 // ---------------------------------------------------------------------------
@@ -789,6 +819,9 @@ const ppcService = {
   listCableMachines,
   updateCableMachine,
   addCableMachine,
+  duplicateCableMachine,
+  archiveCableMachine,
+  deleteCableMachine,
   // mrp
   runMrp,
   lowStock,
