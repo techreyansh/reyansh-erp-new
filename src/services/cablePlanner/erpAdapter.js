@@ -66,6 +66,34 @@ export function rowToOrder(r) {
   };
 }
 
+// Machine Schedules row (flattened record) → engine job. Inverse of
+// jobToScheduleRow, so the Capacity Board / Production Calendar can read the
+// SAVED schedule (persistent) without re-running the planner.
+export function scheduleRowToJob(r) {
+  return {
+    id: r.scheduleId || r.id,
+    orderId: r.planId || r.orderNumber || "",
+    cableId: r.productCode || "",
+    machineId: r.machineId || "",
+    stage: r.stage || "",
+    coreIndex: r.coreIndex === "" || r.coreIndex === undefined ? null : n(r.coreIndex),
+    coreColor: r.coreColor || null,
+    coreOfTotal: r.coreOfTotal === "" || r.coreOfTotal === undefined ? null : n(r.coreOfTotal),
+    startTime: r.scheduledStartTime || null,
+    endTime: r.scheduledEndTime || null,
+    plannedHrs: n(r.operationTime) || 0,
+    changeoverHrs: n(r.changeoverHours) || 0,
+    orderM: n(r.quantity) || 0,
+    plannedM: n(r.quantity) || 0,
+    plannedInputM: n(r.inputQuantity) || 0,
+    customerName: r.customerName || "",
+    orderNo: r.orderNumber || "",
+    productName: r.productName || "",
+    status: (r.status || "Scheduled").toLowerCase().includes("complete") ? "completed" : "planned",
+    _rowIndex: r.rowIndex,
+  };
+}
+
 // engine job → Machine Schedules row (flattened record).
 export function jobToScheduleRow(job, cable, order) {
   return {

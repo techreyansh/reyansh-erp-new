@@ -15,7 +15,34 @@ import { supabase } from '../lib/supabaseClient';
 import * as scheduler from './cablePlanner/scheduler';
 import * as materials from './cablePlanner/materials';
 import * as machineConfig from './cablePlanner/machineConfig';
+import { toEngineMachines } from './cablePlanner/machineAdapter';
+import { scheduleRowToJob } from './cablePlanner/erpAdapter';
 import { toEngineCable, listCables } from './cableMasterService';
+import ppcService from './ppcService';
+import sheetService from './sheetService';
+
+// Load the Machine Master (ppc_machines) as engine machines, one per pipeline
+// stage, falling back to the engine's DEFAULT_MACHINES for any stage the DB
+// doesn't cover. So scheduling always has a complete bunching→…→sheathing line.
+export async function loadEngineMachines() {
+  try {
+    const rows = await ppcService.listCableMachines();
+    return toEngineMachines(rows || []);
+  } catch {
+    return toEngineMachines([]); // -> all DEFAULT_MACHINES
+  }
+}
+
+// Read the SAVED Machine Schedules sheet as engine jobs (for capacity/calendar
+// views that should reflect the committed schedule, not a fresh auto-run).
+export async function loadSavedSchedule() {
+  try {
+    const rows = await sheetService.getSheetData('Machine Schedules');
+    return (rows || []).map(scheduleRowToJob).filter((j) => j.machineId && j.startTime);
+  } catch {
+    return [];
+  }
+}
 
 // Total production metres from a plan + cable row.
 // Power cords: qty (pieces) × length per piece. Bulk cable: qty is already metres.
@@ -168,6 +195,8 @@ const cableProductionService = {
   deletePlan,
   releaseToWorkOrder,
   mrpDashboard,
+  loadEngineMachines,
+  loadSavedSchedule,
 };
 
 export default cableProductionService;

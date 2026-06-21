@@ -41,6 +41,8 @@ import {
   PrecisionManufacturingRounded as MachineMasterIcon,
   AssignmentRounded as ProductionPlansIcon,
   InventoryRounded as MrpIcon,
+  SpeedRounded as CapacityIcon,
+  CalendarMonthRounded as CalendarIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -53,6 +55,8 @@ import CableMaster from "./CableMaster";
 import MachineMaster from "./MachineMaster";
 import CableProductionPlans from "./CableProductionPlans";
 import CableMrpDashboard from "./CableMrpDashboard";
+import CableCapacityBoard from "./CableCapacityBoard";
+import CableProductionCalendar from "./CableProductionCalendar";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -641,6 +645,20 @@ const CableProductionModule = () => {
       component: <CableMrpDashboard />,
       description: "Material requirement",
       route: "/cable-production/mrp",
+    },
+    {
+      label: "Capacity",
+      icon: <CapacityIcon />,
+      component: <CableCapacityBoard />,
+      description: "Machine load & bottlenecks",
+      route: "/cable-production/capacity",
+    },
+    {
+      label: "Calendar",
+      icon: <CalendarIcon />,
+      component: <CableProductionCalendar />,
+      description: "Week / month schedule",
+      route: "/cable-production/calendar",
     },
     {
       label: "Cable Master",

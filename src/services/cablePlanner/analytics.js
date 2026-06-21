@@ -74,6 +74,76 @@ export function loadHeatmap(machines = [], schedule = [], days = 14, baseDate = 
 }
 
 /**
+ * capacityBoard(machines, schedule, baseDate) → per-machine capacity snapshot for
+ * the board view: today's booked vs shift capacity (util%), total booked hours +
+ * job count across the whole schedule, the next upcoming changeover, and a
+ * bottleneck flag (today's util > 100%). Pure; computed from the schedule only.
+ */
+export function capacityBoard(machines = [], schedule = [], baseDate = new Date()) {
+  const today = startOfDay(baseDate);
+  const now = new Date(baseDate);
+  return machines.map((m) => {
+    const jobs = (schedule || []).filter((j) => j.machineId === m.id);
+    const todays = jobs.filter((j) => startOfDay(j.startTime).getTime() === today.getTime());
+    const bookedToday = todays.reduce((s, j) => s + num(j.plannedHrs) + num(j.changeoverHrs), 0);
+    const capacityToday = isWorkingDay(today, m) ? num(m?.shiftHrs, 8) : 0;
+    const bookedTotal = jobs.reduce((s, j) => s + num(j.plannedHrs) + num(j.changeoverHrs), 0);
+    const future = jobs
+      .filter((j) => num(j.changeoverHrs) > 0 && new Date(j.startTime) >= now)
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    const nextChangeover = future.length
+      ? { at: future[0].startTime, hrs: +num(future[0].changeoverHrs).toFixed(2), label: future[0].coreColor || future[0].stage }
+      : null;
+    const utilToday = capacityToday ? Math.round((bookedToday / capacityToday) * 100) : 0;
+    return {
+      machine: m,
+      bookedToday: +bookedToday.toFixed(2),
+      capacityToday,
+      utilToday,
+      bookedTotal: +bookedTotal.toFixed(2),
+      jobsTotal: jobs.length,
+      nextChangeover,
+      bottleneck: utilToday > 100,
+    };
+  });
+}
+
+/**
+ * calendarBuckets(schedule, machines, baseDate, days) → daily buckets over the
+ * window: each day carries its jobs (per machine), a job/hour total, and a
+ * working-day flag. The UI renders day/week/month layouts by grouping these
+ * daily buckets, so the granularity logic stays in one place.
+ */
+export function calendarBuckets(schedule = [], machines = [], baseDate = new Date(), days = 42) {
+  const base = startOfDay(baseDate);
+  const machineIds = machines.map((m) => m.id);
+  const out = [];
+  for (let i = 0; i < days; i++) {
+    const day = new Date(base); day.setDate(base.getDate() + i);
+    const dayJobs = (schedule || []).filter((j) => startOfDay(j.startTime).getTime() === day.getTime());
+    const byMachine = {};
+    for (const id of machineIds) byMachine[id] = [];
+    let totalHrs = 0;
+    for (const j of dayJobs) {
+      if (!byMachine[j.machineId]) byMachine[j.machineId] = [];
+      byMachine[j.machineId].push(j);
+      totalHrs += num(j.plannedHrs) + num(j.changeoverHrs);
+    }
+    const working = machines.length ? machines.some((m) => isWorkingDay(day, m)) : true;
+    out.push({
+      date: localDateStr(day),
+      dow: day.getDay(),
+      jobs: dayJobs,
+      byMachine,
+      jobCount: dayJobs.length,
+      totalHrs: +totalHrs.toFixed(2),
+      working,
+    });
+  }
+  return out;
+}
+
+/**
  * rmBurndown(schedule, cablesById, stock, days, baseDate) — projected on-hand
  * balance of copper / PVC-insulation / PVC-sheath over the planning window.
  * Each order's total RM (estimateRM over its finished metres) is consumed on the

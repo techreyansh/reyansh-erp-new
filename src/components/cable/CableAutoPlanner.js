@@ -23,6 +23,7 @@ import {
   loadHeatmap, orderRiskWatchlist, rmBurndown,
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
+import { loadEngineMachines } from "../../services/cableProductionService";
 
 // Categorical stage-identity palette (one distinct hue per production stage) — data/legend colors, kept literal so stages stay visually distinguishable.
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
@@ -53,6 +54,8 @@ export default function CableAutoPlanner() {
   const [loading, setLoading] = useState(true);
   const [cables, setCables] = useState([]);
   const [orders, setOrders] = useState([]);
+  // Machine Master (ppc_machines) → engine machines; DEFAULT_MACHINES until loaded.
+  const [machines, setMachines] = useState(DEFAULT_MACHINES);
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [snack, setSnack] = useState(null);
@@ -77,12 +80,14 @@ export default function CableAutoPlanner() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [cp, plans] = await Promise.all([
+      const [cp, plans, eng] = await Promise.all([
         sheetService.getSheetData("Cable Products"),
         sheetService.getSheetData("Cable Production Plans"),
+        loadEngineMachines(),
       ]);
       setCables((cp || []).map(rowToCable).filter((c) => c.code));
       setOrders((plans || []).map(rowToOrder).filter((o) => o.cableId && o.qtyM > 0));
+      if (Array.isArray(eng) && eng.length) setMachines(eng);
     } catch (e) {
       notify(`Failed to load data: ${e.message}`, "error");
     } finally {
@@ -98,7 +103,7 @@ export default function CableAutoPlanner() {
     if (!orders.length) { notify("No production plans with a quantity to schedule", "warning"); return; }
     try {
       const res = runAutoSchedule({
-        cables, machines: DEFAULT_MACHINES, speeds: [], orders,
+        cables, machines, speeds: [], orders,
         options: { ...opts, stock, startDate: new Date(`${opts.startDate}T09:00:00`) },
       });
       setResult(res);
@@ -137,7 +142,7 @@ export default function CableAutoPlanner() {
 
   // Decision support: who's at risk, where's the bottleneck.
   const watchlist = useMemo(() => orderRiskWatchlist(orders, result?.schedule || []), [orders, result]);
-  const heatmap = useMemo(() => (result ? loadHeatmap(DEFAULT_MACHINES, result.schedule, 14) : []), [result]);
+  const heatmap = useMemo(() => (result ? loadHeatmap(machines, result.schedule, 14) : []), [result, machines]);
   const hasStock = stock.copperKg > 0 || stock.pvcInsKg > 0 || stock.pvcShKg > 0;
   const burndown = useMemo(
     () => (result?.schedule?.length && hasStock ? rmBurndown(result.schedule, cablesById, stock, 30) : null),
@@ -386,7 +391,7 @@ export default function CableAutoPlanner() {
           <Heatmap heatmap={heatmap} theme={theme} />
 
           {/* GANTT */}
-          <Gantt schedule={result.schedule} machines={DEFAULT_MACHINES} theme={theme} />
+          <Gantt schedule={result.schedule} machines={machines} theme={theme} />
 
           {/* TABLE */}
           <Paper variant="outlined" sx={{ borderRadius: 2.5, mt: 2, overflow: "hidden" }}>
