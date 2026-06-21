@@ -679,6 +679,23 @@ async function advanceStage(stageId, status, output, scrap) {
   return data || null;
 }
 
+/**
+ * Finish a cable work order and book its finished output into FG stock (once).
+ * qty defaults to the WO's produced_qty / planned qty server-side. Returns
+ * { ok, produced, on_hand, already_stocked }.
+ */
+async function finishWorkOrder(woId, qty) {
+  if (!woId) throw new Error('Finish work order: no work order selected');
+  const data = unwrap(
+    await supabase.rpc('cable_finish_work_order', {
+      p_wo_id: woId,
+      p_qty: qty != null && qty !== '' ? Number(qty) : null,
+    }),
+    'Finish work order'
+  );
+  return data || null;
+}
+
 /** Issue material to a WO (decrements stock). */
 async function issueMaterial(woMaterialId, qty) {
   if (!woMaterialId) throw new Error('Issue material: no material line selected');
@@ -790,6 +807,7 @@ const ppcService = {
   woShortage,
   updateStage,
   advanceStage,
+  finishWorkOrder,
   issueMaterial,
   recordQc,
   shopfloor,

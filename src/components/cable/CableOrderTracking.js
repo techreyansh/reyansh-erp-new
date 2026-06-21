@@ -6,10 +6,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box, Paper, Stack, Typography, Button, Chip, CircularProgress, LinearProgress,
   List, ListItemButton, TextField, MenuItem, Divider, Tooltip, useTheme, alpha,
+  Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert,
 } from "@mui/material";
 import {
   RefreshRounded, CheckCircleRounded, PlayCircleRounded, RadioButtonUncheckedRounded,
-  ArrowForwardRounded, ScienceRounded,
+  ArrowForwardRounded, ScienceRounded, Inventory2Rounded, LocalShippingRounded,
 } from "@mui/icons-material";
 import { woStatusBucket, woProgress } from "../../services/cablePlanner";
 import ppcService from "../../services/ppcService";
@@ -33,6 +34,9 @@ export default function CableOrderTracking() {
   const [selId, setSelId] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [acting, setActing] = useState(false);
+  const [snack, setSnack] = useState(null);
+  const [dispatch, setDispatch] = useState(null); // { qty, customer }
 
   const loadList = useCallback(async () => {
     setLoading(true);
@@ -61,6 +65,41 @@ export default function CableOrderTracking() {
     finally { setDetailLoading(false); }
   }, []);
   useEffect(() => { if (selId) loadDetail(selId); }, [selId, loadDetail]);
+
+  // Complete the WO and book its finished output into FG stock.
+  const finishWO = async () => {
+    if (!detail) return;
+    setActing(true);
+    try {
+      const r = await ppcService.finishWorkOrder(detail.id);
+      setSnack({ severity: "success", message: r?.already_stocked
+        ? "WO marked done (FG was already stocked)."
+        : `Done · ${r?.produced || 0} booked into FG stock (on hand ${r?.on_hand || 0}).` });
+      await Promise.all([loadList(), loadDetail(detail.id)]);
+    } catch (e) {
+      setSnack({ severity: "error", message: e.message || "Failed to finish work order." });
+    } finally { setActing(false); }
+  };
+
+  // Dispatch finished goods from stock to the customer (decrement).
+  const doDispatch = async () => {
+    if (!detail || !dispatch) return;
+    setActing(true);
+    try {
+      const r = await ppcService.dispatchStock(detail.item_id, {
+        qty: Number(dispatch.qty), customer: dispatch.customer, reference: detail.wo_number || detail.id,
+      });
+      setSnack({ severity: "success", message: `Dispatched ${dispatch.qty} · FG on hand ${r?.on_hand ?? "—"}.` });
+      setDispatch(null);
+      await loadDetail(detail.id);
+    } catch (e) {
+      setSnack({ severity: "error", message: e.message || "Dispatch failed." });
+    } finally { setActing(false); }
+  };
+
+  const bucket = detail ? woStatusBucket(detail.status) : null;
+  const canFinish = detail && bucket !== "completed" && bucket !== "cancelled";
+  const isStocked = !!detail?.fg_stocked_at;
 
   return (
     <Box>
@@ -132,6 +171,26 @@ export default function CableOrderTracking() {
                     <Typography variant="h6" sx={{ fontWeight: 800, color: "primary.main" }}>{Math.round(woProgress(detail) * 100)}%</Typography>
                     <Typography variant="caption" color="text.secondary">{detail.produced_qty || 0}/{detail.qty} produced</Typography>
                   </Box>
+                </Stack>
+                <Divider sx={{ my: 1.5 }} />
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" gap={1}>
+                  {canFinish && (
+                    <Button size="small" variant="contained" startIcon={<Inventory2Rounded />}
+                      disabled={acting} onClick={finishWO}>
+                      Complete &amp; stock FG
+                    </Button>
+                  )}
+                  {isStocked && (
+                    <Chip size="small" color="success" icon={<CheckCircleRounded />}
+                      label={`FG stocked${detail.fg_stocked_qty ? ` · ${detail.fg_stocked_qty}` : ""}`} />
+                  )}
+                  {(isStocked || bucket === "completed") && (
+                    <Button size="small" variant="outlined" startIcon={<LocalShippingRounded />}
+                      disabled={acting}
+                      onClick={() => setDispatch({ qty: detail.fg_stocked_qty || detail.produced_qty || detail.qty || 0, customer: detail.customer_name || "" })}>
+                      Dispatch FG
+                    </Button>
+                  )}
                 </Stack>
               </Paper>
 
@@ -212,6 +271,30 @@ export default function CableOrderTracking() {
           )}
         </Box>
       </Stack>
+
+      <Dialog open={!!dispatch} onClose={() => !acting && setDispatch(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Dispatch finished goods</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Decrements FG stock for {detail?.item?.name || "this cable"}.
+            </Typography>
+            <TextField label="Quantity" type="number" size="small" value={dispatch?.qty ?? ""}
+              onChange={(e) => setDispatch((d) => ({ ...d, qty: e.target.value }))} />
+            <TextField label="Customer" size="small" value={dispatch?.customer ?? ""}
+              onChange={(e) => setDispatch((d) => ({ ...d, customer: e.target.value }))} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDispatch(null)} disabled={acting}>Cancel</Button>
+          <Button variant="contained" onClick={doDispatch} disabled={acting || !(Number(dispatch?.qty) > 0)}>Dispatch</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={!!snack} autoHideDuration={5000} onClose={() => setSnack(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        {snack ? <Alert severity={snack.severity} onClose={() => setSnack(null)} variant="filled">{snack.message}</Alert> : undefined}
+      </Snackbar>
     </Box>
   );
 }
