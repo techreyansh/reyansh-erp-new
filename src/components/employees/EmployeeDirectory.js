@@ -44,6 +44,14 @@ import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ClearIcon from "@mui/icons-material/Clear";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
+import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccountOutlined";
+import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNew";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const COLS_STORAGE_KEY = "reyansh.emp.dir.cols";
 
@@ -190,9 +198,14 @@ export default function EmployeeDirectory({
   onBulkSetStatus = () => {},
   onBulkAssignAccess = () => {},
   onExport = () => {},
+  actions = {},
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [rowMenu, setRowMenu] = useState({ anchor: null, emp: null });
+  const closeRowMenu = useCallback(() => setRowMenu({ anchor: null, emp: null }), []);
+  // Run a row action then close the menu.
+  const runAction = useCallback((fn) => () => { const emp = rowMenu.emp; closeRowMenu(); fn?.(emp); }, [rowMenu.emp, closeRowMenu]);
 
   const rows = Array.isArray(employees) ? employees : [];
 
@@ -687,16 +700,23 @@ export default function EmployeeDirectory({
                         {formatJoinDate(emp.joining_date)}
                       </Typography>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Tooltip title="Open">
-                        <IconButton
-                          size="small"
-                          className="row-open-action"
-                          onClick={() => onOpenEmployee(emp)}
-                        >
-                          <LaunchIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <TableCell onClick={(e) => e.stopPropagation()} align="right">
+                      <Stack direction="row" spacing={0.25} justifyContent="flex-end">
+                        <Tooltip title="Open">
+                          <IconButton
+                            size="small"
+                            className="row-open-action"
+                            onClick={() => onOpenEmployee(emp)}
+                          >
+                            <LaunchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Actions">
+                          <IconButton size="small" onClick={(e) => setRowMenu({ anchor: e.currentTarget, emp })}>
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 );
@@ -941,6 +961,22 @@ export default function EmployeeDirectory({
             </Button>
             <Button
               size="small"
+              startIcon={<SwapHorizOutlinedIcon />}
+              onClick={() => actions.onBulkTransfer?.(selectedIdsArr)}
+              sx={{ color: "inherit" }}
+            >
+              Transfer dept
+            </Button>
+            <Button
+              size="small"
+              startIcon={<SupervisorAccountOutlinedIcon />}
+              onClick={() => actions.onBulkAssignManager?.(selectedIdsArr)}
+              sx={{ color: "inherit" }}
+            >
+              Assign manager
+            </Button>
+            <Button
+              size="small"
               startIcon={<VpnKeyOutlinedIcon />}
               onClick={() => onBulkAssignAccess(selectedIdsArr)}
               sx={{ color: "inherit" }}
@@ -955,6 +991,14 @@ export default function EmployeeDirectory({
             >
               Export
             </Button>
+            <Button
+              size="small"
+              startIcon={<DeleteOutlineIcon />}
+              onClick={() => actions.onBulkDelete?.(selectedIdsArr)}
+              sx={{ color: "#ffd5d5" }}
+            >
+              Delete
+            </Button>
             <Divider orientation="vertical" flexItem sx={{ borderColor: alpha("#fff", 0.2), mx: 0.5 }} />
             <Button
               size="small"
@@ -967,6 +1011,46 @@ export default function EmployeeDirectory({
           </Paper>
         </Box>
       </Slide>
+
+      {/* Per-row actions menu */}
+      <Menu
+        anchorEl={rowMenu.anchor}
+        open={Boolean(rowMenu.anchor)}
+        onClose={closeRowMenu}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={runAction(onOpenEmployee)}>
+          <ListItemIcon><VisibilityOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>View</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={runAction(actions.onEdit)}>
+          <ListItemIcon><EditOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Edit</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={runAction(actions.onDuplicate)}>
+          <ListItemIcon><ContentCopyOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Duplicate</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={runAction(actions.onTransfer)}>
+          <ListItemIcon><SwapHorizOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Transfer department</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={runAction(actions.onChangeManager)}>
+          <ListItemIcon><SupervisorAccountOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Change reporting manager</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={runAction(actions.onToggleActive)}>
+          <ListItemIcon><PowerSettingsNewOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>{rowMenu.emp?.is_active === false ? "Activate" : "Deactivate"}</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={runAction(actions.onDelete)} sx={{ color: "error.main" }}>
+          <ListItemIcon><DeleteOutlineIcon fontSize="small" color="error" /></ListItemIcon>
+          <ListItemText>Delete</ListItemText>
+        </MenuItem>
+      </Menu>
     </Paper>
   );
 }

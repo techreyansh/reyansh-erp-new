@@ -149,6 +149,36 @@ export async function setEmployeeActive(employeeId, isActive) {
   }
 }
 
+/** Patch arbitrary columns on one employee (transfer dept, change manager…). */
+export async function updateEmployeeFields(employeeId, fields) {
+  if (!employeeId) throw new Error('Employee id is required.');
+  const { data, error } = await supabase
+    .from('employees')
+    .update(fields)
+    .eq('id', employeeId)
+    .select(EMPLOYEE_SELECT)
+    .single();
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  return data;
+}
+
+/**
+ * Hard-delete an employee. Removes dependent permission rows first (FK), then
+ * the employee row itself. Irreversible — callers must confirm.
+ */
+export async function deleteEmployee(employeeId) {
+  if (!employeeId) throw new Error('Employee id is required.');
+  await supabase.from('employee_permissions').delete().eq('employee_id', employeeId);
+  const { error } = await supabase.from('employees').delete().eq('id', employeeId);
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+}
+
 export async function listEmployeePermissionOverrides(employeeId) {
   if (!employeeId) return [];
   const { data, error } = await supabase

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Box, Container, Typography, Chip, ToggleButtonGroup, ToggleButton, Button, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Snackbar, Alert, CircularProgress,
@@ -101,6 +101,86 @@ export default function EmployeeManagement() {
     finally { setSaving(false); }
   };
 
+  // ----- row / bulk actions -----
+  const departments = useMemo(
+    () => Array.from(new Set(employees.map((e) => e.department).filter(Boolean))).sort(),
+    [employees]
+  );
+  const empsByIds = useCallback((ids) => employees.filter((e) => ids.includes(e.id)), [employees]);
+
+  const [deleteTarget, setDeleteTarget] = useState(null);   // { emps: [] }
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [transferTarget, setTransferTarget] = useState(null); // { emps, value }
+  const [managerTarget, setManagerTarget] = useState(null);   // { emps, value }
+
+  const onEdit = (emp) => openEmployee(emp, 1);              // Employment tab
+  const onDuplicate = (emp) => {
+    setAddForm({
+      full_name: emp.full_name ? `${emp.full_name} (copy)` : "",
+      email: "", department: emp.department || "",
+      designation: emp.designation || "", role_id: emp.role_id || "",
+    });
+    setAddOpen(true);
+  };
+  const onToggleActive = async (emp) => {
+    try {
+      const next = emp.is_active === false;
+      await rbacService.setEmployeeActive(emp.id, next);
+      notify(`${emp.full_name || "Employee"} set ${next ? "Active" : "Inactive"}`);
+      load();
+    } catch (e) { notify(e.message || "Failed", "error"); }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await Promise.all(deleteTarget.emps.map((e) => rbacService.deleteEmployee(e.id)));
+      notify(`${deleteTarget.emps.length} employee(s) deleted`);
+      setDeleteTarget(null); setDeleteConfirm("");
+      load();
+    } catch (e) {
+      notify(e.message || "Delete failed — you may not have permission.", "error");
+    }
+  };
+
+  const confirmTransfer = async () => {
+    const dept = (transferTarget?.value || "").trim();
+    if (!dept) { notify("Pick or type a department", "error"); return; }
+    try {
+      await Promise.all(transferTarget.emps.map((e) => rbacService.updateEmployeeFields(e.id, { department: dept })));
+      notify(`Moved ${transferTarget.emps.length} employee(s) to ${dept}`);
+      setTransferTarget(null); load();
+    } catch (e) { notify(e.message || "Transfer failed", "error"); }
+  };
+
+  const confirmManager = async () => {
+    const mgr = employees.find((e) => e.id === managerTarget?.value) || null;
+    try {
+      await Promise.all(
+        managerTarget.emps.map((e) =>
+          rbacService.updateEmployeeFields(e.id, {
+            reporting_manager_id: mgr?.id || null,
+            reporting_manager: mgr?.full_name || null,
+          })
+        )
+      );
+      notify(`Reporting manager updated for ${managerTarget.emps.length} employee(s)`);
+      setManagerTarget(null); load();
+    } catch (e) { notify(e.message || "Failed to set manager", "error"); }
+  };
+
+  const directoryActions = {
+    onEdit,
+    onDuplicate,
+    onToggleActive,
+    onDelete: (emp) => { setDeleteTarget({ emps: [emp] }); setDeleteConfirm(""); },
+    onTransfer: (emp) => setTransferTarget({ emps: [emp], value: emp.department || "" }),
+    onChangeManager: (emp) => setManagerTarget({ emps: [emp], value: emp.reporting_manager_id || "" }),
+    onBulkDelete: (ids) => { setDeleteTarget({ emps: empsByIds(ids) }); setDeleteConfirm(""); },
+    onBulkTransfer: (ids) => setTransferTarget({ emps: empsByIds(ids), value: "" }),
+    onBulkAssignManager: (ids) => setManagerTarget({ emps: empsByIds(ids), value: "" }),
+  };
+
   if (permissions?.loading) {
     return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress /></Box>;
   }
@@ -160,6 +240,7 @@ export default function EmployeeManagement() {
           onBulkSetStatus={handleBulkSetStatus}
           onBulkAssignAccess={(ids) => { const e = employees.find((x) => x.id === ids[0]); if (e) openEmployee(e, 2); }}
           onExport={handleExport}
+          actions={directoryActions}
         />
       )}
       {view === "org" && <EmployeeOrgChart employees={employees} onOpenEmployee={(e) => openEmployee(e)} />}
@@ -181,6 +262,82 @@ export default function EmployeeManagement() {
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleAdd} disabled={saving}>{saving ? "Adding…" : "Add employee"}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete confirmation (type-to-confirm) */}
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ color: "error.main" }}>
+          Delete {deleteTarget?.emps.length || 0} employee{deleteTarget?.emps.length === 1 ? "" : "s"}?
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            This permanently removes the employee record and their module access. This cannot be undone.
+          </Alert>
+          {deleteTarget?.emps.length <= 5 && (
+            <Box component="ul" sx={{ pl: 2, mt: 0, mb: 2, color: "text.secondary" }}>
+              {deleteTarget?.emps.map((e) => (
+                <li key={e.id}><Typography variant="body2">{e.full_name || e.email}</Typography></li>
+              ))}
+            </Box>
+          )}
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            Type <b>DELETE</b> to confirm.
+          </Typography>
+          <TextField
+            autoFocus fullWidth size="small" value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder="DELETE"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button color="error" variant="contained" disabled={deleteConfirm !== "DELETE"} onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Transfer department */}
+      <Dialog open={!!transferTarget} onClose={() => setTransferTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Transfer {transferTarget?.emps.length || 0} employee{transferTarget?.emps.length === 1 ? "" : "s"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            select fullWidth label="New department" sx={{ mt: 1 }}
+            value={transferTarget?.value || ""}
+            onChange={(e) => setTransferTarget((t) => ({ ...t, value: e.target.value }))}
+          >
+            {departments.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTransferTarget(null)}>Cancel</Button>
+          <Button variant="contained" onClick={confirmTransfer}>Transfer</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Change reporting manager */}
+      <Dialog open={!!managerTarget} onClose={() => setManagerTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Reporting manager for {managerTarget?.emps.length || 0} employee{managerTarget?.emps.length === 1 ? "" : "s"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            select fullWidth label="Reporting manager" sx={{ mt: 1 }}
+            value={managerTarget?.value || ""}
+            onChange={(e) => setManagerTarget((t) => ({ ...t, value: e.target.value }))}
+          >
+            <MenuItem value="">— none —</MenuItem>
+            {employees
+              .filter((e) => !managerTarget?.emps.some((t) => t.id === e.id))
+              .map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.full_name || e.email}{e.designation ? ` · ${e.designation}` : ""}
+                </MenuItem>
+              ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setManagerTarget(null)}>Cancel</Button>
+          <Button variant="contained" onClick={confirmManager}>Save</Button>
         </DialogActions>
       </Dialog>
 
