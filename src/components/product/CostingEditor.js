@@ -5,8 +5,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Dialog, AppBar, Toolbar, Typography, IconButton, Box, Button, TextField, MenuItem,
   Stack, Chip, Table, TableHead, TableRow, TableCell, TableBody, Divider, Tooltip,
-  CircularProgress, Alert, useTheme, alpha,
+  CircularProgress, Alert, Menu, useTheme, alpha,
 } from '@mui/material';
+import bomService, { bomToCostingLines } from '../../services/bomService';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
@@ -24,6 +25,18 @@ export default function CostingEditor({ costingId, onClose, onSaved, notify }) {
   const [margin, setMargin] = useState(20);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [bomAnchor, setBomAnchor] = useState(null);
+  const [boms, setBoms] = useState([]);
+
+  const openBom = async (e) => {
+    setBomAnchor(e.currentTarget);
+    if (!boms.length) { try { setBoms(await bomService.listBoms()); } catch { /* ignore */ } }
+  };
+  const importBom = (bom) => {
+    setBomAnchor(null);
+    const imported = bomToCostingLines(bom, rates);
+    setLines((ls) => [...ls, ...imported.map((l, i) => ({ ...l, sequence: ls.length + i }))]);
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,7 +87,15 @@ export default function CostingEditor({ costingId, onClose, onSaved, notify }) {
             <Typography variant="caption" color="text.secondary">{version?.product_name} · V{version?.version_number} · {version?.status}</Typography>
           </Box>
           {!editable && version && <Chip size="small" color="default" label={`${version.status} — read-only`} />}
+          {editable && <Button variant="outlined" onClick={openBom}>Import from BOM</Button>}
           {editable && <Button variant="contained" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save costing'}</Button>}
+          <Menu anchorEl={bomAnchor} open={Boolean(bomAnchor)} onClose={() => setBomAnchor(null)}>
+            {boms.length === 0
+              ? <MenuItem disabled>No BOMs found</MenuItem>
+              : boms.map((b) => (
+                <MenuItem key={b.pk_id} onClick={() => importBom(b)}>{b.productDescription || b.productCode || `BOM ${b.pk_id}`}</MenuItem>
+              ))}
+          </Menu>
           <IconButton onClick={onClose} edge="end"><CloseIcon /></IconButton>
         </Toolbar>
       </AppBar>
