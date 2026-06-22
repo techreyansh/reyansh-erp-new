@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -37,6 +38,8 @@ import {
 import {
   AddRounded,
   AutoAwesomeRounded,
+  AutorenewRounded,
+  TaskAltRounded,
   BoltRounded,
   CakeOutlined,
   CampaignOutlined,
@@ -68,6 +71,7 @@ import {
   YAxis,
 } from 'recharts';
 import kitService, { CHANNELS, CHANNEL_LABELS } from '../../services/kitService';
+import kitWorkflowService from '../../services/kitWorkflowService';
 import { rankForOutreach } from '../../services/kitCadence';
 import { scoreByCategory } from '../../services/kitEngagement';
 import { supabase } from '../../lib/supabaseClient';
@@ -1143,55 +1147,165 @@ function TemplatesTab({ theme }) {
 
 /* ================================================================ WORKFLOWS */
 
+// Multi-step nurture sequences. Each step = { channel, category, wait_days }
+// where wait_days is the gap BEFORE that step (step 0 is the trigger delay).
+// The automation engine (kitWorkflowEngine) enrolls matching contacts and
+// surfaces the due step; reps send it and the engine advances to the next.
 const WORKFLOW_BLUEPRINTS = [
-  { name: 'New Prospect Welcome', description: 'New prospect → wait 3 days → Intro email', trigger_type: 'new_prospect', icon: BoltRounded, trigger_config: { wait_days: 3 }, steps: [{ channel: 'email', template: 'Intro' }] },
-  { name: 'Quotation Follow-up', description: 'Quotation Sent → wait 5 days → WhatsApp follow-up', trigger_type: 'quotation_sent', icon: WhatsApp, trigger_config: { wait_days: 5 }, steps: [{ channel: 'whatsapp', template: 'Quote follow-up' }] },
-  { name: 'Re-engage Quiet Contacts', description: 'No interaction for 30 days → check-in message', trigger_type: 'no_interaction_30d', icon: SpeakerNotesOffOutlined, trigger_config: { days: 30 }, steps: [{ channel: 'whatsapp', template: 'Check-in' }] },
-  { name: 'Dormant Client Alert', description: 'No orders for 90 days → notify account manager', trigger_type: 'no_orders_90d', icon: WarningAmberRounded, trigger_config: { days: 90 }, steps: [{ channel: 'portal', template: 'Manager alert' }] },
-  { name: 'Birthday / Festival Greeting', description: 'Birthday or festival → automated greeting', trigger_type: 'date_event', icon: CakeOutlined, trigger_config: { events: ['birthday', 'festival'] }, steps: [{ channel: 'whatsapp', template: 'Greeting' }] },
+  {
+    name: 'New Prospect Welcome', icon: BoltRounded, trigger_type: 'new_prospect', trigger_config: { days: 2 },
+    description: 'New prospect → intro, then a value follow-up and a soft check-in.',
+    steps: [
+      { channel: 'email', category: 'Intro', wait_days: 0 },
+      { channel: 'whatsapp', category: 'Industry insight', wait_days: 3 },
+      { channel: 'whatsapp', category: 'Check-in', wait_days: 5 },
+    ],
+  },
+  {
+    name: 'Quotation Follow-up', icon: WhatsApp, trigger_type: 'quotation_sent', trigger_config: {},
+    description: 'Quotation sent → follow up at day 3, nudge at day 7, last call at day 14.',
+    steps: [
+      { channel: 'whatsapp', category: 'Quote follow-up', wait_days: 0 },
+      { channel: 'whatsapp', category: 'Quote nudge', wait_days: 3 },
+      { channel: 'email', category: 'Last call', wait_days: 7 },
+    ],
+  },
+  {
+    name: 'Re-engage Quiet Contacts', icon: SpeakerNotesOffOutlined, trigger_type: 'no_interaction_30d', trigger_config: { days: 30 },
+    description: 'No contact for 30 days → check-in, then a relevant update.',
+    steps: [
+      { channel: 'whatsapp', category: 'Check-in', wait_days: 0 },
+      { channel: 'email', category: 'Industry insight', wait_days: 5 },
+    ],
+  },
+  {
+    name: 'Dormant Client Win-back', icon: WarningAmberRounded, trigger_type: 'no_order_90d', trigger_config: { days: 90 },
+    description: 'No order for 90 days → win-back outreach, then an offer.',
+    steps: [
+      { channel: 'whatsapp', category: 'Win-back', wait_days: 0 },
+      { channel: 'email', category: 'Offer', wait_days: 7 },
+    ],
+  },
+  {
+    name: 'Birthday / Festival Greeting', icon: CakeOutlined, trigger_type: 'manual', trigger_config: {},
+    description: 'Manual-enroll: send a warm greeting on the occasion.',
+    steps: [{ channel: 'whatsapp', category: 'Greeting', wait_days: 0 }],
+  },
 ];
 
-function WorkflowsTab({ theme }) {
+function WorkflowsTab({ theme, currentUser }) {
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [due, setDue] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [runSend, setRunSend] = useState({ open: false, contact: null, channel: 'whatsapp', enrollment: null, workflow: null });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const list = await kitService.listWorkflows();
-    setSaved(list);
-    setLoading(false);
+    try {
+      const [list, dueList, enr] = await Promise.all([
+        kitService.listWorkflows(), kitWorkflowService.dueSteps(), kitWorkflowService.listEnrollments(),
+      ]);
+      setSaved(list); setDue(dueList); setEnrollments(enr);
+    } catch (e) { setMsg({ sev: 'error', text: e.message || 'Failed to load workflows' }); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const findSaved = (bp) => saved.find((w) => w.name === bp.name);
+  const countsFor = (workflowId) => {
+    const mine = enrollments.filter((e) => e.workflow_id === workflowId);
+    return { active: mine.filter((e) => e.status === 'active').length, done: mine.filter((e) => e.status === 'completed').length };
+  };
 
+  // Toggle persists the (possibly upgraded) blueprint definition so steps stay in sync.
   const toggle = async (bp) => {
     const existing = findSaved(bp);
-    if (existing) {
-      await kitService.saveWorkflow({ ...existing, is_active: !existing.is_active });
-    } else {
-      await kitService.saveWorkflow({ ...bp, icon: undefined, is_active: true });
-    }
+    const payload = { name: bp.name, description: bp.description, trigger_type: bp.trigger_type, trigger_config: bp.trigger_config, steps: bp.steps };
+    if (existing) await kitService.saveWorkflow({ ...existing, ...payload, is_active: !existing.is_active });
+    else await kitService.saveWorkflow({ ...payload, is_active: true });
     load();
   };
 
+  const runAutoEnroll = async () => {
+    setBusy(true);
+    try { const r = await kitWorkflowService.autoEnroll(); setMsg({ sev: 'success', text: `Auto-enroll: ${r.enrolled} new contact${r.enrolled === 1 ? '' : 's'} matched active workflows.` }); await load(); }
+    catch (e) { setMsg({ sev: 'error', text: e.message || 'Auto-enroll failed' }); }
+    finally { setBusy(false); }
+  };
+
+  const markDone = async (d) => {
+    try { await kitWorkflowService.advanceStep(d.enrollment, d.workflow); await load(); }
+    catch (e) { setMsg({ sev: 'error', text: e.message || 'Could not advance step' }); }
+  };
+
+  const openSend = (d) => setRunSend({ open: true, contact: d.contact, channel: d.step.channel === 'email' ? 'email' : 'whatsapp', enrollment: d.enrollment, workflow: d.workflow });
+  const afterSend = async () => { const r = runSend; setRunSend((s) => ({ ...s, open: false })); if (r.enrollment) { try { await kitWorkflowService.advanceStep(r.enrollment, r.workflow); } catch { /* ignore */ } } load(); };
+
+  const stepChip = (step) => `${(CHANNEL_LABELS[step.channel] || step.channel)}: ${step.category || 'message'}`;
+
   return (
     <Box>
+      {/* Runner header */}
       <Paper variant="outlined" sx={{ borderRadius: 2.5, p: 2, mb: 2, bgcolor: `${theme.palette.primary.main}08`, borderColor: `${theme.palette.primary.main}33` }}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <BoltRounded sx={{ color: theme.palette.primary.main }} />
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Automation foundation</Typography>
-            <Typography variant="caption" color="text.secondary">
-              Create and toggle automations now. The automation engine that runs these on schedule ships in a future release — nothing is executed automatically yet.
-            </Typography>
-          </Box>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }} justifyContent="space-between">
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <BoltRounded sx={{ color: theme.palette.primary.main }} />
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Automation engine — live</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Enable a workflow, auto-enroll matching contacts, then work the due steps below. Each send advances the sequence to its next step.
+              </Typography>
+            </Box>
+          </Stack>
+          <Button onClick={runAutoEnroll} disabled={busy} startIcon={<AutorenewRounded />} variant="contained" sx={{ borderRadius: 2, flexShrink: 0 }}>
+            {busy ? 'Scanning…' : 'Auto-enroll contacts'}
+          </Button>
         </Stack>
       </Paper>
 
+      {msg && <Alert severity={msg.sev} onClose={() => setMsg(null)} sx={{ mb: 2, borderRadius: 2 }}>{msg.text}</Alert>}
+
+      {/* Due steps today */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, mb: 2, overflow: 'hidden' }}>
+        <Box sx={{ px: 2, py: 1.25, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ScheduleSendOutlined fontSize="small" color="primary" />
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Due today</Typography>
+          <Chip size="small" label={due.length} color={due.length ? 'primary' : 'default'} sx={{ fontWeight: 700 }} />
+        </Box>
+        {loading ? <Box sx={{ p: 2 }}><Skeleton variant="rounded" height={120} /></Box> : due.length === 0 ? (
+          <Box sx={{ p: 3 }}><Typography variant="body2" color="text.secondary">Nothing due. Enable workflows and click “Auto-enroll contacts” to populate the queue.</Typography></Box>
+        ) : (
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead><TableRow>{['Contact', 'Workflow', 'Step', 'Due', ''].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }}>{h}</TableCell>)}</TableRow></TableHead>
+              <TableBody>
+                {due.map((d) => (
+                  <TableRow key={d.enrollment.id} hover>
+                    <TableCell sx={{ fontWeight: 600 }}>{d.enrollment.company_name || d.contact?.company_name || d.enrollment.account_id}</TableCell>
+                    <TableCell><Typography variant="caption" color="text.secondary">{d.workflow.name}</Typography><br /><Typography variant="caption">step {d.enrollment.current_step + 1}/{(d.workflow.steps || []).length}</Typography></TableCell>
+                    <TableCell><Chip size="small" variant="outlined" label={stepChip(d.step)} sx={{ fontWeight: 600 }} /></TableCell>
+                    <TableCell><Typography variant="caption" color="text.secondary">{d.enrollment.next_due_date}</Typography></TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                        <Tooltip title={d.contact ? 'Send & advance' : 'Contact not reachable'}><span>
+                          <IconButton size="small" color="primary" disabled={!d.contact} onClick={() => openSend(d)}><SendRounded fontSize="small" /></IconButton>
+                        </span></Tooltip>
+                        <Tooltip title="Mark step done (sent outside KIT)"><IconButton size="small" onClick={() => markDone(d)}><TaskAltRounded fontSize="small" /></IconButton></Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Workflow definitions */}
       {loading ? (
         <Skeleton variant="rounded" height={200} />
       ) : (
@@ -1199,6 +1313,7 @@ function WorkflowsTab({ theme }) {
           {WORKFLOW_BLUEPRINTS.map((bp) => {
             const existing = findSaved(bp);
             const active = existing ? existing.is_active : false;
+            const c = existing ? countsFor(existing.id) : { active: 0, done: 0 };
             const Icon = bp.icon;
             return (
               <Card key={bp.name} variant="outlined" sx={{ borderRadius: 2.5, borderColor: active ? theme.palette.primary.main : 'divider' }}>
@@ -1211,17 +1326,34 @@ function WorkflowsTab({ theme }) {
                   </Stack>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 1.5 }}>{bp.name}</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{bp.description}</Typography>
-                  <Chip
-                    label={existing ? (active ? 'Created · enabled' : 'Created · paused') : 'Not created'}
-                    size="small"
-                    sx={{ mt: 1.5, fontWeight: 600, bgcolor: existing ? (active ? `${theme.palette.success.main}1a` : `${theme.palette.warning.main}1a`) : 'action.hover', color: existing ? (active ? theme.palette.success.main : theme.palette.warning.main) : 'text.secondary' }}
-                  />
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mt: 1.5, gap: 0.5 }}>
+                    {(bp.steps || []).map((s, i) => (
+                      <Chip key={i} size="small" variant="outlined" label={`${i === 0 ? 'on trigger' : `+${s.wait_days}d`} · ${stepChip(s)}`} sx={{ fontSize: '0.65rem' }} />
+                    ))}
+                  </Stack>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} alignItems="center">
+                    <Chip
+                      label={existing ? (active ? 'Enabled' : 'Paused') : 'Not created'}
+                      size="small"
+                      sx={{ fontWeight: 600, bgcolor: existing ? (active ? `${theme.palette.success.main}1a` : `${theme.palette.warning.main}1a`) : 'action.hover', color: existing ? (active ? theme.palette.success.main : theme.palette.warning.main) : 'text.secondary' }}
+                    />
+                    {existing && <Typography variant="caption" color="text.secondary">{c.active} active · {c.done} done</Typography>}
+                  </Stack>
                 </CardContent>
               </Card>
             );
           })}
         </Box>
       )}
+
+      <SendDialog
+        open={runSend.open}
+        contact={runSend.contact}
+        channel={runSend.channel}
+        currentUser={currentUser}
+        onClose={() => setRunSend((s) => ({ ...s, open: false }))}
+        onSent={afterSend}
+      />
     </Box>
   );
 }
@@ -1304,7 +1436,7 @@ export default function KitModule() {
       {tab === 0 && <DashboardTab stats={stats} contacts={contacts} loading={loading} theme={theme} onAction={handleAction} />}
       {tab === 1 && <ContactsTab contacts={contacts} loading={loading} users={users} theme={theme} onAction={handleAction} />}
       {tab === 2 && <TemplatesTab theme={theme} />}
-      {tab === 3 && <WorkflowsTab theme={theme} />}
+      {tab === 3 && <WorkflowsTab theme={theme} currentUser={currentUser} />}
 
       <SendDialog
         open={send.open}
