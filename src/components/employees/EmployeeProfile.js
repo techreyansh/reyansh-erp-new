@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   Alert, Avatar, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress,
   Collapse, Divider, FormControl, FormControlLabel, Grid, IconButton, InputLabel,
@@ -15,7 +15,7 @@ import {
   AccountBalance, Badge, AssignmentTurnedIn, Assessment, Settings, ViewModule,
   AccountBalanceWallet, School, FolderOpen, SupervisorAccount, Email as EmailIcon,
   Phone as PhoneIcon, WorkOutline, EventAvailable, BeachAccess, TrendingUp,
-  History, CloudUpload, InsertDriveFile, PersonOutline, BusinessCenter,
+  History, CloudUpload, CloudDownload, DeleteOutline, InsertDriveFile, PersonOutline, BusinessCenter,
   CheckCircle,
 } from '@mui/icons-material';
 import { usePermissions } from '../../context/PermissionContext';
@@ -519,6 +519,9 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
   const [moduleDraft, setModuleDraft] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
+  const [docType, setDocType] = useState('General');
+  const [docUploading, setDocUploading] = useState(false);
+  const docInputRef = useRef(null);
 
   const [showEducation, setShowEducation] = useState(false);
   const [showBank, setShowBank] = useState(false);
@@ -566,28 +569,77 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
   }, [employeeId, modules]);
 
   // Load documents for this employee (defensive — table may be empty/absent).
-  useEffect(() => {
+  const loadDocuments = useCallback(async () => {
     if (!employeeId) return;
-    let cancelled = false;
-    (async () => {
-      setDocsLoading(true);
-      try {
-        const { data, error: docErr } = await supabase
-          .from('employee_documents')
-          .select('*')
-          .eq('employee_id', employeeId)
-          .order('created_at', { ascending: false });
-        if (docErr) throw docErr;
-        if (!cancelled) setDocuments(data || []);
-      } catch (err) {
-        // Soft-fail: keep the friendly empty state rather than blowing up.
-        if (!cancelled) setDocuments([]);
-      } finally {
-        if (!cancelled) setDocsLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    setDocsLoading(true);
+    try {
+      const { data, error: docErr } = await supabase
+        .from('employee_documents')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .order('created_at', { ascending: false });
+      if (docErr) throw docErr;
+      setDocuments(data || []);
+    } catch (err) {
+      setDocuments([]);
+    } finally {
+      setDocsLoading(false);
+    }
   }, [employeeId]);
+  useEffect(() => { loadDocuments(); }, [loadDocuments]);
+
+  // Upload a document to the shared 'documents' storage bucket + record it.
+  const handleUploadDocument = async (file) => {
+    if (!file || !employeeId) return;
+    setDocUploading(true); setError(null);
+    try {
+      const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      const path = `employees/${employeeId}/${Date.now()}_${safe}`;
+      const { error: upErr } = await supabase.storage.from("documents").upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      let uploaderEmail = null;
+      try { uploaderEmail = (await supabase.auth.getUser()).data?.user?.email || null; } catch { /* optional */ }
+      const { error: insErr } = await supabase.from("employee_documents").insert({
+        employee_id: employeeId,
+        doc_type: docType || "General",
+        file_name: file.name,
+        storage_path: path,
+        uploaded_by_email: uploaderEmail,
+      });
+      if (insErr) throw insErr;
+      setSuccess(`Uploaded ${file.name}`);
+      await loadDocuments();
+    } catch (err) {
+      setError(err.message || "Upload failed.");
+    } finally {
+      setDocUploading(false);
+      if (docInputRef.current) docInputRef.current.value = "";
+    }
+  };
+
+  const handleDownloadDocument = async (doc) => {
+    if (!doc?.storage_path) return;
+    try {
+      const { data, error: sErr } = await supabase.storage.from("documents").createSignedUrl(doc.storage_path, 3600);
+      if (sErr) throw sErr;
+      if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+    } catch (err) {
+      setError(err.message || "Could not open the document.");
+    }
+  };
+
+  const handleDeleteDocument = async (doc) => {
+    if (!doc?.id) return;
+    setError(null);
+    try {
+      if (doc.storage_path) await supabase.storage.from("documents").remove([doc.storage_path]);
+      const { error: dErr } = await supabase.from("employee_documents").delete().eq("id", doc.id);
+      if (dErr) throw dErr;
+      await loadDocuments();
+    } catch (err) {
+      setError(err.message || "Could not delete the document.");
+    }
+  };
 
   const visibleModules = useMemo(() => moduleDraft.filter((m) => m.can_view), [moduleDraft]);
 
@@ -1190,11 +1242,26 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
                 <FolderOpen color="action" />
                 <Typography variant="h6" fontWeight={700}>Documents</Typography>
               </Stack>
-              <Tooltip title="Document upload is coming soon">
-                <span>
-                  <Button size="small" variant="outlined" startIcon={<CloudUpload />} disabled>Upload (coming soon)</Button>
-                </span>
-              </Tooltip>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <TextField
+                  select size="small" label="Type" value={docType}
+                  onChange={(e) => setDocType(e.target.value)} sx={{ minWidth: 150 }}
+                >
+                  {['General', 'Contract', 'ID Proof', 'Offer Letter', 'Certificate', 'Payslip', 'Other'].map((t) => (
+                    <MenuItem key={t} value={t}>{t}</MenuItem>
+                  ))}
+                </TextField>
+                <input
+                  ref={docInputRef} type="file" hidden
+                  onChange={(e) => handleUploadDocument(e.target.files?.[0])}
+                />
+                <Button
+                  size="small" variant="contained" startIcon={<CloudUpload />}
+                  disabled={docUploading} onClick={() => docInputRef.current?.click()}
+                >
+                  {docUploading ? 'Uploading…' : 'Upload'}
+                </Button>
+              </Stack>
             </Stack>
 
             {docsLoading ? (
@@ -1206,7 +1273,7 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
                 </Avatar>
                 <Typography variant="subtitle1" fontWeight={700}>No documents yet</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto', mt: 0.5 }}>
-                  Contracts, ID proofs and certificates for this employee will live here. Upload is on the way.
+                  Upload contracts, ID proofs and certificates using the button above.
                 </Typography>
               </Box>
             ) : (
@@ -1218,12 +1285,18 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="body2" fontWeight={600} noWrap>
-                        {doc.file_name || doc.name || doc.document_type || 'Document'}
+                        {doc.file_name || doc.doc_type || 'Document'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {[doc.document_type, fmtDate(doc.created_at)].filter(Boolean).join(' · ')}
+                        {[doc.doc_type, fmtDate(doc.created_at), doc.uploaded_by_email].filter(Boolean).join(' · ')}
                       </Typography>
                     </Box>
+                    <Tooltip title="Download">
+                      <IconButton size="small" onClick={() => handleDownloadDocument(doc)}><CloudDownload fontSize="small" /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton size="small" color="error" onClick={() => handleDeleteDocument(doc)}><DeleteOutline fontSize="small" /></IconButton>
+                    </Tooltip>
                   </Paper>
                 ))}
               </Stack>
