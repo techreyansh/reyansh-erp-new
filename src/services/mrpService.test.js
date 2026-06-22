@@ -1,4 +1,4 @@
-import { aggregateMrp } from './mrpService';
+import { aggregateMrp, netRequirements } from './mrpService';
 
 describe('aggregateMrp', () => {
   test('rolls up material per piece × order qty, across costings', () => {
@@ -24,5 +24,41 @@ describe('aggregateMrp', () => {
   test('empty input safe; lines without costing ignored', () => {
     expect(aggregateMrp([], [], [])).toEqual([]);
     expect(aggregateMrp([{ qty: 10, costing_version_id: null }], [], [])).toEqual([]);
+  });
+});
+
+describe('netRequirements', () => {
+  const materials = [
+    { code: 'PIN_6A', name: '6A pin/plug', uom: 'pc', qty: 500 },
+    { code: 'COPPER', name: 'Copper conductor', uom: 'kg', qty: 300 },
+    { code: 'PVC_INS', name: 'PVC insulation', uom: 'kg', qty: 80 },
+  ];
+  const stock = [
+    { itemCode: 'PIN_6A', itemName: '6A Pin', currentStock: '1200', reorderPoint: '500', unit: 'pc' }, // code match, enough
+    { itemCode: 'CU01', itemName: 'Copper conductor', currentStock: '100', reorderPoint: '50', unit: 'kg' }, // name match, short
+  ];
+
+  test('nets by code, by name, and flags unmatched', () => {
+    const out = netRequirements(materials, stock);
+    const pin = out.find((m) => m.code === 'PIN_6A');
+    expect(pin.onHand).toBe(1200);
+    expect(pin.shortfall).toBe(0);
+    expect(pin.status).toBe('ok');
+
+    const cu = out.find((m) => m.code === 'COPPER'); // matched by normalized name
+    expect(cu.onHand).toBe(100);
+    expect(cu.shortfall).toBe(200); // 300 - 100
+    expect(cu.status).toBe('short');
+
+    const pvc = out.find((m) => m.code === 'PVC_INS'); // no stock record
+    expect(pvc.onHand).toBeNull();
+    expect(pvc.shortfall).toBe(80);
+    expect(pvc.status).toBe('unmatched');
+  });
+
+  test('no stock → everything unmatched, shortfall = full qty', () => {
+    const out = netRequirements(materials, []);
+    expect(out.every((m) => m.status === 'unmatched')).toBe(true);
+    expect(out.find((m) => m.code === 'COPPER').shortfall).toBe(300);
   });
 });
