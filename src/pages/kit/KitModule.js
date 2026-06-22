@@ -67,6 +67,7 @@ import {
   YAxis,
 } from 'recharts';
 import kitService, { CHANNELS, CHANNEL_LABELS } from '../../services/kitService';
+import { rankForOutreach } from '../../services/kitCadence';
 import { listAssignableUsers, getCurrentUserEmail } from '../../services/crmPipelineService';
 
 /* ------------------------------------------------------------------ helpers */
@@ -625,10 +626,9 @@ function DashboardTab({ stats, contacts, loading, theme, onAction }) {
     else buckets[0].value += 1;
   });
 
-  const attention = [...contacts]
-    .filter((c) => c.at_risk || c.needs_followup || (Number(c.days_since_touch) || 0) > 0)
-    .sort((a, b) => (Number(b.days_since_touch) || 0) - (Number(a.days_since_touch) || 0))
-    .slice(0, 8);
+  // Cadence engine: who to contact today + which message type + why.
+  const PRIORITY_COLOR = { 3: theme.palette.error.main, 2: theme.palette.warning.main, 1: theme.palette.info.main };
+  const attention = rankForOutreach(contacts).slice(0, 8);
 
   const axis = { fontSize: 12, fill: theme.palette.text.secondary };
   const grid = theme.palette.divider;
@@ -671,21 +671,26 @@ function DashboardTab({ stats, contacts, loading, theme, onAction }) {
 
         <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
           <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Needs attention</Typography>
-            <Typography variant="caption" color="text.secondary">Going quiet or at risk — reach out</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Suggested outreach today</Typography>
+            <Typography variant="caption" color="text.secondary">Who to reach, what to send, and why</Typography>
           </Box>
           <Divider />
           {attention.length ? (
             <Stack divider={<Divider />} sx={{ maxHeight: 320, overflow: 'auto' }}>
-              {attention.map((c) => (
+              {attention.map(({ contact: c, rec }) => (
                 <Stack key={c.account_id} direction="row" alignItems="center" justifyContent="space-between" spacing={1} sx={{ px: 2, py: 1.25 }}>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                      {c.company_name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {(Number(c.days_since_touch) || 0)} d since touch
-                      {c.at_risk ? ' · at risk' : c.needs_followup ? ' · follow-up due' : ''}
+                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>{c.company_name}</Typography>
+                      <Chip
+                        label={rec.label}
+                        size="small"
+                        sx={{ height: 18, fontSize: 10, fontWeight: 700, flexShrink: 0,
+                          bgcolor: `${PRIORITY_COLOR[rec.priority]}1a`, color: PRIORITY_COLOR[rec.priority] }}
+                      />
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                      {rec.reason}
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
