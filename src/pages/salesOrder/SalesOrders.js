@@ -11,6 +11,8 @@ import ReceiptLongOutlined from '@mui/icons-material/ReceiptLongOutlined';
 import so from '../../services/salesOrderService';
 import SalesOrderWizard from '../../components/salesOrder/SalesOrderWizard';
 import Order360 from '../../components/salesOrder/Order360';
+import ReportExportButton from '../../components/common/ReportExportButton';
+import { buildSalesOrderReport } from '../../services/reporting/operationsReports';
 
 const STATUS_COLOR = {
   draft: 'default', pending_review: 'info', approved: 'warning', released: 'primary',
@@ -70,6 +72,7 @@ export default function SalesOrders() {
         <ReceiptLongOutlined color="primary" />
         <Typography variant="h5" sx={{ fontWeight: 800 }}>Sales Orders</Typography>
         <Box sx={{ flexGrow: 1 }} />
+        <ReportExportButton buildReport={() => buildSalesOrderReport(orders)} label="Export register" />
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setWizard(true)}>New order</Button>
       </Stack>
 

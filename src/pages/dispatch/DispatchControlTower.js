@@ -13,6 +13,8 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded';
 import dispatch from '../../services/dispatchTowerService';
 import { backwardPlan, readiness, planRisk } from '../../services/dispatchPlanner';
+import ReportExportButton from '../../components/common/ReportExportButton';
+import { buildDispatchReport } from '../../services/reporting/operationsReports';
 
 const inr = (v) => `₹${(Number(v) || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const fmt = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—');
@@ -71,6 +73,8 @@ export default function DispatchControlTower() {
         <LocalShippingOutlined color="primary" />
         <Typography variant="h5" sx={{ fontWeight: 800 }}>Dispatch Control Tower</Typography>
         <Chip size="small" variant="outlined" label="reverse planning" color="primary" />
+        <Box sx={{ flexGrow: 1 }} />
+        <ReportExportButton buildReport={() => buildDispatchReport(plans)} label="Export plan" />
       </Stack>
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>

@@ -6,6 +6,8 @@ import {
 } from '@mui/material';
 import FactoryOutlined from '@mui/icons-material/FactoryOutlined';
 import demand from '../../services/productionDemandService';
+import ReportExportButton from '../../components/common/ReportExportButton';
+import { buildProductionDemandReport } from '../../services/reporting/operationsReports';
 
 const STATUS_COLOR = { pending: 'warning', planned: 'info', in_production: 'secondary', done: 'success', cancelled: 'default' };
 const fmt = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—');
@@ -47,6 +49,8 @@ export default function ProductionDemand() {
         <FactoryOutlined color="primary" />
         <Typography variant="h5" sx={{ fontWeight: 800 }}>Production Demand</Typography>
         <Chip size="small" variant="outlined" label="from released orders" color="primary" />
+        <Box sx={{ flexGrow: 1 }} />
+        <ReportExportButton buildReport={() => buildProductionDemandReport(rows)} label="Export demand" />
       </Stack>
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
