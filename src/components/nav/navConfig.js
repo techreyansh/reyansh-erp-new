@@ -90,6 +90,7 @@ export const NAV_GROUPS = [
     icon: ic(BuildOutlined),
     items: [
       { label: "Production Planning", path: "/ppc", icon: ic(AssignmentOutlined) },
+      { label: "Production Demand", path: "/production-demand", icon: ic(FactoryOutlined) },
       { label: "Cable Production", path: "/cable-production", icon: ic(CableOutlined) },
       { label: "Molding Production", path: "/molding", icon: ic(PrecisionManufacturingOutlined) },
       { label: "Production Log", path: "/production-log", icon: ic(GridViewOutlined) },

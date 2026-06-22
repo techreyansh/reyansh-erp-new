@@ -64,6 +64,7 @@ export async function createOrder({ header, lines = [], status = 'draft' }) {
     if (lErr) throw lErr;
   }
   await supabase.from('sales_order_status_log').insert({ so_id: order.id, from_status: null, to_status: status, changed_by_email: email });
+  if (status === 'released') { try { await createProductionDemand(order.id); } catch { /* non-fatal */ } }
   return order;
 }
 
@@ -85,8 +86,24 @@ export async function transitionStatus(orderId, toStatus, note) {
   const { error } = await supabase.from('sales_order').update(patch).eq('id', orderId);
   if (error) throw error;
   await supabase.from('sales_order_status_log').insert({ so_id: orderId, from_status: cur?.status, to_status: toStatus, changed_by_email: email, note: note || null });
+  if (toStatus === 'released') { try { await createProductionDemand(orderId); } catch { /* non-fatal */ } }
   return toStatus;
 }
 
-const salesOrderService = { listSalesOrders, getSalesOrder, createOrder, uploadOrderDocument, transitionStatus, nextStatus };
+/** Generate production demand from a released order's lines (idempotent). */
+export async function createProductionDemand(orderId) {
+  const { data: existing } = await supabase.from('production_demand').select('id').eq('so_id', orderId).limit(1);
+  if (existing && existing.length) return; // already generated
+  const { order, lines } = await getSalesOrder(orderId);
+  if (!lines.length) return;
+  const rows = lines.map((l) => ({
+    so_id: orderId, so_line_id: l.id, so_number: order.so_number, customer_code: order.customer_code,
+    company_name: order.company_name, product_id: l.product_id, product_code: l.product_code,
+    product_name: l.product_name, qty: l.qty, uom: l.uom, required_date: l.required_delivery_date || order.expected_delivery_date,
+    priority: order.priority, owner_email: order.owner_email,
+  }));
+  await supabase.from('production_demand').insert(rows);
+}
+
+const salesOrderService = { listSalesOrders, getSalesOrder, createOrder, uploadOrderDocument, transitionStatus, nextStatus, createProductionDemand };
 export default salesOrderService;

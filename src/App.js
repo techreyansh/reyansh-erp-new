@@ -130,6 +130,7 @@ const EmployeeManagement = lazy(() => import("./pages/employees/EmployeeManageme
 const ProductMaster = lazy(() => import("./pages/products/ProductMaster"));
 const SalesOrders = lazy(() => import("./pages/salesOrder/SalesOrders"));
 const DispatchControlTower = lazy(() => import("./pages/dispatch/DispatchControlTower"));
+const ProductionDemand = lazy(() => import("./pages/production/ProductionDemand"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -314,6 +315,12 @@ function AppContent() {
                   <Route path="/dispatch-control" element={
                     <ProtectedRouteGate>
                       <DispatchControlTower />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/production-demand" element={
+                    <ProtectedRouteGate>
+                      <ProductionDemand />
                     </ProtectedRouteGate>
                   } />
 
