@@ -515,10 +515,14 @@ const Header = () => {
           )}
           {!isCompactNav && user && !permissions?.loading && (
             <Box sx={{
-              display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center",
+              display: "flex", alignItems: "center", flexGrow: 1,
               flexWrap: "nowrap", minWidth: 0, overflowX: "auto",
               "&::-webkit-scrollbar": { display: "none" }, scrollbarWidth: "none",
             }}>
+              {/* Inner wrapper: m:auto centers the strip when there's room, and
+                  collapses to a scrollable left-align when it overflows — so the
+                  first item ("Home") is never clipped off the left edge. */}
+              <Box sx={{ display: "flex", alignItems: "center", m: "auto", flexShrink: 0 }}>
               {finalMenuGroups.map((group) => (
                 <Box key={group.key} sx={{ position: "relative", flexShrink: 0 }}>
                   <Tooltip title={group.label} placement="bottom">
@@ -622,6 +626,7 @@ const Header = () => {
                   </Menu>
                 </Box>
               ))}
+              </Box>
             </Box>
           )}
 
