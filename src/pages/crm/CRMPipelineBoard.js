@@ -63,6 +63,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import DescriptionIcon from "@mui/icons-material/Description";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import CrmReportDialog from "../../components/crm/CrmReportDialog";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
@@ -2862,6 +2864,7 @@ export default function CRMPipelineBoard() {
   const [collaboratorRows, setCollaboratorRows] = useState([]);
 
   const [addOpen, setAddOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
   const [snack, setSnack] = useState(null); // { message, severity }
 
@@ -3171,6 +3174,15 @@ export default function CRMPipelineBoard() {
             sx={{ minWidth: 200 }}
           />
 
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<SummarizeIcon />}
+            onClick={() => setReportOpen(true)}
+          >
+            Generate CRM Report
+          </Button>
+
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
             Add company
           </Button>
@@ -3234,6 +3246,8 @@ export default function CRMPipelineBoard() {
         onSubmit={handleAddCompany}
         currentEmail={currentEmail}
       />
+
+      <CrmReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
 
       <CompanyDrawer
         id={drawerId}
