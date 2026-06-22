@@ -470,6 +470,27 @@ export async function moveOrderCycle(id, toStage, note) {
  * @returns {{ overdue:Array, today:Array, upcoming:Array,
  *             counts:{ overdue:number, today:number, upcoming:number, total:number } }}
  */
+/**
+ * Collapse follow-ups to ONE row per account so the same company never repeats.
+ * Keeps the most urgent (soonest-due) item; on a tie, prefers the pipeline
+ * "action" over an activity follow-up. Pure — unit-tested.
+ */
+export function consolidateFollowups(items) {
+  const byAccount = new Map();
+  for (const it of items || []) {
+    if (!it || !it.date) continue;
+    const key = it.pipelineId || it.id;
+    const prev = byAccount.get(key);
+    if (!prev) { byAccount.set(key, it); continue; }
+    const a = new Date(it.date).getTime();
+    const b = new Date(prev.date).getTime();
+    if (a < b || (a === b && it.kind === "action" && prev.kind !== "action")) {
+      byAccount.set(key, it);
+    }
+  }
+  return [...byAccount.values()];
+}
+
 export async function getMyFollowups(email) {
   const mine = (ownerEmail) =>
     ownerEmail == null ||
@@ -484,12 +505,15 @@ export async function getMyFollowups(email) {
 
   // 2) Activities with a planned follow-up. Company name comes from the joined
   //    pipeline row (foreign-table select on the pipeline_id relationship).
+  //    Exclude COMPLETED activities — a finished follow-up must not linger in
+  //    the widget (this was the source of stale/repeated rows).
   const { data: actRows, error: aErr } = await supabase
     .from("crm_pipeline_activity")
     .select(
-      "id,pipeline_id,subject,activity_type,next_follow_up_date,owner_email,crm_pipeline(company_name)",
+      "id,pipeline_id,subject,activity_type,next_follow_up_date,owner_email,status,crm_pipeline(company_name)",
     )
-    .not("next_follow_up_date", "is", null);
+    .not("next_follow_up_date", "is", null)
+    .neq("status", "completed");
   throwIf(aErr);
 
   const items = [];
@@ -538,7 +562,8 @@ export async function getMyFollowups(email) {
   const dueToday = [];
   const upcoming = [];
 
-  items.forEach((it) => {
+  // One row per account (drops duplicate same-company follow-ups).
+  consolidateFollowups(items).forEach((it) => {
     if (!it.date) return;
     const d = startOfDay(it.date);
     if (d < today) overdue.push(it);
