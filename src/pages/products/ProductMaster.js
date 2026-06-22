@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabaseClient';
 import plm from '../../services/plmProductService';
 import costing from '../../services/plmCostingService';
 import { listAudit, diffRows } from '../../services/masterAuditService';
+import CostingEditor from '../../components/product/CostingEditor';
 
 const STATUSES = ['development', 'sample', 'approved', 'production', 'inactive', 'obsolete'];
 const STATUS_COLOR = { development: 'info', sample: 'warning', approved: 'success', production: 'primary', inactive: 'default', obsolete: 'error' };
@@ -275,6 +276,7 @@ function OverviewTab({ p, onSaved, notify }) {
 function CostingTab({ p, notify }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
   const load = useCallback(async () => {
     setLoading(true);
     try { setRows(await costing.listCostingsForProduct(p.id)); } finally { setLoading(false); }
@@ -312,14 +314,15 @@ function CostingTab({ p, notify }) {
               <TableCell>{inr(c.net_selling_price)}</TableCell>
               <TableCell>{Number(c.net_margin_pct || 0).toFixed(1)}%</TableCell>
               <TableCell><Chip size="small" color={cColor[c.status] || 'default'} label={c.status} sx={{ height: 20, textTransform: 'capitalize' }} /></TableCell>
-              <TableCell align="right">{costing.nextStatus(c.status) && <Button size="small" onClick={() => advance(c)}>→ {costing.nextStatus(c.status)}</Button>}</TableCell>
+              <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                <Button size="small" onClick={() => setEditingId(c.id)}>Edit</Button>
+                {costing.nextStatus(c.status) && <Button size="small" onClick={() => advance(c)}>→ {costing.nextStatus(c.status)}</Button>}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody></Table>
       )}
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        Line-item editor with live margin lands in the next step; status workflow + rates are live now.
-      </Typography>
+      {editingId && <CostingEditor costingId={editingId} onClose={() => setEditingId(null)} onSaved={load} notify={notify} />}
     </CardContent></Card>
   );
 }
