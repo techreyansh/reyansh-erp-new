@@ -112,12 +112,17 @@ function fillVariables(text, ctx) {
   if (!text) return '';
   const map = {
     company: ctx.company_name || '',
-    contact: ctx.contact || ctx.company_name || 'there',
+    // Greet the person; fall back to a neutral salutation, never the company name.
+    contact: ctx.contact || 'there',
     industry: ctx.industry || 'your industry',
     city: ctx.city || '',
     me: ctx.me || '',
   };
-  return String(text).replace(/\{(\w+)\}/g, (m, key) => (key in map ? map[key] : m));
+  return String(text)
+    .replace(/\{(\w+)\}/g, (m, key) => (key in map ? map[key] : m))
+    // Templates may store URL-encoded newlines (%0A) meant for the mailto link;
+    // show them as real line breaks. encodeURIComponent re-encodes them on send.
+    .replace(/%0D%0A|%0A|%0D/gi, '\n');
 }
 
 /* ----------------------------------------------------------- shared widgets */
@@ -203,7 +208,7 @@ function SendDialog({ open, onClose, contact, channel, currentUser, onSent }) {
   const ctx = useMemo(
     () => ({
       company_name: contact?.company_name,
-      contact: contact?.company_name,
+      contact: contact?.contact_person || contact?.contact_name || '',
       industry: contact?.industry,
       city: contact?.city,
       me: currentUser ? namePrefix(currentUser) : '',
