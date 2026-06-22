@@ -76,6 +76,7 @@ export const NAV_GROUPS = [
     icon: ic(TrendingUpOutlined),
     items: [
       { label: "Products", path: "/products", icon: ic(ShoppingBagOutlined) },
+      { label: "Product Master (PLM)", path: "/product-master", icon: ic(Inventory2Outlined) },
       { label: "Client Orders", path: "/client-orders", icon: ic(ReceiptLongOutlined) },
       { label: "Sales Order Ingestion", path: "/po-ingestion", icon: ic(InputOutlined) },
       { label: "Sales Flow", path: "/sales-flow", icon: ic(TrendingUpOutlined) },
