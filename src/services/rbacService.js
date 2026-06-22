@@ -10,8 +10,16 @@ const EMPLOYEE_SELECT = `
   full_name,
   phone,
   department,
+  designation,
+  employee_code,
+  employment_type,
+  joining_date,
+  reporting_manager,
+  reporting_manager_id,
+  status,
   role_id,
   is_active,
+  archived_at,
   created_at,
   updated_at,
   roles:role_id (
@@ -163,6 +171,16 @@ export async function updateEmployeeFields(employeeId, fields) {
     throw error;
   }
   return data;
+}
+
+/** Archive an employee: hide from the directory + remove access. Reversible. */
+export async function archiveEmployee(employeeId) {
+  return updateEmployeeFields(employeeId, { archived_at: new Date().toISOString(), is_active: false });
+}
+
+/** Restore an archived employee (clears archived_at; does not auto-reactivate access). */
+export async function unarchiveEmployee(employeeId) {
+  return updateEmployeeFields(employeeId, { archived_at: null });
 }
 
 /**

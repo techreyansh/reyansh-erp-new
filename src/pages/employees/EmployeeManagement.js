@@ -178,6 +178,14 @@ export default function EmployeeManagement() {
       load();
     } catch (e) { notify(e.message || "Failed", "error"); }
   };
+  const bulkRun = async (ids, fn, doneMsg) => {
+    try { await Promise.all((ids || []).map(fn)); notify(doneMsg(ids.length)); load(); }
+    catch (e) { notify(e.message || "Failed", "error"); }
+  };
+  const onArchive = (emp) => bulkRun([emp.id], (id) => rbacService.archiveEmployee(id), () => `${emp.full_name || "Employee"} archived`);
+  const onUnarchive = (emp) => bulkRun([emp.id], (id) => rbacService.unarchiveEmployee(id), () => `${emp.full_name || "Employee"} restored`);
+  const onBulkArchive = (ids) => bulkRun(ids, (id) => rbacService.archiveEmployee(id), (n) => `${n} employee(s) archived`);
+  const onBulkUnarchive = (ids) => bulkRun(ids, (id) => rbacService.unarchiveEmployee(id), (n) => `${n} employee(s) restored`);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -221,9 +229,13 @@ export default function EmployeeManagement() {
     onEdit,
     onDuplicate,
     onToggleActive,
+    onArchive,
+    onUnarchive,
     onDelete: (emp) => { setDeleteTarget({ emps: [emp] }); setDeleteConfirm(""); },
     onTransfer: (emp) => setTransferTarget({ emps: [emp], value: emp.department || "" }),
     onChangeManager: (emp) => setManagerTarget({ emps: [emp], value: emp.reporting_manager_id || "" }),
+    onBulkArchive,
+    onBulkUnarchive,
     onBulkDelete: (ids) => { setDeleteTarget({ emps: empsByIds(ids) }); setDeleteConfirm(""); },
     onBulkTransfer: (ids) => setTransferTarget({ emps: empsByIds(ids), value: "" }),
     onBulkAssignManager: (ids) => setManagerTarget({ emps: empsByIds(ids), value: "" }),

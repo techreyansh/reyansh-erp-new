@@ -53,6 +53,8 @@ import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
 import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccountOutlined";
 import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNew";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import UnarchiveOutlinedIcon from "@mui/icons-material/UnarchiveOutlined";
 
 const COLS_STORAGE_KEY = "reyansh.emp.dir.cols";
 
@@ -70,6 +72,7 @@ const SAVED_VIEWS = [
   { id: "active", label: "Active only" },
   { id: "inactive", label: "Inactive" },
   { id: "noaccess", label: "No access" },
+  { id: "archived", label: "Archived" },
 ];
 
 // ---------- helpers ----------
@@ -248,6 +251,11 @@ export default function EmployeeDirectory({
     const q = search.trim().toLowerCase();
     return rows.filter((e) => {
       if (!e) return false;
+
+      // archive filter: hide archived everywhere except the "Archived" view
+      const archived = !!e.archived_at;
+      if (activeView === "archived") { if (!archived) return false; }
+      else if (archived) return false;
 
       // status filter
       const active = isActiveEmp(e);
@@ -1006,6 +1014,14 @@ export default function EmployeeDirectory({
             </Button>
             <Button
               size="small"
+              startIcon={<ArchiveOutlinedIcon />}
+              onClick={() => (activeView === "archived" ? actions.onBulkUnarchive?.(selectedIdsArr) : actions.onBulkArchive?.(selectedIdsArr))}
+              sx={{ color: "inherit" }}
+            >
+              {activeView === "archived" ? "Unarchive" : "Archive"}
+            </Button>
+            <Button
+              size="small"
               startIcon={<DeleteOutlineIcon />}
               onClick={() => actions.onBulkDelete?.(selectedIdsArr)}
               sx={{ color: "#ffd5d5" }}
@@ -1058,6 +1074,17 @@ export default function EmployeeDirectory({
           <ListItemIcon><PowerSettingsNewOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>{rowMenu.emp?.is_active === false ? "Activate" : "Deactivate"}</ListItemText>
         </MenuItem>
+        {rowMenu.emp?.archived_at ? (
+          <MenuItem onClick={runAction(actions.onUnarchive)}>
+            <ListItemIcon><UnarchiveOutlinedIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Unarchive</ListItemText>
+          </MenuItem>
+        ) : (
+          <MenuItem onClick={runAction(actions.onArchive)}>
+            <ListItemIcon><ArchiveOutlinedIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Archive</ListItemText>
+          </MenuItem>
+        )}
         <Divider />
         <MenuItem onClick={runAction(actions.onDelete)} sx={{ color: "error.main" }}>
           <ListItemIcon><DeleteOutlineIcon fontSize="small" color="error" /></ListItemIcon>
