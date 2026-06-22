@@ -184,16 +184,23 @@ export async function unarchiveEmployee(employeeId) {
 }
 
 /**
- * Hard-delete an employee. Removes dependent permission rows first (FK), then
- * the employee row itself. Irreversible — callers must confirm.
+ * Hard-delete an employee. Dependent rows (permissions, documents, attendance,
+ * leave) cascade via FK. Uses an exact row count so a silent RLS denial (0 rows
+ * removed, no error) surfaces as a real error instead of a false success.
+ * Irreversible — callers must confirm.
  */
 export async function deleteEmployee(employeeId) {
   if (!employeeId) throw new Error('Employee id is required.');
-  await supabase.from('employee_permissions').delete().eq('employee_id', employeeId);
-  const { error } = await supabase.from('employees').delete().eq('id', employeeId);
+  const { error, count } = await supabase
+    .from('employees')
+    .delete({ count: 'exact' })
+    .eq('id', employeeId);
   if (error) {
     console.error('CRUD error:', error);
     throw error;
+  }
+  if (!count) {
+    throw new Error('Delete was blocked — you may not have permission to delete employees.');
   }
 }
 
