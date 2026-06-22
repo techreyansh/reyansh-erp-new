@@ -117,6 +117,10 @@ function fillVariables(text, ctx) {
     industry: ctx.industry || 'your industry',
     city: ctx.city || '',
     me: ctx.me || '',
+    stage: ctx.stage || '',
+    customer_type: ctx.customer_type || '',
+    days_since: ctx.days_since != null ? String(ctx.days_since) : 'some',
+    last_contact: ctx.last_contact || 'a while back',
   };
   return String(text)
     .replace(/\{(\w+)\}/g, (m, key) => (key in map ? map[key] : m))
@@ -206,13 +210,20 @@ function SendDialog({ open, onClose, contact, channel, currentUser, onSent }) {
   const [busy, setBusy] = useState(false);
 
   const ctx = useMemo(
-    () => ({
-      company_name: contact?.company_name,
-      contact: contact?.contact_person || contact?.contact_name || '',
-      industry: contact?.industry,
-      city: contact?.city,
-      me: currentUser ? namePrefix(currentUser) : '',
-    }),
+    () => {
+      const d = Number(contact?.days_since_touch);
+      return {
+        company_name: contact?.company_name,
+        contact: contact?.contact_person || contact?.contact_name || '',
+        industry: contact?.industry,
+        city: contact?.city,
+        me: currentUser ? namePrefix(currentUser) : '',
+        stage: contact ? stageLabel(contact) : '',
+        customer_type: contact?.account_type === 'client' ? 'valued customer' : 'prospective partner',
+        days_since: Number.isFinite(d) ? d : null,
+        last_contact: Number.isFinite(d) ? (d === 0 ? 'earlier today' : `${d} day${d === 1 ? '' : 's'} ago`) : 'a while back',
+      };
+    },
     [contact, currentUser],
   );
 
@@ -242,15 +253,31 @@ function SendDialog({ open, onClose, contact, channel, currentUser, onSent }) {
     }
   };
 
-  // "Generate with AI" — smart context-fill now (real LLM later).
+  // "Generate with AI" — context-aware templated draft (picks tone from the
+  // relationship signal: opportunity vs dormant vs relationship). No LLM.
   const generate = () => {
     const t = templates.find((x) => String(x.id) === String(templateId));
-    const baseSubject = t?.subject || (channel === 'email' ? 'Quick hello from Reyansh International' : '');
-    const baseBody =
-      t?.body ||
-      `Hi {contact}, this is {me} from Reyansh International. We work with {industry} businesses${
-        contact?.city ? ' in {city}' : ''
-      } and would love to stay in touch about your wire & cable requirements. Happy to help whenever you need.`;
+    const d = Number(contact?.days_since_touch);
+    const stageKey = String(contact?.prospect_stage || contact?.client_stage || '').toLowerCase();
+    const isEmail = channel === 'email';
+
+    let baseSubject = t?.subject || (isEmail ? 'Keeping in touch — {company}' : '');
+    let baseBody = t?.body;
+    if (!baseBody) {
+      if (/quotation|sample|negotiation|meeting/.test(stageKey)) {
+        // Opportunity in motion — move it forward, helpfully.
+        baseSubject = isEmail ? 'On our {industry} discussion — {company}' : '';
+        baseBody = `Hi {contact}, circling back on where we'd reached with {company} on the {industry} requirement. Happy to refine specs or pricing so it fits cleanly — what would help move it forward from here?`;
+      } else if (Number.isFinite(d) && d >= 30) {
+        // Dormant — warm reconnect, no pressure.
+        baseSubject = isEmail ? 'Reconnecting with {company}' : '';
+        baseBody = `Hi {contact}, it's been about {last_contact} since we last connected — no agenda, just didn't want the line with {company} to go quiet. If anything has come up on the {industry} side, I'm glad to help. How are things at your end?`;
+      } else {
+        // Healthy relationship — light, value-first touch.
+        baseSubject = isEmail ? 'A quick hello from Reyansh' : '';
+        baseBody = `Hi {contact}, hope things are running well at {company}. Just keeping in touch as a {customer_type} of ours — if any wire, cord or harness need surfaces for your {industry} work, I'm here to help. No agenda today.`;
+      }
+    }
     setSubject(fillVariables(baseSubject, ctx));
     setBody(fillVariables(baseBody, ctx));
   };
@@ -330,7 +357,7 @@ function SendDialog({ open, onClose, contact, channel, currentUser, onSent }) {
             Generate with AI
           </Button>
           <Typography variant="caption" color="text.secondary" sx={{ mt: -1.5 }}>
-            AI-assisted: fills {'{company}'}, {'{contact}'}, {'{industry}'}, {'{city}'}, {'{me}'} from CRM context. Real LLM drafting comes later.
+            Context-aware: fills {'{company}'}, {'{contact}'}, {'{industry}'}, {'{city}'}, {'{stage}'}, {'{customer_type}'}, {'{last_contact}'}, {'{me}'} from CRM, and picks tone from the relationship (opportunity / dormant / relationship).
           </Typography>
 
           {!isWhatsapp && (
@@ -540,7 +567,7 @@ function TemplateDialog({ open, onClose, template, onDone }) {
             minRows={5}
             value={form.body || ''}
             onChange={set('body')}
-            helperText="Use {company} {contact} {industry} {city} {me} as variables"
+            helperText="Variables: {company} {contact} {industry} {city} {stage} {customer_type} {last_contact} {me}"
           />
           <FormControlLabel
             control={<Switch checked={form.is_active !== false} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))} />}
