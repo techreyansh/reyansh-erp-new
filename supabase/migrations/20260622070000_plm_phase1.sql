@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS public.product_document (
 );
 CREATE INDEX IF NOT EXISTS idx_product_document_p ON public.product_document (product_id);
 
--- Link BOM to the product master (additive).
-ALTER TABLE public.bom_templates ADD COLUMN IF NOT EXISTS product_id uuid;
+-- (BOM↔product link deferred to Phase 3 auto-costing — the BOM table is
+--  bom_template/company_bom_data; wired then once the join approach is confirmed.)
 
 -- ===== COSTING (folded; references product, not customer_product) =========
 CREATE TABLE IF NOT EXISTS public.material_rate (
