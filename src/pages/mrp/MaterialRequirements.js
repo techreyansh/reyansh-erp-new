@@ -1,11 +1,14 @@
 // MRP — material requirements rolled up from released orders' costings.
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container, Box, Stack, Typography, Grid, Card, CardContent, Chip, Table, TableHead,
-  TableRow, TableCell, TableBody, CircularProgress, Alert, Snackbar, FormControlLabel, Switch, Tooltip,
+  TableRow, TableCell, TableBody, CircularProgress, Alert, Snackbar, FormControlLabel, Switch, Tooltip, Button,
 } from '@mui/material';
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import ShoppingCartOutlined from '@mui/icons-material/ShoppingCartOutlined';
 import mrp from '../../services/mrpService';
+import prService from '../../services/purchaseRequisitionService';
 import ReportExportButton from '../../components/common/ReportExportButton';
 
 const STATUS = {
@@ -20,6 +23,8 @@ export default function MaterialRequirements() {
   const [loading, setLoading] = useState(true);
   const [snack, setSnack] = useState(null);
   const [shortOnly, setShortOnly] = useState(false);
+  const [raising, setRaising] = useState(false);
+  const navigate = useNavigate();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -28,6 +33,18 @@ export default function MaterialRequirements() {
     finally { setLoading(false); }
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  const buyable = data.materials.filter((m) => m.status !== 'ok' && Number(m.shortfall) > 0);
+  const raisePr = async () => {
+    setRaising(true);
+    try {
+      const rates = await prService.rateMap();
+      const created = await prService.createFromShortfall(data.materials, rates);
+      setSnack({ message: `Created ${created.pr_number} with ${buyable.length} line(s).`, severity: 'success' });
+      setTimeout(() => navigate('/purchase-requisitions'), 900);
+    } catch (e) { setSnack({ message: e.message || 'Could not raise PR', severity: 'error' }); }
+    finally { setRaising(false); }
+  };
 
   const rows = useMemo(
     () => (shortOnly ? data.materials.filter((m) => m.status !== 'ok') : data.materials),
@@ -66,6 +83,14 @@ export default function MaterialRequirements() {
           label={<Typography variant="caption">Shortfalls only</Typography>}
           sx={{ mr: 1 }}
         />
+        <Tooltip title={buyable.length ? `Raise a draft PR for ${buyable.length} short material(s)` : 'No shortfalls to requisition'}>
+          <span>
+            <Button variant="contained" color="warning" startIcon={<ShoppingCartOutlined />} disabled={!buyable.length || raising}
+              onClick={raisePr} sx={{ borderRadius: 2, mr: 1 }}>
+              {raising ? 'Raising…' : `Raise PR${buyable.length ? ` (${buyable.length})` : ''}`}
+            </Button>
+          </span>
+        </Tooltip>
         <ReportExportButton buildReport={buildReport} label="Export MRP" />
       </Stack>
 

@@ -28,7 +28,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path === '/costing', moduleKey: MODULE_KEYS.ACCOUNTS },
-  { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow'), moduleKey: MODULE_KEYS.INVENTORY },
+  { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow') || path === '/purchase-requisitions', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/task-scheduler' || path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/my-tasks' || path === '/task-checklist' || path === '/task-compliance-admin' || path === '/checklist-templates', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/document-library', moduleKey: MODULE_KEYS.REPORTS },

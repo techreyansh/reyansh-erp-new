@@ -121,6 +121,7 @@ export const NAV_GROUPS = [
     label: "Purchase",
     icon: ic(ShoppingCartOutlined),
     items: [
+      { label: "Purchase Requisitions", path: "/purchase-requisitions", icon: ic(ReceiptLongOutlined) },
       { label: "Purchase Flow", path: "/purchase-flow", icon: ic(ShoppingCartOutlined) },
       { label: "Vendors", path: "/vendor-management", icon: ic(StorefrontOutlined) },
     ],
