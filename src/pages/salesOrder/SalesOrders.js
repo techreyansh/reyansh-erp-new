@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ReceiptLongOutlined from '@mui/icons-material/ReceiptLongOutlined';
 import so from '../../services/salesOrderService';
 import SalesOrderWizard from '../../components/salesOrder/SalesOrderWizard';
+import Order360 from '../../components/salesOrder/Order360';
 
 const STATUS_COLOR = {
   draft: 'default', pending_review: 'info', approved: 'warning', released: 'primary',
@@ -25,6 +26,7 @@ export default function SalesOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [wizard, setWizard] = useState(false);
+  const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [snack, setSnack] = useState(null);
   const notify = (message, severity = 'success') => setSnack({ message, severity });
@@ -57,6 +59,10 @@ export default function SalesOrders() {
     try { await so.transitionStatus(o.id, next); notify(`${o.so_number} → ${next.replace(/_/g, ' ')}`); load(); }
     catch (e) { notify(e.message || 'Failed', 'error'); }
   };
+
+  if (selected) {
+    return <Order360 orderId={selected} onBack={() => { setSelected(null); load(); }} notify={notify} />;
+  }
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -95,7 +101,7 @@ export default function SalesOrders() {
               ) : filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={9} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>No sales orders. Click “New order”.</TableCell></TableRow>
               ) : filtered.map((o) => (
-                <TableRow key={o.id} hover>
+                <TableRow key={o.id} hover sx={{ cursor: 'pointer' }} onClick={() => setSelected(o.id)}>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.74rem', whiteSpace: 'nowrap' }}>{o.so_number}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{o.company_name || '—'}</TableCell>
                   <TableCell>{o.po_number || '—'}</TableCell>
@@ -104,7 +110,7 @@ export default function SalesOrders() {
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{inr(o.total_value)}</TableCell>
                   <TableCell sx={{ textTransform: 'capitalize' }}>{o.priority}</TableCell>
                   <TableCell><Chip size="small" color={STATUS_COLOR[o.status] || 'default'} label={(o.status || '').replace(/_/g, ' ')} sx={{ height: 20, textTransform: 'capitalize' }} /></TableCell>
-                  <TableCell align="right">{so.nextStatus(o.status) && <Button size="small" onClick={() => advance(o)}>→ {so.nextStatus(o.status).replace(/_/g, ' ')}</Button>}</TableCell>
+                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>{so.nextStatus(o.status) && <Button size="small" onClick={() => advance(o)}>→ {so.nextStatus(o.status).replace(/_/g, ' ')}</Button>}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
