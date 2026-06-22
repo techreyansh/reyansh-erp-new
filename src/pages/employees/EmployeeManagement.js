@@ -13,6 +13,7 @@ import EmployeeDashboard from "../../components/employees/EmployeeDashboard";
 import EmployeeDirectory from "../../components/employees/EmployeeDirectory";
 import EmployeeProfile from "../../components/employees/EmployeeProfile";
 import EmployeeOrgChart from "../../components/employees/EmployeeOrgChart";
+import EmployeeImportDialog from "../../components/employees/EmployeeImportDialog";
 
 export default function EmployeeManagement() {
   const permissions = usePermissions();
@@ -107,6 +108,53 @@ export default function EmployeeManagement() {
     [employees]
   );
   const empsByIds = useCallback((ids) => employees.filter((e) => ids.includes(e.id)), [employees]);
+
+  const [importOpen, setImportOpen] = useState(false);
+  const toIsoDate = (s) => {
+    if (!s) return null;
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  };
+  // Bulk-create from the import dialog; core fields via saveEmployee, extras via
+  // updateEmployeeFields. Returns { created, failed, errors } for the dialog.
+  const handleRunImport = async (rows) => {
+    let created = 0, failed = 0;
+    const errors = [];
+    for (const row of rows) {
+      try {
+        const saved = await rbacService.saveEmployee({
+          full_name: row.full_name,
+          email: row.email,
+          phone: row.phone || null,
+          department: row.department || null,
+          is_active: String(row.status || "").toLowerCase() !== "inactive",
+        });
+        const extra = {};
+        if (row.employee_code) extra.employee_code = row.employee_code;
+        if (row.designation) extra.designation = row.designation;
+        const jd = toIsoDate(row.joining_date);
+        if (jd) extra.joining_date = jd;
+        if (row.reporting_manager) {
+          extra.reporting_manager = row.reporting_manager;
+          const mgr = employees.find(
+            (e) =>
+              (e.full_name || "").toLowerCase() === row.reporting_manager.toLowerCase() ||
+              (e.email || "").toLowerCase() === row.reporting_manager.toLowerCase()
+          );
+          if (mgr) extra.reporting_manager_id = mgr.id;
+        }
+        if (saved?.id && Object.keys(extra).length) {
+          try { await rbacService.updateEmployeeFields(saved.id, extra); } catch { /* core row created; extras optional */ }
+        }
+        created += 1;
+      } catch (e) {
+        failed += 1;
+        errors.push(`${row.email}: ${e.message || "failed"}`);
+      }
+    }
+    return { created, failed, errors };
+  };
 
   const [deleteTarget, setDeleteTarget] = useState(null);   // { emps: [] }
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -227,7 +275,7 @@ export default function EmployeeManagement() {
           employees={employees} loading={loading}
           onOpenEmployee={(e) => openEmployee(e)}
           onAddEmployee={() => setAddOpen(true)}
-          onImport={() => notify("CSV import — coming soon", "info")}
+          onImport={() => setImportOpen(true)}
           onAssignAccess={() => setView("directory")}
           onExport={() => handleExport()}
         />
@@ -240,6 +288,7 @@ export default function EmployeeManagement() {
           onBulkSetStatus={handleBulkSetStatus}
           onBulkAssignAccess={(ids) => { const e = employees.find((x) => x.id === ids[0]); if (e) openEmployee(e, 2); }}
           onExport={handleExport}
+          onImport={() => setImportOpen(true)}
           actions={directoryActions}
         />
       )}
@@ -340,6 +389,14 @@ export default function EmployeeManagement() {
           <Button variant="contained" onClick={confirmManager}>Save</Button>
         </DialogActions>
       </Dialog>
+
+      <EmployeeImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        existingEmployees={employees}
+        onRunImport={handleRunImport}
+        onDone={load}
+      />
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         {snack ? <Alert severity={snack.severity} onClose={() => setSnack(null)} variant="filled">{snack.message}</Alert> : undefined}

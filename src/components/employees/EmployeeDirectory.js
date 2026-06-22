@@ -36,6 +36,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -198,6 +199,7 @@ export default function EmployeeDirectory({
   onBulkSetStatus = () => {},
   onBulkAssignAccess = () => {},
   onExport = () => {},
+  onImport = () => {},
   actions = {},
 }) {
   const theme = useTheme();
@@ -515,6 +517,17 @@ export default function EmployeeDirectory({
             </MenuItem>
           ))}
         </Menu>
+
+        <Button
+          variant="outlined"
+          size="small"
+          color="inherit"
+          startIcon={<UploadFileOutlinedIcon />}
+          onClick={onImport}
+          sx={{ borderColor: "divider", color: "text.secondary" }}
+        >
+          Import
+        </Button>
 
         <Button
           variant="outlined"
