@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Container, Box, Stack, Typography, Button, Grid, Card, CardContent, Chip, Table, TableHead,
   TableRow, TableCell, TableBody, IconButton, CircularProgress, Snackbar, Alert, TextField,
-  MenuItem, Collapse, LinearProgress, Divider, Tooltip, useTheme, alpha,
+  MenuItem, Collapse, LinearProgress, Divider, Tooltip, ToggleButton, ToggleButtonGroup, useTheme, alpha,
 } from '@mui/material';
+import DispatchCalendar from '../../components/dispatch/DispatchCalendar';
 import LocalShippingOutlined from '@mui/icons-material/LocalShippingOutlined';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -28,6 +29,7 @@ export default function DispatchControlTower() {
   const [plannable, setPlannable] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [view, setView] = useState('list');
   const [planning, setPlanning] = useState(null); // order being scheduled
   const [planDate, setPlanDate] = useState(todayStr());
   const [snack, setSnack] = useState(null);
@@ -102,9 +104,17 @@ export default function DispatchControlTower() {
 
       {/* Dispatch plans */}
       <Card variant="outlined" sx={{ borderRadius: 2 }}><CardContent>
-        <Typography variant="overline" color="text.secondary">Dispatch plans</Typography>
+        <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>Dispatch plans</Typography>
+          <ToggleButtonGroup size="small" exclusive value={view} onChange={(_, v) => v && setView(v)}>
+            <ToggleButton value="list">List</ToggleButton>
+            <ToggleButton value="calendar">Calendar</ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
         {loading ? <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={24} /></Stack> : plans.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>No dispatch plans yet. Plan a released order above.</Typography>
+        ) : view === 'calendar' ? (
+          <DispatchCalendar plans={plans} onOpen={(p) => { setView('list'); setExpanded(p.id); }} />
         ) : (
           <Stack spacing={1} sx={{ mt: 1 }}>
             {plans.map((p) => {
