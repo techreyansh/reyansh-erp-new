@@ -128,6 +128,7 @@ const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/Ch
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
 const EmployeeManagement = lazy(() => import("./pages/employees/EmployeeManagement"));
 const ProductMaster = lazy(() => import("./pages/products/ProductMaster"));
+const SalesOrders = lazy(() => import("./pages/salesOrder/SalesOrders"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -300,6 +301,12 @@ function AppContent() {
                   <Route path="/product-master" element={
                     <ProtectedRouteGate>
                       <ProductMaster />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/sales-orders" element={
+                    <ProtectedRouteGate>
+                      <SalesOrders />
                     </ProtectedRouteGate>
                   } />
 
