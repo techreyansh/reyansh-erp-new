@@ -25,6 +25,8 @@ import { UserProvider } from "./context/UserContext";
 import { StepStatusProvider } from './context/StepStatusContext';
 
 import Header from "./components/common/Header";
+import SidebarNav from "./components/nav/SidebarNav";
+import { useNavPrefs } from "./hooks/useNavPrefs";
 import ScrollProgressBar from "./components/common/ScrollProgressBar";
 import Login from "./components/auth/Login";
 import ProfilePage from "./components/common/ProfilePage";
@@ -155,6 +157,8 @@ function AppContent() {
   const { loading: userLoading } = useUser();
   const { loading: permissionsLoading } = usePermissions();
   const location = useLocation();
+  const navPrefs = useNavPrefs();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const isPublicEntry =
     location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied";
   if (!isPublicEntry && (authLoading || userLoading || permissionsLoading)) {
@@ -169,8 +173,23 @@ function AppContent() {
         backgroundColor: "background.default",
       }}
     >
-      {!isPublicEntry && <Header />}
+      {!isPublicEntry && <Header onMenuClick={() => setMobileOpen(true)} />}
       {!isPublicEntry && <ScrollProgressBar />}
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+        {!isPublicEntry && (
+          <SidebarNav
+            collapsed={navPrefs.collapsed}
+            onToggleCollapsed={navPrefs.toggleCollapsed}
+            mobileOpen={mobileOpen}
+            onMobileClose={() => setMobileOpen(false)}
+            favorites={navPrefs.favorites}
+            isFavorite={navPrefs.isFavorite}
+            toggleFavorite={navPrefs.toggleFavorite}
+            recents={navPrefs.recents}
+            pushRecent={navPrefs.pushRecent}
+          />
+        )}
+        <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
       <Box component="main" sx={{ flex: 1, py: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2, md: 3 }, maxWidth: "100%" }}>
         <Box
           key={location.pathname}
@@ -915,6 +934,8 @@ function AppContent() {
                   {new Date().getFullYear()}
                 </Typography>
               </Box>
+        </Box>
+      </Box>
             </Box>
   );
 }

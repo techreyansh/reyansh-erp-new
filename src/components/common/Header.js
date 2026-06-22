@@ -81,7 +81,7 @@ import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
 import TaskBell from "./TaskBell";
 
-const Header = () => {
+const Header = ({ onMenuClick } = {}) => {
   const theme = useTheme();
   const { mode, toggleMode } = useThemeMode();
   const { user, signOut, role: userRole } = useAuth();
@@ -452,7 +452,7 @@ const Header = () => {
               edge="start"
               color="primary"
               aria-label="menu"
-              onClick={toggleDrawer}
+              onClick={onMenuClick || toggleDrawer}
               sx={{ mr: 2 }}
             >
               <MenuIcon />
@@ -505,15 +505,15 @@ const Header = () => {
             </Typography>
           </Box>
 
-          {/* Desktop Navigation */}
-          {!isCompactNav && user && permissions?.loading && (
+          {/* Desktop module navigation moved to the left SidebarNav (App shell). */}
+          {false && user && permissions?.loading && (
             <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center", gap: 1.5, px: 2 }}>
               {[1, 2, 3, 4].map((n) => (
                 <Skeleton key={n} variant="rounded" width={96} height={36} animation="wave" />
               ))}
             </Box>
           )}
-          {!isCompactNav && user && !permissions?.loading && (
+          {false && user && !permissions?.loading && (
             <Box sx={{
               display: "flex", alignItems: "center", flexGrow: 1,
               flexWrap: "nowrap", minWidth: 0, overflowX: "auto",
