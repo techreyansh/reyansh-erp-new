@@ -21,6 +21,7 @@ import {
 import { usePermissions } from '../../context/PermissionContext';
 import { DEPARTMENT_OPTIONS } from '../../config/departments';
 import { supabase } from '../../lib/supabaseClient';
+import { listAudit, diffRows } from '../../services/masterAuditService';
 import {
   listEmployeePermissionOverrides, listEmployees, listModules,
   saveEmployee, saveEmployeeModuleAccess, setEmployeeActive,
@@ -522,6 +523,8 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
   const [docType, setDocType] = useState('General');
   const [docUploading, setDocUploading] = useState(false);
   const docInputRef = useRef(null);
+  const [auditRows, setAuditRows] = useState([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   const [showEducation, setShowEducation] = useState(false);
   const [showBank, setShowBank] = useState(false);
@@ -587,6 +590,24 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
     }
   }, [employeeId]);
   useEffect(() => { loadDocuments(); }, [loadDocuments]);
+
+  // Change history (who/when/old→new) from the shared master_audit_log.
+  useEffect(() => {
+    if (!employeeId) return;
+    let cancelled = false;
+    (async () => {
+      setAuditLoading(true);
+      try {
+        const rows = await listAudit('employees', employeeId, 50);
+        if (!cancelled) setAuditRows(rows || []);
+      } catch {
+        if (!cancelled) setAuditRows([]);
+      } finally {
+        if (!cancelled) setAuditLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [employeeId, success]);
 
   // Upload a document to the shared 'documents' storage bucket + record it.
   const handleUploadDocument = async (file) => {
@@ -1358,6 +1379,47 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
                 </Typography>
               )}
             </Stack>
+
+            {/* Change history (audit log) */}
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>
+                Change history
+              </Typography>
+              {auditLoading ? (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>Loading…</Typography>
+              ) : auditRows.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 1.5 }}>
+                  No edits recorded yet — every change to this employee will be logged here (who, when, what changed).
+                </Typography>
+              ) : (
+                <Stack spacing={1} sx={{ mt: 1 }}>
+                  {auditRows.map((a) => {
+                    const changes = a.action === 'UPDATE' ? diffRows(a.old_value || {}, a.new_value || {}) : [];
+                    const verb = a.action === 'INSERT' ? 'Created' : a.action === 'DELETE' ? 'Deleted' : 'Updated';
+                    return (
+                      <Paper key={a.id} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="baseline" flexWrap="wrap" useFlexGap>
+                          <Typography variant="body2" fontWeight={600}>
+                            {verb}{a.changed_by_email ? ` · ${a.changed_by_email}` : ''}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">{fmtDate(a.changed_at)}</Typography>
+                        </Stack>
+                        {changes.length > 0 && (
+                          <Box sx={{ mt: 0.5 }}>
+                            {changes.slice(0, 8).map((c) => (
+                              <Typography key={c.field} variant="caption" color="text.secondary" display="block">
+                                <b>{c.field}</b>: {String(c.from ?? '—')} → {String(c.to ?? '—')}
+                              </Typography>
+                            ))}
+                          </Box>
+                        )}
+                        {a.reason && <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5, fontStyle: 'italic' }}>Reason: {a.reason}</Typography>}
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              )}
+            </Box>
           </CardContent>
         </Card>
       )}
