@@ -17,6 +17,7 @@ import {
   InputAdornment,
   InputLabel,
   LinearProgress,
+  Table, TableHead, TableRow, TableCell, TableBody,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -68,6 +69,8 @@ import {
 } from 'recharts';
 import kitService, { CHANNELS, CHANNEL_LABELS } from '../../services/kitService';
 import { rankForOutreach } from '../../services/kitCadence';
+import { scoreByCategory } from '../../services/kitEngagement';
+import { supabase } from '../../lib/supabaseClient';
 import { listAssignableUsers, getCurrentUserEmail } from '../../services/crmPipelineService';
 
 /* ------------------------------------------------------------------ helpers */
@@ -591,6 +594,21 @@ function TemplateDialog({ open, onClose, template, onDone }) {
 /* ================================================================ DASHBOARD */
 
 function DashboardTab({ stats, contacts, loading, theme, onAction }) {
+  const [perf, setPerf] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [m, t, a] = await Promise.all([
+          supabase.from('kit_messages').select('template_id, account_id, sent_at, direction'),
+          supabase.from('kit_templates').select('id, category, name'),
+          supabase.from('crm_pipeline_activity').select('pipeline_id, activity_type, activity_at'),
+        ]);
+        if (alive) setPerf(scoreByCategory({ messages: m.data || [], templates: t.data || [], activities: a.data || [] }));
+      } catch { /* non-fatal */ }
+    })();
+    return () => { alive = false; };
+  }, []);
   if (loading) {
     return (
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(2,1fr)', lg: 'repeat(4,1fr)' } }}>
@@ -722,6 +740,41 @@ function DashboardTab({ stats, contacts, loading, theme, onAction }) {
           )}
         </Paper>
       </Box>
+
+      {/* Message performance — which categories drive engagement */}
+      <Paper variant="outlined" sx={{ borderRadius: 2.5, mt: 2, overflow: 'hidden' }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Message performance</Typography>
+          <Typography variant="caption" color="text.secondary">Response within 14 days, by message category — learn what works</Typography>
+        </Box>
+        <Divider />
+        {perf.length === 0 ? (
+          <Box sx={{ p: 3, textAlign: 'center' }}><Typography variant="body2" color="text.secondary">No sent messages yet — performance appears as you message contacts.</Typography></Box>
+        ) : (
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead><TableRow>{['Category', 'Sent', 'Responded', 'Response rate', 'Meetings', 'Quotes'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }}>{h}</TableCell>)}</TableRow></TableHead>
+              <TableBody>
+                {perf.map((c) => (
+                  <TableRow key={c.category} hover>
+                    <TableCell sx={{ fontWeight: 600, textTransform: 'capitalize' }}>{(c.category || '').replace(/_/g, ' ')}</TableCell>
+                    <TableCell>{c.sent}</TableCell>
+                    <TableCell>{c.responded}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <LinearProgress variant="determinate" value={c.responseRate} sx={{ width: 64, height: 6, borderRadius: 3 }} />
+                        <Typography variant="caption" fontWeight={700}>{c.responseRate}%</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>{c.meetings}</TableCell>
+                    <TableCell>{c.quotations}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+      </Paper>
     </Box>
   );
 }
