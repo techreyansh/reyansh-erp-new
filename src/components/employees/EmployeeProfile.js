@@ -22,6 +22,8 @@ import { usePermissions } from '../../context/PermissionContext';
 import { DEPARTMENT_OPTIONS } from '../../config/departments';
 import { supabase } from '../../lib/supabaseClient';
 import { listAudit, diffRows } from '../../services/masterAuditService';
+import EmployeeAttendanceTab from './EmployeeAttendanceTab';
+import EmployeeLeaveTab from './EmployeeLeaveTab';
 import {
   listEmployeePermissionOverrides, listEmployees, listModules,
   saveEmployee, saveEmployeeModuleAccess, setEmployeeActive,
@@ -1327,22 +1329,10 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
       )}
 
       {/* ---------------- TAB 4: ATTENDANCE ---------------- */}
-      {tab === 4 && (
-        <ComingSoonPanel
-          icon={EventAvailable}
-          title="Attendance"
-          line="Daily check-in/out, shifts and monthly summaries for this employee will appear here."
-        />
-      )}
+      {tab === 4 && <EmployeeAttendanceTab employeeId={employeeId} />}
 
       {/* ---------------- TAB 5: LEAVE ---------------- */}
-      {tab === 5 && (
-        <ComingSoonPanel
-          icon={BeachAccess}
-          title="Leave"
-          line="Leave balances, requests and approvals for this employee will appear here."
-        />
-      )}
+      {tab === 5 && <EmployeeLeaveTab employeeId={employeeId} />}
 
       {/* ---------------- TAB 6: PERFORMANCE ---------------- */}
       {tab === 6 && <PerformanceTab employee={employee} />}
