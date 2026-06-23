@@ -64,7 +64,10 @@ export async function createOrder({ header, lines = [], status = 'draft' }) {
     if (lErr) throw lErr;
   }
   await supabase.from('sales_order_status_log').insert({ so_id: order.id, from_status: null, to_status: status, changed_by_email: email });
-  if (status === 'released') { try { await createProductionDemand(order.id); } catch { /* non-fatal */ } }
+  if (status === 'released') {
+    try { await createProductionDemand(order.id); } catch { /* non-fatal */ }
+    try { await supabase.rpc('inv_reserve_for_order', { p_so: order.id }); } catch { /* non-fatal */ }
+  }
   return order;
 }
 
@@ -86,7 +89,11 @@ export async function transitionStatus(orderId, toStatus, note) {
   const { error } = await supabase.from('sales_order').update(patch).eq('id', orderId);
   if (error) throw error;
   await supabase.from('sales_order_status_log').insert({ so_id: orderId, from_status: cur?.status, to_status: toStatus, changed_by_email: email, note: note || null });
-  if (toStatus === 'released') { try { await createProductionDemand(orderId); } catch { /* non-fatal */ } }
+  if (toStatus === 'released') {
+    try { await createProductionDemand(orderId); } catch { /* non-fatal */ }
+    try { await supabase.rpc('inv_reserve_for_order', { p_so: orderId }); } catch { /* non-fatal */ }
+  }
+  if (['cancelled', 'completed'].includes(toStatus)) { try { await supabase.rpc('inv_release_order', { p_so: orderId }); } catch { /* non-fatal */ } }
   return toStatus;
 }
 
