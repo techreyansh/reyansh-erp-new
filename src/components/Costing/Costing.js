@@ -39,7 +39,7 @@ import {
   TrendingUpRounded,
   CableOutlined,
 } from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import costingService from '../../services/costingService';
 import { StatCard } from '../common/kit';
 
