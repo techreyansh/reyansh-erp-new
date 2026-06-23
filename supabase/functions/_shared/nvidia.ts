@@ -43,20 +43,29 @@ function skeleton(s: any): any {
   return s.type || "string";
 }
 
-// Pull a JSON object out of model output: drop <think>…</think> reasoning,
-// strip ``` fences, then parse — falling back to first balanced {…} block.
+// Pull a JSON object out of model output: drop <think>…</think> reasoning
+// (Nemotron reasoning models may emit it even with thinking off), strip ```
+// fences, then parse — falling back to a STRING-AWARE balanced {…} scan so
+// braces inside string values don't break the match.
 function extractJson(text: string): any {
   let t = String(text || "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fence) t = fence[1].trim();
   try { return JSON.parse(t); } catch { /* fall through */ }
-  const i = t.indexOf("{");
-  if (i >= 0) {
-    let depth = 0;
-    for (let j = i; j < t.length; j++) {
-      const c = t[j];
-      if (c === "{") depth++;
-      else if (c === "}") { depth--; if (depth === 0) { try { return JSON.parse(t.slice(i, j + 1)); } catch { break; } } }
+  const start = t.indexOf("{");
+  if (start < 0) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < t.length; i++) {
+    const c = t[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === "\\") esc = true;
+      else if (c === '"') inStr = false;
+    } else if (c === '"') inStr = true;
+    else if (c === "{") depth++;
+    else if (c === "}") {
+      depth--;
+      if (depth === 0) { try { return JSON.parse(t.slice(start, i + 1)); } catch { return null; } }
     }
   }
   return null;
