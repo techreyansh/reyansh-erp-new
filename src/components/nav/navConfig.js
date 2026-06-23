@@ -68,6 +68,7 @@ export const NAV_GROUPS = [
       { label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: ic(TrendingUpOutlined) },
       { label: "Client Management", path: "/crm-pipeline?view=clients", icon: ic(PeopleAltOutlined) },
       { label: "Client Pipeline", path: "/crm/client-pipeline", icon: ic(AccountTreeOutlined) },
+      { label: "Payment Follow-Up", path: "/crm/payments", icon: ic(PaymentsOutlined) },
       { label: "CRM Dashboard", path: "/crm/dashboard", icon: ic(InsightsOutlined) },
       { label: "KIT — Keep In Touch", path: "/kit", icon: ic(ForumOutlined) },
       { label: "AI Sales Copilot", path: "/crm/copilot", icon: ic(AutoAwesomeOutlined) },

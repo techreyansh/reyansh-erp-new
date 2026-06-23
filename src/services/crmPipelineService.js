@@ -1008,6 +1008,22 @@ export async function listClientStageDefs() {
   return data || [];
 }
 
+// Payment Dashboard rollup (outstanding/due-this-week/overdue/critical/aging/
+// forecast/top-debtors/invoices) for the Payment Follow-Up workflow.
+export async function paymentDashboard() {
+  const { data, error } = await supabase.rpc("ar_payment_dashboard");
+  if (error) throw error;
+  return data || {};
+}
+
+// Update per-invoice collection tracking (commitment date / status / owner / notes).
+export async function updateCollection(invoiceId, { commitment = null, status = null, owner = null, notes = null } = {}) {
+  const { error } = await supabase.rpc("ar_update_collection", {
+    p_invoice: invoiceId, p_commitment: commitment, p_status: status, p_owner: owner, p_notes: notes,
+  });
+  if (error) throw error;
+}
+
 // Set/clear a client's mandatory next action (Status/Action/Owner/Due/Priority).
 export async function setClientNextAction(id, { action = null, date = null, owner = null, priority = "normal", status = null } = {}) {
   const patch = {

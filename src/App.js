@@ -124,6 +124,7 @@ const RepWorklist = lazy(() => import("./pages/crm/RepWorklist"));
 const CrmTeam = lazy(() => import("./pages/crm/CrmTeam"));
 const AISalesCopilot = lazy(() => import("./pages/crm/AISalesCopilot"));
 const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
+const PaymentFollowUp = lazy(() => import("./pages/crm/PaymentFollowUp"));
 const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
@@ -987,6 +988,14 @@ function AppContent() {
                     element={
                       <ProtectedRouteGate>
                         <ClientPipeline />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/payments"
+                    element={
+                      <ProtectedRouteGate>
+                        <PaymentFollowUp />
                       </ProtectedRouteGate>
                     }
                   />
