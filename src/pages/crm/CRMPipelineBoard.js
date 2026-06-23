@@ -96,6 +96,7 @@ import {
   addContact,
   updateContact,
   deleteContact,
+  clientHealth,
   convertToClient,
   assignOwner,
   addCompany,
@@ -2868,6 +2869,16 @@ export default function CRMPipelineBoard() {
   const [reportOpen, setReportOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
   const [snack, setSnack] = useState(null); // { message, severity }
+  const [healthMap, setHealthMap] = useState({}); // customer_code(lower) -> health row
+
+  // Load client health scores once (used for the Health column on the clients table).
+  useEffect(() => {
+    clientHealth().then((arr) => {
+      const m = {};
+      (arr || []).forEach((h) => { m[String(h.customer_code || "").toLowerCase()] = h; });
+      setHealthMap(m);
+    }).catch(() => {});
+  }, []);
 
   // Drag-and-drop: stash the card currently being dragged ({ id, stage }).
   const dragRef = React.useRef(null);
@@ -3235,6 +3246,7 @@ export default function CRMPipelineBoard() {
             clients={filteredClients}
             scope={scope}
             userMap={userMap}
+            healthMap={healthMap}
             onOpen={(id) => setDrawerId(id)}
             onStageChange={handleClientStageChange}
           />
@@ -3381,7 +3393,7 @@ function ClientStageSelect({ row, onStageChange }) {
   );
 }
 
-function ClientsTable({ theme, clients, scope, userMap, onOpen, onStageChange }) {
+function ClientsTable({ theme, clients, scope, userMap, onOpen, onStageChange, healthMap }) {
   if (!clients || clients.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
@@ -3417,6 +3429,7 @@ function ClientsTable({ theme, clients, scope, userMap, onOpen, onStageChange })
           <TableRow>
             <TableCell sx={headSx}>Code</TableCell>
             <TableCell sx={headSx}>Company</TableCell>
+            <TableCell sx={{ ...headSx, textAlign: "center" }}>Health</TableCell>
             <TableCell sx={headSx}>Industry</TableCell>
             <TableCell sx={headSx}>City</TableCell>
             <TableCell sx={headSx}>GST</TableCell>
@@ -3441,6 +3454,13 @@ function ClientsTable({ theme, clients, scope, userMap, onOpen, onStageChange })
               </TableCell>
               <TableCell sx={{ ...cellSx, fontWeight: 700 }}>
                 {c.company_name || "—"}
+              </TableCell>
+              <TableCell sx={{ ...cellSx, textAlign: "center" }}>
+                {(() => {
+                  const h = healthMap?.[(c.customer_code || "").toLowerCase()];
+                  if (!h) return <Typography variant="caption" color="text.disabled">—</Typography>;
+                  return <Chip size="small" label={h.health_score} variant="outlined" color={h.band === "green" ? "success" : h.band === "yellow" ? "warning" : "error"} sx={{ fontWeight: 700, height: 20 }} />;
+                })()}
               </TableCell>
               <TableCell sx={cellSx}>{c.industry || "—"}</TableCell>
               <TableCell sx={cellSx}>{c.city || "—"}</TableCell>
