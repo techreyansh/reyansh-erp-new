@@ -54,12 +54,16 @@ export function buildPlan(input = {}) {
   const copperConstruction = numStrands && strandDia ? `${numStrands}/${strandDia}` : (numStrands ? `${numStrands} strands` : '');
 
   const machineOf = (stage) => DEFAULT_MACHINES.find((m) => m.stage === stage) || { name: '—', defaultSpeed: 500, shiftHrs: 8 };
+  // Planner-editable machine capacity: per-stage speed (m/hr) + shift hours.
+  // Falls back to the machine-master defaults when a field is left blank.
+  const SPEED_KEY = { bunching: 'speedBunching', core: 'speedCore', laying: 'speedLaying', sheathing: 'speedSheathing' };
+  const shiftHrs = Number(input.shiftHours) > 0 ? Number(input.shiftHours) : 8;
+  const speedFor = (stage) => { const v = Number(input[SPEED_KEY[stage]]); return v > 0 ? v : (machineOf(stage).defaultSpeed || 0); };
   // Machine loading for a stage given the raw length it must process.
   const planStage = (stage, rawLength) => {
     const m = machineOf(stage);
     const planningLength = r2(rawLength * w);
-    const speed = m.defaultSpeed || 0;                          // m/hr
-    const shiftHrs = m.shiftHrs || 8;
+    const speed = speedFor(stage);                              // m/hr (planner override or master default)
     const dailyCapacity = speed * shiftHrs;                     // m/day (one shift)
     const requiredHours = speed ? r2(planningLength / speed) : 0;
     return {
@@ -161,8 +165,10 @@ async function nextPlanNumber() {
 
 const FIELDS = ['customer_name', 'product_name', 'cable_description', 'order_qty', 'required_length', 'delivery_date',
   'priority', 'remarks', 'cores', 'shape', 'conductor_size', 'strand_construction', 'num_strands', 'core_colours',
-  'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct', 'report_language'];
-const NUMERIC = ['order_qty', 'required_length', 'cores', 'conductor_size', 'num_strands', 'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct'];
+  'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct', 'report_language',
+  'speed_bunching', 'speed_core', 'speed_laying', 'speed_sheathing', 'shift_hours'];
+const NUMERIC = ['order_qty', 'required_length', 'cores', 'conductor_size', 'num_strands', 'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct',
+  'speed_bunching', 'speed_core', 'speed_laying', 'speed_sheathing', 'shift_hours'];
 
 function toRow(input) {
   const row = {};

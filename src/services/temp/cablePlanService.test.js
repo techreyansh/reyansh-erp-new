@@ -78,3 +78,17 @@ test('machine load summary has capacity, hours and utilisation per stage', () =>
   });
   expect(p.summary.leadDays).toBeGreaterThan(0);
 });
+
+test('planner machine-capacity override drives speed + required hours', () => {
+  const slow = buildPlan({ ...base, cores: 3, orderQty: 1000, requiredLength: 1, speedBunching: 250, shiftHours: 8 });
+  const fast = buildPlan({ ...base, cores: 3, orderQty: 1000, requiredLength: 1, speedBunching: 1000, shiftHours: 8 });
+  expect(slow.departments.bunching.speed).toBe(250);
+  expect(fast.departments.bunching.speed).toBe(1000);
+  expect(slow.departments.bunching.dailyCapacity).toBe(2000);  // 250 × 8
+  expect(slow.departments.bunching.requiredHours).toBeGreaterThan(fast.departments.bunching.requiredHours);
+});
+
+test('blank capacity falls back to machine-master default', () => {
+  const p = buildPlan({ ...base, cores: 3, orderQty: 1000, requiredLength: 1, speedCore: '' });
+  expect(p.departments.core.speed).toBe(700);   // master default
+});

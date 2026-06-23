@@ -49,13 +49,28 @@ table.cpd-tbl th { background:#eee; font-weight:800; font-size: 11px; }
 .cpd-sign div { text-align:center; font-size: 12px; } .cpd-sign .ln { border-top: 1.5px solid #111; width: 200px; margin-top: 28px; padding-top: 3px; }
 @media screen { .cpd-print { background:#eef0f3; padding: 16px; } }
 @media print {
-  @page { size: A4 portrait; margin: 6mm; }
+  @page { size: A4 portrait; margin: 7mm; }
+  html, body { background:#fff !important; }
   body * { visibility: hidden !important; }
   .cpd-print, .cpd-print * { visibility: visible !important; }
-  .cpd-print { position: absolute; left: 0; top: 0; width: 100%; background:#fff; padding:0; }
+  .cpd-print { position: absolute; left: 0; top: 0; width: 100%; background:#fff; padding:0; font-size: 11px; }
   .cpd-toolbar { display: none !important; }
-  .cpd-page { border: none; margin: 0; width: 100%; min-height: auto; page-break-after: always; padding: 4mm 2mm; }
-  .cpd-page:last-child { page-break-after: auto; }
+  /* one card == exactly one A4 page: start on a fresh page AND never split */
+  .cpd-page { border: none; margin: 0; width: 100%; min-height: auto; height: auto; padding: 0;
+    page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid; }
+  .cpd-page:last-child { page-break-after: auto; break-after: auto; }
+  .cpd-sec, .cpd-two, .cpd-eff, .cpd-sign, table.cpd-tbl, .cpd-rows { page-break-inside: avoid; break-inside: avoid; }
+  /* compact the layout so the densest card (4-core core-extrusion) fits one page */
+  .cpd-hdr h1 { font-size: 17px; } .cpd-hdr h2 { font-size: 10.5px; } .cpd-co { font-size: 10px; }
+  .cpd-meta { margin: 5px 0; } .cpd-meta div { font-size: 10.5px; padding: 2px 0; }
+  .cpd-sec { margin-top: 6px; } .cpd-sec > .cpd-sec-h { font-size: 10.5px; padding: 3px 6px; }
+  .cpd-rows { padding: 3px 6px; } .cpd-row { font-size: 11px; padding: 2px 0; }
+  table.cpd-tbl { font-size: 10px; } table.cpd-tbl th, table.cpd-tbl td { padding: 2.5px 4px; }
+  table.cpd-tbl th { font-size: 9px; }
+  .cpd-entry { padding: 5px 6px; gap: 4px 14px; } .cpd-blank { font-size: 11px; } .cpd-blank .ln { height: 15px; }
+  .cpd-ticks { padding: 3px 6px; gap: 3px 12px; } .cpd-tick { font-size: 10px; }
+  .cpd-eff div { padding: 4px 3px; } .cpd-eff .lbl { font-size: 9px; } .cpd-eff .box { height: 22px; margin-top: 4px; }
+  .cpd-sign { padding: 8px 6px 2px; } .cpd-sign .ln { margin-top: 20px; width: 180px; }
 }
 `;
 

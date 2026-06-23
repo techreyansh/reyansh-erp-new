@@ -21,6 +21,7 @@ const EMPTY = {
   customerName: '', productName: '', cableDescription: '', orderQty: '', requiredLength: '', deliveryDate: '', priority: 'normal', remarks: '',
   cores: 3, shape: 'Round', conductorSize: '', strandConstruction: '', numStrands: '', coreColours: '', finishedOd: '', cableLength: '',
   coreOd: '', wastagePct: 2, layingLossPct: 2, reportLanguage: 'bilingual',
+  speedBunching: 500, speedCore: 700, speedLaying: 600, speedSheathing: 500, shiftHours: 8,
 };
 
 function Field({ label, value, onChange, type = 'text', select, options, ...rest }) {
@@ -140,6 +141,17 @@ export default function CablePlanningWorkbench() {
                 <Grid item xs={6} sm={3}><Field label="Laying loss %" type="number" value={form.layingLossPct} onChange={set('layingLossPct')} helperText="3/4-core only · ~1–2%" /></Grid>
               )}
               <Grid item xs={6} sm={3}><Field label="Job-card language" select value={form.reportLanguage} onChange={set('reportLanguage')} options={LANGS} /></Grid>
+            </Grid>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 0.5 }}>4 · Machine capacity</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+              Defaults from the machine master — edit per plan to match the actual machine. Drives required hours, utilisation & completion on every job card.
+            </Typography>
+            <Grid container spacing={1.5}>
+              <Grid item xs={6} sm={3}><Field label="Bunching (m/hr)" type="number" value={form.speedBunching} onChange={set('speedBunching')} /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Core extrusion (m/hr)" type="number" value={form.speedCore} onChange={set('speedCore')} /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Laying (m/hr)" type="number" value={form.speedLaying} onChange={set('speedLaying')} /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Sheathing (m/hr)" type="number" value={form.speedSheathing} onChange={set('speedSheathing')} /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Shift hours / day" type="number" value={form.shiftHours} onChange={set('shiftHours')} helperText="capacity = speed × shift hrs" /></Grid>
             </Grid>
             <Stack direction="row" spacing={1.5} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
               <Button variant="contained" size="large" startIcon={<BoltRounded />} onClick={generate} sx={{ borderRadius: 2 }}>Generate planning sheet</Button>
