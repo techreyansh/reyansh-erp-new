@@ -4,9 +4,9 @@
 export const SELLER = {
   name: 'Reyansh International',
   addressLines: ['', ''],
-  gstin: '',            // e.g. '27ABCDE1234F1Z5'
-  state: '',            // e.g. 'Maharashtra'
-  stateCode: '',        // 2-digit GST state code, e.g. '27'
+  gstin: '09AAECR0689R1ZH', // PAN AAECR0689R
+  state: 'Uttar Pradesh',
+  stateCode: '09',          // GST state code 09 = Uttar Pradesh
   email: 'reyanshinternational63@gmail.com',
   phone: '',
 };
