@@ -18,14 +18,26 @@ export type LlmPart = { text?: string } | { inlineData?: { mimeType: string; dat
 export const AI_NOT_CONFIGURED =
   "AI is not configured yet — set the NVIDIA_API_KEY secret (Nemotron) on this Edge Function to activate it.";
 
-/** Which provider is active, or null if no AI key is set. */
-export function aiProvider(): "nvidia" | "gemini" | null {
-  if (Deno.env.get("NVIDIA_API_KEY")) return "nvidia";
-  if (Deno.env.get("GEMINI_API_KEY")) return "gemini";
+/**
+ * Pick the provider for a task. TEXT prefers NVIDIA (Nemotron). VISION/DOCUMENT
+ * tasks prefer GEMINI when available, because Gemini reads PDFs + large scans
+ * natively with schema output — NVIDIA's vision models take only small images
+ * and reject PDFs. Falls back to whichever key is set.
+ */
+export function aiProvider(hasMedia = false): "nvidia" | "gemini" | null {
+  const nv = !!Deno.env.get("NVIDIA_API_KEY");
+  const gem = !!Deno.env.get("GEMINI_API_KEY");
+  if (hasMedia) {
+    if (gem) return "gemini";
+    if (nv) return "nvidia";
+  } else {
+    if (nv) return "nvidia";
+    if (gem) return "gemini";
+  }
   return null;
 }
 export function aiConfigured(): boolean {
-  return aiProvider() !== null;
+  return !!(Deno.env.get("NVIDIA_API_KEY") || Deno.env.get("GEMINI_API_KEY"));
 }
 
 /**
@@ -39,10 +51,16 @@ export async function generateJson(opts: {
   schema: any;
   maxOutputTokens?: number;
 }): Promise<{ result: any; usage: any; finishReason: string }> {
-  const provider = aiProvider();
   const hasMedia = (opts.parts || []).some((p: any) => p?.inlineData);
+  const hasPdf = (opts.parts || []).some((p: any) => String(p?.inlineData?.mimeType || "").includes("pdf"));
+  const provider = aiProvider(hasMedia);
 
   if (provider === "nvidia") {
+    // NVIDIA vision can't read PDFs — fail with a clear, actionable message
+    // instead of an opaque upstream 500.
+    if (hasPdf) {
+      throw new Error("This document is a PDF. The NVIDIA vision model reads images only — upload a photo/scan (JPG/PNG) of the document, or add a GEMINI_API_KEY secret to enable PDF + scan extraction.");
+    }
     const apiKey = Deno.env.get("NVIDIA_API_KEY")!;
     const model = hasMedia ? (Deno.env.get("NVIDIA_VISION_MODEL") || DEFAULT_NVIDIA_VISION_MODEL) : undefined;
     return nvidiaJson({ apiKey, system: opts.system, parts: opts.parts as any, schema: opts.schema, maxOutputTokens: opts.maxOutputTokens, model });
