@@ -8,8 +8,8 @@
 //   - vision tasks → NVIDIA_VISION_MODEL  (a multimodal NIM model — Nemotron text
 //     models can't read images/PDFs, so the two extractors auto-use this)
 // Set per the function's needs; sensible defaults below.
-import { generateJson as nvidiaJson } from "./nvidia.ts";
-import { generateJson as geminiJson } from "./gemini.ts";
+import { generateJson as nvidiaJson, generateText as nvidiaText } from "./nvidia.ts";
+import { generateJson as geminiJson, generateText as geminiText } from "./gemini.ts";
 
 export const DEFAULT_NVIDIA_VISION_MODEL = "meta/llama-3.2-90b-vision-instruct";
 
@@ -68,6 +68,26 @@ export async function generateJson(opts: {
   if (provider === "gemini") {
     const apiKey = Deno.env.get("GEMINI_API_KEY")!;
     return geminiJson({ apiKey, system: opts.system, parts: opts.parts as any, schema: opts.schema, maxOutputTokens: opts.maxOutputTokens });
+  }
+  throw new Error(AI_NOT_CONFIGURED);
+}
+
+/**
+ * Provider-agnostic PLAIN-TEXT generation. Use for long-form output where strict
+ * JSON is fragile (the model leaves unescaped quotes/newlines in long bodies).
+ * Caller parses a delimited format in code. Text tasks → NVIDIA, else Gemini.
+ */
+export async function generateText(opts: {
+  system: string;
+  parts: LlmPart[];
+  maxOutputTokens?: number;
+}): Promise<{ text: string; usage: any; finishReason: string }> {
+  const provider = aiProvider(false);
+  if (provider === "nvidia") {
+    return nvidiaText({ apiKey: Deno.env.get("NVIDIA_API_KEY")!, system: opts.system, parts: opts.parts as any, maxOutputTokens: opts.maxOutputTokens });
+  }
+  if (provider === "gemini") {
+    return geminiText({ apiKey: Deno.env.get("GEMINI_API_KEY")!, system: opts.system, parts: opts.parts as any, maxOutputTokens: opts.maxOutputTokens });
   }
   throw new Error(AI_NOT_CONFIGURED);
 }

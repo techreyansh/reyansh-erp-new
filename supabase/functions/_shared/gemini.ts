@@ -95,3 +95,29 @@ export async function generateJson(opts: {
   }
   return { result, usage: data?.usageMetadata ?? null, finishReason };
 }
+
+// Plain-TEXT generation (no responseSchema) — mirror of nvidia.generateText.
+export async function generateText(opts: {
+  apiKey: string;
+  system: string;
+  parts: GeminiPart[];
+  maxOutputTokens?: number;
+}): Promise<{ text: string; usage: any; finishReason: string }> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": opts.apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: opts.system }] },
+      contents: [{ role: "user", parts: opts.parts }],
+      generationConfig: { maxOutputTokens: opts.maxOutputTokens ?? 8000, temperature: 0.3 },
+    }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data?.error?.message || `Gemini HTTP ${r.status}`);
+  const cand = data?.candidates?.[0];
+  const finishReason = cand?.finishReason || "STOP";
+  const text = (cand?.content?.parts || []).map((p: any) => p?.text).filter(Boolean).join("");
+  if (!text) throw new Error(`Gemini returned no content (finishReason: ${finishReason}).`);
+  return { text, usage: data?.usageMetadata ?? null, finishReason };
+}

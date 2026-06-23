@@ -164,3 +164,39 @@ export async function generateJson(opts: {
   if (result == null) throw new Error(`Could not parse NVIDIA JSON (finish_reason: ${finishReason}; likely truncated).`);
   return { result, usage: data?.usage ?? null, finishReason };
 }
+
+// Plain-TEXT generation (no JSON). For long-form output where strict JSON is
+// fragile — callers parse a delimited format in code instead.
+export async function generateText(opts: {
+  apiKey: string;
+  system: string;
+  parts: NvidiaPart[];
+  maxOutputTokens?: number;
+  model?: string;
+}): Promise<{ text: string; usage: any; finishReason: string }> {
+  const model = opts.model || NVIDIA_MODEL;
+  const parts: any[] = opts.parts || [];
+  const hasMedia = parts.some((p) => p?.inlineData);
+  const userContent: any = hasMedia
+    ? parts.map((p) => (p?.inlineData
+      ? { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } }
+      : { type: "text", text: p?.text || "" })).filter((c) => c.type !== "text" || c.text)
+    : parts.map((p) => p?.text).filter(Boolean).join("\n\n");
+
+  const { r, data } = await post(`${NVIDIA_BASE_URL}/chat/completions`, opts.apiKey, {
+    model,
+    messages: [{ role: "system", content: opts.system }, { role: "user", content: userContent }],
+    temperature: NVIDIA_THINKING ? 1 : 0.3,
+    top_p: NVIDIA_THINKING ? 0.95 : 0.9,
+    max_tokens: opts.maxOutputTokens ?? 8000,
+    stream: false,
+    chat_template_kwargs: { enable_thinking: NVIDIA_THINKING },
+    ...(NVIDIA_THINKING ? { reasoning_budget: NVIDIA_REASONING_BUDGET } : {}),
+  });
+  if (!r.ok) throw new Error(data?.error?.message || data?.detail || data?.message || `NVIDIA HTTP ${r.status}`);
+  const choice = data?.choices?.[0];
+  const finishReason = choice?.finish_reason || "stop";
+  const content = String(choice?.message?.content ?? "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  if (!content) throw new Error(`NVIDIA returned no content (finish_reason: ${finishReason}).`);
+  return { text: content, usage: data?.usage ?? null, finishReason };
+}

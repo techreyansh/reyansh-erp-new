@@ -8,14 +8,16 @@
 // then `supabase functions deploy ai-sales-copilot`. (If only GEMINI_API_KEY is
 // set, it transparently falls back to Gemini.)
 import { preflight, json } from "../_shared/cors.ts";
-import { aiConfigured, aiProvider, generateJson, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
+import { aiConfigured, aiProvider, generateText, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 
 const SYSTEM = `You are an expert B2B sales strategist and account manager for REYANSH INTERNATIONAL, an Indian manufacturer of:
 - Power cords (2/3-pin, appliance, computer/IEC), wiring harnesses, cable assemblies, battery cables, EV harnesses
 - Single-core and multi-core (2/3/4-core) PVC-insulated copper cables, flat & round
 Customers are OEMs and industrial buyers in: home appliances, EV, solar, pumps, motors, consumer electronics, industrial equipment, and the electrical trade.
 You understand: BIS/IS standards, copper (LME) price sensitivity, conductor sizing & strand construction, lead times, MOQs, tooling, and Indian B2B manufacturing-sales dynamics (purchase managers, sourcing heads, R&D, plant heads, quality, owners).
-Use the CRM CONTEXT provided. Be specific, practical, commercially sharp, and India-appropriate. Never invent customer facts not in context; when unknown, say what to find out. Output ONLY the requested structured sections — each a clear heading + concise actionable body (use short paragraphs / bullet lists in the body text).`;
+Use the CRM CONTEXT provided. Be specific, practical, commercially sharp, and India-appropriate. Never invent customer facts not in context; when unknown, say what to find out.
+
+OUTPUT FORMAT — output ONLY the requested sections, nothing else. Start each section with a line that is exactly "## " followed by the section heading, then the section body on the following lines (short paragraphs or "- " bullet points). Separate sections with a blank line. Do not use JSON, code fences, tables, or any preamble/closing text.`;
 
 const TOOL_PROMPTS: Record<string, string> = {
   icp: `IDEAL CUSTOMER PROFILE ANALYSIS. From the customer base + won/lost signals in context, produce sections: "Best-fit Industries", "Ideal Customer Profile", "Common Buying Patterns", "High-Probability Accounts To Pursue", "Accounts To Avoid".`,
@@ -33,16 +35,24 @@ const TOOL_PROMPTS: Record<string, string> = {
   recovery: `LOST OPPORTUNITY / DORMANT RECOVERY ENGINE. From last activity, lost reason, history & timeline, produce sections: "Recovery Probability & Score", "Lost-Reason Classification (price/timing/competition/no-follow-up/budget/internal-delay/unknown)", "Recovery Strategy", "Recovery Plan (Week 1/2/3/4 actions)", "Re-engagement Drafts (WhatsApp / Email / Call script / Meeting request)". For dormant clients also add "Upsell/Cross-sell & Relationship-Rebuild Plan".`,
 };
 
-const SCHEMA = {
-  type: "object",
-  properties: {
-    sections: {
-      type: "array",
-      items: { type: "object", properties: { heading: { type: "string" }, body: { type: "string" } }, required: ["heading", "body"] },
-    },
-  },
-  required: ["sections"],
-};
+// Parse the "## heading\nbody" delimited format into sections. Robust to long
+// free-text bodies — no JSON escaping to break (unlike asking the model for JSON).
+function parseSections(text: string): Array<{ heading: string; body: string }> {
+  const out: Array<{ heading: string; body: string }> = [];
+  let cur: { heading: string; body: string } | null = null;
+  for (const raw of String(text || "").split("\n")) {
+    const line = raw.replace(/\s+$/, "");
+    const h = line.match(/^\s{0,3}#{1,4}\s+(.+)$/) || line.match(/^\s*\*\*(.+?)\*\*\s*:?\s*$/);
+    if (h && h[1].trim().length <= 80) {
+      if (cur) out.push(cur);
+      cur = { heading: h[1].replace(/[:#*]+\s*$/, "").trim(), body: "" };
+    } else if (cur) {
+      cur.body += (cur.body ? "\n" : "") + raw;
+    }
+  }
+  if (cur) out.push(cur);
+  return out.map((s) => ({ heading: s.heading, body: s.body.trim() })).filter((s) => s.heading && s.body);
+}
 
 Deno.serve(async (req) => {
   const pre = preflight(req); if (pre) return pre;
@@ -56,8 +66,10 @@ Deno.serve(async (req) => {
     const parts = [{
       text: `TOOL: ${instruction}\n\nFREE-FORM INPUT (if any):\n${input || "(none)"}\n\nCRM CONTEXT (JSON):\n${JSON.stringify(context || {}, null, 0).slice(0, 12000)}`,
     }];
-    const { result, usage } = await generateJson({ system: SYSTEM, parts, schema: SCHEMA, maxOutputTokens: 8000 });
-    return json({ sections: result?.sections || [], usage, provider: aiProvider() });
+    const { text, usage } = await generateText({ system: SYSTEM, parts, maxOutputTokens: 8000 });
+    const sections = parseSections(text);
+    // Fallback: if no headings were detected, surface the whole answer as one section.
+    return json({ sections: sections.length ? sections : [{ heading: "Result", body: text }], usage, provider: aiProvider() });
   } catch (e) {
     return json({ error: (e as Error).message || "AI generation failed" }, 500);
   }
