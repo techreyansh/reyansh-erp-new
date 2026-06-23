@@ -65,6 +65,7 @@ import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CrmReportDialog from "../../components/crm/CrmReportDialog";
+import Client360 from "../../components/crm/Client360";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
@@ -3249,16 +3250,23 @@ export default function CRMPipelineBoard() {
 
       <CrmReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
 
-      <CompanyDrawer
-        id={drawerId}
-        open={Boolean(drawerId)}
-        onClose={() => setDrawerId(null)}
-        onChanged={loadAll}
-        users={assignableUsers}
-        userMap={userMap}
-        collaborators={drawerId ? collabMap.get(drawerId) || [] : []}
-        onCollaboratorsChanged={refreshCollaborators}
-      />
+      {/* Clients open the full Client-360 hub; prospects keep the legacy drawer. */}
+      {(() => {
+        const clientAcct = drawerId ? clients.find((x) => x.id === drawerId) : null;
+        if (clientAcct) return <Client360 account={clientAcct} onClose={() => setDrawerId(null)} notify={notify} />;
+        return (
+          <CompanyDrawer
+            id={drawerId}
+            open={Boolean(drawerId)}
+            onClose={() => setDrawerId(null)}
+            onChanged={loadAll}
+            users={assignableUsers}
+            userMap={userMap}
+            collaborators={drawerId ? collabMap.get(drawerId) || [] : []}
+            onCollaboratorsChanged={refreshCollaborators}
+          />
+        );
+      })()}
 
       <LogNextActionDialog
         open={Boolean(pendingMove)}
