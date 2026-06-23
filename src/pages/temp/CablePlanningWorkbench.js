@@ -12,14 +12,16 @@ import BoltRounded from '@mui/icons-material/BoltRounded';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded';
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
+import PrintRounded from '@mui/icons-material/PrintRounded';
 import cablePlan from '../../services/temp/cablePlanService';
-import ReportExportButton from '../../components/common/ReportExportButton';
+import CableJobCards from '../../components/temp/CableJobCards';
+import { LANGS } from '../../services/temp/cablePlanLabels';
 
 const EMPTY = {
   customerName: '', productName: '', cableDescription: '', orderQty: '', requiredLength: '', deliveryDate: '', priority: 'normal', remarks: '',
   cores: 3, shape: 'Round', conductorSize: '', strandConstruction: '', numStrands: '', coreColours: '', finishedOd: '', cableLength: '',
+  coreOd: '', wastagePct: 2, layingLossPct: 2, reportLanguage: 'bilingual',
 };
-const kg = (n) => `${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 3 })} kg`;
 
 function Field({ label, value, onChange, type = 'text', select, options, ...rest }) {
   return (
@@ -30,10 +32,10 @@ function Field({ label, value, onChange, type = 'text', select, options, ...rest
   );
 }
 
-function ProductionFlow({ flow }) {
+function FlowChips({ flow }) {
   const nodes = [{ label: 'Copper', required: true }, ...flow, { label: 'Finished Cable', required: true }];
   return (
-    <Stack direction="row" alignItems="center" flexWrap="wrap" useFlexGap sx={{ gap: 0.5, my: 1.5 }}>
+    <Stack direction="row" alignItems="center" flexWrap="wrap" useFlexGap sx={{ gap: 0.5 }}>
       {nodes.map((n, i) => (
         <React.Fragment key={i}>
           <Chip label={n.label} size="small"
@@ -43,69 +45,6 @@ function ProductionFlow({ flow }) {
         </React.Fragment>
       ))}
     </Stack>
-  );
-}
-
-function DeptCard({ title, dept, rows }) {
-  if (!dept?.required) return (
-    <Card variant="outlined" sx={{ borderRadius: 2, opacity: 0.55 }}><CardContent sx={{ py: 1.25, '&:last-child': { pb: 1.25 } }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{title}</Typography>
-      <Typography variant="caption" color="text.secondary">Not required — {dept?.reason || 'skipped'}</Typography>
-    </CardContent></Card>
-  );
-  return (
-    <Card variant="outlined" sx={{ borderRadius: 2, borderColor: 'primary.main' }}><CardContent sx={{ py: 1.25, '&:last-child': { pb: 1.25 } }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>{title}</Typography>
-      <Stack spacing={0.25}>
-        {rows.map(([k, v]) => v != null && v !== '' && (
-          <Stack key={k} direction="row" justifyContent="space-between" spacing={2}>
-            <Typography variant="caption" color="text.secondary">{k}</Typography>
-            <Typography variant="caption" sx={{ fontWeight: 600, textAlign: 'right' }}>{v}</Typography>
-          </Stack>
-        ))}
-      </Stack>
-    </CardContent></Card>
-  );
-}
-
-function PlanningSheet({ form, plan, planNumber }) {
-  const d = plan.departments;
-  const m = plan.material;
-  return (
-    <Card variant="outlined" sx={{ borderRadius: 2, mt: 2 }}>
-      <CardContent>
-        {/* Header */}
-        <Stack direction="row" justifyContent="space-between" flexWrap="wrap" sx={{ mb: 1 }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>Production Planning Sheet</Typography>
-            <Typography variant="caption" color="text.secondary">{planNumber || 'DRAFT'} · {new Date().toLocaleDateString('en-IN')}</Typography>
-          </Box>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2"><strong>{form.customerName || '—'}</strong></Typography>
-            <Typography variant="caption" color="text.secondary">{form.productName} · Due {form.deliveryDate || '—'}</Typography>
-          </Box>
-        </Stack>
-        <Divider />
-        <Typography variant="overline" color="text.secondary">Production flow</Typography>
-        <ProductionFlow flow={plan.flow} />
-
-        <Grid container spacing={1.5} sx={{ mt: 0.5 }}>
-          <Grid item xs={12} sm={6} md={3}><DeptCard title="Bunching" dept={d.bunching} rows={[['Cable', d.bunching.cable], ['Strand const.', d.bunching.strandConstruction], ['Quantity', d.bunching.quantity], ['Machine', d.bunching.machine], ['Target', d.bunching.target || '—'], ['Remarks', d.bunching.remarks || '—']]} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><DeptCard title="Core Extrusion" dept={d.core} rows={[['Colour', d.core.colour], ['Size', d.core.size], ['Length', d.core.length], ['Core OD', d.core.od], ['Machine', d.core.machine], ['Target', d.core.target || '—']]} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><DeptCard title="Laying" dept={d.laying} rows={[['Cores', d.laying.cores], ['Length', d.laying.length], ['Drum', d.laying.drum], ['Machine', d.laying.machine], ['Target', d.laying.target || '—']]} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><DeptCard title="Sheathing" dept={d.sheathing} rows={[['Flat/Round', d.sheathing.shape], ['Finished OD', d.sheathing.finishedOd], ['Length', d.sheathing.length], ['Machine', d.sheathing.machine], ['Target', d.sheathing.target || '—']]} /></Grid>
-        </Grid>
-
-        <Typography variant="overline" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>Material estimate ({plan.totalMeters.toLocaleString('en-IN')} m total)</Typography>
-        <Table size="small">
-          <TableHead><TableRow>{['Material', 'Required', `Wastage (${m.wastagePct}%)`, 'Incl. wastage'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }} align={h === 'Material' ? 'left' : 'right'}>{h}</TableCell>)}</TableRow></TableHead>
-          <TableBody>
-            <TableRow><TableCell>Copper conductor</TableCell><TableCell align="right">{kg(m.copper)}</TableCell><TableCell align="right">{kg(m.estWastageCopper)}</TableCell><TableCell align="right" sx={{ fontWeight: 700 }}>{kg(m.copperWithWastage)}</TableCell></TableRow>
-            <TableRow><TableCell>PVC (insulation + sheath)</TableCell><TableCell align="right">{kg(m.pvcTotal)} <Typography component="span" variant="caption" color="text.secondary">(ins {kg(m.pvcIns)} · sh {kg(m.pvcSheath)})</Typography></TableCell><TableCell align="right">{kg(m.estWastagePvc)}</TableCell><TableCell align="right" sx={{ fontWeight: 700 }}>{kg(m.pvcWithWastage)}</TableCell></TableRow>
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -129,6 +68,7 @@ export default function CablePlanningWorkbench() {
 
   const generate = () => {
     if (!form.cores || !form.conductorSize) { setSnack({ message: 'Enter cores + conductor size at minimum.', severity: 'info' }); return; }
+    if (form.coreOd === '' || form.coreOd == null) { setSnack({ message: 'Core OD is required — enter the planned core OD (e.g. 2.20 mm).', severity: 'warning' }); return; }
     setPlan(cablePlan.buildPlan(form));
   };
   const save = async () => {
@@ -150,26 +90,7 @@ export default function CablePlanningWorkbench() {
   const dup = async (id) => { try { const r = await cablePlan.duplicatePlan(id); setSnack({ message: `Duplicated → ${r.plan_number}`, severity: 'success' }); loadSaved(); } catch (e) { setSnack({ message: e.message, severity: 'error' }); } };
   const del = async (id) => { try { await cablePlan.deletePlan(id); setSnack({ message: 'Deleted', severity: 'success' }); if (id === editingId) newPlan(); loadSaved(); } catch (e) { setSnack({ message: e.message, severity: 'error' }); } };
 
-  const buildReport = () => {
-    if (!plan) return { key: 'plan', title: 'Cable Plan', sections: [] };
-    const d = plan.departments; const m = plan.material;
-    const dept = (name, dp, rows) => ({ key: name, title: name, columns: [{ key: 'k', label: 'Field' }, { key: 'v', label: 'Value' }],
-      rows: dp?.required ? rows.map(([k, v]) => ({ k, v: String(v ?? '—') })) : [{ k: 'Status', v: `Not required — ${dp?.reason || ''}` }], emptyText: '—' });
-    return {
-      key: `cable-plan-${savedNumber || 'draft'}`, title: `Production Planning Sheet — ${savedNumber || 'DRAFT'}`,
-      subtitle: `${form.customerName || ''} · ${form.productName || ''}`, generatedAt: new Date(),
-      kpis: [{ label: 'Customer', value: form.customerName || '—' }, { label: 'Delivery', value: form.deliveryDate || '—' },
-        { label: 'Total length', value: `${plan.totalMeters.toLocaleString('en-IN')} m` }, { label: 'Routing', value: plan.routing.map((r) => r.label).join(' → ') }],
-      sections: [
-        dept('Bunching', d.bunching, [['Cable', d.bunching.cable], ['Strand construction', d.bunching.strandConstruction], ['Quantity', d.bunching.quantity], ['Machine', d.bunching.machine]]),
-        dept('Core Extrusion', d.core, [['Colour', d.core.colour], ['Size', d.core.size], ['Length', d.core.length], ['Core OD', d.core.od], ['Machine', d.core.machine]]),
-        dept('Laying', d.laying, [['Cores', d.laying.cores], ['Length', d.laying.length], ['Drum', d.laying.drum], ['Machine', d.laying.machine]]),
-        dept('Sheathing', d.sheathing, [['Flat/Round', d.sheathing.shape], ['Finished OD', d.sheathing.finishedOd], ['Length', d.sheathing.length], ['Machine', d.sheathing.machine]]),
-        { key: 'mat', title: 'Material Estimate', columns: [{ key: 'mat', label: 'Material' }, { key: 'req', label: 'Required' }, { key: 'waste', label: 'Wastage' }, { key: 'tot', label: 'Incl. wastage' }],
-          rows: [{ mat: 'Copper', req: kg(m.copper), waste: kg(m.estWastageCopper), tot: kg(m.copperWithWastage) }, { mat: 'PVC', req: kg(m.pvcTotal), waste: kg(m.estWastagePvc), tot: kg(m.pvcWithWastage) }], emptyText: '—' },
-      ],
-    };
-  };
+  const printDocs = () => window.print();
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -207,19 +128,43 @@ export default function CablePlanningWorkbench() {
               <Grid item xs={6} sm={3}><Field label="Shape" select value={form.shape} onChange={set('shape')} options={['Round', 'Flat']} /></Grid>
               <Grid item xs={6} sm={3}><Field label="Conductor size (sqmm)" type="number" value={form.conductorSize} onChange={set('conductorSize')} /></Grid>
               <Grid item xs={6} sm={3}><Field label="No. of strands" type="number" value={form.numStrands} onChange={set('numStrands')} helperText="≥24 → bunching" /></Grid>
-              <Grid item xs={6} sm={3}><Field label="Strand construction" value={form.strandConstruction} onChange={set('strandConstruction')} placeholder="e.g. 7/0.3" /></Grid>
-              <Grid item xs={6} sm={3}><Field label="Core colours" value={form.coreColours} onChange={set('coreColours')} placeholder="Red, Black…" /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Strand construction / dia (mm)" value={form.strandConstruction} onChange={set('strandConstruction')} placeholder="e.g. 0.201" /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Core OD (mm) *" type="number" required value={form.coreOd} onChange={set('coreOd')} placeholder="planner-entered, e.g. 2.20" helperText="Mandatory — not auto-calculated" /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Core colours" value={form.coreColours} onChange={set('coreColours')} placeholder="Red, Black, Yellow-Green" /></Grid>
               <Grid item xs={6} sm={3}><Field label="Finished OD (mm)" type="number" value={form.finishedOd} onChange={set('finishedOd')} /></Grid>
-              <Grid item xs={6} sm={3}><Field label="Cable length (m)" type="number" value={form.cableLength} onChange={set('cableLength')} /></Grid>
             </Grid>
-            <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1.5 }}>3 · Planning factors & output</Typography>
+            <Grid container spacing={1.5}>
+              <Grid item xs={6} sm={3}><Field label="Wastage %" type="number" value={form.wastagePct} onChange={set('wastagePct')} helperText="default 2% — planner editable" /></Grid>
+              {Number(form.cores) >= 3 && (
+                <Grid item xs={6} sm={3}><Field label="Laying loss %" type="number" value={form.layingLossPct} onChange={set('layingLossPct')} helperText="3/4-core only · ~1–2%" /></Grid>
+              )}
+              <Grid item xs={6} sm={3}><Field label="Job-card language" select value={form.reportLanguage} onChange={set('reportLanguage')} options={LANGS} /></Grid>
+            </Grid>
+            <Stack direction="row" spacing={1.5} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
               <Button variant="contained" size="large" startIcon={<BoltRounded />} onClick={generate} sx={{ borderRadius: 2 }}>Generate planning sheet</Button>
               {plan && <Button variant="outlined" onClick={save} sx={{ borderRadius: 2 }}>{editingId ? 'Update saved plan' : 'Save plan'}</Button>}
-              {plan && <ReportExportButton buildReport={buildReport} label="Print / PDF" />}
+              {plan && <Button variant="outlined" startIcon={<PrintRounded />} onClick={printDocs} sx={{ borderRadius: 2 }}>Print job cards / PDF</Button>}
             </Stack>
           </CardContent></Card>
 
-          {plan && <PlanningSheet form={form} plan={plan} planNumber={savedNumber} />}
+          {plan && (
+            <Card variant="outlined" sx={{ borderRadius: 2 }} className="cpd-toolbar"><CardContent sx={{ py: 1.5 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ gap: 1, mb: 1 }}>
+                <Box>
+                  <Typography variant="overline" color="text.secondary">Production flow & documents</Typography>
+                  <Typography variant="caption" display="block" color="text.secondary">
+                    Master sheet + {plan.flow.filter((f) => f.required).length} operator job card(s) · ~{plan.summary.leadDays} working days lead
+                  </Typography>
+                </Box>
+                <FlowChips flow={plan.flow} />
+              </Stack>
+            </CardContent></Card>
+          )}
+
+          {plan && (
+            <CableJobCards plan={plan} form={form} planNumber={savedNumber} lang={form.reportLanguage} />
+          )}
         </Stack>
       ) : (
         <Card variant="outlined" sx={{ borderRadius: 2 }}>

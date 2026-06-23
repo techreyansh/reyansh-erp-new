@@ -3,71 +3,149 @@
 // standalone temp_cable_plans table. No ERP integration (bridge tool).
 import { supabase } from '../../lib/supabaseClient';
 import {
-  requiredStages, cableGeometry, estimateRM, STAGE_LABEL, DEFAULT_MACHINES, DEFAULT_CORE_COLORS,
+  requiredStages, cableGeometry, estimateRM, STAGE_LABEL, STAGE_ORDER,
+  DEFAULT_MACHINES, CONST, coreColorsFor,
 } from '../cablePlanner/index.js';
 
-const machineFor = (stage) => DEFAULT_MACHINES.find((m) => m.stage === stage)?.name || '—';
+const r1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
 const r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 const r3 = (n) => Math.round((Number(n) || 0) * 1000) / 1000;
-const WASTAGE = 0.05; // estimated process wastage on top of the engine's 4% copper draw loss
+const numOr = (v, dflt) => (v === '' || v == null ? dflt : Number(v));
 
 /**
- * PURE: turn manual order + cable inputs into a full production plan via the
- * existing cable engine. Returns { routing, stages, geometry, totalMeters,
- * material, departments } — no network.
+ * PURE: turn manual order + cable inputs into a full, execution-ready production
+ * plan. Reuses the cable engine for routing/material. Corrected manufacturing
+ * math: bunching length = finished × cores; laying loss inflates required core
+ * production; planner-entered wastage % and Core OD; per-stage machine capacity,
+ * required hours, utilisation. Returns everything the master sheet + per-department
+ * operator job cards need. No network.
  */
 export function buildPlan(input = {}) {
   const cores = Number(input.cores) || 1;
   const size = Number(input.conductorSize) || 0;
   const numStrands = Number(input.numStrands) || 0;
+  const strandDia = Number(input.strandConstruction) || 0; // "strand construction" = strand dia (mm)
   const orderQty = Number(input.orderQty) || 0;
   const lengthEach = Number(input.requiredLength || input.cableLength) || 0;
+  const coreOd = Number(input.coreOd) || 0;
+  const wastagePct = numOr(input.wastagePct, 2);          // planner-entered, default 2%
+  const w = 1 + wastagePct / 100;
   const shThick = cores >= 2 ? 0.9 : 0;
   const cable = { size, cores, strandCount: numStrands, insThick: 0.6, shThick };
 
-  const stages = requiredStages(cable);             // auto-routing per the engine rules
+  const stages = requiredStages(cable);                   // auto-routing per engine rules
   const has = (s) => stages.some((x) => x.stage === s);
   const geo = cableGeometry(cable);
-  const totalMeters = r2(orderQty * lengthEach);
-  const rm = estimateRM(cable, totalMeters);        // { copper, ins, sh } kg
-  const colours = input.coreColours || (DEFAULT_CORE_COLORS[cores] || []).join(', ');
+  const finishedOd = Number(input.finishedOd) || geo.outerOd;
 
-  const departments = {
-    bunching: has('bunching') ? {
-      required: true, cable: input.cableDescription || `${cores}C ${size}sqmm`,
-      strandConstruction: input.strandConstruction || `${numStrands} strands`,
-      quantity: `${totalMeters.toLocaleString('en-IN')} m`, machine: machineFor('bunching'),
-      target: '', remarks: '',
-    } : { required: false, reason: `< ${24} strands → direct core extrusion` },
-    core: {
-      required: true, colour: colours, size: `${size} sqmm`,
-      length: `${totalMeters.toLocaleString('en-IN')} m`, od: `${geo.insOd} mm`,
-      machine: machineFor('core'), target: '', remarks: '',
-    },
-    laying: has('laying') ? {
-      required: true, cores, length: `${totalMeters.toLocaleString('en-IN')} m`,
-      drum: `${Math.max(1, Math.ceil(totalMeters / 1000))} drum(s)`, machine: machineFor('laying'),
-      target: '', remarks: '',
-    } : { required: false, reason: cores === 1 ? '1 core → no laying' : '2 cores → direct to sheathing' },
-    sheathing: has('sheathing') ? {
-      required: true, shape: input.shape || 'Round', finishedOd: `${input.finishedOd || geo.outerOd} mm`,
-      length: `${totalMeters.toLocaleString('en-IN')} m`, machine: machineFor('sheathing'),
-      target: '', remarks: '',
-    } : { required: false, reason: 'single-core wire → no sheath' },
+  // Laying loss only applies when the cable is laid up (≥3 cores). Default 2%.
+  const layingApplies = has('laying');
+  const layingLossPct = layingApplies ? numOr(input.layingLossPct, 2) : 0;
+  const layW = 1 + layingLossPct / 100;
+
+  // Lengths (the core correction). Finished cable metres → required core
+  // production (per core, compensating laying loss) → total core production.
+  const finishedLength = r2(orderQty * lengthEach);
+  const requiredCorePerCore = r2(finishedLength * layW);
+  const totalCoreProduction = r2(requiredCorePerCore * cores);   // bunching = this
+
+  const colourList = String(input.coreColours || '').split(/[,/]/).map((s) => s.trim()).filter(Boolean);
+  const colours = colourList.length ? colourList : coreColorsFor({ cores, coreColors: [] });
+  const copperConstruction = numStrands && strandDia ? `${numStrands}/${strandDia}` : (numStrands ? `${numStrands} strands` : '');
+
+  const machineOf = (stage) => DEFAULT_MACHINES.find((m) => m.stage === stage) || { name: '—', defaultSpeed: 500, shiftHrs: 8 };
+  // Machine loading for a stage given the raw length it must process.
+  const planStage = (stage, rawLength) => {
+    const m = machineOf(stage);
+    const planningLength = r2(rawLength * w);
+    const speed = m.defaultSpeed || 0;                          // m/hr
+    const shiftHrs = m.shiftHrs || 8;
+    const dailyCapacity = speed * shiftHrs;                     // m/day (one shift)
+    const requiredHours = speed ? r2(planningLength / speed) : 0;
+    return {
+      machine: m.name, machineId: m.id, speed, shiftHrs, dailyCapacity,
+      length: r2(rawLength), planningLength, requiredHours,
+      days: shiftHrs ? r2(requiredHours / shiftHrs) : 0,
+      utilizationPct: dailyCapacity ? r1((planningLength / dailyCapacity) * 100) : 0,
+    };
   };
 
+  // Per-core extrusion rows — every core planned independently.
+  const corePlan = planStage('core', totalCoreProduction);
+  const coreRows = Array.from({ length: cores }, (_, i) => ({
+    coreNo: i + 1,
+    colour: colours[i] || `Core ${i + 1}`,
+    size, coreOd, strands: numStrands, strandDia, copperConstruction, insThick: 0.6,
+    requiredLength: finishedLength,
+    targetLength: r2(requiredCorePerCore * w),                 // with wastage
+    requiredHours: planStage('core', requiredCorePerCore).requiredHours,
+  }));
+
+  const departments = {
+    bunching: has('bunching')
+      ? {
+        required: true, ...planStage('bunching', totalCoreProduction),
+        strands: numStrands, strandDia, copperConstruction, copperArea: size,
+        note: `${cores} cores × ${finishedLength.toLocaleString('en-IN')} m`
+          + (layingLossPct ? ` + ${layingLossPct}% laying loss` : ''),
+      }
+      : { required: false, reason: `< ${CONST.BUNCH_TRIGGER_STRANDS} strands → direct core extrusion` },
+    core: { required: true, ...corePlan, rows: coreRows, colour: colours.join(', '), coreOd, insThick: 0.6, copperConstruction, strands: numStrands, strandDia },
+    laying: has('laying')
+      ? {
+        required: true, ...planStage('laying', finishedLength), cores,
+        colourCombination: colours.join(' / '), layingLossPct, coreOd,
+        requiredCorePerCore, totalCoreProduction,
+        drum: `${Math.max(1, Math.ceil(finishedLength / 1000))} drum(s)`,
+      }
+      : { required: false, reason: cores < CONST.LAYING_TRIGGER_CORES ? `< ${CONST.LAYING_TRIGGER_CORES} cores → no laying` : 'n/a' },
+    sheathing: has('sheathing')
+      ? {
+        required: true, ...planStage('sheathing', finishedLength),
+        shape: input.shape || 'Round', finishedOd, cores, colour: colours.join(', '),
+      }
+      : { required: false, reason: 'single-core wire → no sheath' },
+  };
+
+  const rm = estimateRM(cable, finishedLength);             // { copper, ins, sh } kg (cores baked in)
   const pvcTotal = rm.ins + rm.sh;
   const material = {
     copper: r3(rm.copper), pvcIns: r3(rm.ins), pvcSheath: r3(rm.sh), pvcTotal: r3(pvcTotal),
-    wastagePct: WASTAGE * 100,
-    estWastageCopper: r3(rm.copper * WASTAGE), estWastagePvc: r3(pvcTotal * WASTAGE),
-    copperWithWastage: r3(rm.copper * (1 + WASTAGE)), pvcWithWastage: r3(pvcTotal * (1 + WASTAGE)),
+    wastagePct,
+    estWastageCopper: r3(rm.copper * (w - 1)), estWastagePvc: r3(pvcTotal * (w - 1)),
+    copperWithWastage: r3(rm.copper * w), pvcWithWastage: r3(pvcTotal * w),
   };
 
+  // Machine-load summary + cumulative lead time (working days, one shift each).
+  let cum = 0;
+  const machineLoad = stages.map((s) => {
+    const dp = departments[s.stage]; cum += (dp.days || 0);
+    return {
+      stage: s.stage, label: STAGE_LABEL[s.stage], machine: dp.machine,
+      requiredLength: dp.planningLength, capacity: dp.dailyCapacity,
+      hours: dp.requiredHours, days: dp.days, utilizationPct: dp.utilizationPct, cumulativeDays: r2(cum),
+    };
+  });
+
+  const planned = (key) => (departments[key].required ? departments[key].planningLength : 0);
   return {
+    config: {
+      cores, shape: input.shape || 'Round', conductorSize: size, numStrands, strandDia,
+      copperConstruction, coreOd, finishedOd, colours, wastagePct, layingLossPct,
+    },
+    geometry: geo, orderQty, lengthEach, finishedLength, requiredCorePerCore, totalCoreProduction,
     routing: stages.map((s) => ({ stage: s.stage, label: STAGE_LABEL[s.stage] })),
-    flow: ['bunching', 'core', 'laying', 'sheathing'].map((s) => ({ stage: s, label: STAGE_LABEL[s], required: has(s) })),
-    geometry: geo, totalMeters, material, departments,
+    flow: STAGE_ORDER.map((s) => ({ stage: s, label: STAGE_LABEL[s], required: has(s) })),
+    departments, material,
+    summary: {
+      finishedLength, cores, coreProductionLength: totalCoreProduction,
+      bunchingLength: planned('bunching'), layingLength: planned('laying'), sheathingLength: planned('sheathing'),
+      wastagePct, layingLossPct,
+      totalPlannedLength: r2(planned('bunching') + departments.core.planningLength + planned('laying') + planned('sheathing')),
+      leadDays: r2(cum), machineLoad,
+    },
+    // legacy alias kept so older callers/saved-plan readers don't break
+    totalMeters: finishedLength,
   };
 }
 
@@ -83,14 +161,15 @@ async function nextPlanNumber() {
 
 const FIELDS = ['customer_name', 'product_name', 'cable_description', 'order_qty', 'required_length', 'delivery_date',
   'priority', 'remarks', 'cores', 'shape', 'conductor_size', 'strand_construction', 'num_strands', 'core_colours',
-  'finished_od', 'cable_length'];
+  'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct', 'report_language'];
+const NUMERIC = ['order_qty', 'required_length', 'cores', 'conductor_size', 'num_strands', 'finished_od', 'cable_length', 'core_od', 'wastage_pct', 'laying_loss_pct'];
 
 function toRow(input) {
   const row = {};
   FIELDS.forEach((f) => {
     const camel = f.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
     let v = input[camel] ?? input[f];
-    if (['order_qty', 'required_length', 'cores', 'conductor_size', 'num_strands', 'finished_od', 'cable_length'].includes(f)) v = v === '' || v == null ? null : Number(v);
+    if (NUMERIC.includes(f)) v = v === '' || v == null ? null : Number(v);
     if (f === 'delivery_date' && (v === '' || v == null)) v = null;
     row[f] = v ?? null;
   });
