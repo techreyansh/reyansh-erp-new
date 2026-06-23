@@ -11,12 +11,18 @@
 //                      id shown on the model's API page. Defaults below.
 //   NVIDIA_BASE_URL  — optional. Defaults to the hosted NIM endpoint.
 
-// Default model id — OVERRIDE with the NVIDIA_MODEL secret to the exact
-// "Nemotron 3 Ultra" id from the model's page (model strings change between
-// releases; the page's API tab shows the precise value to use here).
-export const DEFAULT_NVIDIA_MODEL = "nvidia/llama-3.1-nemotron-ultra-253b-v1";
+// Default = Nemotron 3 Ultra (the model the user provisioned). Override with the
+// NVIDIA_MODEL secret if the id changes.
+export const DEFAULT_NVIDIA_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
 export const NVIDIA_MODEL = Deno.env.get("NVIDIA_MODEL") || DEFAULT_NVIDIA_MODEL;
 export const NVIDIA_BASE_URL = (Deno.env.get("NVIDIA_BASE_URL") || "https://integrate.api.nvidia.com/v1").replace(/\/+$/, "");
+
+// Nemotron 3 is a reasoning model: thinking is toggled via chat_template_kwargs.
+// For our structured-JSON tasks we DISABLE thinking by default → clean JSON,
+// lower latency, and no risk of blowing the Edge Function time/token budget.
+// Set NVIDIA_ENABLE_THINKING=true to turn deep reasoning on (slower, richer).
+export const NVIDIA_THINKING = (Deno.env.get("NVIDIA_ENABLE_THINKING") || "false").toLowerCase() === "true";
+export const NVIDIA_REASONING_BUDGET = Number(Deno.env.get("NVIDIA_REASONING_BUDGET") || "8192");
 
 // Text part, or an inline image/PDF (same shape as GeminiPart.inlineData) so
 // vision Edge Functions can pass media through unchanged.
@@ -86,19 +92,21 @@ export async function generateJson(opts: {
       ? { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } }
       : { type: "text", text: p?.text || "" })).filter((c) => c.type !== "text" || c.text)
     : parts.map((p) => p?.text).filter(Boolean).join("\n\n");
-  // "detailed thinking off" disables Nemotron's reasoning trace so we get clean
-  // JSON; the shape hint keeps the model on the exact contract.
-  const system = `detailed thinking off\n\n${opts.system}\n\n` +
+  const system = `${opts.system}\n\n` +
     `OUTPUT FORMAT: respond with a SINGLE valid JSON object ONLY — no markdown, no commentary, no <think> tags. ` +
     `It must match this exact shape (same keys):\n${JSON.stringify(skeleton(opts.schema))}`;
 
-  const base = {
+  // Sampling follows Nemotron guidance: greedy-ish for JSON when thinking is off,
+  // the model's recommended temp/top_p when reasoning is on.
+  const base: Record<string, unknown> = {
     model,
     messages: [{ role: "system", content: system }, { role: "user", content: userContent }],
-    temperature: 0.2,
-    top_p: 0.9,
+    temperature: NVIDIA_THINKING ? 1 : 0.2,
+    top_p: NVIDIA_THINKING ? 0.95 : 0.9,
     max_tokens: opts.maxOutputTokens ?? 8000,
     stream: false,
+    chat_template_kwargs: { enable_thinking: NVIDIA_THINKING },
+    ...(NVIDIA_THINKING ? { reasoning_budget: NVIDIA_REASONING_BUDGET } : {}),
   };
   const url = `${NVIDIA_BASE_URL}/chat/completions`;
 
