@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container, Box, Stack, Typography, Card, CardContent, Chip, Grid, TextField, MenuItem, Button,
   Divider, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, IconButton, Tooltip,
-  CircularProgress, Alert, Snackbar,
+  CircularProgress, Alert, Snackbar, Checkbox,
 } from '@mui/material';
 import CableOutlined from '@mui/icons-material/CableOutlined';
 import BoltRounded from '@mui/icons-material/BoltRounded';
@@ -14,8 +14,17 @@ import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded';
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
 import PrintRounded from '@mui/icons-material/PrintRounded';
 import cablePlan from '../../services/temp/cablePlanService';
+import { buildDaySchedule } from '../../services/temp/cableScheduleService';
 import CableJobCards from '../../components/temp/CableJobCards';
+import CableDaySchedule from '../../components/temp/CableDaySchedule';
 import { LANGS } from '../../services/temp/cablePlanLabels';
+
+// Reconstruct a buildPlan input object from a saved temp_cable_plans row.
+const rowToInput = (row) => {
+  const f = {};
+  Object.keys(EMPTY).forEach((k) => { const snake = k.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`); if (row[snake] != null) f[k] = row[snake]; });
+  return f;
+};
 
 const EMPTY = {
   customerName: '', productName: '', cableDescription: '', orderQty: '', requiredLength: '', deliveryDate: '', priority: 'normal', remarks: '',
@@ -58,6 +67,12 @@ export default function CablePlanningWorkbench() {
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(false);
   const [snack, setSnack] = useState(null);
+  // Daily Schedule tab state
+  const [schedSel, setSchedSel] = useState({});           // { [rowId]: true }
+  const [schedDate, setSchedDate] = useState('');
+  const [schedStart, setSchedStart] = useState(8);
+  const [schedHours, setSchedHours] = useState(8);
+  const [schedule, setSchedule] = useState(null);
 
   const set = (k) => (v) => { setForm((f) => ({ ...f, [k]: v })); };
 
@@ -93,6 +108,17 @@ export default function CablePlanningWorkbench() {
 
   const printDocs = () => window.print();
 
+  const buildSchedule = () => {
+    const rows = saved.filter((r) => schedSel[r.id]);
+    if (!rows.length) { setSnack({ message: 'Select at least one saved plan to schedule.', severity: 'info' }); return; }
+    const plans = rows.map((r) => ({
+      planNumber: r.plan_number, customer: r.customer_name, product: r.product_name,
+      priority: r.priority || 'normal', deliveryDate: r.delivery_date,
+      plan: cablePlan.buildPlan(rowToInput(r)),   // rebuild for the current engine shape
+    }));
+    setSchedule(buildDaySchedule({ plans, date: schedDate || null, shiftStartHour: Number(schedStart) || 8, shiftHours: Number(schedHours) || 8 }));
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
       <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
@@ -103,10 +129,44 @@ export default function CablePlanningWorkbench() {
         {tab === 0 && <Button variant="outlined" size="small" onClick={newPlan} sx={{ borderRadius: 2 }}>New plan</Button>}
       </Stack>
       <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Tab label="Planner" /><Tab label={`Saved plans${saved.length ? ` (${saved.length})` : ''}`} />
+        <Tab label="Planner" /><Tab label={`Saved plans${saved.length ? ` (${saved.length})` : ''}`} /><Tab label="Daily Schedule" />
       </Tabs>
 
-      {tab === 0 ? (
+      {tab === 2 ? (
+        <Stack spacing={2}>
+          <Card variant="outlined" sx={{ borderRadius: 2 }} className="cds-toolbar"><CardContent>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>Daily Machine Schedule</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+              Pick the plans running today and the shift window. The system auto-sequences each machine (start/finish from capacity + changeover) and produces one schedule sheet per machine + a management view.
+            </Typography>
+            <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
+              <Grid item xs={6} sm={3}><Field label="Schedule date" type="date" value={schedDate} onChange={setSchedDate} /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Shift start (hour)" type="number" value={schedStart} onChange={setSchedStart} helperText="24h, e.g. 8 = 08:00" /></Grid>
+              <Grid item xs={6} sm={3}><Field label="Shift hours" type="number" value={schedHours} onChange={setSchedHours} /></Grid>
+            </Grid>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>Plans to schedule</Typography>
+            {saved.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No saved plans. Create + save plans in the Planner tab first.</Typography>
+            ) : (
+              <Box sx={{ maxHeight: 240, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1, mt: 0.5 }}>
+                {saved.map((r) => (
+                  <Stack key={r.id} direction="row" alignItems="center" sx={{ px: 1, py: 0.25, borderBottom: 1, borderColor: 'divider' }}>
+                    <Checkbox size="small" checked={!!schedSel[r.id]} onChange={(e) => setSchedSel((s) => ({ ...s, [r.id]: e.target.checked }))} />
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 700, mr: 1 }}>{r.plan_number}</Typography>
+                    <Typography variant="body2" sx={{ flexGrow: 1 }}>{r.customer_name || '—'} · {r.product_name || '—'}</Typography>
+                    <Typography variant="caption" color="text.secondary">{r.order_qty || '—'}×{r.required_length || '—'}m · {r.cores}C · {r.priority || 'normal'}</Typography>
+                  </Stack>
+                ))}
+              </Box>
+            )}
+            <Stack direction="row" spacing={1.5} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+              <Button variant="contained" startIcon={<BoltRounded />} onClick={buildSchedule} sx={{ borderRadius: 2 }}>Build daily schedule</Button>
+              {schedule && <Button variant="outlined" startIcon={<PrintRounded />} onClick={printDocs} sx={{ borderRadius: 2 }}>Print schedule (A3) / PDF</Button>}
+            </Stack>
+          </CardContent></Card>
+          {schedule && <CableDaySchedule schedule={schedule} />}
+        </Stack>
+      ) : tab === 0 ? (
         <Stack spacing={2}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}><CardContent>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>1 · Order details</Typography>
