@@ -84,6 +84,7 @@ export const NAV_GROUPS = [
       { label: "Sales Order Ingestion", path: "/po-ingestion", icon: ic(InputOutlined) },
       { label: "Sales Flow", path: "/sales-flow", icon: ic(TrendingUpOutlined) },
       { label: "Payments / Collections", path: "/crm/collections", icon: ic(PaymentsOutlined) },
+      { label: "Customer Portal", path: "/portal-admin", icon: ic(StorefrontOutlined) },
     ],
   },
   {

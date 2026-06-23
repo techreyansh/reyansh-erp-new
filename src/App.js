@@ -136,6 +136,8 @@ const PurchaseRequisitions = lazy(() => import("./pages/purchase/PurchaseRequisi
 const Invoicing = lazy(() => import("./pages/invoicing/Invoicing"));
 const OperationsControlTower = lazy(() => import("./pages/operations/OperationsControlTower"));
 const DemandForecast = lazy(() => import("./pages/forecast/DemandForecast"));
+const CustomerPortal = lazy(() => import("./pages/portal/CustomerPortal"));
+const CustomerPortalAdmin = lazy(() => import("./pages/portal/CustomerPortalAdmin"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -169,7 +171,8 @@ function AppContent() {
   const navPrefs = useNavPrefs();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const isPublicEntry =
-    location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied";
+    location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied" ||
+    location.pathname.startsWith("/portal/");
   if (!isPublicEntry && (authLoading || userLoading || permissionsLoading)) {
     return <FullScreenLogoLoader />;
   }
@@ -211,6 +214,13 @@ function AppContent() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<RootRedirect />} />
                   <Route path="/access-denied" element={<AccessDenied />} />
+                  <Route path="/portal/:token" element={<CustomerPortal />} />
+
+                  <Route path="/portal-admin" element={
+                    <ProtectedRouteGate>
+                      <CustomerPortalAdmin />
+                    </ProtectedRouteGate>
+                  } />
 
                   <Route path="/home" element={
                     <ProtectedRouteGate>

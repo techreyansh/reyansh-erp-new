@@ -19,9 +19,9 @@ const base = {
     { status: 'done', required_date: '2026-06-10' },
   ],
   invoices: [
-    { amount: 69620, balance: 20000, due_date: '2026-06-15', status: 'issued' }, // overdue AR
-    { amount: 10000, balance: 0, due_date: '2026-07-01', status: 'paid' },
-    { amount: 5000, balance: 5000, due_date: '2026-06-01', status: 'cancelled' }, // ignored
+    { amount: 69620, balance: 20000, due_date: '2026-06-15', status: 'ISSUED' }, // overdue AR
+    { amount: 10000, balance: 0, due_date: '2026-07-01', status: 'PAID' },
+    { amount: 5000, balance: 5000, due_date: '2026-06-01', status: 'CANCELLED' }, // ignored
   ],
   mrpShortCount: 3,
   uninvoicedCount: 2,

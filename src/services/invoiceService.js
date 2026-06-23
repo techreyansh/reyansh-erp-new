@@ -74,9 +74,9 @@ export async function createFromSalesOrder(soId, opts = {}) {
   const invoice_number = await nextInvoiceNumber();
 
   const header = {
-    sales_order_id: soId, invoice_number, invoice_date: invoiceDate, status: 'issued',
+    sales_order_id: soId, invoice_number, invoice_date: invoiceDate, status: 'ISSUED',
     customer_code: so.customer_code, customer_name: so.company_name,
-    amount: calc.grandTotal, balance: calc.grandTotal, amount_received: 0,
+    amount: calc.grandTotal, amount_received: 0, // balance is a generated column (amount - amount_received)
     payment_terms_days: termsDays, due_date: ymd(due), po_ref: so.po_number, owner_email: so.owner_email || email,
     taxable_value: calc.taxable, gst_rate: gstRate, cgst: calc.cgst, sgst: calc.sgst, igst: calc.igst,
     round_off: calc.roundOff, inter_state: interState,
@@ -105,7 +105,7 @@ export async function getInvoice(id) {
 }
 
 export async function cancelInvoice(id) {
-  const { error } = await supabase.from('finance_invoices').update({ status: 'cancelled' }).eq('id', id);
+  const { error } = await supabase.from('finance_invoices').update({ status: 'CANCELLED' }).eq('id', id);
   if (error) throw error;
 }
 

@@ -12,7 +12,7 @@ import { DEFAULT_GST_RATE } from '../../config/company';
 import ReportExportButton from '../../components/common/ReportExportButton';
 
 const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const STATUS = { issued: 'info', paid: 'success', partial: 'warning', cancelled: 'error', draft: 'default' };
+const STATUS = { ISSUED: 'info', PAID: 'success', PARTIAL: 'warning', OVERDUE: 'error', CANCELLED: 'error', DRAFT: 'default' };
 const GST_RATES = [0, 5, 12, 18, 28];
 
 function CreateDialog({ open, order, onClose, onCreated, setSnack }) {
@@ -232,7 +232,7 @@ export default function Invoicing() {
                       <TableCell align="right">{inr((Number(r.cgst) || 0) + (Number(r.sgst) || 0) + (Number(r.igst) || 0))}</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>{inr(r.amount)}</TableCell>
                       <TableCell align="right">{inr(r.balance)}</TableCell>
-                      <TableCell><Chip size="small" label={r.status} color={STATUS[r.status] || 'default'} variant={r.status === 'paid' ? 'filled' : 'outlined'} /></TableCell>
+                      <TableCell><Chip size="small" label={r.status} color={STATUS[r.status] || 'default'} variant={r.status === 'PAID' ? 'filled' : 'outlined'} /></TableCell>
                       <TableCell align="right"><Button size="small" onClick={(e) => { e.stopPropagation(); setDetailId(r.id); }}>View</Button></TableCell>
                     </TableRow>
                   ))}</TableBody>

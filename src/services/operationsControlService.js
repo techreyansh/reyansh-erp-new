@@ -37,7 +37,7 @@ export function summarizeOperations(o = {}) {
   const funnel = FUNNEL_ORDER.map((s) => stage[s]);
 
   // Money flow
-  const liveInvoices = invoices.filter((i) => i.status !== 'cancelled');
+  const liveInvoices = invoices.filter((i) => i.status !== 'CANCELLED'); // finance_invoices uses uppercase status
   const orderBacklogValue = orders.filter((r) => OPEN_ORDER(r.status)).reduce((s, r) => s + num(r.total_value), 0);
   const invoicedValue = liveInvoices.reduce((s, i) => s + num(i.amount), 0);
   const outstandingValue = liveInvoices.reduce((s, i) => s + num(i.balance), 0);
