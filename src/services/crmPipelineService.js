@@ -990,3 +990,32 @@ export async function clientHealth() {
     return [];
   }
 }
+
+/* ---- Client Pipeline (Account Management Workspace) ---- */
+
+// One call → all client cards (stage, owner, health, revenue, outstanding,
+// last-contact, next-action, is_unmanaged). p_owner_email null = all accounts.
+export async function clientCards(ownerEmail = null) {
+  const { data, error } = await supabase.rpc("crm_client_cards", { p_owner_email: ownerEmail });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+// The 12 operational stages + per-stage action sets (single source of truth).
+export async function listClientStageDefs() {
+  const { data, error } = await supabase.from("crm_client_stage_def").select("*").order("sort_order");
+  if (error) throw error;
+  return data || [];
+}
+
+// Set/clear a client's mandatory next action (Status/Action/Owner/Due/Priority).
+export async function setClientNextAction(id, { action = null, date = null, owner = null, priority = "normal", status = null } = {}) {
+  const patch = {
+    next_action: action, next_action_date: date || null,
+    next_action_owner_email: owner || null, next_action_priority: priority || "normal",
+    updated_at: new Date().toISOString(),
+  };
+  if (status !== null) patch.current_status = status;
+  const { error } = await supabase.from("crm_pipeline").update(patch).eq("id", id);
+  if (error) throw error;
+}
