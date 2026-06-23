@@ -592,18 +592,18 @@ const Costing = () => {
                 ⚡ Live Cost Breakdown
               </Typography>
               <Chip
-                label={`Cord Cost  ₹${(liveCost?.cordCost || 0).toFixed(2)}`}
+                label={`Cord Cost  ₹${(Number(liveCost?.cordCost) || 0).toFixed(2)}`}
                 color="primary"
                 sx={{ fontWeight: 800, fontSize: '0.85rem', height: 30 }}
               />
             </Stack>
             <Grid container spacing={1.25}>
               {[
-                { label: 'Final Copper', value: `${(liveCost?.finalCopper || 0).toFixed(3)}`, unit: 'kg/100m' },
-                { label: 'Final PVC', value: `${((liveCost?.finalPVCRound || 0) + (liveCost?.finalPVCFlat || 0)).toFixed(3)}`, unit: 'kg/100m' },
-                { label: 'RMC', value: `₹${(liveCost?.rmc || 0).toFixed(2)}`, unit: '/100m' },
-                { label: 'Wire / metre', value: `₹${(liveCost?.costOfWirePerMtr || 0).toFixed(2)}`, unit: 'per m' },
-                { label: 'Wire Cost', value: `₹${(liveCost?.wireCost || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
+                { label: 'Final Copper', value: `${(Number(liveCost?.finalCopper) || 0).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'Final PVC', value: `${((Number(liveCost?.finalPVCRound) || 0) + (Number(liveCost?.finalPVCFlat) || 0)).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'RMC', value: `₹${(Number(liveCost?.rmc) || 0).toFixed(2)}`, unit: '/100m' },
+                { label: 'Wire / metre', value: `₹${(Number(liveCost?.costOfWirePerMtr) || 0).toFixed(2)}`, unit: 'per m' },
+                { label: 'Wire Cost', value: `₹${(Number(liveCost?.wireCost) || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
                 { label: 'Plug + Terminal', value: `₹${((parseFloat(formData.plugCost) || 0) + (parseFloat(formData.terminalAccCost) || 0)).toFixed(2)}`, unit: 'add-ons' },
               ].map((m) => (
                 <Grid item xs={6} sm={4} md={2} key={m.label}>
