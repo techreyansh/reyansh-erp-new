@@ -16,6 +16,7 @@ import CloudDownload from '@mui/icons-material/CloudDownload';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
 import { supabase } from '../../lib/supabaseClient';
+import { usePermissions } from '../../context/PermissionContext';
 import plm from '../../services/plmProductService';
 import costing from '../../services/plmCostingService';
 import { listAudit, diffRows } from '../../services/masterAuditService';
@@ -176,6 +177,9 @@ const TABS = ['Overview', 'Costing', 'Process', 'Documents', 'Revisions', 'Activ
 
 function Product360({ productId, onBack, notify, snack, setSnack }) {
   const theme = useTheme();
+  const { canView } = usePermissions();
+  const canCosting = canView('accounts'); // costing/margins are confidential — gate to Accounts
+  const visibleTabs = TABS.filter((t) => t !== 'Costing' || canCosting);
   const [tab, setTab] = useState(0);
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -201,15 +205,15 @@ function Product360({ productId, onBack, notify, snack, setSnack }) {
         <Chip size="small" color={STATUS_COLOR[p.status] || 'default'} label={p.status} sx={{ textTransform: 'capitalize' }} />
       </Stack>
       <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-        {TABS.map((t) => <Tab key={t} label={t} />)}
+        {visibleTabs.map((t) => <Tab key={t} label={t} />)}
       </Tabs>
 
-      {tab === 0 && <OverviewTab p={p} onSaved={load} notify={notify} />}
-      {tab === 1 && <CostingTab p={p} notify={notify} />}
-      {tab === 2 && <ProcessTab p={p} notify={notify} />}
-      {tab === 3 && <DocumentsTab p={p} notify={notify} />}
-      {tab === 4 && <RevisionsTab p={p} />}
-      {tab === 5 && <ActivityTab p={p} />}
+      {visibleTabs[tab] === 'Overview' && <OverviewTab p={p} onSaved={load} notify={notify} />}
+      {visibleTabs[tab] === 'Costing' && <CostingTab p={p} notify={notify} />}
+      {visibleTabs[tab] === 'Process' && <ProcessTab p={p} notify={notify} />}
+      {visibleTabs[tab] === 'Documents' && <DocumentsTab p={p} notify={notify} />}
+      {visibleTabs[tab] === 'Revisions' && <RevisionsTab p={p} />}
+      {visibleTabs[tab] === 'Activity' && <ActivityTab p={p} />}
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         {snack ? <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(null)}>{snack.message}</Alert> : undefined}

@@ -50,7 +50,7 @@ export const NAV_GROUPS = [
     icon: ic(SpaceDashboardOutlined),
     items: [
       { label: "Home", path: "/home", icon: ic(HomeOutlined) },
-      { label: "CEO Master Control", path: "/ceo-command", icon: ic(SecurityOutlined) },
+      { label: "CEO Master Control", path: "/ceo-command", icon: ic(SecurityOutlined), moduleKey: "employees", requireEdit: true },
       { label: "Plant Command", path: "/plant-command", icon: ic(FactoryOutlined) },
       { label: "Operations Control Tower", path: "/operations-tower", icon: ic(InsightsOutlined) },
       { label: "Main Dashboard", path: "/dashboard", icon: ic(SpaceDashboardOutlined) },
@@ -138,8 +138,8 @@ export const NAV_GROUPS = [
       { label: "Team Tasks", path: "/team-tasks", icon: ic(AssignmentOutlined), moduleKey: "tasks", requireEdit: true },
       { label: "My Tasks", path: "/my-tasks", icon: ic(AssignmentOutlined), moduleKey: "tasks" },
       { label: "My Checklist", path: "/task-checklist", icon: ic(ChecklistOutlined) },
-      { label: "Checklist Templates", path: "/checklist-templates", icon: ic(FactCheckOutlined) },
-      { label: "Checklist Compliance", path: "/task-compliance-admin", icon: ic(FactCheckOutlined) },
+      { label: "Checklist Templates", path: "/checklist-templates", icon: ic(FactCheckOutlined), moduleKey: "tasks", requireEdit: true },
+      { label: "Checklist Compliance", path: "/task-compliance-admin", icon: ic(FactCheckOutlined), moduleKey: "tasks", requireEdit: true },
     ],
   },
   {
@@ -147,7 +147,7 @@ export const NAV_GROUPS = [
     label: "HR & Performance",
     icon: ic(BadgeOutlined),
     items: [
-      { label: "Employee Management", path: "/employee-management", icon: ic(BadgeOutlined) },
+      { label: "Employee Management", path: "/employee-management", icon: ic(BadgeOutlined), moduleKey: "employees", requireEdit: true },
       { label: "Performance Review", path: "/performance", icon: ic(TrendingUpOutlined) },
       { label: "MIS Home", path: "/mis", icon: ic(AnalyticsOutlined) },
     ],
