@@ -64,7 +64,7 @@ function DeptCard({ title, dept, rows }) {
           </Stack>
         ))}
       </Stack>
-    </Card>
+    </CardContent></Card>
   );
 }
 
