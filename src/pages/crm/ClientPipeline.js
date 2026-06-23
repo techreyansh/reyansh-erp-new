@@ -9,7 +9,9 @@ import {
   Container, Box, Stack, Typography, Chip, CircularProgress, Alert, Snackbar, Avatar, Tooltip,
   IconButton, Menu, MenuItem, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions,
   Drawer, Divider, ToggleButtonGroup, ToggleButton, Autocomplete, InputAdornment, ListItemIcon, Badge,
+  Table, TableHead, TableRow, TableCell, TableBody, Collapse,
 } from '@mui/material';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import AccountTreeOutlined from '@mui/icons-material/AccountTreeOutlined';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
 import SearchRounded from '@mui/icons-material/SearchRounded';
@@ -228,6 +230,8 @@ export default function ClientPipeline() {
   const [scope, setScope] = useState('all');
   const [search, setSearch] = useState('');
   const [onlyUnmanaged, setOnlyUnmanaged] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState(null);   // email or null
+  const [showTeam, setShowTeam] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drag, setDrag] = useState(null);
   const [menu, setMenu] = useState(null);       // { anchor, card }
@@ -255,9 +259,24 @@ export default function ClientPipeline() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return cards.filter((c) => (!onlyUnmanaged || c.is_unmanaged)
+      && (!ownerFilter || (c.owner_email || '').toLowerCase() === ownerFilter)
       && (!q || `${c.company_name} ${c.customer_code}`.toLowerCase().includes(q)));
-  }, [cards, search, onlyUnmanaged]);
+  }, [cards, search, onlyUnmanaged, ownerFilter]);
   const unmanagedCount = cards.filter((c) => c.is_unmanaged).length;
+
+  // Owner rollup — who owns what, at a glance (manager view, computed client-side).
+  const rollup = useMemo(() => {
+    const m = new Map();
+    cards.forEach((c) => {
+      const key = (c.owner_email || '').toLowerCase() || '__unassigned';
+      const r = m.get(key) || { email: c.owner_email || '', accounts: 0, unmanaged: 0, outstanding: 0, revenue: 0, dueSoon: 0 };
+      r.accounts += 1; if (c.is_unmanaged) r.unmanaged += 1;
+      r.outstanding += Number(c.outstanding || 0); r.revenue += Number(c.revenue || 0);
+      if (c.next_action_date && c.next_action_date <= today()) r.dueSoon += 1;
+      m.set(key, r);
+    });
+    return Array.from(m.values()).sort((a, b) => b.unmanaged - a.unmanaged || b.outstanding - a.outstanding);
+  }, [cards]);
   const colCards = (key) => filtered.filter((c) => (c.pipeline_stage || 'active') === key);
   const stageDefOf = (key) => defs.find((d) => d.stage_key === key);
 
@@ -299,12 +318,39 @@ export default function ClientPipeline() {
           <ToggleButton value="all">All clients</ToggleButton>
           <ToggleButton value="mine">My clients</ToggleButton>
         </ToggleButtonGroup>
+        <Button size="small" variant={showTeam ? 'contained' : 'outlined'} startIcon={<GroupsRounded />} onClick={() => setShowTeam((v) => !v)} sx={{ borderRadius: 2 }}>Team</Button>
         <Badge badgeContent={unmanagedCount} color="error">
           <Button size="small" variant={onlyUnmanaged ? 'contained' : 'outlined'} color="error" startIcon={<WarningAmberRounded />} onClick={() => setOnlyUnmanaged((v) => !v)} sx={{ borderRadius: 2 }}>Unmanaged</Button>
         </Badge>
         <TextField size="small" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)}
           InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded fontSize="small" /></InputAdornment> }} sx={{ width: 200 }} />
       </Stack>
+
+      {ownerFilter && (
+        <Chip sx={{ mb: 1.5 }} color="primary" label={`Filtered to ${nm(names, ownerFilter)}`} onDelete={() => setOwnerFilter(null)} />
+      )}
+
+      <Collapse in={showTeam} unmountOnExit>
+        <Box sx={{ mb: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+          <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover' }}><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Team overview — who owns what</Typography></Box>
+          <Table size="small">
+            <TableHead><TableRow>{['Account Manager', 'Accounts', 'Unmanaged', 'Action Due', 'Outstanding', 'Revenue (12m)', ''].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem' }} align={['Account Manager', ''].includes(h) ? 'left' : 'right'}>{h}</TableCell>)}</TableRow></TableHead>
+            <TableBody>
+              {rollup.map((r) => (
+                <TableRow key={r.email || 'unassigned'} hover sx={{ cursor: 'pointer' }} onClick={() => { setOwnerFilter((r.email || '').toLowerCase() || null); setShowTeam(false); }}>
+                  <TableCell><Stack direction="row" alignItems="center" spacing={1}><Avatar sx={{ width: 22, height: 22, fontSize: 11 }}>{nm(names, r.email)[0]?.toUpperCase()}</Avatar><Typography variant="body2" sx={{ fontWeight: 600 }}>{r.email ? nm(names, r.email) : 'Unassigned'}</Typography></Stack></TableCell>
+                  <TableCell align="right">{r.accounts}</TableCell>
+                  <TableCell align="right">{r.unmanaged > 0 ? <Chip size="small" color="error" label={r.unmanaged} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.62rem' } }} /> : '—'}</TableCell>
+                  <TableCell align="right">{r.dueSoon > 0 ? <Chip size="small" color="warning" label={r.dueSoon} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.62rem' } }} /> : '—'}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: r.outstanding ? 'error.main' : 'text.disabled' }}>{r.outstanding ? inrK(r.outstanding) : '—'}</TableCell>
+                  <TableCell align="right">{inrK(r.revenue)}</TableCell>
+                  <TableCell align="right"><Button size="small">View</Button></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      </Collapse>
 
       {loading ? <Stack alignItems="center" sx={{ py: 6 }}><CircularProgress /></Stack> : (
         <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto', pb: 2, alignItems: 'flex-start' }}>
