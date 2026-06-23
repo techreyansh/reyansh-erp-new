@@ -140,6 +140,7 @@ const CustomerPortal = lazy(() => import("./pages/portal/CustomerPortal"));
 const CustomerPortalAdmin = lazy(() => import("./pages/portal/CustomerPortalAdmin"));
 const CostControl = lazy(() => import("./pages/costControl/CostControl"));
 const CablePlanningWorkbench = lazy(() => import("./pages/temp/CablePlanningWorkbench"));
+const AccessPreview = lazy(() => import("./pages/admin/AccessPreview"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -234,6 +235,12 @@ function AppContent() {
                     <ProtectedRouteGate>
                       <CablePlanningWorkbench />
                     </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/access-preview" element={
+                    <CEOOnlyRoute>
+                      <AccessPreview />
+                    </CEOOnlyRoute>
                   } />
 
                   <Route path="/home" element={

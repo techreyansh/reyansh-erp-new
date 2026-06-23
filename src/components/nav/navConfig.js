@@ -176,6 +176,7 @@ export const NAV_GROUPS = [
     icon: ic(SettingsOutlined),
     items: [
       { label: "Master Data Hub", path: "/master-data", icon: ic(GridViewOutlined), moduleKey: "employees", requireEdit: true },
+      { label: "View as User", path: "/access-preview", icon: ic(GroupsOutlined), moduleKey: "employees", requireEdit: true },
       { label: "Document Library", path: "/document-library", icon: ic(FolderOutlined) },
       { label: "Setup Sheets", path: "/setup-sheets", icon: ic(SettingsOutlined) },
       { label: "Troubleshoot", path: "/troubleshoot-sheets", icon: ic(BuildOutlined) },
