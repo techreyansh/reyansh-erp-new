@@ -15,7 +15,7 @@ export const MODULE_KEYS = {
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
 
 const ROUTE_MODULE_RULES = [
-  { test: (path) => path === '/home' || path === '/welcome' || path === '/dashboard', moduleKey: MODULE_KEYS.DASHBOARD },
+  { test: (path) => path === '/home' || path === '/welcome' || path === '/dashboard' || path === '/operations-tower', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/ceo-command' || path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/employee-dashboard' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/profile' || path === '/help', moduleKey: MODULE_KEYS.DASHBOARD },

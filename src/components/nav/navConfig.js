@@ -52,6 +52,7 @@ export const NAV_GROUPS = [
       { label: "Home", path: "/home", icon: ic(HomeOutlined) },
       { label: "CEO Master Control", path: "/ceo-command", icon: ic(SecurityOutlined) },
       { label: "Plant Command", path: "/plant-command", icon: ic(FactoryOutlined) },
+      { label: "Operations Control Tower", path: "/operations-tower", icon: ic(InsightsOutlined) },
       { label: "Main Dashboard", path: "/dashboard", icon: ic(SpaceDashboardOutlined) },
     ],
   },
