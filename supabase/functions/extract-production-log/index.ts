@@ -12,7 +12,8 @@
 //   supabase secrets set GEMINI_API_KEY=AIza...
 //
 // Model: gemini-2.5-flash (vision + structured outputs) — see ../_shared/gemini.ts.
-import { CORS, json, generateJson, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
+import { CORS, json, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
+import { aiConfigured, generateJson, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 
 // ---- Structured output schemas -------------------------------------------------
 const EXTRACT_SCHEMA = {
@@ -113,8 +114,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set on the Edge Function." }, 500);
+  if (!aiConfigured()) return json({ error: AI_NOT_CONFIGURED }, 503);
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
@@ -151,7 +151,6 @@ Deno.serve(async (req) => {
     }
 
     const { result, usage } = await generateJson({
-      apiKey,
       system: mode === "extract" ? EXTRACT_SYSTEM : ANALYZE_SYSTEM,
       parts,
       schema: mode === "extract" ? EXTRACT_SCHEMA : ANALYZE_SCHEMA,

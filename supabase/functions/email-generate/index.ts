@@ -12,14 +12,14 @@
 // POST body: { contact, campaign, step, priorMessages? }   (see _shared/ai.ts types)
 import { preflight, json } from "../_shared/cors.ts";
 import { generateEmail } from "../_shared/ai.ts";
+import { aiConfigured, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 
 Deno.serve(async (req) => {
   const pf = preflight(req);
   if (pf) return pf;
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set on the Edge Function." }, 500);
+  if (!aiConfigured()) return json({ error: AI_NOT_CONFIGURED }, 503);
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   if (!step?.goal) return json({ error: "step.goal is required" }, 400);
 
   try {
-    const result = await generateEmail({ apiKey, contact, campaign, step, priorMessages });
+    const result = await generateEmail({ contact, campaign, step, priorMessages });
     return json({ ok: true, ...result });
   } catch (e) {
     return json({ error: (e as Error)?.message || String(e) }, 500);

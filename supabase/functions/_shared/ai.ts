@@ -4,9 +4,9 @@
 //
 // Follows the repo pattern (extract-production-log): structured JSON output via
 // the shared Gemini helper (responseSchema), then return the parsed object.
-import { generateJson, GEMINI_MODEL } from "./gemini.ts";
+import { generateJson } from "./llm.ts";
 
-export const EMAIL_MODEL = GEMINI_MODEL;
+export const EMAIL_MODEL = "auto"; // provider/model resolved by _shared/llm.ts
 
 const EMAIL_SCHEMA = {
   type: "object",
@@ -67,13 +67,13 @@ Rules:
 - Output plain text with real newlines. No markdown, no subject line inside the body.`;
 
 export async function generateEmail(opts: {
-  apiKey: string;
+  apiKey?: string; // deprecated/ignored — provider + key resolved by _shared/llm.ts
   contact: Contact;
   campaign: Campaign;
   step: Step;
   priorMessages?: PriorMessage[];
 }): Promise<{ subject: string; body: string; preview_text: string; model: string; usage: unknown }> {
-  const { apiKey, contact, campaign, step, priorMessages = [] } = opts;
+  const { contact, campaign, step, priorMessages = [] } = opts;
 
   const recipient = {
     first_name: contact.first_name || null,
@@ -104,7 +104,6 @@ export async function generateEmail(opts: {
     history;
 
   const { result, usage } = await generateJson({
-    apiKey,
     system: SYSTEM,
     parts: [{ text: userText }],
     schema: EMAIL_SCHEMA,

@@ -18,7 +18,9 @@ export const DEFAULT_NVIDIA_MODEL = "nvidia/llama-3.1-nemotron-ultra-253b-v1";
 export const NVIDIA_MODEL = Deno.env.get("NVIDIA_MODEL") || DEFAULT_NVIDIA_MODEL;
 export const NVIDIA_BASE_URL = (Deno.env.get("NVIDIA_BASE_URL") || "https://integrate.api.nvidia.com/v1").replace(/\/+$/, "");
 
-export type NvidiaPart = { text?: string };
+// Text part, or an inline image/PDF (same shape as GeminiPart.inlineData) so
+// vision Edge Functions can pass media through unchanged.
+export type NvidiaPart = { text?: string } | { inlineData?: { mimeType: string; data: string } };
 
 // Build a compact JSON skeleton from a JSON-Schema so the model knows the
 // EXACT shape to return (NVIDIA's json_object mode doesn't enforce a schema).
@@ -75,7 +77,15 @@ export async function generateJson(opts: {
   model?: string;
 }): Promise<{ result: any; usage: any; finishReason: string }> {
   const model = opts.model || NVIDIA_MODEL;
-  const userText = (opts.parts || []).map((p) => p.text).filter(Boolean).join("\n\n");
+  // Build OpenAI-style user content. With images/PDFs, use the array form with
+  // image_url data URIs (needs a vision-capable model); otherwise plain text.
+  const parts: any[] = opts.parts || [];
+  const hasMedia = parts.some((p) => p?.inlineData);
+  const userContent: any = hasMedia
+    ? parts.map((p) => (p?.inlineData
+      ? { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } }
+      : { type: "text", text: p?.text || "" })).filter((c) => c.type !== "text" || c.text)
+    : parts.map((p) => p?.text).filter(Boolean).join("\n\n");
   // "detailed thinking off" disables Nemotron's reasoning trace so we get clean
   // JSON; the shape hint keeps the model on the exact contract.
   const system = `detailed thinking off\n\n${opts.system}\n\n` +
@@ -84,7 +94,7 @@ export async function generateJson(opts: {
 
   const base = {
     model,
-    messages: [{ role: "system", content: system }, { role: "user", content: userText }],
+    messages: [{ role: "system", content: system }, { role: "user", content: userContent }],
     temperature: 0.2,
     top_p: 0.9,
     max_tokens: opts.maxOutputTokens ?? 8000,

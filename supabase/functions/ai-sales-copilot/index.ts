@@ -8,8 +8,7 @@
 // then `supabase functions deploy ai-sales-copilot`. (If only GEMINI_API_KEY is
 // set, it transparently falls back to Gemini.)
 import { preflight, json } from "../_shared/cors.ts";
-import { generateJson as nvidiaJson } from "../_shared/nvidia.ts";
-import { generateJson as geminiJson } from "../_shared/gemini.ts";
+import { aiConfigured, aiProvider, generateJson, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 
 const SYSTEM = `You are an expert B2B sales strategist and account manager for REYANSH INTERNATIONAL, an Indian manufacturer of:
 - Power cords (2/3-pin, appliance, computer/IEC), wiring harnesses, cable assemblies, battery cables, EV harnesses
@@ -48,11 +47,7 @@ const SCHEMA = {
 Deno.serve(async (req) => {
   const pre = preflight(req); if (pre) return pre;
   try {
-    // NVIDIA Nemotron preferred; Gemini fallback if that's the only key set.
-    const nvKey = Deno.env.get("NVIDIA_API_KEY");
-    const gemKey = Deno.env.get("GEMINI_API_KEY");
-    const provider = nvKey ? "nvidia" : (gemKey ? "gemini" : null);
-    if (!provider) return json({ error: "AI is not configured yet — set the NVIDIA_API_KEY secret (Nemotron) on this Edge Function to activate the Copilot." }, 503);
+    if (!aiConfigured()) return json({ error: AI_NOT_CONFIGURED }, 503);
 
     const { tool, context, input } = await req.json();
     const instruction = TOOL_PROMPTS[tool];
@@ -61,10 +56,8 @@ Deno.serve(async (req) => {
     const parts = [{
       text: `TOOL: ${instruction}\n\nFREE-FORM INPUT (if any):\n${input || "(none)"}\n\nCRM CONTEXT (JSON):\n${JSON.stringify(context || {}, null, 0).slice(0, 12000)}`,
     }];
-    const generateJson = provider === "nvidia" ? nvidiaJson : geminiJson;
-    const apiKey = provider === "nvidia" ? nvKey! : gemKey!;
-    const { result, usage } = await generateJson({ apiKey, system: SYSTEM, parts, schema: SCHEMA, maxOutputTokens: 8000 });
-    return json({ sections: result?.sections || [], usage, provider });
+    const { result, usage } = await generateJson({ system: SYSTEM, parts, schema: SCHEMA, maxOutputTokens: 8000 });
+    return json({ sections: result?.sections || [], usage, provider: aiProvider() });
   } catch (e) {
     return json({ error: (e as Error).message || "AI generation failed" }, 500);
   }

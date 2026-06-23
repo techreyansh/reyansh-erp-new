@@ -17,6 +17,7 @@
 import { preflight, json } from "../_shared/cors.ts";
 import { serviceClient } from "../_shared/db.ts";
 import { generateEmail } from "../_shared/ai.ts";
+import { aiConfigured, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 import { sendMessageById } from "../_shared/send.ts";
 import { evaluateWindow } from "../_shared/schedule.ts";
 
@@ -32,8 +33,7 @@ Deno.serve(async (req) => {
     return json({ error: "unauthorized" }, 401);
   }
 
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) return json({ error: "GEMINI_API_KEY is not set." }, 500);
+  if (!aiConfigured()) return json({ error: AI_NOT_CONFIGURED }, 503);
 
   let db: any;
   try { db = serviceClient(); } catch (e) { return json({ error: (e as Error).message }, 500); }
@@ -121,7 +121,6 @@ Deno.serve(async (req) => {
       let gen;
       try {
         gen = await generateEmail({
-          apiKey,
           contact,
           campaign,
           step: { step_order: nextOrder, goal: step.goal, subject_hint: step.subject_hint },
