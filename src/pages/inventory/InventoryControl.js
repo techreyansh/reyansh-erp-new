@@ -5,14 +5,54 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container, Box, Stack, Typography, Grid, Card, CardContent, Chip, Table, TableHead, TableRow,
   TableCell, TableBody, CircularProgress, Alert, Snackbar, TextField, MenuItem, InputAdornment,
+  Drawer, IconButton, Divider,
 } from '@mui/material';
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
 import SearchRounded from '@mui/icons-material/SearchRounded';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import inv from '../../services/inventoryControlService';
 import ReportExportButton from '../../components/common/ReportExportButton';
 
 const inrK = (n) => { const v = Number(n || 0); return v >= 1e7 ? `₹${(v / 1e7).toFixed(2)}Cr` : v >= 1e5 ? `₹${(v / 1e5).toFixed(1)}L` : `₹${v.toLocaleString('en-IN')}`; };
 const STATUS = { out: { label: 'Stock-out', color: 'error' }, reorder: { label: 'Reorder', color: 'warning' }, low: { label: 'Low', color: 'warning' }, ok: { label: 'OK', color: 'success' } };
+const dt = (d) => (d ? new Date(d).toLocaleDateString('en-IN') : '—');
+
+function Material360({ row, onClose }) {
+  const [data, setData] = useState(null);
+  useEffect(() => { (async () => { setData(await inv.getMaterial360(row.item_id)); })(); }, [row.item_id]);
+  return (
+    <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 560 }, maxWidth: '100%' } }}>
+      <Box sx={{ p: 2 }}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Box sx={{ flexGrow: 1 }}><Typography variant="h6" sx={{ fontWeight: 800 }}>{row.name}</Typography><Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{row.code} · {row.group}</Typography></Box>
+          <IconButton onClick={onClose}><CloseRounded /></IconButton>
+        </Stack>
+        <Grid container spacing={1} sx={{ my: 1 }}>
+          {[['On hand', `${row.on_hand} ${row.uom}`], ['Reserved', row.reserved], ['Available', row.available], ['Reorder', row.reorder], ['Safety', row.safety], ['Location', row.location || '—']].map(([k, v]) => (
+            <Grid item xs={4} key={k}><Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.58rem', textTransform: 'uppercase', fontWeight: 700 }}>{k}</Typography><Typography variant="body2" sx={{ fontWeight: 600 }}>{v}</Typography></Grid>
+          ))}
+        </Grid>
+        <Divider sx={{ my: 1 }} />
+        {!data ? <Stack alignItems="center" sx={{ py: 3 }}><CircularProgress size={22} /></Stack> : (
+          <>
+            <Typography variant="overline" color="text.secondary">Stock movements ({data.transactions.length})</Typography>
+            <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow>{['Date', 'Type', 'Δ Qty', 'Balance', 'Ref'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.68rem' }} align={['Δ Qty', 'Balance'].includes(h) ? 'right' : 'left'}>{h}</TableCell>)}</TableRow></TableHead>
+              <TableBody>{data.transactions.length === 0 ? <TableRow><TableCell colSpan={5}><Typography variant="caption" color="text.secondary">No movements.</Typography></TableCell></TableRow> : data.transactions.map((t, i) => (
+                <TableRow key={i}><TableCell>{dt(t.created_at)}</TableCell><TableCell><Chip size="small" variant="outlined" label={t.transaction_type} /></TableCell>
+                  <TableCell align="right" sx={{ color: Number(t.quantity_delta) >= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}>{Number(t.quantity_delta) >= 0 ? '+' : ''}{t.quantity_delta}</TableCell>
+                  <TableCell align="right">{t.on_hand_after}</TableCell><TableCell><Typography variant="caption" color="text.secondary">{t.reference_type || '—'}</Typography></TableCell></TableRow>
+              ))}</TableBody></Table></Box>
+            <Typography variant="overline" color="text.secondary" sx={{ mt: 2, display: 'block' }}>Suppliers ({data.vendors.length})</Typography>
+            {data.vendors.length === 0 ? <Typography variant="caption" color="text.secondary">No suppliers linked.</Typography> : (
+              <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow>{['Vendor', 'Preferred', 'Lead time', 'Rate', 'MOQ'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.68rem' }}>{h}</TableCell>)}</TableRow></TableHead>
+                <TableBody>{data.vendors.map((v, i) => <TableRow key={i}><TableCell>{v.vendor_name || v.vendor_code}</TableCell><TableCell>{v.is_preferred ? '★' : '—'}</TableCell><TableCell>{v.lead_time_days ? `${v.lead_time_days}d` : '—'}</TableCell><TableCell>{v.unit_cost ? inrK(v.unit_cost) : '—'}</TableCell><TableCell>{v.moq || '—'}</TableCell></TableRow>)}</TableBody></Table></Box>
+            )}
+          </>
+        )}
+      </Box>
+    </Drawer>
+  );
+}
 
 export default function InventoryControl() {
   const [dash, setDash] = useState(null);
@@ -22,6 +62,7 @@ export default function InventoryControl() {
   const [q, setQ] = useState('');
   const [grp, setGrp] = useState('all');
   const [statusF, setStatusF] = useState('all');
+  const [selected, setSelected] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,7 +125,7 @@ export default function InventoryControl() {
                 <TableBody>{rows.map((s, i) => {
                   const st = STATUS[s.status] || {};
                   return (
-                    <TableRow key={i} hover>
+                    <TableRow key={i} hover sx={{ cursor: 'pointer' }} onClick={() => setSelected(s)}>
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.72rem' }}>{s.code}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>{s.name}</TableCell>
                       <TableCell><Typography variant="caption">{s.group}</Typography></TableCell>
@@ -102,6 +143,8 @@ export default function InventoryControl() {
           </Card>
         </>
       )}
+
+      {selected && <Material360 row={selected} onClose={() => setSelected(null)} />}
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         {snack ? <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(null)}>{snack.message}</Alert> : undefined}
