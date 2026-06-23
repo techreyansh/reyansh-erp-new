@@ -163,6 +163,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    key: "temporary",
+    label: "Temporary",
+    icon: ic(BuildOutlined),
+    items: [
+      { label: "Cable Planning Workbench", path: "/temp/cable-planning", icon: ic(CableOutlined) },
+    ],
+  },
+  {
     key: "admin",
     label: "Administration",
     icon: ic(SettingsOutlined),
