@@ -11,6 +11,8 @@ import EditOutlined from '@mui/icons-material/EditOutlined';
 import RefreshRounded from '@mui/icons-material/RefreshRounded';
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded';
 import rateMaster from '../../services/rateMasterService';
+import { REPORTS } from '../../services/costingReportsService';
+import ReportExportButton from '../../components/common/ReportExportButton';
 
 const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 const pct = (n) => `${Number(n || 0).toFixed(2)}%`;
@@ -211,6 +213,43 @@ function WhatIfTab({ rates, setSnack }) {
   );
 }
 
+function ReportsTab({ setSnack }) {
+  const [sel, setSel] = useState('profitability');
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async (key) => {
+    setLoading(true);
+    try { setReport(await REPORTS.find((r) => r.key === key).build()); }
+    catch (e) { setSnack({ message: e.message, severity: 'error' }); }
+    finally { setLoading(false); }
+  }, [setSnack]);
+  useEffect(() => { load(sel); }, [sel, load]);
+  const section = report?.sections?.[0];
+  return (
+    <Box>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }} alignItems="center">
+        {REPORTS.map((r) => <Chip key={r.key} label={r.label} clickable color={sel === r.key ? 'primary' : 'default'} variant={sel === r.key ? 'filled' : 'outlined'} onClick={() => setSel(r.key)} />)}
+        <Box sx={{ flexGrow: 1 }} />
+        {report && <ReportExportButton buildReport={() => report} label="Export" />}
+      </Stack>
+      {loading || !report ? <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={24} /></Stack> : (
+        <Card variant="outlined" sx={{ borderRadius: 2 }}>
+          <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{report.title}</Typography>
+            <Stack direction="row" spacing={2} flexWrap="wrap">{report.kpis.map((k) => <Typography key={k.label} variant="caption" color="text.secondary">{k.label}: <strong>{k.value}</strong></Typography>)}</Stack>
+          </Box>
+          {section.rows.length === 0 ? <Box sx={{ p: 2 }}><Typography variant="body2" color="text.secondary">{section.emptyText}</Typography></Box> : (
+            <Box sx={{ overflowX: 'auto' }}><Table size="small" stickyHeader>
+              <TableHead><TableRow>{section.columns.map((c) => <TableCell key={c.key} sx={{ fontWeight: 700, fontSize: '0.7rem' }}>{c.label}</TableCell>)}</TableRow></TableHead>
+              <TableBody>{section.rows.map((row, i) => <TableRow key={i} hover>{section.columns.map((c) => <TableCell key={c.key} sx={{ fontSize: '0.78rem' }}>{row[c.key]}</TableCell>)}</TableRow>)}</TableBody>
+            </Table></Box>
+          )}
+        </Card>
+      )}
+    </Box>
+  );
+}
+
 export default function CostControl() {
   const [tab, setTab] = useState(0);
   const [data, setData] = useState(null);
@@ -245,11 +284,12 @@ export default function CostControl() {
       {loading || !data ? <Stack alignItems="center" sx={{ py: 6 }}><CircularProgress /></Stack> : (
         <>
           <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Tab label="Dashboard" /><Tab label="Rate Master" /><Tab label="What-If" />
+            <Tab label="Dashboard" /><Tab label="Rate Master" /><Tab label="What-If" /><Tab label="Reports" />
           </Tabs>
           {tab === 0 && <DashboardTab data={data} onRecostAll={recostAll} recosting={recosting} />}
           {tab === 1 && <RateMasterTab rates={data.rates} onEdit={setEditRate} />}
           {tab === 2 && <WhatIfTab rates={data.rates} setSnack={setSnack} />}
+          {tab === 3 && <ReportsTab setSnack={setSnack} />}
         </>
       )}
 
