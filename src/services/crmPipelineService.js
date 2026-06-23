@@ -946,6 +946,7 @@ const crmPipelineService = {
   listAssignableUsers,
   repWorklist,
   rfmDashboard,
+  clientHealth,
   repScorecard,
   setRepTarget,
   walletDashboard,
@@ -956,3 +957,15 @@ const crmPipelineService = {
 };
 
 export default crmPipelineService;
+
+/** Client health scores (0-100 + band) for all clients — see crm_client_health RPC. */
+export async function clientHealth() {
+  try {
+    const { data, error } = await supabase.rpc("crm_client_health");
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("[crmPipelineService.clientHealth]", e);
+    return [];
+  }
+}
