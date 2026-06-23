@@ -279,7 +279,7 @@ export default function CableDaySchedule({ schedule }) {
   return (
     <div className="cds-print">
       <style>{PRINT_CSS}</style>
-      <ManagementSheet schedule={schedule} />
+      <ManagementSheet sched={schedule} />
       {schedule.order.map((stage) => <MachineSheet key={stage} mc={schedule.machines[stage]} sched={schedule} />)}
     </div>
   );
