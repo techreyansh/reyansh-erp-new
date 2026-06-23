@@ -2,7 +2,7 @@
 // change and recosts every affected product costing via the pure recostEngine,
 // so master rates flow through to product cost / price / margin automatically.
 import { supabase } from '../lib/supabaseClient';
-import { costAt, costImpact, isStale } from './recostEngine';
+import { costImpact, isStale } from './recostEngine';
 
 async function currentEmail() {
   try { return (await supabase.auth.getUser()).data?.user?.email || null; } catch { return null; }
@@ -41,25 +41,15 @@ async function versionsWithLines(versionIds = null) {
   return (versions || []).map((v) => ({ version: v, lines: byV[v.id] || [] }));
 }
 
-/** Recompute one version against current rates; write back line rates + version totals. */
-export async function recostVersion(versionId, map = null) {
-  const rmap = map || await rateMap();
-  const items = await versionsWithLines([versionId]);
-  if (!items.length) return null;
-  const { version, lines } = items[0];
-  const { lines: priced, ...s } = costAt(lines, rmap, versionMargin(version, rmap));
-  for (const l of priced) {
-    if (l.rate_overridden || l.id == null) continue;
-    await supabase.from('costing_line').update({ rate: l.rate, amount: l.amount }).eq('id', l.id);
-  }
-  await supabase.from('costing_version').update({
-    material_cost: s.material_cost, labour_cost: s.labour_cost, machine_cost: s.machine_cost,
-    overhead_cost: s.overhead_cost, financial_cost: s.financial_cost, total_cost: s.total_cost,
-    net_selling_price: s.net_selling_price, contribution_pct: s.contribution_pct,
-    gross_margin_pct: s.gross_margin_pct, net_margin_pct: s.net_margin_pct,
-    recosted_at: new Date().toISOString(), rate_basis_date: new Date().toISOString().slice(0, 10),
-  }).eq('id', versionId);
-  return s;
+// Persisted recost is done by the DB function recost_costing_version (mirrors
+// the JS engine exactly, validated). The JS engine is kept only for no-save
+// preview/what-if (whatIf, isStale). One source of truth for applied numbers.
+
+/** Recompute one version against current rates (delegates to the DB function). */
+export async function recostVersion(versionId) {
+  const { error } = await supabase.rpc('recost_costing_version', { p_version: versionId });
+  if (error) throw error;
+  return true;
 }
 
 /** Versions with a non-frozen line referencing a rate code. */
@@ -69,36 +59,41 @@ export async function affectedVersions(code) {
   return [...new Set((data || []).map((l) => l.costing_id))];
 }
 
-export async function recostAffected(code, map = null) {
-  const rmap = map || await rateMap();
+export async function recostAffected(code) {
   const ids = await affectedVersions(code);
-  for (const id of ids) await recostVersion(id, rmap);
+  for (const id of ids) await recostVersion(id);
   return ids.length;
 }
 
 export async function recostAll() {
-  const rmap = await rateMap();
-  const items = await versionsWithLines();
-  for (const { version } of items) await recostVersion(version.id, rmap);
-  return items.length;
+  const { data, error } = await supabase.rpc('recost_all_versions');
+  if (error) throw error;
+  return data || 0;
 }
 
-/** Apply a rate change: log it, then recost every affected product. */
+/**
+ * Apply a rate change: the DB trigger on material_rate auto-recosts every
+ * affected product and logs the change; here we just persist the rate, then
+ * enrich the auto-log entry with the user's reason + actor.
+ */
 export async function updateRate(code, newRate, reason = null) {
   const email = await currentEmail();
-  const { data: existing } = await supabase.from('material_rate').select('rate, rate_type').eq('material_code', code).single();
-  const old = Number(existing?.rate);
-  const nw = Number(newRate);
+  const { data: existing } = await supabase.from('material_rate').select('rate').eq('material_code', code).single();
+  const old = Number(existing?.rate); const nw = Number(newRate);
   const { error } = await supabase.from('material_rate')
     .update({ previous_rate: old, rate: nw, updated_at: new Date().toISOString(), updated_by_email: email })
     .eq('material_code', code);
   if (error) throw error;
-  const affected = await recostAffected(code);
-  await supabase.from('rate_change_log').insert({
-    rate_code: code, rate_type: existing?.rate_type, old_rate: old, new_rate: nw,
-    pct_change: old ? +(((nw - old) / old) * 100).toFixed(2) : null,
-    reason, changed_by_email: email, affected_versions: affected,
-  });
+  // the trigger has now inserted a rate_change_log row + recosted products
+  const { data: log } = await supabase.from('rate_change_log').select('id, affected_versions')
+    .eq('rate_code', code).order('changed_at', { ascending: false }).limit(1);
+  let affected = 0;
+  if (log && log[0]) {
+    affected = log[0].affected_versions || 0;
+    const patch = { changed_by_email: email };
+    if (reason) patch.reason = reason;
+    await supabase.from('rate_change_log').update(patch).eq('id', log[0].id);
+  }
   return { affected, old, new: nw };
 }
 

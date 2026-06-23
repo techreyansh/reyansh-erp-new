@@ -51,32 +51,38 @@ export async function applyOrderPrice(soId) {
   return { total };
 }
 
-/** Quotation items matched (by product name) to a current costing whose price has moved. */
+// Recommended price for a quote item: prefer the hard costing_version_id link,
+// fall back to product-name match for un-linked legacy items.
+async function quoteRecommender() {
+  const { data: cvs } = await supabase.from('costing_version').select('id, product_name, net_selling_price').neq('status', 'superseded');
+  const byId = {}; const byName = {};
+  (cvs || []).forEach((c) => { byId[c.id] = Number(c.net_selling_price) || 0; if (c.product_name) byName[String(c.product_name).toLowerCase().trim()] = Number(c.net_selling_price) || 0; });
+  return (it) => (it.costing_version_id != null ? byId[it.costing_version_id] : byName[String(it.product || '').toLowerCase().trim()]);
+}
+
+/** Quotation items whose captured price differs from the linked costing's current price. */
 export async function quotationPriceImpact() {
-  const { data: items } = await supabase.from('crm_quotation_items').select('id, quotation_id, product, qty, unit_price, line_total');
+  const { data: items } = await supabase.from('crm_quotation_items').select('id, quotation_id, product, qty, unit_price, line_total, costing_version_id');
   if (!items || !items.length) return [];
-  const { data: cvs } = await supabase.from('costing_version').select('product_name, net_selling_price').neq('status', 'superseded');
-  const recByName = {};
-  (cvs || []).forEach((c) => { if (c.product_name) recByName[String(c.product_name).toLowerCase().trim()] = Number(c.net_selling_price) || 0; });
+  const rec = await quoteRecommender();
   const { data: quotes } = await supabase.from('crm_quotations').select('id, quote_number, status');
   const qById = Object.fromEntries((quotes || []).map((q) => [q.id, q]));
   return items.map((it) => {
-    const rec = recByName[String(it.product || '').toLowerCase().trim()];
-    if (rec == null) return null;
-    const captured = r2(it.unit_price); const delta = r2(rec - captured); const q = qById[it.quotation_id];
+    const recommended = rec(it);
+    if (recommended == null) return null;
+    const captured = r2(it.unit_price); const delta = r2(recommended - captured); const q = qById[it.quotation_id];
     return { item_id: it.id, quotation_id: it.quotation_id, quote_number: q?.quote_number, status: q?.status,
-      product: it.product, qty: Number(it.qty) || 0, captured, recommended: rec, delta, stale: Math.abs(delta) > 0.01 };
+      product: it.product, qty: Number(it.qty) || 0, captured, recommended, delta,
+      linked: it.costing_version_id != null, stale: Math.abs(delta) > 0.01 };
   }).filter(Boolean).filter((r) => r.stale);
 }
 
 export async function applyQuotationPrice(quotationId) {
-  const { data: items } = await supabase.from('crm_quotation_items').select('id, product, qty').eq('quotation_id', quotationId);
-  const { data: cvs } = await supabase.from('costing_version').select('product_name, net_selling_price').neq('status', 'superseded');
-  const recByName = {};
-  (cvs || []).forEach((c) => { if (c.product_name) recByName[String(c.product_name).toLowerCase().trim()] = Number(c.net_selling_price) || 0; });
+  const { data: items } = await supabase.from('crm_quotation_items').select('id, product, qty, costing_version_id').eq('quotation_id', quotationId);
+  const rec = await quoteRecommender();
   for (const it of items || []) {
-    const rec = recByName[String(it.product || '').toLowerCase().trim()]; if (rec == null) continue;
-    await supabase.from('crm_quotation_items').update({ unit_price: rec, line_total: r2(rec * (Number(it.qty) || 0)) }).eq('id', it.id);
+    const recommended = rec(it); if (recommended == null) continue;
+    await supabase.from('crm_quotation_items').update({ unit_price: recommended, line_total: r2(recommended * (Number(it.qty) || 0)) }).eq('id', it.id);
   }
   const { data: all } = await supabase.from('crm_quotation_items').select('line_total').eq('quotation_id', quotationId);
   const subtotal = r2((all || []).reduce((s, l) => s + (Number(l.line_total) || 0), 0));
