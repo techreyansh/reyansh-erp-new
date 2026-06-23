@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Drawer, Box, Stack, Typography, Chip, Tabs, Tab, Table, TableHead, TableRow, TableCell,
-  TableBody, CircularProgress, IconButton, Grid, TextField, MenuItem, Button, Tooltip, Avatar,
+  TableBody, CircularProgress, IconButton, Grid, TextField, MenuItem, Button, Tooltip, Avatar, Alert,
 } from '@mui/material';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import CallRounded from '@mui/icons-material/CallRounded';
@@ -12,6 +12,52 @@ import WhatsApp from '@mui/icons-material/WhatsApp';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
+import aiCopilot from '../../services/aiCopilotService';
+import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
+
+const AI_ACTIONS = [
+  { key: 'oem_research', label: 'Analyze Account' },
+  { key: 'persona', label: 'Decision-Maker', input: true },
+  { key: 'recovery', label: 'Recover / Re-engage' },
+  { key: 'relationship', label: 'Relationship Insights' },
+  { key: 'outreach', label: 'Outreach' },
+  { key: 'followup', label: 'Follow-Up Plan' },
+];
+
+function AICopilotTab({ account, notify }) {
+  const [busy, setBusy] = useState(null);
+  const [out, setOut] = useState(null);
+  const [err, setErr] = useState(null);
+  const [input, setInput] = useState('');
+  const run = async (toolKey) => {
+    setBusy(toolKey); setErr(null); setOut(null);
+    try {
+      const r = await aiCopilot.runTool(toolKey, { account, input });
+      if (r.error) setErr(r.error); else setOut({ tool: toolKey, sections: r.sections });
+    } catch (e) { setErr(e.message); } finally { setBusy(null); }
+  };
+  const save = async () => { try { await aiCopilot.saveToCRM(account.id, out.tool, out.sections); notify?.('Saved to timeline'); } catch (e) { notify?.(e.message, 'error'); } };
+  return (
+    <Box>
+      <Typography variant="overline" color="text.secondary">AI Copilot — uses this account's full context</Typography>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ my: 1 }}>
+        {AI_ACTIONS.map((a) => (
+          <Button key={a.key} size="small" variant="outlined" startIcon={busy === a.key ? <CircularProgress size={14} /> : <AutoAwesomeRounded fontSize="small" />} disabled={!!busy} onClick={() => run(a.key)} sx={{ borderRadius: 2 }}>{a.label}</Button>
+        ))}
+      </Stack>
+      <TextField size="small" fullWidth placeholder="Optional: decision-maker designation / extra notes" value={input} onChange={(e) => setInput(e.target.value)} sx={{ mb: 1 }} />
+      {err && <Alert severity={/configured|GEMINI|Edge Function|send a request/i.test(err) ? 'warning' : 'error'} sx={{ mt: 1 }}>{err}</Alert>}
+      {out?.sections?.length > 0 && (
+        <Box sx={{ mt: 1 }}>
+          <Stack direction="row" justifyContent="flex-end"><Button size="small" onClick={save}>Save to timeline</Button></Stack>
+          {out.sections.map((s, i) => (
+            <Box key={i} sx={{ mb: 1.5 }}><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{s.heading}</Typography><Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>{s.body}</Typography></Box>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+}
 
 const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const BAND = { green: '#2e7d32', yellow: '#ed6c02', red: '#d32f2f' };
@@ -68,7 +114,7 @@ export default function Client360({ account, onClose, notify }) {
 
   const s = data?.summary || {};
   const c = crm?.company || account;
-  const TABS = ['Overview', 'Sales', 'Production & Dispatch', 'Finance', 'Engagement', 'Complaints'];
+  const TABS = ['Overview', 'Sales', 'Production & Dispatch', 'Finance', 'Engagement', 'Complaints', 'AI Copilot'];
 
   return (
     <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', md: 980 }, maxWidth: '100%' } }}>
@@ -185,6 +231,7 @@ export default function Client360({ account, onClose, notify }) {
           {tab === 5 && (
             <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />
           )}
+          {tab === 6 && <AICopilotTab account={account} notify={notify} />}
         </Box>
       )}
     </Drawer>
