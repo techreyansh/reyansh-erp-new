@@ -62,6 +62,7 @@ export const NAV_GROUPS = [
     icon: ic(GroupsOutlined),
     items: [
       { label: "Daily Worklist", path: "/crm/worklist", icon: ic(AssignmentOutlined) },
+      { label: "Team Performance", path: "/crm/team", icon: ic(GroupsOutlined) },
       { label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: ic(TrendingUpOutlined) },
       { label: "Client Management", path: "/crm-pipeline?view=clients", icon: ic(PeopleAltOutlined) },
       { label: "CRM Dashboard", path: "/crm/dashboard", icon: ic(InsightsOutlined) },

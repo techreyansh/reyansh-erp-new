@@ -947,6 +947,7 @@ const crmPipelineService = {
   repWorklist,
   rfmDashboard,
   clientHealth,
+  teamPerformance,
   repScorecard,
   setRepTarget,
   walletDashboard,
@@ -957,6 +958,18 @@ const crmPipelineService = {
 };
 
 export default crmPipelineService;
+
+/** Per-salesperson client-book metrics — see crm_team_performance RPC. */
+export async function teamPerformance() {
+  try {
+    const { data, error } = await supabase.rpc("crm_team_performance");
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("[crmPipelineService.teamPerformance]", e);
+    return [];
+  }
+}
 
 /** Client health scores (0-100 + band) for all clients — see crm_client_health RPC. */
 export async function clientHealth() {
