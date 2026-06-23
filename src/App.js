@@ -124,6 +124,7 @@ const RepWorklist = lazy(() => import("./pages/crm/RepWorklist"));
 const CrmTeam = lazy(() => import("./pages/crm/CrmTeam"));
 const AISalesCopilot = lazy(() => import("./pages/crm/AISalesCopilot"));
 const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
+const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
@@ -366,6 +367,12 @@ function AppContent() {
                   <Route path="/mrp" element={
                     <ProtectedRouteGate>
                       <MaterialRequirements />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/inventory-control" element={
+                    <ProtectedRouteGate>
+                      <InventoryControl />
                     </ProtectedRouteGate>
                   } />
 
