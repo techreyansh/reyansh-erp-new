@@ -36,6 +36,7 @@ import {
   PrecisionManufacturingOutlined,
   ShoppingBagOutlined,
   InsightsOutlined,
+  AutoAwesomeOutlined,
 } from "@mui/icons-material";
 
 const ic = (Comp) => <Comp sx={{ fontSize: 20 }} />;
@@ -67,6 +68,7 @@ export const NAV_GROUPS = [
       { label: "Client Management", path: "/crm-pipeline?view=clients", icon: ic(PeopleAltOutlined) },
       { label: "CRM Dashboard", path: "/crm/dashboard", icon: ic(InsightsOutlined) },
       { label: "KIT — Keep In Touch", path: "/kit", icon: ic(ForumOutlined) },
+      { label: "AI Sales Copilot", path: "/crm/copilot", icon: ic(AutoAwesomeOutlined) },
       { label: "Email Campaigns", path: "/crm/campaigns", icon: ic(CampaignOutlined) },
       { label: "Import CRM Data", path: "/crm-import", icon: ic(InputOutlined) },
       { label: "CRM Guide", path: "/crm/guide", icon: ic(HelpOutlineOutlined) },
