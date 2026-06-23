@@ -92,7 +92,7 @@ const Costing = () => {
     try {
       setLoading(true);
       const data = await costingService.getAllCostingEntries();
-      setCostingEntries(data);
+      setCostingEntries(Array.isArray(data) ? data : []);
     } catch (error) {
       setSnackbar({ 
         open: true, 
@@ -201,7 +201,8 @@ const Costing = () => {
 
   // Default order: newest costing entries first.
   const sortedEntries = useMemo(() => {
-    return [...costingEntries].sort((a, b) => {
+    const arr = Array.isArray(costingEntries) ? costingEntries : [];
+    return [...arr].sort((a, b) => {
       const da = new Date(a.Date || a.date || 0).getTime();
       const db = new Date(b.Date || b.date || 0).getTime();
       return (db || 0) - (da || 0);
