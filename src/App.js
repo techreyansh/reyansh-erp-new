@@ -123,6 +123,7 @@ const CollectionsPage = lazy(() => import("./pages/crm/CollectionsPage"));
 const RepWorklist = lazy(() => import("./pages/crm/RepWorklist"));
 const CrmTeam = lazy(() => import("./pages/crm/CrmTeam"));
 const AISalesCopilot = lazy(() => import("./pages/crm/AISalesCopilot"));
+const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
@@ -971,6 +972,14 @@ function AppContent() {
                     element={
                       <ProtectedRouteGate>
                         <AISalesCopilot />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/client-pipeline"
+                    element={
+                      <ProtectedRouteGate>
+                        <ClientPipeline />
                       </ProtectedRouteGate>
                     }
                   />

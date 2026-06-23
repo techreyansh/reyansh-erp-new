@@ -948,6 +948,7 @@ const crmPipelineService = {
   rfmDashboard,
   clientHealth,
   teamPerformance,
+  moveClientPipelineStage,
   repScorecard,
   setRepTarget,
   walletDashboard,
@@ -958,6 +959,13 @@ const crmPipelineService = {
 };
 
 export default crmPipelineService;
+
+/** Move a client along the operational pipeline (additive pipeline_stage field). */
+export async function moveClientPipelineStage(id, toStage, note) {
+  const { error } = await supabase.from("crm_pipeline").update({ pipeline_stage: toStage, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+  try { await supabase.from("crm_pipeline_activity").insert({ pipeline_id: id, activity_type: "note", subject: `Pipeline → ${toStage}`, body: note || null }); } catch { /* non-fatal */ }
+}
 
 /** Per-salesperson client-book metrics — see crm_team_performance RPC. */
 export async function teamPerformance() {
