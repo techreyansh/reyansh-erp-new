@@ -12,6 +12,7 @@ import RefreshRounded from '@mui/icons-material/RefreshRounded';
 import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded';
 import rateMaster from '../../services/rateMasterService';
 import { REPORTS } from '../../services/costingReportsService';
+import priceImpact from '../../services/priceImpactService';
 import ReportExportButton from '../../components/common/ReportExportButton';
 
 const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -250,6 +251,71 @@ function ReportsTab({ setSnack }) {
   );
 }
 
+function PriceImpactTab({ setSnack }) {
+  const [orders, setOrders] = useState([]);
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(null);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { const [o, q] = await Promise.all([priceImpact.orderPriceImpact(), priceImpact.quotationPriceImpact()]); setOrders(o); setQuotes(q); }
+    catch (e) { setSnack({ message: e.message, severity: 'error' }); }
+    finally { setLoading(false); }
+  }, [setSnack]);
+  useEffect(() => { load(); }, [load]);
+  const applySO = async (soId) => { setBusy(soId); try { await priceImpact.applyOrderPrice(soId); setSnack({ message: 'Order re-priced to current costing.', severity: 'success' }); await load(); } catch (e) { setSnack({ message: e.message, severity: 'error' }); } finally { setBusy(null); } };
+  const applyQ = async (qid) => { setBusy(qid); try { await priceImpact.applyQuotationPrice(qid); setSnack({ message: 'Quotation re-priced to current costing.', severity: 'success' }); await load(); } catch (e) { setSnack({ message: e.message, severity: 'error' }); } finally { setBusy(null); } };
+
+  if (loading) return <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={24} /></Stack>;
+  const soIds = [...new Set(orders.map((o) => o.so_id))];
+  return (
+    <Stack spacing={2}>
+      <Alert severity="info" sx={{ borderRadius: 2 }}>Open orders &amp; quotations whose captured price no longer matches the current costing's recommended price. Applying updates the document; <strong>dispatched/closed orders are never touched.</strong></Alert>
+
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Sales orders</Typography><Chip size="small" label={soIds.length} color={soIds.length ? 'warning' : 'default'} /></Box>
+        {orders.length === 0 ? <Box sx={{ p: 2 }}><Typography variant="body2" color="text.secondary">No open orders priced below current costing.</Typography></Box> : (
+          <Box sx={{ overflowX: 'auto' }}><Table size="small">
+            <TableHead><TableRow>{['Order', 'Product', 'Qty', 'Captured', 'Recommended', 'Δ/unit', 'Margin@captured', ''].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem' }} align={['Qty', 'Captured', 'Recommended', 'Δ/unit', 'Margin@captured'].includes(h) ? 'right' : 'left'}>{h}</TableCell>)}</TableRow></TableHead>
+            <TableBody>{orders.map((r) => (
+              <TableRow key={r.line_id} hover>
+                <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700 }}>{r.so_number}<Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{r.company_name} · {r.status}</Typography></TableCell>
+                <TableCell>{r.product_name}</TableCell>
+                <TableCell align="right">{r.qty.toLocaleString('en-IN')}</TableCell>
+                <TableCell align="right">{inr(r.captured)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>{inr(r.recommended)}</TableCell>
+                <TableCell align="right" sx={{ color: r.delta > 0 ? 'error.main' : 'success.main', fontWeight: 700 }}>{r.delta > 0 ? '+' : ''}{inr(r.delta)}</TableCell>
+                <TableCell align="right"><Chip size="small" variant="outlined" color={r.margin_at_captured < r.target_margin ? 'error' : 'success'} label={pct(r.margin_at_captured)} /></TableCell>
+                <TableCell align="right"><Button size="small" variant="outlined" disabled={busy === r.so_id} onClick={() => applySO(r.so_id)} sx={{ borderRadius: 2 }}>Apply</Button></TableCell>
+              </TableRow>
+            ))}</TableBody>
+          </Table></Box>
+        )}
+      </Card>
+
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Quotations</Typography><Chip size="small" label={[...new Set(quotes.map((q) => q.quotation_id))].length} color={quotes.length ? 'warning' : 'default'} /></Box>
+        {quotes.length === 0 ? <Box sx={{ p: 2 }}><Typography variant="body2" color="text.secondary">No quotations priced below current costing (matched by product name).</Typography></Box> : (
+          <Box sx={{ overflowX: 'auto' }}><Table size="small">
+            <TableHead><TableRow>{['Quote', 'Product', 'Qty', 'Captured', 'Recommended', 'Δ/unit', ''].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem' }} align={['Qty', 'Captured', 'Recommended', 'Δ/unit'].includes(h) ? 'right' : 'left'}>{h}</TableCell>)}</TableRow></TableHead>
+            <TableBody>{quotes.map((r) => (
+              <TableRow key={r.item_id} hover>
+                <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700 }}>{r.quote_number || '—'}<Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{r.status}</Typography></TableCell>
+                <TableCell>{r.product}</TableCell>
+                <TableCell align="right">{r.qty.toLocaleString('en-IN')}</TableCell>
+                <TableCell align="right">{inr(r.captured)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>{inr(r.recommended)}</TableCell>
+                <TableCell align="right" sx={{ color: r.delta > 0 ? 'error.main' : 'success.main', fontWeight: 700 }}>{r.delta > 0 ? '+' : ''}{inr(r.delta)}</TableCell>
+                <TableCell align="right"><Button size="small" variant="outlined" disabled={busy === r.quotation_id} onClick={() => applyQ(r.quotation_id)} sx={{ borderRadius: 2 }}>Apply</Button></TableCell>
+              </TableRow>
+            ))}</TableBody>
+          </Table></Box>
+        )}
+      </Card>
+    </Stack>
+  );
+}
+
 export default function CostControl() {
   const [tab, setTab] = useState(0);
   const [data, setData] = useState(null);
@@ -284,12 +350,13 @@ export default function CostControl() {
       {loading || !data ? <Stack alignItems="center" sx={{ py: 6 }}><CircularProgress /></Stack> : (
         <>
           <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Tab label="Dashboard" /><Tab label="Rate Master" /><Tab label="What-If" /><Tab label="Reports" />
+            <Tab label="Dashboard" /><Tab label="Rate Master" /><Tab label="What-If" /><Tab label="Price Impact" /><Tab label="Reports" />
           </Tabs>
           {tab === 0 && <DashboardTab data={data} onRecostAll={recostAll} recosting={recosting} />}
           {tab === 1 && <RateMasterTab rates={data.rates} onEdit={setEditRate} />}
           {tab === 2 && <WhatIfTab rates={data.rates} setSnack={setSnack} />}
-          {tab === 3 && <ReportsTab setSnack={setSnack} />}
+          {tab === 3 && <PriceImpactTab setSnack={setSnack} />}
+          {tab === 4 && <ReportsTab setSnack={setSnack} />}
         </>
       )}
 
