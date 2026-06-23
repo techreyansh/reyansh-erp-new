@@ -1008,6 +1008,16 @@ export async function listClientStageDefs() {
   return data || [];
 }
 
+// Unified chronological timeline for one account (activities/stage moves/
+// quotations/orders/invoices/payments/complaints/KIT) — see everything at once.
+export async function clientTimeline(account) {
+  const { data, error } = await supabase.rpc("crm_client_timeline", {
+    p_account_id: account.id, p_customer_code: account.customer_code || null,
+  });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 // Payment Dashboard rollup (outstanding/due-this-week/overdue/critical/aging/
 // forecast/top-debtors/invoices) for the Payment Follow-Up workflow.
 export async function paymentDashboard() {

@@ -86,6 +86,44 @@ function MiniTable({ cols, rows, render, empty }) {
   );
 }
 
+// Unified chronological timeline — every event on the account in one feed.
+const TL_COLOR = { call: '#0288d1', whatsapp: '#25d366', email: '#5d4037', meeting: '#7b1fa2', note: '#607d8b', stage: '#455a64', quotation: '#0288d1', order: '#7b1fa2', invoice: '#5d4037', payment: '#2e7d32', complaint: '#d32f2f', kit: '#ed6c02' };
+function TimelineTab({ account }) {
+  const [events, setEvents] = useState(null);
+  const [filter, setFilter] = useState('all');
+  useEffect(() => {
+    let on = true;
+    crmPipelineService.clientTimeline(account).then((e) => on && setEvents(e || [])).catch(() => on && setEvents([]));
+    return () => { on = false; };
+  }, [account]);
+  if (!events) return <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={22} /></Stack>;
+  const kinds = ['all', ...Array.from(new Set(events.map((e) => e.kind)))];
+  const shown = filter === 'all' ? events : events.filter((e) => e.kind === filter);
+  return (
+    <Box>
+      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+        {kinds.map((k) => <Chip key={k} size="small" label={k === 'all' ? `All (${events.length})` : k} variant={filter === k ? 'filled' : 'outlined'} color={filter === k ? 'primary' : 'default'} onClick={() => setFilter(k)} sx={{ cursor: 'pointer', textTransform: 'capitalize' }} />)}
+      </Stack>
+      {shown.length === 0 ? <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No events yet.</Typography> : (
+        <Box sx={{ position: 'relative', pl: 2, '&::before': { content: '""', position: 'absolute', left: 6, top: 6, bottom: 6, width: 2, bgcolor: 'divider' } }}>
+          {shown.map((e, i) => (
+            <Box key={i} sx={{ position: 'relative', mb: 1.75 }}>
+              <Box sx={{ position: 'absolute', left: -16, top: 4, width: 11, height: 11, borderRadius: '50%', bgcolor: TL_COLOR[e.kind] || 'grey.500', border: '2px solid', borderColor: 'background.paper' }} />
+              <Stack direction="row" alignItems="baseline" spacing={1}>
+                <Chip size="small" label={e.kind} sx={{ height: 18, textTransform: 'capitalize', bgcolor: TL_COLOR[e.kind] || 'grey.500', color: '#fff', '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem', fontWeight: 700 } }} />
+                <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1, minWidth: 0 }}>{e.title}</Typography>
+                <Typography variant="caption" color="text.disabled">{dt(e.at)}</Typography>
+              </Stack>
+              {e.detail && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', whiteSpace: 'pre-wrap', ml: 0.5 }}>{e.detail}</Typography>}
+              {e.owner && <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>· {String(e.owner).split('@')[0]}</Typography>}
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
 export default function Client360({ account, onClose, notify }) {
   const [tab, setTab] = useState(0);
   const [data, setData] = useState(null);
@@ -114,7 +152,7 @@ export default function Client360({ account, onClose, notify }) {
 
   const s = data?.summary || {};
   const c = crm?.company || account;
-  const TABS = ['Overview', 'Sales', 'Production & Dispatch', 'Finance', 'Engagement', 'Complaints', 'AI Copilot'];
+  const TABS = ['Overview', 'Sales', 'Production & Dispatch', 'Finance', 'Engagement', 'Complaints', 'Timeline', 'AI Copilot'];
 
   return (
     <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', md: 980 }, maxWidth: '100%' } }}>
@@ -231,7 +269,8 @@ export default function Client360({ account, onClose, notify }) {
           {tab === 5 && (
             <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />
           )}
-          {tab === 6 && <AICopilotTab account={account} notify={notify} />}
+          {tab === 6 && <TimelineTab account={account} />}
+          {tab === 7 && <AICopilotTab account={account} notify={notify} />}
         </Box>
       )}
     </Drawer>
