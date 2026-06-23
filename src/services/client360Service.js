@@ -14,7 +14,7 @@ export async function getClient360(account = {}) {
   const code = account.customer_code || null;
   const id = account.id || null;
 
-  const [products, orders, invoices, dispatches, complaints, quotations, orderCycles, prodDemand, kit, healthAll] = await Promise.all([
+  const [products, orders, invoices, dispatches, complaints, quotations, orderCycles, prodDemand, kit, documents, healthAll] = await Promise.all([
     code ? safe(supabase.from('product').select('product_code, product_name, status, current_revision').eq('customer_code', code)) : [],
     code ? safe(supabase.from('sales_order').select('id, so_number, status, total_qty, total_value, po_number, expected_dispatch_date, created_at').eq('customer_code', code).order('created_at', { ascending: false })) : [],
     code ? safe(supabase.from('finance_invoices').select('invoice_number, invoice_date, amount, balance, status, due_date').eq('customer_code', code).order('invoice_date', { ascending: false })) : [],
@@ -24,6 +24,7 @@ export async function getClient360(account = {}) {
     code ? safe(supabase.from('crm_order_cycle').select('order_number, cycle_stage, amount, order_date, stage_entered_at').eq('customer_code', code).order('order_date', { ascending: false })) : [],
     code ? safe(supabase.from('production_demand').select('so_number, product_name, qty, uom, status, required_date').eq('customer_code', code)) : [],
     id ? safe(supabase.from('kit_messages').select('channel, direction, subject, status, sent_at, created_at').eq('account_id', id).order('created_at', { ascending: false }).limit(50)) : [],
+    id ? safe(supabase.from('crm_account_documents').select('*').eq('account_id', id).order('created_at', { ascending: false })) : [],
     safe(supabase.rpc('crm_client_health')),
   ]);
 
@@ -37,7 +38,7 @@ export async function getClient360(account = {}) {
   const openComplaints = complaints.filter((c) => !['resolved', 'closed'].includes(String(c.status || '').toLowerCase())).length;
 
   return {
-    products, orders, invoices, dispatches, complaints, quotations, orderCycles, prodDemand, kit, health,
+    products, orders, invoices, dispatches, complaints, quotations, orderCycles, prodDemand, kit, documents, health,
     summary: { outstanding, billed, openOrders, openComplaints, totalOrders: orders.length },
   };
 }
