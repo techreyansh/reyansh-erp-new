@@ -26,6 +26,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/sales-flow') || path === '/clients' || path === '/prospects-clients' || path === '/client-orders' || path === '/po-ingestion' || path === '/client-dashboard' || path === '/products' || path === '/product-master' || path === '/sales-orders', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path === '/plant-command' || path === '/production-log' || path === '/production-demand' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
+  { test: (path) => path === '/demand-forecast', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path === '/costing' || path === '/invoicing', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow') || path === '/purchase-requisitions', moduleKey: MODULE_KEYS.INVENTORY },

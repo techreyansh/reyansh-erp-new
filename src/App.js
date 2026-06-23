@@ -135,6 +135,7 @@ const MaterialRequirements = lazy(() => import("./pages/mrp/MaterialRequirements
 const PurchaseRequisitions = lazy(() => import("./pages/purchase/PurchaseRequisitions"));
 const Invoicing = lazy(() => import("./pages/invoicing/Invoicing"));
 const OperationsControlTower = lazy(() => import("./pages/operations/OperationsControlTower"));
+const DemandForecast = lazy(() => import("./pages/forecast/DemandForecast"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
@@ -349,6 +350,12 @@ function AppContent() {
                   <Route path="/operations-tower" element={
                     <ProtectedRouteGate>
                       <OperationsControlTower />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/demand-forecast" element={
+                    <ProtectedRouteGate>
+                      <DemandForecast />
                     </ProtectedRouteGate>
                   } />
 

@@ -79,6 +79,7 @@ export const NAV_GROUPS = [
       { label: "Products", path: "/products", icon: ic(ShoppingBagOutlined) },
       { label: "Product Master (PLM)", path: "/product-master", icon: ic(Inventory2Outlined) },
       { label: "Sales Orders", path: "/sales-orders", icon: ic(ReceiptLongOutlined) },
+      { label: "Demand Forecast", path: "/demand-forecast", icon: ic(InsightsOutlined) },
       { label: "Client Orders", path: "/client-orders", icon: ic(ReceiptLongOutlined) },
       { label: "Sales Order Ingestion", path: "/po-ingestion", icon: ic(InputOutlined) },
       { label: "Sales Flow", path: "/sales-flow", icon: ic(TrendingUpOutlined) },
