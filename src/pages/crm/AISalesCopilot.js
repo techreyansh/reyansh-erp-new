@@ -1,5 +1,5 @@
 // AI Sales Copilot — Dashboard (data-driven, works now) + 13 context-aware tools
-// (need GEMINI_API_KEY to respond). Reyansh manufacturing sales intelligence.
+// (need the NVIDIA_API_KEY Nemotron secret to respond). Reyansh manufacturing sales intelligence.
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Container, Box, Stack, Typography, Card, CardContent, Chip, Grid, Button, Autocomplete, TextField,
@@ -74,7 +74,7 @@ function DashboardTab() {
         </Stack>
         {aiErr && <Alert severity="warning" sx={{ borderRadius: 2 }}>{aiErr}</Alert>}
         {ai && ai.map((s, i) => <Box key={i} sx={{ mb: 1 }}><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{s.heading}</Typography><Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>{s.body}</Typography></Box>)}
-        {!ai && !aiErr && <Typography variant="body2" color="text.secondary">Click to have the AI rank your open pipeline (needs GEMINI_API_KEY).</Typography>}
+        {!ai && !aiErr && <Typography variant="body2" color="text.secondary">Click to have the AI rank your open pipeline (needs the NVIDIA Nemotron key).</Typography>}
       </CardContent></Card>
     </Box>
   );
@@ -133,7 +133,7 @@ function ToolsTab() {
           {needsInput && <TextField size="small" fullWidth multiline minRows={tool?.scope === 'input' ? 3 : 1} label={tool?.inputLabel || 'Input'} value={input} onChange={(e) => setInput(e.target.value)} />}
           <Box><Button variant="contained" startIcon={running ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeRounded />} onClick={run} disabled={running} sx={{ borderRadius: 2 }}>{running ? 'Thinking…' : tool?.button || 'Run'}</Button></Box>
         </Stack>
-        {err && <Alert severity={/configured|GEMINI|not deployed|send a request|Edge Function/i.test(err) ? 'warning' : 'error'} sx={{ mt: 2, borderRadius: 2 }}>{err}</Alert>}
+        {err && <Alert severity={/configured|NVIDIA|GEMINI|not deployed|send a request|Edge Function/i.test(err) ? 'warning' : 'error'} sx={{ mt: 2, borderRadius: 2 }}>{err}</Alert>}
         {result?.sections?.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Stack direction="row" alignItems="center" sx={{ mb: 1 }}><Typography variant="overline" color="text.secondary" sx={{ flexGrow: 1 }}>Output</Typography>

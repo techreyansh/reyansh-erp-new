@@ -1,6 +1,7 @@
 // AI Sales Copilot — context engine + tool runner. gatherContext is
 // LLM-independent (pulls live CRM/ERP data); runTool sends it to the
-// ai-sales-copilot Edge Function (needs GEMINI_API_KEY to be set to respond).
+// ai-sales-copilot Edge Function (needs the NVIDIA_API_KEY Nemotron secret —
+// or GEMINI_API_KEY as fallback — to be set to respond).
 import { supabase } from '../lib/supabaseClient';
 import client360Service from './client360Service';
 import { getCompany, teamPerformance, clientHealth } from './crmPipelineService';

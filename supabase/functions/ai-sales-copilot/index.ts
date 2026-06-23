@@ -1,9 +1,15 @@
 // AI Sales Copilot — context-aware sales intelligence for Reyansh International.
 // Receives { tool, context, input } and returns structured { sections } generated
-// by Gemini using a Reyansh-manufacturing system prompt + per-tool instructions.
-// Activate: `supabase secrets set GEMINI_API_KEY=AIza...` then deploy this function.
+// by an LLM using a Reyansh-manufacturing system prompt + per-tool instructions.
+//
+// Provider = NVIDIA Nemotron (preferred), Gemini as fallback. Activate:
+//   supabase secrets set NVIDIA_API_KEY=nvapi-...
+//   supabase secrets set NVIDIA_MODEL=<exact "Nemotron 3 Ultra" id from build.nvidia.com>
+// then `supabase functions deploy ai-sales-copilot`. (If only GEMINI_API_KEY is
+// set, it transparently falls back to Gemini.)
 import { preflight, json } from "../_shared/cors.ts";
-import { generateJson } from "../_shared/gemini.ts";
+import { generateJson as nvidiaJson } from "../_shared/nvidia.ts";
+import { generateJson as geminiJson } from "../_shared/gemini.ts";
 
 const SYSTEM = `You are an expert B2B sales strategist and account manager for REYANSH INTERNATIONAL, an Indian manufacturer of:
 - Power cords (2/3-pin, appliance, computer/IEC), wiring harnesses, cable assemblies, battery cables, EV harnesses
@@ -42,8 +48,11 @@ const SCHEMA = {
 Deno.serve(async (req) => {
   const pre = preflight(req); if (pre) return pre;
   try {
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) return json({ error: "AI is not configured yet — set the GEMINI_API_KEY secret on this Edge Function to activate the Copilot." }, 503);
+    // NVIDIA Nemotron preferred; Gemini fallback if that's the only key set.
+    const nvKey = Deno.env.get("NVIDIA_API_KEY");
+    const gemKey = Deno.env.get("GEMINI_API_KEY");
+    const provider = nvKey ? "nvidia" : (gemKey ? "gemini" : null);
+    if (!provider) return json({ error: "AI is not configured yet — set the NVIDIA_API_KEY secret (Nemotron) on this Edge Function to activate the Copilot." }, 503);
 
     const { tool, context, input } = await req.json();
     const instruction = TOOL_PROMPTS[tool];
@@ -52,8 +61,10 @@ Deno.serve(async (req) => {
     const parts = [{
       text: `TOOL: ${instruction}\n\nFREE-FORM INPUT (if any):\n${input || "(none)"}\n\nCRM CONTEXT (JSON):\n${JSON.stringify(context || {}, null, 0).slice(0, 12000)}`,
     }];
+    const generateJson = provider === "nvidia" ? nvidiaJson : geminiJson;
+    const apiKey = provider === "nvidia" ? nvKey! : gemKey!;
     const { result, usage } = await generateJson({ apiKey, system: SYSTEM, parts, schema: SCHEMA, maxOutputTokens: 8000 });
-    return json({ sections: result?.sections || [], usage });
+    return json({ sections: result?.sections || [], usage, provider });
   } catch (e) {
     return json({ error: (e as Error).message || "AI generation failed" }, 500);
   }
