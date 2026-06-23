@@ -43,15 +43,43 @@ function skeleton(s: any): any {
   return s.type || "string";
 }
 
+// Repair the #1 LLM JSON defect: raw control chars (newlines/tabs) left
+// unescaped INSIDE string values — common when a model writes long multi-line
+// bodies. Walks string-aware and escapes them so JSON.parse succeeds.
+function repairJson(s: string): string {
+  let out = "", inStr = false, esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) {
+      if (esc) { out += c; esc = false; continue; }
+      if (c === "\\") { out += c; esc = true; continue; }
+      if (c === '"') { out += c; inStr = false; continue; }
+      if (c === "\n") { out += "\\n"; continue; }
+      if (c === "\r") { out += "\\r"; continue; }
+      if (c === "\t") { out += "\\t"; continue; }
+      out += c;
+    } else {
+      if (c === '"') inStr = true;
+      out += c;
+    }
+  }
+  return out;
+}
+
+function tryParse(s: string): any {
+  try { return JSON.parse(s); } catch { /* try repair */ }
+  try { return JSON.parse(repairJson(s)); } catch { return undefined; }
+}
+
 // Pull a JSON object out of model output: drop <think>…</think> reasoning
 // (Nemotron reasoning models may emit it even with thinking off), strip ```
-// fences, then parse — falling back to a STRING-AWARE balanced {…} scan so
-// braces inside string values don't break the match.
+// fences, then parse — STRING-AWARE balanced {…} scan + control-char repair.
 function extractJson(text: string): any {
   let t = String(text || "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fence) t = fence[1].trim();
-  try { return JSON.parse(t); } catch { /* fall through */ }
+  let r = tryParse(t);
+  if (r !== undefined) return r;
   const start = t.indexOf("{");
   if (start < 0) return null;
   let depth = 0, inStr = false, esc = false;
@@ -65,7 +93,7 @@ function extractJson(text: string): any {
     else if (c === "{") depth++;
     else if (c === "}") {
       depth--;
-      if (depth === 0) { try { return JSON.parse(t.slice(start, i + 1)); } catch { return null; } }
+      if (depth === 0) { r = tryParse(t.slice(start, i + 1)); return r === undefined ? null : r; }
     }
   }
   return null;
@@ -103,7 +131,8 @@ export async function generateJson(opts: {
     : parts.map((p) => p?.text).filter(Boolean).join("\n\n");
   const system = `${opts.system}\n\n` +
     `OUTPUT FORMAT: respond with a SINGLE valid JSON object ONLY — no markdown, no commentary, no <think> tags. ` +
-    `It must match this exact shape (same keys):\n${JSON.stringify(skeleton(opts.schema))}`;
+    `It must match this exact shape (same keys):\n${JSON.stringify(skeleton(opts.schema))}\n` +
+    `Every string value MUST be valid JSON: escape line breaks as \\n and double-quotes as \\", and never put a raw line break inside a string. Keep each body concise.`;
 
   // Sampling follows Nemotron guidance: greedy-ish for JSON when thinking is off,
   // the model's recommended temp/top_p when reasoning is on.
