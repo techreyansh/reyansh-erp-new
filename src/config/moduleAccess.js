@@ -30,7 +30,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/demand-forecast' || path === '/portal-admin', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
-  { test: (path) => path === '/costing' || path === '/invoicing', moduleKey: MODULE_KEYS.ACCOUNTS },
+  { test: (path) => path === '/costing' || path === '/invoicing' || path === '/cost-control', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow') || path === '/purchase-requisitions', moduleKey: MODULE_KEYS.PURCHASE },
   { test: (path) => path === '/quality' || path.startsWith('/quality/'), moduleKey: MODULE_KEYS.QUALITY },
   { test: (path) => path === '/task-scheduler' || path === '/team-tasks' || path === '/tasks', moduleKey: MODULE_KEYS.TASKS },

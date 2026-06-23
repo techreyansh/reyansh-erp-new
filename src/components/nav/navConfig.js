@@ -157,6 +157,7 @@ export const NAV_GROUPS = [
     label: "Accounts",
     icon: ic(CalculateOutlined),
     items: [
+      { label: "Cost Control", path: "/cost-control", icon: ic(CalculateOutlined) },
       { label: "Invoicing", path: "/invoicing", icon: ic(ReceiptLongOutlined) },
       { label: "Costing", path: "/costing", icon: ic(CalculateOutlined) },
     ],

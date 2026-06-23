@@ -22,8 +22,15 @@ export async function rateMap() {
   return m;
 }
 
+// Margin that drives a version's price: its own target if set (incl. 0), else the master default.
+function versionMargin(version, rmap) {
+  const tm = version?.target_margin_pct;
+  return (tm == null || tm === '') ? (Number(rmap.MARGIN_PCT) || 0) : Number(tm);
+}
+
 async function versionsWithLines(versionIds = null) {
-  let vq = supabase.from('costing_version').select('*').neq('status', 'archived');
+  // Exclude 'superseded' — those are intentionally frozen historical versions.
+  let vq = supabase.from('costing_version').select('*').neq('status', 'superseded');
   if (versionIds) vq = vq.in('id', versionIds);
   const { data: versions } = await vq;
   const ids = (versions || []).map((v) => v.id);
@@ -40,8 +47,7 @@ export async function recostVersion(versionId, map = null) {
   const items = await versionsWithLines([versionId]);
   if (!items.length) return null;
   const { version, lines } = items[0];
-  const margin = Number(version.target_margin_pct) || Number(rmap.MARGIN_PCT) || 0;
-  const { lines: priced, ...s } = costAt(lines, rmap, margin);
+  const { lines: priced, ...s } = costAt(lines, rmap, versionMargin(version, rmap));
   for (const l of priced) {
     if (l.rate_overridden || l.id == null) continue;
     await supabase.from('costing_line').update({ rate: l.rate, amount: l.amount }).eq('id', l.id);
@@ -99,11 +105,10 @@ export async function updateRate(code, newRate, reason = null) {
 /** What-if across all (or selected) versions — does NOT save. */
 export async function whatIf(overrides, versionIds = null) {
   const rmap = await rateMap();
-  const margin = Number(rmap.MARGIN_PCT) || 0;
   const items = await versionsWithLines(versionIds);
   return items.map(({ version, lines }) => ({
     version_id: version.id, costing_no: version.costing_no, product_name: version.product_name,
-    ...costImpact(lines, rmap, overrides, Number(version.target_margin_pct) || margin),
+    ...costImpact(lines, rmap, overrides, versionMargin(version, rmap)),
   }));
 }
 
