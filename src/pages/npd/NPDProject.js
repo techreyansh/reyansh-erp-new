@@ -17,6 +17,15 @@ import inventoryLedgerService from '../../services/inventoryLedgerService';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
+const DOC_CATEGORIES = [
+  { v: 'customer_drawing', l: 'Customer drawing' }, { v: 'internal_drawing', l: 'Internal drawing' },
+  { v: 'bom', l: 'BOM' }, { v: 'costing', l: 'Costing' }, { v: 'inspection', l: 'Inspection report' },
+  { v: 'test_report', l: 'Test report' }, { v: 'quality', l: 'Quality report' }, { v: 'photo', l: 'Photo' },
+  { v: 'video', l: 'Video' }, { v: 'email', l: 'Customer email' }, { v: 'approval', l: 'Approval' },
+  { v: 'ppap', l: 'PPAP' }, { v: 'tech_note', l: 'Technical note' }, { v: 'work_instruction', l: 'Work instruction' },
+  { v: 'certificate', l: 'Certificate' }, { v: 'other', l: 'Other' },
+];
+
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-IN') : '—');
 
 const NPDProject = () => {
@@ -29,6 +38,7 @@ const NPDProject = () => {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
+  const [docCategory, setDocCategory] = useState('customer_drawing');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const load = useCallback(async () => {
@@ -58,7 +68,7 @@ const NPDProject = () => {
   const onUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try { await npdService.uploadDocument(id, file); setSnackbar({ open: true, message: 'Document uploaded.', severity: 'success' }); await load(); }
+    try { await npdService.uploadDocument(id, file, { category: docCategory, docType: docCategory }); setSnackbar({ open: true, message: 'Document uploaded.', severity: 'success' }); await load(); }
     catch (err) { setSnackbar({ open: true, message: err.message, severity: 'error' }); }
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -165,22 +175,32 @@ const NPDProject = () => {
         <Stack spacing={2}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" gap={1}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Documents</Typography>
-                <Button size="small" startIcon={<UploadIcon />} onClick={() => fileRef.current?.click()}>Upload</Button>
-                <input ref={fileRef} type="file" hidden onChange={onUpload} />
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <TextField size="small" select label="Category" value={docCategory} onChange={(e) => setDocCategory(e.target.value)} sx={{ width: 180 }}>
+                    {DOC_CATEGORIES.map((cat) => <MenuItem key={cat.v} value={cat.v}>{cat.l}</MenuItem>)}
+                  </TextField>
+                  <Button size="small" variant="outlined" startIcon={<UploadIcon />} onClick={() => fileRef.current?.click()}>Upload</Button>
+                  <input ref={fileRef} type="file" hidden onChange={onUpload} />
+                </Stack>
               </Stack>
               <Divider sx={{ mb: 1 }} />
-              {docs.length === 0 ? <Typography variant="body2" color="text.secondary">No documents yet — upload drawings, samples, specs.</Typography> : (
+              {docs.length === 0 ? <Typography variant="body2" color="text.secondary">No documents yet — pick a category and upload drawings, BOMs, test reports.</Typography> : (
                 <Stack spacing={0.5}>
-                  {docs.map((d) => (
-                    <Stack key={d.id} direction="row" spacing={1} alignItems="center">
-                      <DocIcon fontSize="small" color="action" />
-                      <Link component="button" variant="body2" onClick={() => openDoc(d)}>{d.file_name}</Link>
-                      {d.doc_type && d.doc_type !== 'other' && <Chip size="small" label={d.doc_type} sx={{ height: 18 }} />}
-                      <Typography variant="caption" color="text.secondary">{fmtDate(d.created_at)}</Typography>
-                    </Stack>
-                  ))}
+                  {docs.map((d) => {
+                    const cat = DOC_CATEGORIES.find((c) => c.v === (d.category || d.doc_type));
+                    return (
+                      <Stack key={d.id} direction="row" spacing={1} alignItems="center" sx={{ opacity: d.is_current === false ? 0.55 : 1 }}>
+                        <DocIcon fontSize="small" color="action" />
+                        <Link component="button" variant="body2" onClick={() => openDoc(d)}>{d.file_name}</Link>
+                        {cat && <Chip size="small" label={cat.l} sx={{ height: 18 }} />}
+                        {d.version > 1 && <Chip size="small" variant="outlined" label={`v${d.version}`} sx={{ height: 18 }} />}
+                        {d.is_current === false && <Chip size="small" variant="outlined" label="superseded" sx={{ height: 18 }} />}
+                        <Typography variant="caption" color="text.secondary">{fmtDate(d.created_at)}</Typography>
+                      </Stack>
+                    );
+                  })}
                 </Stack>
               )}
             </CardContent>
@@ -497,22 +517,25 @@ function SamplesQualityTab({ project, notify }) {
   const [samples, setSamples] = useState([]);
   const [qcs, setQcs] = useState([]);
   const [fbs, setFbs] = useState([]);
-  const [s, setS] = useState({ sample_no: '', status: 'planned' });
+  const [dsps, setDsps] = useState([]);
+  const [s, setS] = useState({ sample_no: '', status: 'planned', sample_type: 'customer', received_date: '', condition: 'good' });
   const [q, setQ] = useState({ test_type: 'dimensional', parameter: '', spec_value: '', measured_value: '', result: 'pending' });
   const [f, setF] = useState({ outcome: 'pending', comments: '', sent_at: '' });
+  const [dsp, setDsp] = useState({ dispatch_date: '', courier: '', tracking_no: '', quantity: '', receiver: '', feedback_due_date: '' });
 
   const reload = useCallback(async () => {
     try {
-      const [sm, qc, fb] = await Promise.all([
-        npdService.listSamples(project.id), npdService.listQualityChecks(project.id), npdService.listFeedback(project.id),
+      const [sm, qc, fb, dp] = await Promise.all([
+        npdService.listSamples(project.id), npdService.listQualityChecks(project.id), npdService.listFeedback(project.id), npdService.listDispatches(project.id),
       ]);
-      setSamples(sm); setQcs(qc); setFbs(fb);
+      setSamples(sm); setQcs(qc); setFbs(fb); setDsps(dp);
     } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
   }, [project.id, notify]);
   useEffect(() => { reload(); }, [reload]);
 
   const wrap = (fn) => async () => { try { await fn(); await reload(); } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); } };
-  const addSample = wrap(async () => { if (!s.sample_no.trim()) return; await npdService.addSample(project.id, { ...s, revision: project.revision }); setS({ sample_no: '', status: 'planned' }); });
+  const addSample = wrap(async () => { if (!s.sample_no.trim()) return; await npdService.addSample(project.id, { ...s, received_date: s.received_date || null, revision: project.revision }); setS({ sample_no: '', status: 'planned', sample_type: 'customer', received_date: '', condition: 'good' }); });
+  const addDsp = wrap(async () => { await npdService.addDispatch(project.id, { ...dsp, quantity: dsp.quantity ? Number(dsp.quantity) : null, dispatch_date: dsp.dispatch_date || null, feedback_due_date: dsp.feedback_due_date || null, revision: project.revision }); setDsp({ dispatch_date: '', courier: '', tracking_no: '', quantity: '', receiver: '', feedback_due_date: '' }); });
   const addQc = wrap(async () => { if (!q.parameter.trim()) return; await npdService.addQualityCheck(project.id, { ...q, revision: project.revision, checked_at: new Date().toISOString() }); setQ({ test_type: 'dimensional', parameter: '', spec_value: '', measured_value: '', result: 'pending' }); });
   const addFb = wrap(async () => { await npdService.addFeedback(project.id, { ...f, revision: project.revision, sent_at: f.sent_at || null }); setF({ outcome: 'pending', comments: '', sent_at: '' }); });
 
@@ -520,23 +543,60 @@ function SamplesQualityTab({ project, notify }) {
     <Stack spacing={2}>
       {/* Samples */}
       <Card sx={{ borderRadius: 2 }}><CardContent>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Samples</Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Samples <Typography component="span" variant="caption" color="text.secondary">(a customer can send several)</Typography></Typography>
         <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
-          <TextField size="small" label="Sample no." value={s.sample_no} onChange={(e) => setS({ ...s, sample_no: e.target.value })} sx={{ width: 160 }} />
-          <TextField size="small" select label="Status" value={s.status} onChange={(e) => setS({ ...s, status: e.target.value })} sx={{ width: 150 }}>
+          <TextField size="small" label="Sample no." value={s.sample_no} onChange={(e) => setS({ ...s, sample_no: e.target.value })} sx={{ width: 130 }} />
+          <TextField size="small" select label="Type" value={s.sample_type} onChange={(e) => setS({ ...s, sample_type: e.target.value })} sx={{ width: 120 }}>
+            {['customer', 'our', 'competitor', 'reference'].map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
+          </TextField>
+          <TextField size="small" type="date" label="Received" value={s.received_date} onChange={(e) => setS({ ...s, received_date: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ width: 140 }} />
+          <TextField size="small" select label="Condition" value={s.condition} onChange={(e) => setS({ ...s, condition: e.target.value })} sx={{ width: 120 }}>
+            {['good', 'damaged', 'partial'].map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
+          </TextField>
+          <TextField size="small" select label="Status" value={s.status} onChange={(e) => setS({ ...s, status: e.target.value })} sx={{ width: 140 }}>
             {SAMPLE_STATUS.map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
           </TextField>
           <Button size="small" variant="outlined" onClick={addSample}>Add</Button>
         </Stack>
         <Divider sx={{ mb: 1 }} />
         {samples.length === 0 ? <Typography variant="body2" color="text.secondary">No samples yet.</Typography> : samples.map((x) => (
-          <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 120 }}>{x.sample_no || '—'}</Typography>
+          <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5, flexWrap: 'wrap' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 110 }}>{x.sample_no || '—'}</Typography>
+            {x.sample_type && <Chip size="small" variant="outlined" label={x.sample_type} sx={{ height: 18 }} />}
             <Chip size="small" label={x.status} color={RESULT_COLOR[x.status] || 'default'} sx={{ height: 18 }} />
-            {x.dispatched_at && <Typography variant="caption" color="text.secondary">dispatched {fmtDate(x.dispatched_at)}</Typography>}
+            {x.received_date && <Typography variant="caption" color="text.secondary">recd {fmtDate(x.received_date)}</Typography>}
+            {x.condition && x.condition !== 'good' && <Chip size="small" color="warning" label={x.condition} sx={{ height: 18 }} />}
             <Typography variant="caption" color="text.secondary">rev {x.revision}</Typography>
           </Stack>
         ))}
+      </CardContent></Card>
+
+      {/* Sample dispatch */}
+      <Card sx={{ borderRadius: 2 }}><CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Sample dispatch</Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
+          <TextField size="small" type="date" label="Dispatch" value={dsp.dispatch_date} onChange={(e) => setDsp({ ...dsp, dispatch_date: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ width: 140 }} />
+          <TextField size="small" label="Courier" value={dsp.courier} onChange={(e) => setDsp({ ...dsp, courier: e.target.value })} sx={{ width: 120 }} />
+          <TextField size="small" label="Tracking #" value={dsp.tracking_no} onChange={(e) => setDsp({ ...dsp, tracking_no: e.target.value })} sx={{ width: 130 }} />
+          <TextField size="small" type="number" label="Qty" value={dsp.quantity} onChange={(e) => setDsp({ ...dsp, quantity: e.target.value })} sx={{ width: 80 }} />
+          <TextField size="small" label="Receiver" value={dsp.receiver} onChange={(e) => setDsp({ ...dsp, receiver: e.target.value })} sx={{ width: 120 }} />
+          <TextField size="small" type="date" label="Feedback due" value={dsp.feedback_due_date} onChange={(e) => setDsp({ ...dsp, feedback_due_date: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ width: 140 }} />
+          <Button size="small" variant="outlined" onClick={addDsp}>Add</Button>
+        </Stack>
+        <Divider sx={{ mb: 1 }} />
+        {dsps.length === 0 ? <Typography variant="body2" color="text.secondary">No dispatches yet.</Typography> : dsps.map((x) => {
+          const overdue = x.feedback_due_date && x.feedback_status === 'pending' && new Date(x.feedback_due_date) < new Date();
+          return (
+            <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5, flexWrap: 'wrap' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{x.courier || 'courier'}{x.tracking_no ? ` · ${x.tracking_no}` : ''}</Typography>
+              {x.quantity ? <Typography variant="caption" color="text.secondary">qty {x.quantity}</Typography> : null}
+              {x.dispatch_date && <Typography variant="caption" color="text.secondary">sent {fmtDate(x.dispatch_date)}</Typography>}
+              {x.receiver && <Typography variant="caption" color="text.secondary">→ {x.receiver}</Typography>}
+              <Chip size="small" label={overdue ? 'feedback overdue' : x.feedback_status} color={overdue ? 'error' : x.feedback_status === 'received' ? 'success' : 'default'} sx={{ height: 18 }} />
+              {x.feedback_due_date && <Typography variant="caption" color={overdue ? 'error.main' : 'text.secondary'}>due {fmtDate(x.feedback_due_date)}</Typography>}
+            </Stack>
+          );
+        })}
       </CardContent></Card>
 
       {/* Quality checks */}

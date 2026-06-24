@@ -90,6 +90,7 @@ const NPDDashboard = () => {
               sx={{ bgcolor: alpha('#fff', 0.15), '& .MuiToggleButton-root': { color: 'white', border: 'none', px: 1.5 }, '& .Mui-selected': { bgcolor: 'white !important', color: theme.palette.secondary.main + ' !important' } }}>
               <ToggleButton value="board">Board</ToggleButton>
               <ToggleButton value="list">List</ToggleButton>
+              <ToggleButton value="mgmt">Management</ToggleButton>
             </ToggleButtonGroup>
             <Button onClick={() => setAddOpen(true)} startIcon={<AddIcon />} variant="contained" color="inherit" sx={{ color: theme.palette.secondary.main }}>New project</Button>
             <Tooltip title="Refresh"><IconButton onClick={load} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
@@ -108,6 +109,8 @@ const NPDDashboard = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
       ) : view === 'list' ? (
         <ReportTable projects={projects} navigate={navigate} />
+      ) : view === 'mgmt' ? (
+        <ManagementView projects={projects} navigate={navigate} />
       ) : (
         <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto', flex: 1, pb: 1 }}>
           {NPD_STAGES.map((stage) => {
@@ -159,6 +162,62 @@ const NPDDashboard = () => {
     </Box>
   );
 };
+
+function ManagementView({ projects, navigate }) {
+  const now = new Date();
+  const isDelayed = (p) => p.target_date && new Date(p.target_date) < now && p.status === 'active';
+  const buckets = [
+    { label: 'Delayed', color: 'error.main', fn: isDelayed },
+    { label: 'Awaiting costing', color: 'warning.main', fn: (p) => p.stage === 'costing_ready' },
+    { label: 'Awaiting material', color: 'warning.main', fn: (p) => p.stage === 'material_ready' },
+    { label: 'Awaiting dispatch', color: 'info.main', fn: (p) => p.stage === 'sample_dispatch' },
+    { label: 'Awaiting approval', color: 'info.main', fn: (p) => p.stage === 'customer_feedback' },
+    { label: 'Recently approved', color: 'success.main', fn: (p) => p.status === 'approved' },
+  ].map((b) => ({ ...b, count: projects.filter(b.fn).length }));
+
+  const byCust = {};
+  projects.forEach((p) => {
+    const k = p.company_name || p.customer_code || 'Unassigned';
+    const o = (byCust[k] = byCust[k] || { name: k, total: 0, active: 0, approved: 0, delayed: 0 });
+    o.total++;
+    if (p.status === 'approved') o.approved++; else o.active++;
+    if (isDelayed(p)) o.delayed++;
+  });
+  const customers = Object.values(byCust).sort((a, b) => b.total - a.total);
+
+  return (
+    <Box sx={{ overflow: 'auto', flex: 1 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', sm: 'repeat(3,1fr)', md: 'repeat(6,1fr)' }, gap: 1.5, mb: 2 }}>
+        {buckets.map((b) => (
+          <Card key={b.label} sx={{ borderRadius: 2 }}><CardContent sx={{ py: 1.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.58rem', fontWeight: 700, display: 'block' }}>{b.label}</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: b.count ? b.color : 'text.disabled' }}>{b.count}</Typography>
+          </CardContent></Card>
+        ))}
+      </Box>
+      <Card sx={{ borderRadius: 2 }}><CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Developments by customer</Typography>
+        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+          <Table size="small">
+            <TableHead><TableRow>{['Customer', 'Developments', 'In progress', 'Approved', 'Delayed'].map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}</TableRow></TableHead>
+            <TableBody>
+              {customers.map((c) => (
+                <TableRow key={c.name} hover>
+                  <TableCell sx={{ fontWeight: 600 }}>{c.name}</TableCell>
+                  <TableCell>{c.total}</TableCell>
+                  <TableCell>{c.active}</TableCell>
+                  <TableCell>{c.approved ? <Chip size="small" color="success" label={c.approved} sx={{ height: 20 }} /> : 0}</TableCell>
+                  <TableCell>{c.delayed ? <Chip size="small" color="error" label={c.delayed} sx={{ height: 20 }} /> : 0}</TableCell>
+                </TableRow>
+              ))}
+              {customers.length === 0 && <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>No developments yet.</TableCell></TableRow>}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent></Card>
+    </Box>
+  );
+}
 
 function ReportTable({ projects, navigate }) {
   const overdue = (p) => p.target_date && new Date(p.target_date) < new Date() && p.status === 'active';

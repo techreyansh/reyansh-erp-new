@@ -114,18 +114,41 @@ export async function listDocuments(id) {
   return data || [];
 }
 
-/** Upload a file to the shared `documents` bucket under npd/<project>/ + index it. */
-export async function uploadDocument(projectId, file, { docType = 'other' } = {}) {
+/** Upload a file to the shared `documents` bucket under npd/<project>/ + index it.
+ *  Supersedes any current doc in the same category (version control). */
+export async function uploadDocument(projectId, file, { docType = 'other', category = 'other' } = {}) {
   const path = `npd/${projectId}/${Date.now()}_${file.name}`;
   const up = await supabase.storage.from('documents').upload(path, file, { upsert: true });
   throwIf(up.error, 'Upload file');
+  // version: next version within this project+category; mark prior current ones stale
+  const { data: prior } = await supabase.from('npd_document').select('version')
+    .eq('project_id', projectId).eq('category', category).order('version', { ascending: false }).limit(1);
+  const version = ((prior && prior[0]?.version) || 0) + 1;
+  if (version > 1) {
+    await supabase.from('npd_document').update({ is_current: false })
+      .eq('project_id', projectId).eq('category', category);
+  }
   const { data, error } = await supabase
     .from('npd_document')
-    .insert({ project_id: projectId, doc_type: docType, file_name: file.name, storage_path: path })
+    .insert({ project_id: projectId, doc_type: docType, category, file_name: file.name, storage_path: path, version, is_current: true })
     .select('*')
     .single();
   throwIf(error, 'Index document');
   return data;
+}
+
+// ---- P6 — sample dispatch tracking ----
+export async function listDispatches(projectId) {
+  const { data, error } = await supabase.from('npd_dispatch').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+  throwIf(error, 'List dispatches'); return data || [];
+}
+export async function addDispatch(projectId, payload) {
+  const { data, error } = await supabase.from('npd_dispatch').insert({ project_id: projectId, ...payload }).select('*').single();
+  throwIf(error, 'Add dispatch'); return data;
+}
+export async function updateDispatch(id, patch) {
+  const { data, error } = await supabase.from('npd_dispatch').update(patch).eq('id', id).select('*').single();
+  throwIf(error, 'Update dispatch'); return data;
 }
 
 export async function documentUrl(storagePath) {
@@ -174,5 +197,6 @@ const npdService = {
   moveStage, getStageHistory, listDocuments, uploadDocument, documentUrl,
   listSamples, addSample, updateSample, listQualityChecks, addQualityCheck,
   listFeedback, addFeedback, releaseToProduction,
+  listDispatches, addDispatch, updateDispatch,
 };
 export default npdService;
