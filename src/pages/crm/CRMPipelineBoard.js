@@ -66,6 +66,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CrmReportDialog from "../../components/crm/CrmReportDialog";
 import Client360 from "../../components/crm/Client360";
+import NPDDevelopmentPanel from "../../components/crm/NPDDevelopmentPanel";
 
 import { inrCompact, inrFull } from "../../components/common/kit/format";
 import {
@@ -1980,6 +1981,16 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                     Add contact
                   </Button>
                 </Stack>
+              </Box>
+
+              <Divider />
+
+              {/* Development (NPD) — prospects develop products before becoming clients */}
+              <Box>
+                <SectionTitle>Development (NPD)</SectionTitle>
+                <Box sx={{ mt: 1 }}>
+                  <NPDDevelopmentPanel accountId={id} customerCode={company?.customer_code} companyName={company?.company_name} notify={notify} dense />
+                </Box>
               </Box>
 
               <Divider />

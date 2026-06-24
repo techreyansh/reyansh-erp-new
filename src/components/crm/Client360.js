@@ -10,11 +10,10 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import CallRounded from '@mui/icons-material/CallRounded';
 import WhatsApp from '@mui/icons-material/WhatsApp';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
-import { useNavigate } from 'react-router-dom';
 import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
-import npdService, { NPD_STAGE_LABEL } from '../../services/npdService';
+import NPDDevelopmentPanel from './NPDDevelopmentPanel';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 
 const AI_ACTIONS = [
@@ -126,100 +125,6 @@ function TimelineTab({ account }) {
   );
 }
 
-const DEV_TYPES = [
-  { v: 'drawing_based', l: 'Drawing based' },
-  { v: 'sample_based', l: 'Sample based' },
-  { v: 'modification', l: 'Modification' },
-  { v: 'cost_reduction', l: 'Cost reduction' },
-  { v: 'new_product', l: 'New product' },
-];
-
-// Development (NPD) tab — every development this customer has, and a one-click
-// "New Development Request" that originates from THIS customer (no isolated
-// projects). The customer-centric heart of the NPD redesign.
-function NPDTab({ account, customerCode, companyName, notify }) {
-  const navigate = useNavigate();
-  const [devs, setDevs] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const blank = { product_name: '', development_type: 'sample_based', customer_part_no: '', priority: 'normal', target_date: '', npd_engineer_email: '' };
-  const [form, setForm] = useState(blank);
-
-  const load = useCallback(async () => {
-    try { setDevs(await npdService.listByCustomer({ customerCode, accountId: account.id })); }
-    catch (e) { setDevs([]); notify?.(e.message, 'error'); }
-  }, [customerCode, account.id, notify]);
-  useEffect(() => { load(); }, [load]);
-
-  const summary = (devs || []).reduce((a, d) => {
-    if (d.status === 'approved') a.approved++;
-    else if (d.stage === 'customer_feedback') a.feedback++;
-    else a.active++;
-    return a;
-  }, { active: 0, feedback: 0, approved: 0 });
-
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const submit = async () => {
-    if (!form.product_name.trim()) { notify?.('Product name is required.', 'error'); return; }
-    setSaving(true);
-    try {
-      const p = await npdService.createProject({
-        ...form, customer_code: customerCode || null, company_name: companyName || null, account_id: account.id,
-      });
-      notify?.('Development request created.');
-      navigate(`/npd/${p.id}`);
-    } catch (e) { notify?.(e.message, 'error'); }
-    setSaving(false);
-  };
-
-  if (devs === null) return <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress size={24} /></Box>;
-
-  return (
-    <Box sx={{ p: 2 }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }} flexWrap="wrap" useFlexGap alignItems="center">
-        {[['Under development', summary.active, 'primary.main'], ['Awaiting feedback', summary.feedback, 'warning.main'], ['Approved', summary.approved, 'success.main']].map(([l, v, col]) => (
-          <Box key={l}><Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.58rem', display: 'block' }}>{l}</Typography><Typography variant="h6" sx={{ fontWeight: 800, color: col }}>{v}</Typography></Box>
-        ))}
-        <Box sx={{ flexGrow: 1 }} />
-        <Button variant="contained" color="secondary" onClick={() => setShowForm((s) => !s)}>{showForm ? 'Cancel' : '+ New development request'}</Button>
-      </Stack>
-
-      {showForm && (
-        <Box sx={{ p: 2, mb: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5, bgcolor: 'action.hover' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>New development request — {companyName}</Typography>
-          <Grid container spacing={1.5}>
-            <Grid item xs={12} sm={6}><TextField size="small" fullWidth label="Product name" value={form.product_name} onChange={set('product_name')} autoFocus /></Grid>
-            <Grid item xs={12} sm={6}><TextField size="small" fullWidth select label="Development type" value={form.development_type} onChange={set('development_type')}>{DEV_TYPES.map((t) => <MenuItem key={t.v} value={t.v}>{t.l}</MenuItem>)}</TextField></Grid>
-            <Grid item xs={12} sm={6}><TextField size="small" fullWidth label="Customer part no." value={form.customer_part_no} onChange={set('customer_part_no')} /></Grid>
-            <Grid item xs={6} sm={3}><TextField size="small" fullWidth select label="Priority" value={form.priority} onChange={set('priority')}>{['low', 'normal', 'high', 'urgent'].map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}</TextField></Grid>
-            <Grid item xs={6} sm={3}><TextField size="small" fullWidth type="date" label="Target" value={form.target_date} onChange={set('target_date')} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid item xs={12} sm={6}><TextField size="small" fullWidth label="Assigned engineer (email)" value={form.npd_engineer_email} onChange={set('npd_engineer_email')} /></Grid>
-            <Grid item xs={12}><Button variant="contained" color="secondary" onClick={submit} disabled={saving}>{saving ? <CircularProgress size={20} /> : 'Create & open'}</Button></Grid>
-          </Grid>
-        </Box>
-      )}
-
-      {devs.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No developments yet for {companyName}. Start one above — it links to this customer automatically.</Typography>
-      ) : (
-        <Table size="small">
-          <TableHead><TableRow>{['Development', 'Type', 'Stage', 'Status', 'Target'].map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}</TableRow></TableHead>
-          <TableBody>
-            {devs.map((d) => (
-              <TableRow key={d.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/npd/${d.id}`)}>
-                <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{d.product_name}</Typography><Typography variant="caption" color="text.secondary">{d.project_no}</Typography></TableCell>
-                <TableCell><Typography variant="caption">{(DEV_TYPES.find((t) => t.v === d.development_type) || {}).l || '—'}</Typography></TableCell>
-                <TableCell><Chip size="small" label={NPD_STAGE_LABEL[d.stage] || d.stage} sx={{ height: 20 }} /></TableCell>
-                <TableCell><Chip size="small" color={d.status === 'approved' ? 'success' : d.status === 'active' ? 'default' : 'warning'} label={d.status} sx={{ height: 20 }} /></TableCell>
-                <TableCell><Typography variant="caption" color={d.target_date && new Date(d.target_date) < new Date() && d.status === 'active' ? 'error.main' : 'text.secondary'}>{d.target_date ? dt(d.target_date) : '—'}</Typography></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-    </Box>
-  );
-}
 
 export default function Client360({ account, onClose, notify }) {
   const [tab, setTab] = useState(0);
@@ -381,7 +286,7 @@ export default function Client360({ account, onClose, notify }) {
           {/* 14 AI COPILOT */}
           {tab === 14 && <AICopilotTab account={account} notify={notify} />}
           {/* 15 DEVELOPMENT (NPD) */}
-          {tab === 15 && <NPDTab account={account} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
+          {tab === 15 && <NPDDevelopmentPanel accountId={account.id} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
         </Box>
       )}
     </Drawer>
