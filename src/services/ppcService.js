@@ -746,7 +746,7 @@ async function finishWorkOrder(woId, qty) {
   return data || null;
 }
 
-/** Issue material to a WO (decrements stock). */
+/** Issue material to a WO (decrements stock). Legacy ppc_stock path. */
 async function issueMaterial(woMaterialId, qty) {
   if (!woMaterialId) throw new Error('Issue material: no material line selected');
   const data = unwrap(
@@ -757,6 +757,28 @@ async function issueMaterial(woMaterialId, qty) {
     'Issue material'
   );
   return data || null;
+}
+
+/** Issue ONE kit line to the perpetual ledger (MFG_CONSUME). */
+async function issueKitLine(woMaterialId, qty) {
+  if (!woMaterialId) throw new Error('Issue material: no material line selected');
+  return unwrap(
+    await supabase.rpc('inv_issue_kit_line', { p_wo_material_id: woMaterialId, p_qty: Number(qty) || 0 }),
+    'Issue kit line'
+  );
+}
+
+/**
+ * Issue the ENTIRE kit for a work order in one action. With allowPartial=false
+ * (default) it issues nothing if any component is short and returns the
+ * shortfall in `.shortages`; with allowPartial=true it issues what's available.
+ */
+async function issueKit(woId, allowPartial = false) {
+  if (!woId) throw new Error('Issue kit: no work order selected');
+  return unwrap(
+    await supabase.rpc('inv_issue_kit', { p_wo_id: woId, p_allow_partial: allowPartial }),
+    'Issue full kit'
+  );
 }
 
 /** Record a QC check against a WO (optionally tied to a stage). */
@@ -862,6 +884,8 @@ const ppcService = {
   advanceStage,
   finishWorkOrder,
   issueMaterial,
+  issueKitLine,
+  issueKit,
   recordQc,
   shopfloor,
   // legacy import

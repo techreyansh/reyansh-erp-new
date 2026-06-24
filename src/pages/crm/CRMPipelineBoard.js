@@ -3165,16 +3165,25 @@ export default function CRMPipelineBoard() {
         spacing={1.5}
         alignItems={{ md: "center" }}
         justifyContent="space-between"
+        flexWrap="wrap"
+        useFlexGap
         sx={{ mb: 2 }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>
           <TrendingUpIcon color="primary" />
-          <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>
+          <Typography variant="h5" noWrap sx={{ fontWeight: 800, letterSpacing: "-0.02em", minWidth: 0 }}>
             {view === "clients" ? "Client Management" : "Prospect Management"}
           </Typography>
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ sm: "center" }} flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ minWidth: 0, width: { xs: "100%", md: "auto" }, justifyContent: { xs: "flex-start", md: "flex-end" } }}
+        >
 
           {view === "clients" && (
             <ToggleButtonGroup

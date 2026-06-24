@@ -2030,13 +2030,33 @@ function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
       return;
     }
     try {
-      await ppcService.issueMaterial(mat.id, amount);
+      await ppcService.issueKitLine(mat.id, amount);
       setIssueQty((p) => ({ ...p, [mat.id]: '' }));
       await load();
       onChanged?.();
-      notify('Material issued — stock decremented.', 'success');
+      notify('Material issued to the stock ledger.', 'success');
     } catch (e) {
       notify(e.message, 'error');
+    }
+  };
+
+  const issueFullKit = async () => {
+    setBusy(true);
+    try {
+      const res = await ppcService.issueKit(woId, false);
+      if (res && res.ok === false) {
+        const short = (res.shortages || []).map((s) => `${s.code} (need ${s.required}, have ${s.available})`).join(', ');
+        notify(`Kit not issued — short on: ${short || 'stock'}`, 'warning');
+      } else {
+        const n = (res?.issued || []).length;
+        await load();
+        onChanged?.();
+        notify(n ? `Full kit issued — ${n} component${n > 1 ? 's' : ''} consumed.` : 'Nothing left to issue.', 'success');
+      }
+    } catch (e) {
+      notify(e.message, 'error');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -2201,13 +2221,24 @@ function WorkOrderDrawer({ woId, machines, onClose, notify, onChanged }) {
 
             {/* MATERIALS — the 4th M */}
             <Paper variant="outlined" sx={{ borderRadius: 2.5, overflow: 'hidden' }}>
-              <Box sx={{ px: 2, py: 1.25 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  Material (issue to job)
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Issuing decrements store stock
-                </Typography>
+              <Box sx={{ px: 2, py: 1.25, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    Material (issue to job)
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Issuing decrements store stock (posts to the stock ledger)
+                  </Typography>
+                </Box>
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={issueFullKit}
+                  disabled={busy || wo.materials.length === 0 || wo.materials.every((m) => num(m.qty_issued) >= num(m.qty_required))}
+                  sx={{ flexShrink: 0, fontWeight: 600 }}
+                >
+                  Issue full kit
+                </Button>
               </Box>
               <Divider />
               <TableContainer>
