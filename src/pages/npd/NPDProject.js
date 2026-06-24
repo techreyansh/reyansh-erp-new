@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Stack, Card, CardContent, Typography, Button, IconButton, Chip, Tabs, Tab, Divider,
-  CircularProgress, Snackbar, Alert, Tooltip, Stepper, Step, StepLabel, Link, useTheme, alpha,
+  CircularProgress, Snackbar, Alert, Tooltip, Stepper, Step, StepLabel, Link, TextField, MenuItem,
+  useTheme, alpha,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon, Refresh as RefreshIcon, ArrowForward as NextIcon, UploadFile as UploadIcon,
@@ -155,9 +156,7 @@ const NPDProject = () => {
       {/* Engineering — product gateway + Costing (Phase 2) */}
       {tab === 1 && <EngineeringTab project={project} onChanged={load} notify={setSnackbar} navigate={navigate} />}
       {/* Samples & Quality (Phase 3) */}
-      {tab === 2 && (
-        <Placeholder title="Samples & Quality (Phase 3)" hint="Sample development tracking, inspection/test reports, and customer feedback land here in Phase 3." />
-      )}
+      {tab === 2 && <SamplesQualityTab project={project} notify={setSnackbar} />}
 
       {/* Activity — Timeline + Documents (Phase 1) */}
       {tab === 3 && (
@@ -206,10 +205,8 @@ const NPDProject = () => {
         </Stack>
       )}
 
-      {/* Approvals (Phase 3) */}
-      {tab === 4 && (
-        <Placeholder title="Approvals & Production Release (Phase 3)" hint="Customer approval capture and the one-click Production Release (flips the product to Production + snapshots BOM/costing) land here in Phase 3." />
-      )}
+      {/* Approvals & Production Release (Phase 3) */}
+      {tab === 4 && <ApprovalsTab project={project} onChanged={load} notify={setSnackbar} />}
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
@@ -342,6 +339,136 @@ function EngineeringTab({ project, onChanged, notify, navigate }) {
         </CardContent>
       </Card>
     </Stack>
+  );
+}
+
+const SAMPLE_STATUS = ['planned', 'in_development', 'built', 'dispatched', 'approved', 'rejected'];
+const QC_RESULT = ['pending', 'pass', 'fail'];
+const FB_OUTCOME = ['pending', 'approved', 'approved_with_changes', 'rejected', 'resample'];
+const RESULT_COLOR = { pass: 'success', fail: 'error', pending: 'default', approved: 'success', rejected: 'error', approved_with_changes: 'warning', resample: 'warning' };
+
+function SamplesQualityTab({ project, notify }) {
+  const [samples, setSamples] = useState([]);
+  const [qcs, setQcs] = useState([]);
+  const [fbs, setFbs] = useState([]);
+  const [s, setS] = useState({ sample_no: '', status: 'planned' });
+  const [q, setQ] = useState({ test_type: 'dimensional', parameter: '', spec_value: '', measured_value: '', result: 'pending' });
+  const [f, setF] = useState({ outcome: 'pending', comments: '', sent_at: '' });
+
+  const reload = useCallback(async () => {
+    try {
+      const [sm, qc, fb] = await Promise.all([
+        npdService.listSamples(project.id), npdService.listQualityChecks(project.id), npdService.listFeedback(project.id),
+      ]);
+      setSamples(sm); setQcs(qc); setFbs(fb);
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+  }, [project.id, notify]);
+  useEffect(() => { reload(); }, [reload]);
+
+  const wrap = (fn) => async () => { try { await fn(); await reload(); } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); } };
+  const addSample = wrap(async () => { if (!s.sample_no.trim()) return; await npdService.addSample(project.id, { ...s, revision: project.revision }); setS({ sample_no: '', status: 'planned' }); });
+  const addQc = wrap(async () => { if (!q.parameter.trim()) return; await npdService.addQualityCheck(project.id, { ...q, revision: project.revision, checked_at: new Date().toISOString() }); setQ({ test_type: 'dimensional', parameter: '', spec_value: '', measured_value: '', result: 'pending' }); });
+  const addFb = wrap(async () => { await npdService.addFeedback(project.id, { ...f, revision: project.revision, sent_at: f.sent_at || null }); setF({ outcome: 'pending', comments: '', sent_at: '' }); });
+
+  return (
+    <Stack spacing={2}>
+      {/* Samples */}
+      <Card sx={{ borderRadius: 2 }}><CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Samples</Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
+          <TextField size="small" label="Sample no." value={s.sample_no} onChange={(e) => setS({ ...s, sample_no: e.target.value })} sx={{ width: 160 }} />
+          <TextField size="small" select label="Status" value={s.status} onChange={(e) => setS({ ...s, status: e.target.value })} sx={{ width: 150 }}>
+            {SAMPLE_STATUS.map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
+          </TextField>
+          <Button size="small" variant="outlined" onClick={addSample}>Add</Button>
+        </Stack>
+        <Divider sx={{ mb: 1 }} />
+        {samples.length === 0 ? <Typography variant="body2" color="text.secondary">No samples yet.</Typography> : samples.map((x) => (
+          <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 120 }}>{x.sample_no || '—'}</Typography>
+            <Chip size="small" label={x.status} color={RESULT_COLOR[x.status] || 'default'} sx={{ height: 18 }} />
+            {x.dispatched_at && <Typography variant="caption" color="text.secondary">dispatched {fmtDate(x.dispatched_at)}</Typography>}
+            <Typography variant="caption" color="text.secondary">rev {x.revision}</Typography>
+          </Stack>
+        ))}
+      </CardContent></Card>
+
+      {/* Quality checks */}
+      <Card sx={{ borderRadius: 2 }}><CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Quality / inspection</Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
+          <TextField size="small" select label="Test" value={q.test_type} onChange={(e) => setQ({ ...q, test_type: e.target.value })} sx={{ width: 130 }}>
+            {['dimensional', 'electrical', 'visual', 'other'].map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
+          </TextField>
+          <TextField size="small" label="Parameter" value={q.parameter} onChange={(e) => setQ({ ...q, parameter: e.target.value })} sx={{ width: 150 }} />
+          <TextField size="small" label="Spec" value={q.spec_value} onChange={(e) => setQ({ ...q, spec_value: e.target.value })} sx={{ width: 90 }} />
+          <TextField size="small" label="Measured" value={q.measured_value} onChange={(e) => setQ({ ...q, measured_value: e.target.value })} sx={{ width: 90 }} />
+          <TextField size="small" select label="Result" value={q.result} onChange={(e) => setQ({ ...q, result: e.target.value })} sx={{ width: 110 }}>
+            {QC_RESULT.map((x) => <MenuItem key={x} value={x}>{x}</MenuItem>)}
+          </TextField>
+          <Button size="small" variant="outlined" onClick={addQc}>Add</Button>
+        </Stack>
+        <Divider sx={{ mb: 1 }} />
+        {qcs.length === 0 ? <Typography variant="body2" color="text.secondary">No checks yet.</Typography> : qcs.map((x) => (
+          <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5 }}>
+            <Typography variant="body2" sx={{ minWidth: 100 }}>{x.test_type}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{x.parameter}</Typography>
+            <Typography variant="caption" color="text.secondary">spec {x.spec_value || '—'} / meas {x.measured_value || '—'}</Typography>
+            <Chip size="small" label={x.result} color={RESULT_COLOR[x.result]} sx={{ height: 18 }} />
+          </Stack>
+        ))}
+      </CardContent></Card>
+
+      {/* Customer feedback */}
+      <Card sx={{ borderRadius: 2 }}><CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Customer feedback</Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
+          <TextField size="small" type="date" label="Sent" value={f.sent_at} onChange={(e) => setF({ ...f, sent_at: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ width: 150 }} />
+          <TextField size="small" select label="Outcome" value={f.outcome} onChange={(e) => setF({ ...f, outcome: e.target.value })} sx={{ width: 180 }}>
+            {FB_OUTCOME.map((x) => <MenuItem key={x} value={x}>{x.replace(/_/g, ' ')}</MenuItem>)}
+          </TextField>
+          <TextField size="small" label="Comments" value={f.comments} onChange={(e) => setF({ ...f, comments: e.target.value })} sx={{ flex: 1, minWidth: 160 }} />
+          <Button size="small" variant="outlined" onClick={addFb}>Add</Button>
+        </Stack>
+        <Divider sx={{ mb: 1 }} />
+        {fbs.length === 0 ? <Typography variant="body2" color="text.secondary">No feedback yet.</Typography> : fbs.map((x) => (
+          <Stack key={x.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5 }}>
+            <Chip size="small" label={(x.outcome || '').replace(/_/g, ' ')} color={RESULT_COLOR[x.outcome] || 'default'} sx={{ height: 18 }} />
+            {x.comments && <Typography variant="body2">{x.comments}</Typography>}
+            {x.sent_at && <Typography variant="caption" color="text.secondary">sent {fmtDate(x.sent_at)}</Typography>}
+          </Stack>
+        ))}
+      </CardContent></Card>
+    </Stack>
+  );
+}
+
+function ApprovalsTab({ project, onChanged, notify }) {
+  const [busy, setBusy] = useState(false);
+  const canRelease = project.stage === 'approved' || project.stage === 'production_release';
+  const released = project.stage === 'production_release';
+  const release = async () => {
+    setBusy(true);
+    try {
+      const res = await npdService.releaseToProduction(project.id);
+      if (res && res.ok === false) notify({ open: true, message: res.message, severity: 'warning' });
+      else { notify({ open: true, message: 'Released to production — product flipped to Production.', severity: 'success' }); onChanged(); }
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Approval & production release</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
+        {released ? 'This project is released to production.'
+          : canRelease ? 'Release flips the linked product to Production (no data copy — the product, BOM and costing already live in their own modules).'
+          : 'The project must reach the Approved stage (with a linked product) before production release.'}
+      </Typography>
+      <Button variant="contained" color="secondary" onClick={release} disabled={busy || !canRelease || !project.product_id || released}>
+        {busy ? <CircularProgress size={20} /> : released ? 'Released' : 'Release to production'}
+      </Button>
+      {!project.product_id && <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>Link a product (Engineering tab) first.</Typography>}
+    </CardContent></Card>
   );
 }
 

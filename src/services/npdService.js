@@ -110,9 +110,45 @@ export async function documentUrl(storagePath) {
   return data?.signedUrl;
 }
 
+// ---- Phase 3 — samples, quality, customer feedback, production release ----
+export async function listSamples(projectId) {
+  const { data, error } = await supabase.from('npd_sample').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+  throwIf(error, 'List samples'); return data || [];
+}
+export async function addSample(projectId, payload) {
+  const { data, error } = await supabase.from('npd_sample').insert({ project_id: projectId, ...payload }).select('*').single();
+  throwIf(error, 'Add sample'); return data;
+}
+export async function updateSample(id, patch) {
+  const { data, error } = await supabase.from('npd_sample').update(patch).eq('id', id).select('*').single();
+  throwIf(error, 'Update sample'); return data;
+}
+export async function listQualityChecks(projectId) {
+  const { data, error } = await supabase.from('npd_quality_check').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+  throwIf(error, 'List quality checks'); return data || [];
+}
+export async function addQualityCheck(projectId, payload) {
+  const { data, error } = await supabase.from('npd_quality_check').insert({ project_id: projectId, ...payload }).select('*').single();
+  throwIf(error, 'Add quality check'); return data;
+}
+export async function listFeedback(projectId) {
+  const { data, error } = await supabase.from('npd_feedback').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+  throwIf(error, 'List feedback'); return data || [];
+}
+export async function addFeedback(projectId, payload) {
+  const { data, error } = await supabase.from('npd_feedback').insert({ project_id: projectId, ...payload }).select('*').single();
+  throwIf(error, 'Add feedback'); return data;
+}
+export async function releaseToProduction(projectId) {
+  const { data, error } = await supabase.rpc('npd_release_to_production', { p_project_id: projectId });
+  throwIf(error, 'Release to production'); return data;
+}
+
 const npdService = {
   NPD_STAGES, NPD_STAGE_LABEL,
   listProjects, getProject, createProject, updateProject,
   moveStage, getStageHistory, listDocuments, uploadDocument, documentUrl,
+  listSamples, addSample, updateSample, listQualityChecks, addQualityCheck,
+  listFeedback, addFeedback, releaseToProduction,
 };
 export default npdService;
