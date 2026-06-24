@@ -51,7 +51,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/crm'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/kit'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/sales-flow') || path === '/clients' || path === '/prospects-clients' || path === '/client-orders' || path === '/po-ingestion' || path === '/client-dashboard' || path === '/products' || path === '/product-master' || path === '/sales-orders', moduleKey: MODULE_KEYS.SALES },
-  { test: (path) => path === '/plant-command' || path === '/production-log' || path === '/production-intelligence' || path === '/production-demand' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
+  { test: (path) => path === '/plant-command' || path === '/production-log' || path === '/production-intelligence' || path === '/assembly-operations' || path === '/production-demand' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/demand-forecast' || path === '/portal-admin', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path.startsWith('/temp/'), moduleKey: MODULE_KEYS.PRODUCTION },

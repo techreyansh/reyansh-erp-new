@@ -8,12 +8,14 @@ import {
 import {
   ArrowBack as BackIcon, Refresh as RefreshIcon, ArrowForward as NextIcon, UploadFile as UploadIcon,
   Description as DocIcon, Info as InfoIcon,
+  ArrowUpward as ArrowUpIcon, ArrowDownward as ArrowDownIcon, ContentCopy as CopyIcon,
 } from '@mui/icons-material';
 import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdService';
 import * as plmProductService from '../../services/plmProductService';
 import * as plmCostingService from '../../services/plmCostingService';
 import ppcService from '../../services/ppcService';
 import inventoryLedgerService from '../../services/inventoryLedgerService';
+import mesService from '../../services/mesService';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
@@ -367,11 +369,21 @@ const ROUTING_COLS = [
 ];
 function RoutingEditor({ product, notify }) {
   const [steps, setSteps] = useState(null);
+  const [ops, setOps] = useState([]);
+  const [pick, setPick] = useState('');
   const [busy, setBusy] = useState(false);
   useEffect(() => { plmProductService.listProcess(product.id).then(setSteps).catch(() => setSteps([])); }, [product.id]);
+  useEffect(() => { mesService.listOperations({ includeInactive: false }).then(setOps).catch(() => setOps([])); }, []);
   const upd = (i, k, v) => setSteps((s) => s.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const add = () => setSteps((s) => [...(s || []), { step_name: '', department: '', machine: '', standard_time_sec: '', manpower: '' }]);
+  const addFromOp = (id) => {
+    const o = ops.find((x) => x.id === id); if (!o) return;
+    setSteps((s) => [...(s || []), { step_name: o.name, department: o.category, machine: '', standard_time_sec: o.std_time_sec ?? '', manpower: o.manpower_reqd ?? '', operation_id: o.id }]);
+    setPick('');
+  };
   const del = (i) => setSteps((s) => s.filter((_, j) => j !== i));
+  const dup = (i) => setSteps((s) => { const c = [...s]; c.splice(i + 1, 0, { ...s[i] }); return c; });
+  const move = (i, d) => setSteps((s) => { const j = i + d; if (j < 0 || j >= s.length) return s; const c = [...s]; [c[i], c[j]] = [c[j], c[i]]; return c; });
   const save = async () => {
     setBusy(true);
     try {
@@ -383,12 +395,18 @@ function RoutingEditor({ product, notify }) {
   if (steps === null) return null;
   return (
     <Card sx={{ borderRadius: 2 }}><CardContent>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Production routing <Typography component="span" variant="caption" color="text.secondary">(travels to production on release)</Typography></Typography>
-        <Stack direction="row" spacing={1}><Button size="small" onClick={add}>+ Step</Button><Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save'}</Button></Stack>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" gap={1}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Production routing <Typography component="span" variant="caption" color="text.secondary">(configurable · travels to production on release)</Typography></Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <TextField size="small" select label="Add operation" value={pick} onChange={(e) => addFromOp(e.target.value)} sx={{ width: 200 }}>
+            {ops.map((o) => <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>)}
+          </TextField>
+          <Button size="small" onClick={add}>+ Blank</Button>
+          <Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save'}</Button>
+        </Stack>
       </Stack>
       <Divider sx={{ mb: 1 }} />
-      {steps.length === 0 ? <Typography variant="body2" color="text.secondary">No routing yet — add the operation sequence (e.g. cutting → crimping → molding → testing).</Typography> : (
+      {steps.length === 0 ? <Typography variant="body2" color="text.secondary">No routing yet — pick operations (cutting → crimping → molding → testing → packing) to build the route.</Typography> : (
         <Stack spacing={1}>
           {steps.map((r, i) => (
             <Stack key={i} direction="row" spacing={1} alignItems="center" flexWrap="wrap">
@@ -396,6 +414,9 @@ function RoutingEditor({ product, notify }) {
               {ROUTING_COLS.map((c) => (
                 <TextField key={c.k} size="small" label={c.l} type={c.num ? 'number' : 'text'} value={r[c.k] ?? ''} onChange={(e) => upd(i, c.k, e.target.value)} sx={{ width: c.w }} />
               ))}
+              <Tooltip title="Move up"><span><IconButton size="small" disabled={i === 0} onClick={() => move(i, -1)}><ArrowUpIcon fontSize="small" /></IconButton></span></Tooltip>
+              <Tooltip title="Move down"><span><IconButton size="small" disabled={i === steps.length - 1} onClick={() => move(i, 1)}><ArrowDownIcon fontSize="small" /></IconButton></span></Tooltip>
+              <Tooltip title="Duplicate"><IconButton size="small" onClick={() => dup(i)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
               <Button size="small" color="error" onClick={() => del(i)}>Remove</Button>
             </Stack>
           ))}
