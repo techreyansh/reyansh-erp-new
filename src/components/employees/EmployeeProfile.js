@@ -18,6 +18,8 @@ import {
   History, CloudUpload, CloudDownload, DeleteOutline, InsertDriveFile, PersonOutline, BusinessCenter,
   CheckCircle,
 } from '@mui/icons-material';
+import { Storefront as PurchaseModuleIcon, VerifiedUser as QualityModuleIcon } from '@mui/icons-material';
+import { MODULE_UNLOCKS } from '../../config/moduleAccess';
 import { usePermissions } from '../../context/PermissionContext';
 import { DEPARTMENT_OPTIONS } from '../../config/departments';
 import { supabase } from '../../lib/supabaseClient';
@@ -52,6 +54,8 @@ const MODULE_META = {
   sales: { icon: ShoppingCart, color: 'success' },
   production: { icon: Factory, color: 'secondary' },
   inventory: { icon: Inventory2, color: 'warning' },
+  purchase: { icon: PurchaseModuleIcon, color: 'warning' },
+  quality: { icon: QualityModuleIcon, color: 'success' },
   dispatch: { icon: LocalShipping, color: 'info' },
   accounts: { icon: AccountBalance, color: 'success' },
   employees: { icon: Badge, color: 'secondary' },
@@ -60,6 +64,14 @@ const MODULE_META = {
   settings: { icon: Settings, color: 'secondary' },
 };
 const moduleMeta = (key) => MODULE_META[key] || { icon: ViewModule, color: 'primary' };
+
+/** First few screens a module unlocks, for the matrix caption (+N more). */
+const unlocksCaption = (key) => {
+  const list = MODULE_UNLOCKS[key];
+  if (!list || !list.length) return null;
+  const head = list.slice(0, 3).join(' · ');
+  return list.length > 3 ? `${head} +${list.length - 3} more` : head;
+};
 
 const EMPLOYEE_TYPES = ['Full-time', 'Part-time', 'Contract', 'Intern', 'Consultant', 'Freelancer'];
 
@@ -1177,7 +1189,9 @@ function EmployeeProfile({ employee, onBack, onSaved, onStatusChange }) {
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="body2" fontWeight={on ? 700 : 500} noWrap>{row.module_name}</Typography>
-                          <Typography variant="caption" color="text.secondary">{on ? 'Visible after login' : 'Hidden'}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
+                            {unlocksCaption(row.module_key) || (on ? 'Visible after login' : 'Hidden')}
+                          </Typography>
                         </Box>
                         <Stack direction="row" alignItems="center" spacing={0.5}>
                           <Typography variant="caption" color={on ? `${meta.color}.dark` : 'text.disabled'} fontWeight={600}>Access</Typography>

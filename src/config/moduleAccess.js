@@ -14,6 +14,29 @@ export const MODULE_KEYS = {
   SETTINGS: 'settings',
 };
 
+/**
+ * Human-readable list of the main screens each module unlocks. Shown under each
+ * row in the employee Access & Permissions matrix so an admin can see exactly
+ * what a toggle controls. Keep in sync with ROUTE_MODULE_RULES below — these are
+ * the same groupings, labeled for non-technical admins. A `MODULE_KEYS` value
+ * with no entry here falls back to the generic "Visible after login" caption.
+ */
+export const MODULE_UNLOCKS = {
+  [MODULE_KEYS.DASHBOARD]: ['Home / My Day', 'Dashboards', 'Operations Tower', 'Profile'],
+  [MODULE_KEYS.CRM]: ['CRM Pipeline (Prospects & Clients)', 'KIT', 'Collections', 'Email Campaigns'],
+  [MODULE_KEYS.SALES]: ['Sales Flow', 'Client Orders', 'Sales Orders', 'Products', 'Demand Forecast'],
+  [MODULE_KEYS.PRODUCTION]: ['PPC', 'Cable Production', 'Molding', 'Production Log', 'Plant Command'],
+  [MODULE_KEYS.INVENTORY]: ['Inventory', 'Material Control', 'MRP'],
+  [MODULE_KEYS.PURCHASE]: ['Purchase Flow', 'Purchase Requisitions', 'Vendors'],
+  [MODULE_KEYS.QUALITY]: ['Quality'],
+  [MODULE_KEYS.DISPATCH]: ['Dispatch Control', 'Dispatch Management', 'Flow Management'],
+  [MODULE_KEYS.ACCOUNTS]: ['Invoicing', 'Cost Control', 'Costing'],
+  [MODULE_KEYS.EMPLOYEES]: ['Employee Management', 'Master Data', 'Access'],
+  [MODULE_KEYS.TASKS]: ['Tasks', 'Team Tasks', 'Task Scheduler', 'My Tasks', 'Checklists'],
+  [MODULE_KEYS.REPORTS]: ['MIS', 'Performance Review', 'Document Library'],
+  [MODULE_KEYS.SETTINGS]: ['Settings'],
+};
+
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
 
 const ROUTE_MODULE_RULES = [
