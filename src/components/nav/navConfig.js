@@ -106,7 +106,8 @@ export const NAV_GROUPS = [
       { label: "Production Log", path: "/production-log", icon: ic(GridViewOutlined) },
       { label: "Production Intelligence", path: "/production-intelligence", icon: ic(InsightsOutlined) },
       { label: "Job Cards", path: "/job-cards", icon: ic(AssignmentOutlined) },
-      { label: "Assembly Operations", path: "/assembly-operations", icon: ic(BuildOutlined) },
+      { label: "MES Dashboard", path: "/mes-dashboard", icon: ic(InsightsOutlined) },
+      { label: "MES Setup", path: "/mes-setup", icon: ic(BuildOutlined) },
     ],
   },
   {

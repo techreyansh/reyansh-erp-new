@@ -117,6 +117,8 @@ const ProductionLogModule = lazy(() => import("./components/productionLog/Produc
 const ProductionIntelligence = lazy(() => import("./pages/production/ProductionIntelligence"));
 const AssemblyOperationMaster = lazy(() => import("./pages/mes/AssemblyOperationMaster"));
 const JobCard = lazy(() => import("./pages/mes/JobCard"));
+const MESSetup = lazy(() => import("./pages/mes/MESSetup"));
+const MESDashboard = lazy(() => import("./pages/mes/MESDashboard"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
@@ -304,6 +306,16 @@ function AppContent() {
                   <Route path="/job-cards" element={
                     <ProtectedRouteGate>
                       <JobCard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/mes-setup" element={
+                    <ProtectedRouteGate>
+                      <MESSetup />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/mes-dashboard" element={
+                    <ProtectedRouteGate>
+                      <MESDashboard />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/crm-import" element={
