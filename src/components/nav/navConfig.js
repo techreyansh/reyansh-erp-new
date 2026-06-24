@@ -66,7 +66,6 @@ export const NAV_GROUPS = [
       { label: "Daily Worklist", path: "/crm/worklist", icon: ic(AssignmentOutlined) },
       { label: "Team Performance", path: "/crm/team", icon: ic(GroupsOutlined) },
       { label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: ic(TrendingUpOutlined) },
-      { label: "Client Management", path: "/crm-pipeline?view=clients", icon: ic(PeopleAltOutlined) },
       { label: "Client Pipeline", path: "/crm/client-pipeline", icon: ic(AccountTreeOutlined) },
       { label: "Payment Follow-Up", path: "/crm/payments", icon: ic(PaymentsOutlined) },
       { label: "Client Reports", path: "/crm/client-reports", icon: ic(AnalyticsOutlined) },

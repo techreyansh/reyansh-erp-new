@@ -38,7 +38,7 @@ import {
   alpha,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -2835,6 +2835,16 @@ export default function CRMPipelineBoard() {
   const view =
     rawView === "clients" || rawView === "recurring" ? "clients" : "prospects";
 
+  // Client Management was replaced by the dedicated Client Pipeline (Account
+  // Management Workspace). Any client/recurring view here redirects there; this
+  // board is now prospects-only.
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (rawView === "clients" || rawView === "recurring") {
+      navigate("/crm/client-pipeline", { replace: true });
+    }
+  }, [rawView, navigate]);
+
   const setView = useCallback(
     (next) => {
       if (!next || next === view) return;
@@ -3121,15 +3131,6 @@ export default function CRMPipelineBoard() {
         </Stack>
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ sm: "center" }} flexWrap="wrap" useFlexGap>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={view}
-            onChange={(_, v) => v && setView(v)}
-          >
-            <ToggleButton value="prospects">Prospects</ToggleButton>
-            <ToggleButton value="clients">Clients</ToggleButton>
-          </ToggleButtonGroup>
 
           {view === "clients" && (
             <ToggleButtonGroup
