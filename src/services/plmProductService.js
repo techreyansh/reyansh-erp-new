@@ -9,6 +9,13 @@ async function currentEmail() {
   try { return (await supabase.auth.getUser()).data?.user?.email || null; } catch { return null; }
 }
 
+/** Ensure the product has a manufacturable item (ppc_items) for its BOM. Returns ppc_item_id. */
+export async function ensureItem(productId) {
+  const { data, error } = await supabase.rpc('product_ensure_item', { p_product_id: productId });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function listProducts({ includeArchived = false } = {}) {
   let q = supabase.from('product').select(PRODUCT_SELECT).order('product_name', { ascending: true });
   if (!includeArchived) q = q.is('archived_at', null);

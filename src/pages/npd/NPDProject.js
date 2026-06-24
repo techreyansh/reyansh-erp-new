@@ -12,6 +12,7 @@ import {
 import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdService';
 import * as plmProductService from '../../services/plmProductService';
 import * as plmCostingService from '../../services/plmCostingService';
+import ppcService from '../../services/ppcService';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
@@ -330,15 +331,86 @@ function EngineeringTab({ project, onChanged, notify, navigate }) {
         </CardContent>
       </Card>
 
-      <Card sx={{ borderRadius: 2, bgcolor: (t) => alpha(t.palette.info.main, 0.06) }}>
-        <CardContent>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>BOM & Material status</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            The BOM editor and material-shortage view connect here next (Phase 2b) — once the product↔BOM link is in place. Material on-hand already reads the new stock ledger.
-          </Typography>
-        </CardContent>
-      </Card>
+      <BomEditor product={product} reloadProduct={reload} notify={notify} />
     </Stack>
+  );
+}
+
+function BomEditor({ product, reloadProduct, notify }) {
+  const parentId = product?.ppc_item_id || null;
+  const [bom, setBom] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [row, setRow] = useState({ component_item_id: '', qty_per: '', scrap_pct: '' });
+
+  const reload = useCallback(async () => {
+    if (!parentId) { setBom([]); return; }
+    setLoading(true);
+    try {
+      const [b, its] = await Promise.all([ppcService.listBomForParent(parentId), ppcService.listItems({ includeInactive: false })]);
+      setBom(b || []); setItems(its || []);
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setLoading(false);
+  }, [parentId, notify]);
+  useEffect(() => { reload(); }, [reload]);
+
+  const setupBom = async () => {
+    setBusy(true);
+    try { await plmProductService.ensureItem(product.id); await reloadProduct(); notify({ open: true, message: 'BOM ready — add components.', severity: 'success' }); }
+    catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  const addLine = async () => {
+    if (!row.component_item_id || !row.qty_per) { notify({ open: true, message: 'Pick a component and qty.', severity: 'warning' }); return; }
+    setBusy(true);
+    try {
+      await ppcService.addBomLine({ parent_item_id: parentId, component_item_id: row.component_item_id, qty_per: Number(row.qty_per), scrap_pct: Number(row.scrap_pct) || 0 });
+      setRow({ component_item_id: '', qty_per: '', scrap_pct: '' }); await reload();
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  const removeLine = async (id) => { try { await ppcService.deleteBomLine(id); await reload(); } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); } };
+
+  if (!parentId) {
+    return (
+      <Card sx={{ borderRadius: 2 }}><CardContent sx={{ textAlign: 'center', py: 4 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Bill of Materials</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ my: 1, maxWidth: 440, mx: 'auto' }}>
+          Set up the BOM to list what this product consumes. It uses the production BOM engine (recursive, with scrap and MRP).
+        </Typography>
+        <Button variant="outlined" onClick={setupBom} disabled={busy}>{busy ? <CircularProgress size={20} /> : 'Set up BOM'}</Button>
+      </CardContent></Card>
+    );
+  }
+
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Bill of Materials</Typography>
+      <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} alignItems="center">
+        <TextField size="small" select label="Component" value={row.component_item_id} onChange={(e) => setRow({ ...row, component_item_id: e.target.value })} sx={{ minWidth: 220 }}>
+          {items.map((it) => <MenuItem key={it.id} value={it.id}>{it.code} — {it.name}</MenuItem>)}
+        </TextField>
+        <TextField size="small" type="number" label="Qty / unit" value={row.qty_per} onChange={(e) => setRow({ ...row, qty_per: e.target.value })} sx={{ width: 110 }} />
+        <TextField size="small" type="number" label="Scrap %" value={row.scrap_pct} onChange={(e) => setRow({ ...row, scrap_pct: e.target.value })} sx={{ width: 90 }} />
+        <Button size="small" variant="outlined" onClick={addLine} disabled={busy}>Add</Button>
+      </Stack>
+      <Divider sx={{ mb: 1 }} />
+      {loading ? <CircularProgress size={22} /> : bom.length === 0 ? (
+        <Typography variant="body2" color="text.secondary">No components yet — add what this product is made of.</Typography>
+      ) : (
+        <Stack spacing={0.5}>
+          {bom.map((l) => (
+            <Stack key={l.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 90 }}>{l.component?.code}</Typography>
+              <Typography variant="body2" sx={{ flex: 1, minWidth: 0 }} noWrap>{l.component?.name}</Typography>
+              <Typography variant="caption" color="text.secondary">{l.qty_per} {l.component?.uom}{Number(l.scrap_pct) ? ` · ${l.scrap_pct}% scrap` : ''}</Typography>
+              <Button size="small" color="error" onClick={() => removeLine(l.id)}>Remove</Button>
+            </Stack>
+          ))}
+        </Stack>
+      )}
+    </CardContent></Card>
   );
 }
 
