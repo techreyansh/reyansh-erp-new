@@ -220,6 +220,16 @@ async function dispatchStock(itemId, { qty, customer, reference } = {}) {
     }),
     'Dispatch stock'
   );
+  // Mirror dispatch into the perpetual stock ledger (best-effort; never blocks).
+  try {
+    if (data?.ok && data?.item_id && Number(qty) > 0) {
+      await supabase.rpc('inv_post_by_id', {
+        p_item_id: data.item_id, p_location_code: 'FG', p_type: 'DISPATCH',
+        p_qty_delta: -Math.abs(Number(qty)), p_ref_type: 'dispatch',
+        p_ref_id: reference ? String(reference) : null, p_reason: customer || null,
+      });
+    }
+  } catch (e) { console.warn('[inv] dispatchStock ledger mirror failed:', e?.message); }
   return data || null;
 }
 
@@ -723,6 +733,16 @@ async function finishWorkOrder(woId, qty) {
     }),
     'Finish work order'
   );
+  // Mirror FG production into the perpetual stock ledger (best-effort; never blocks).
+  try {
+    if (data?.ok && data?.item_id && Number(data?.produced) > 0 && !data?.already_stocked) {
+      await supabase.rpc('inv_post_by_id', {
+        p_item_id: data.item_id, p_location_code: 'FG', p_type: 'MFG_RECEIVE',
+        p_qty_delta: Number(data.produced), p_ref_type: 'work_order',
+        p_ref_id: String(woId), p_reason: 'FG production',
+      });
+    }
+  } catch (e) { console.warn('[inv] finishWorkOrder ledger mirror failed:', e?.message); }
   return data || null;
 }
 

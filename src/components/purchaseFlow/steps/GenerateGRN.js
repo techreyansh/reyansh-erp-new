@@ -3,28 +3,9 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { Assignment as AssignmentIcon, Business as BusinessIcon, Person as PersonIcon, Visibility as ViewIcon, VisibilityOff as VisibilityOffIcon, Receipt as ReceiptIcon, Check as CheckIcon } from '@mui/icons-material';
 import purchaseFlowService from '../../../services/purchaseFlowService';
 import sheetService from '../../../services/sheetService';
+import inventoryLedgerService from '../../../services/inventoryLedgerService';
 import { useAuth } from '../../../context/AuthContext';
 import jsPDF from 'jspdf';
-
-// Function to update stock levels
-const updateStockLevels = async (itemCode, quantity, operation) => {
-  const stockData = await sheetService.getSheetData("Stock");
-  const stockIndex = stockData.findIndex((item) => item.itemCode === itemCode);
-  if (stockIndex === -1) {
-    throw new Error(
-      "Item not found in Stock sheet. Please add it to Stock first."
-    );
-  }
-  const updatedStock = { ...stockData[stockIndex] };
-  const currentStock = parseFloat(updatedStock.currentStock) || 0;
-  const qty = parseFloat(quantity) || 0;
-  updatedStock.currentStock =
-    operation === "inward"
-      ? (currentStock + qty).toString()
-      : (currentStock - qty).toString();
-  updatedStock.lastUpdated = new Date().toISOString().split("T")[0];
-  await sheetService.updateRow("Stock", stockIndex + 2, updatedStock);
-};
 
 // Function to create material inward entries from PO data
 const createMaterialInwardEntries = async (po, grnId) => {
@@ -72,13 +53,20 @@ const createMaterialInwardEntries = async (po, grnId) => {
         source: 'Purchase Flow - GRN'
       };
       
-      // Add to Material Inward sheet
+      // Add to Material Inward sheet (inward register / audit document)
       await sheetService.appendRow("Material Inward", materialInwardEntry);
       materialInwardEntries.push(materialInwardEntry);
-      
-      // Update stock levels (since status is Completed)
-      await updateStockLevels(itemCode, quantity, "inward");
-      
+
+      // Post the receipt to the perpetual stock ledger (single source of truth).
+      // Captures the PO unit price as the landed rate -> weighted-average value.
+      const unitRate = parseFloat(item.price ?? item.Price ?? item.rate);
+      await inventoryLedgerService.receive({
+        itemCode,
+        qty: parseFloat(quantity) || 0,
+        rate: Number.isFinite(unitRate) ? unitRate : null,
+        grnRef: grnId,
+      });
+
     } catch (error) {
       console.error(`Error creating material inward entry for item ${item.itemCode || 'unknown'}:`, error);
       // Continue with other items even if one fails

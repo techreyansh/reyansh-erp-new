@@ -127,6 +127,7 @@ const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
 const PaymentFollowUp = lazy(() => import("./pages/crm/PaymentFollowUp"));
 const ClientReports = lazy(() => import("./pages/crm/ClientReports"));
 const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
+const InventoryLedger = lazy(() => import("./pages/inventory/InventoryLedger"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
@@ -374,7 +375,7 @@ function AppContent() {
 
                   <Route path="/inventory-control" element={
                     <ProtectedRouteGate>
-                      <InventoryControl />
+                      <InventoryLedger />
                     </ProtectedRouteGate>
                   } />
 
@@ -639,7 +640,7 @@ function AppContent() {
                     path="/inventory"
                     element={
                       <ProtectedRouteGate>
-                        <InventoryMainNavigation />
+                        <InventoryLedger />
                       </ProtectedRouteGate>
                     } />
 
