@@ -105,6 +105,7 @@ export const NAV_GROUPS = [
       { label: "Molding Production", path: "/molding", icon: ic(PrecisionManufacturingOutlined) },
       { label: "Production Log", path: "/production-log", icon: ic(GridViewOutlined) },
       { label: "Production Intelligence", path: "/production-intelligence", icon: ic(InsightsOutlined) },
+      { label: "Job Cards", path: "/job-cards", icon: ic(AssignmentOutlined) },
       { label: "Assembly Operations", path: "/assembly-operations", icon: ic(BuildOutlined) },
     ],
   },

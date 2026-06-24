@@ -116,6 +116,7 @@ const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantH
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
 const ProductionIntelligence = lazy(() => import("./pages/production/ProductionIntelligence"));
 const AssemblyOperationMaster = lazy(() => import("./pages/mes/AssemblyOperationMaster"));
+const JobCard = lazy(() => import("./pages/mes/JobCard"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
@@ -298,6 +299,11 @@ function AppContent() {
                   <Route path="/assembly-operations" element={
                     <ProtectedRouteGate>
                       <AssemblyOperationMaster />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/job-cards" element={
+                    <ProtectedRouteGate>
+                      <JobCard />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/crm-import" element={
