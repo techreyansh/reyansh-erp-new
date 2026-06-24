@@ -357,8 +357,54 @@ function EngineeringTab({ project, onChanged, notify, navigate }) {
       <UphCard product={product} reloadProduct={reload} notify={notify} />
       <BomEditor product={product} reloadProduct={reload} notify={notify} />
       <RoutingEditor product={product} notify={notify} />
+      <ABSideConfigEditor product={product} notify={notify} />
       <QualityPlanEditor product={product} notify={notify} />
     </Stack>
+  );
+}
+
+const SIDE_FIELDS = [
+  { k: 'plug_type', l: 'Plug type' }, { k: 'pin_type', l: 'Pin type' },
+  { k: 'terminal_type', l: 'Terminal type' }, { k: 'sleeve_type', l: 'Sleeve type' },
+  { k: 'cycle_time_sec', l: 'Cycle (s)', num: true }, { k: 'quality_notes', l: 'Quality notes' },
+];
+function ABSideConfigEditor({ product, notify }) {
+  const [sides, setSides] = useState({ A: {}, B: {} });
+  const [busy, setBusy] = useState('');
+  useEffect(() => {
+    plmProductService.listSideConfig(product.id).then((rows) => {
+      const m = { A: {}, B: {} };
+      rows.forEach((r) => { m[r.side] = r; });
+      setSides(m);
+    }).catch(() => {});
+  }, [product.id]);
+  const set = (side, k, v) => setSides((s) => ({ ...s, [side]: { ...s[side], [k]: v } }));
+  const save = async (side) => {
+    setBusy(side);
+    try { await plmProductService.saveSideConfig(product.id, side, sides[side]); notify({ open: true, message: `${side}-side saved.`, severity: 'success' }); }
+    catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy('');
+  };
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>A / B-side configuration <Typography component="span" variant="caption" color="text.secondary">(plug end · open/terminal end)</Typography></Typography>
+      <Divider sx={{ mb: 1.5 }} />
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+        {['A', 'B'].map((side) => (
+          <Box key={side} sx={{ flex: 1, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{side}-side {side === 'A' ? '(plug)' : '(terminal / open end)'}</Typography>
+              <Button size="small" variant="outlined" onClick={() => save(side)} disabled={busy === side}>{busy === side ? <CircularProgress size={16} /> : 'Save'}</Button>
+            </Stack>
+            <Stack spacing={1.5}>
+              {SIDE_FIELDS.map((f) => (
+                <TextField key={f.k} size="small" label={f.l} type={f.num ? 'number' : 'text'} value={sides[side][f.k] ?? ''} onChange={(e) => set(side, f.k, e.target.value)} fullWidth />
+              ))}
+            </Stack>
+          </Box>
+        ))}
+      </Stack>
+    </CardContent></Card>
   );
 }
 

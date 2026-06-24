@@ -111,6 +111,20 @@ export async function listProductDocuments(productId) {
   const { data } = await supabase.from('product_document').select('*').eq('product_id', productId).order('created_at', { ascending: false });
   return data || [];
 }
+export async function listSideConfig(productId) {
+  const { data } = await supabase.from('assembly_side_config').select('*').eq('product_id', productId);
+  return data || [];
+}
+export async function saveSideConfig(productId, side, fields) {
+  const clean = { ...fields };
+  ['cycle_time_sec'].forEach((k) => { if (clean[k] === '' || clean[k] == null) clean[k] = null; else clean[k] = Number(clean[k]); });
+  const { data: existing } = await supabase.from('assembly_side_config').select('id').eq('product_id', productId).eq('side', side).maybeSingle();
+  if (existing?.id) {
+    const { error } = await supabase.from('assembly_side_config').update(clean).eq('id', existing.id); if (error) throw error;
+  } else {
+    const { error } = await supabase.from('assembly_side_config').insert({ product_id: productId, side, ...clean }); if (error) throw error;
+  }
+}
 export async function listQualityPlan(productId) {
   const { data } = await supabase.from('product_quality_plan').select('*').eq('product_id', productId).order('sequence');
   return data || [];
@@ -132,6 +146,7 @@ export async function saveQualityPlan(productId, rows) {
 const plmProductService = {
   listProducts, getProduct, createProduct, updateProduct, duplicateProduct,
   archiveProduct, restoreProduct, setProductStatus, checkDeletable, deleteProduct,
-  listRevisions, addRevision, listProcess, saveProcess, listQualityPlan, saveQualityPlan, listProductDocuments,
+  listRevisions, addRevision, listProcess, saveProcess, listQualityPlan, saveQualityPlan,
+  listSideConfig, saveSideConfig, listProductDocuments,
 };
 export default plmProductService;
