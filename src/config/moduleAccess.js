@@ -12,6 +12,7 @@ export const MODULE_KEYS = {
   TASKS: 'tasks',
   REPORTS: 'reports',
   SETTINGS: 'settings',
+  NPD: 'npd',
 };
 
 /**
@@ -35,6 +36,7 @@ export const MODULE_UNLOCKS = {
   [MODULE_KEYS.TASKS]: ['Tasks', 'Team Tasks', 'Task Scheduler', 'My Tasks', 'Checklists'],
   [MODULE_KEYS.REPORTS]: ['MIS', 'Performance Review', 'Document Library'],
   [MODULE_KEYS.SETTINGS]: ['Settings'],
+  [MODULE_KEYS.NPD]: ['NPD Projects', 'Product Development Workspace', 'Stage Gates', 'Approvals'],
 };
 
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
@@ -65,6 +67,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/performance' || path.startsWith('/performance/'), moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/access-preview', moduleKey: MODULE_KEYS.EMPLOYEES },
+  { test: (path) => path.startsWith('/npd'), moduleKey: MODULE_KEYS.NPD },
 ];
 
 export function getModuleKeyForPath(pathname = '') {

@@ -98,6 +98,7 @@ export const NAV_GROUPS = [
     label: "Production",
     icon: ic(BuildOutlined),
     items: [
+      { label: "Product Development (NPD)", path: "/npd", icon: ic(AutoAwesomeOutlined), moduleKey: "npd" },
       { label: "Production Planning", path: "/ppc", icon: ic(AssignmentOutlined) },
       { label: "Production Demand", path: "/production-demand", icon: ic(FactoryOutlined) },
       { label: "Cable Production", path: "/cable-production", icon: ic(CableOutlined) },

@@ -128,6 +128,8 @@ const PaymentFollowUp = lazy(() => import("./pages/crm/PaymentFollowUp"));
 const ClientReports = lazy(() => import("./pages/crm/ClientReports"));
 const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
 const InventoryLedger = lazy(() => import("./pages/inventory/InventoryLedger"));
+const NPDDashboard = lazy(() => import("./pages/npd/NPDDashboard"));
+const NPDProject = lazy(() => import("./pages/npd/NPDProject"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
@@ -376,6 +378,17 @@ function AppContent() {
                   <Route path="/inventory-control" element={
                     <ProtectedRouteGate>
                       <InventoryLedger />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/npd" element={
+                    <ProtectedRouteGate>
+                      <NPDDashboard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/npd/:id" element={
+                    <ProtectedRouteGate>
+                      <NPDProject />
                     </ProtectedRouteGate>
                   } />
 
