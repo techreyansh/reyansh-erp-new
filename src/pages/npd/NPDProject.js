@@ -9,6 +9,8 @@ import {
   Description as DocIcon, Info as InfoIcon,
 } from '@mui/icons-material';
 import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdService';
+import * as plmProductService from '../../services/plmProductService';
+import * as plmCostingService from '../../services/plmCostingService';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
@@ -150,13 +152,8 @@ const NPDProject = () => {
         </Stack>
       )}
 
-      {/* Engineering (Phase 2) */}
-      {tab === 1 && (
-        <Placeholder title="Engineering — BOM, Costing, UPH, Material (Phase 2)"
-          hint={project.product_id
-            ? 'This project has a linked product. The BOM, Costing and Material tabs wire to it in Phase 2.'
-            : 'Create/link a product to start its BOM and Costing. The product master, costing engine and BOM explosion already exist; Phase 2 connects them here.'} />
-      )}
+      {/* Engineering — product gateway + Costing (Phase 2) */}
+      {tab === 1 && <EngineeringTab project={project} onChanged={load} notify={setSnackbar} navigate={navigate} />}
       {/* Samples & Quality (Phase 3) */}
       {tab === 2 && (
         <Placeholder title="Samples & Quality (Phase 3)" hint="Sample development tracking, inspection/test reports, and customer feedback land here in Phase 3." />
@@ -220,5 +217,132 @@ const NPDProject = () => {
     </Box>
   );
 };
+
+const fmtInr = (n) => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+function EngineeringTab({ project, onChanged, notify, navigate }) {
+  const [product, setProduct] = useState(null);
+  const [costings, setCostings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const reload = useCallback(async () => {
+    if (!project.product_id) { setProduct(null); setCostings([]); return; }
+    setLoading(true);
+    try {
+      const [p, cs] = await Promise.all([
+        plmProductService.getProduct(project.product_id),
+        plmCostingService.listCostingsForProduct(project.product_id),
+      ]);
+      setProduct(p); setCostings(cs || []);
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setLoading(false);
+  }, [project.product_id, notify]);
+  useEffect(() => { reload(); }, [reload]);
+
+  const createProduct = async () => {
+    setBusy(true);
+    try {
+      const p = await plmProductService.createProduct({
+        product_name: project.product_name,
+        customer_code: project.customer_code || null,
+        company_name: project.company_name || null,
+        customer_part_no: project.customer_part_no || null,
+        product_type: 'custom',
+        status: 'development',
+      });
+      await npdService.updateProject(project.id, { product_id: p.id });
+      notify({ open: true, message: `Product ${p.product_code} created and linked.`, severity: 'success' });
+      onChanged();
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+
+  const startCosting = async () => {
+    setBusy(true);
+    try {
+      await plmCostingService.createCosting(project.product_id, {
+        product_name: product?.product_name || project.product_name,
+        customer_code: project.customer_code || null,
+      });
+      notify({ open: true, message: 'Costing started.', severity: 'success' });
+      await reload();
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+
+  if (!project.product_id) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ textAlign: 'center', py: 5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>No product linked yet</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 460, mx: 'auto', my: 1.5 }}>
+            Create the product to unlock Costing and BOM. It enters the Product Master as a <b>development</b> product, carrying this project's customer and part number.
+          </Typography>
+          <Button variant="contained" color="secondary" onClick={createProduct} disabled={busy}>
+            {busy ? <CircularProgress size={20} /> : 'Create product for this project'}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Stack spacing={2}>
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+            <Box>
+              <Typography variant="overline" color="text.secondary">Linked product</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{product?.product_code} · {product?.product_name}</Typography>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+                {product?.status && <Chip size="small" label={product.status} color={product.status === 'production' ? 'success' : 'default'} />}
+                {product?.product_family && <Chip size="small" variant="outlined" label={product.product_family} />}
+              </Stack>
+            </Box>
+            <Button size="small" onClick={() => navigate('/product-master')}>Open in Product Master</Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Costing</Typography>
+            <Button size="small" onClick={startCosting} disabled={busy}>Start costing</Button>
+          </Stack>
+          <Divider sx={{ mb: 1 }} />
+          {loading ? <CircularProgress size={22} /> : costings.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No costing yet — start one to capture material/labour/overhead and target margin.</Typography>
+          ) : (
+            <Stack spacing={1}>
+              {costings.map((c) => (
+                <Stack key={c.id} direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{c.costing_no} · v{c.version_number}</Typography>
+                    <Chip size="small" label={c.status} sx={{ height: 18 }} />
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{fmtInr(c.total_cost)} cost</Typography>
+                    <Typography variant="caption" color="text.secondary">SP {fmtInr(c.net_selling_price)} · margin {Number(c.net_margin_pct || c.target_margin_pct || 0)}%</Typography>
+                  </Box>
+                </Stack>
+              ))}
+            </Stack>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card sx={{ borderRadius: 2, bgcolor: (t) => alpha(t.palette.info.main, 0.06) }}>
+        <CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>BOM & Material status</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            The BOM editor and material-shortage view connect here next (Phase 2b) — once the product↔BOM link is in place. Material on-hand already reads the new stock ledger.
+          </Typography>
+        </CardContent>
+      </Card>
+    </Stack>
+  );
+}
 
 export default NPDProject;
