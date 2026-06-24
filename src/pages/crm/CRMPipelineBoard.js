@@ -570,7 +570,18 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
       setForm(empty);
       onClose();
     } catch (e) {
-      setErr(e?.message || "Failed to add company.");
+      const raw = String(e?.message || "");
+      if (/company_name_uniq/i.test(raw) || (/duplicate key/i.test(raw) && /company_name/i.test(raw))) {
+        setErr(
+          `A company named "${form.company_name.trim()}" is already in the CRM. ` +
+          `It may be assigned to another salesperson, which hides it from your pipeline. ` +
+          `Ask an admin to reassign it to you, or add it under a different name.`
+        );
+      } else if (/duplicate key/i.test(raw) && /customer_code/i.test(raw)) {
+        setErr("That company code is already in use — please use a different code.");
+      } else {
+        setErr(raw || "Failed to add company.");
+      }
     } finally {
       setSaving(false);
     }
