@@ -8,12 +8,15 @@ import {
 import {
   Insights as IntelIcon, Refresh as RefreshIcon, UploadFile as UploadIcon,
   WarningAmber as WarnIcon, ErrorOutline as CritIcon, InfoOutlined as InfoIcon,
+  AutoAwesome as AiIcon,
 } from '@mui/icons-material';
+import { Alert } from '@mui/material';
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis,
   Tooltip as RTooltip, CartesianGrid, Cell,
 } from 'recharts';
 import productionIntelligenceService from '../../services/productionIntelligenceService';
+import { analyzeRows } from '../../services/productionLogService';
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const SEV_ICON = { critical: <CritIcon color="error" />, warning: <WarnIcon color="warning" />, info: <InfoIcon color="info" /> };
@@ -29,6 +32,17 @@ const ProductionIntelligence = () => {
   const [department, setDepartment] = useState('all');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ai, setAi] = useState({ loading: false, result: null, error: null });
+
+  const runAI = useCallback(async () => {
+    setAi({ loading: true, result: null, error: null });
+    try {
+      const rows = await productionIntelligenceService.getRows({ from, to, department });
+      if (!rows.length) { setAi({ loading: false, result: null, error: 'No data in this range to analyse.' }); return; }
+      const result = await analyzeRows(rows.slice(0, 400));
+      setAi({ loading: false, result, error: null });
+    } catch (e) { setAi({ loading: false, result: null, error: e.message }); }
+  }, [from, to, department]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -93,6 +107,47 @@ const ProductionIntelligence = () => {
             <Kpi label="Top loss reason" value={data.kpis.topReason} sub="most downtime" color={theme.palette.warning.main} />
             <Kpi label="Coverage" value={`${data.kpis.days}d`} sub={`${data.kpis.lines} lines`} />
           </Stack>
+
+          {/* AI Analysis */}
+          <Card sx={{ borderRadius: 2, border: '1px solid', borderColor: alpha(theme.palette.primary.main, 0.3) }}><CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: ai.result || ai.error ? 1 : 0 }} flexWrap="wrap" gap={1}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <AiIcon color="primary" />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>AI analysis</Typography>
+                <Typography variant="caption" color="text.secondary">Gemini reads this period and explains the misses.</Typography>
+              </Stack>
+              <Button size="small" variant="contained" onClick={runAI} disabled={ai.loading} startIcon={ai.loading ? <CircularProgress size={16} color="inherit" /> : <AiIcon />}>
+                {ai.loading ? 'Analysing…' : 'Analyse with AI'}
+              </Button>
+            </Stack>
+            {ai.error && <Alert severity="info" sx={{ mt: 1 }}>{ai.error}</Alert>}
+            {ai.result && (
+              <Box sx={{ mt: 1 }}>
+                <Divider sx={{ mb: 1.5 }} />
+                {ai.result.summary && <Typography variant="body2" sx={{ mb: 1.5 }}>{ai.result.summary}</Typography>}
+                {Array.isArray(ai.result.root_causes) && ai.result.root_causes.length > 0 && (
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Root causes</Typography>
+                    <Stack spacing={0.5} sx={{ mt: 0.5 }}>
+                      {ai.result.root_causes.map((rc, i) => (
+                        <Typography key={i} variant="body2">• <b>{rc.title}</b>{rc.detail ? ` — ${rc.detail}` : ''}{rc.line_no ? ` (${rc.line_no}${rc.time_slot ? ' ' + rc.time_slot : ''})` : ''}{rc.lost_units ? ` · ${rc.lost_units} units lost` : ''}</Typography>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+                {Array.isArray(ai.result.recommendations) && ai.result.recommendations.length > 0 && (
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Recommendations</Typography>
+                    <Stack spacing={0.5} sx={{ mt: 0.5 }}>
+                      {ai.result.recommendations.map((r, i) => (
+                        <Typography key={i} variant="body2">→ {typeof r === 'string' ? r : (r.detail || r.title)}</Typography>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </CardContent></Card>
 
           {/* Charts */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
