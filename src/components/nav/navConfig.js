@@ -104,6 +104,7 @@ export const NAV_GROUPS = [
       { label: "Cable Production", path: "/cable-production", icon: ic(CableOutlined) },
       { label: "Molding Production", path: "/molding", icon: ic(PrecisionManufacturingOutlined) },
       { label: "Production Log", path: "/production-log", icon: ic(GridViewOutlined) },
+      { label: "Production Intelligence", path: "/production-intelligence", icon: ic(InsightsOutlined) },
     ],
   },
   {

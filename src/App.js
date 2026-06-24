@@ -114,6 +114,7 @@ const WelcomePage = lazy(() => import("./pages/WelcomePage"));
 const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOExecutiveDashboard"));
 const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
+const ProductionIntelligence = lazy(() => import("./pages/production/ProductionIntelligence"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
@@ -286,6 +287,11 @@ function AppContent() {
                   <Route path="/production-log" element={
                     <ProtectedRouteGate>
                       <ProductionLogModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/production-intelligence" element={
+                    <ProtectedRouteGate>
+                      <ProductionIntelligence />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/crm-import" element={
