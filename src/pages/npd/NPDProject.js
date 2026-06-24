@@ -13,6 +13,7 @@ import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdServi
 import * as plmProductService from '../../services/plmProductService';
 import * as plmCostingService from '../../services/plmCostingService';
 import ppcService from '../../services/ppcService';
+import inventoryLedgerService from '../../services/inventoryLedgerService';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
@@ -331,8 +332,47 @@ function EngineeringTab({ project, onChanged, notify, navigate }) {
         </CardContent>
       </Card>
 
+      <UphCard product={product} reloadProduct={reload} notify={notify} />
       <BomEditor product={product} reloadProduct={reload} notify={notify} />
     </Stack>
+  );
+}
+
+const UPH_FIELDS = [
+  { key: 'target_per_hour', label: 'Per hour' },
+  { key: 'cycle_time_sec', label: 'Cycle time (sec)' },
+  { key: 'operators_reqd', label: 'Operators' },
+  { key: 'target_per_day', label: 'Per day' },
+];
+function UphCard({ product, reloadProduct, notify }) {
+  const [form, setForm] = useState({});
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const f = {}; UPH_FIELDS.forEach(({ key }) => { f[key] = product[key] ?? ''; }); setForm(f);
+  }, [product]);
+  const save = async () => {
+    setBusy(true);
+    try {
+      const patch = {}; UPH_FIELDS.forEach(({ key }) => { patch[key] = form[key] === '' ? null : Number(form[key]); });
+      await plmProductService.updateProduct(product.id, patch);
+      notify({ open: true, message: 'UPH / capacity saved.', severity: 'success' }); reloadProduct();
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>UPH / capacity</Typography>
+        <Button size="small" onClick={save} disabled={busy}>{busy ? <CircularProgress size={18} /> : 'Save'}</Button>
+      </Stack>
+      <Divider sx={{ mb: 1.5 }} />
+      <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+        {UPH_FIELDS.map(({ key, label }) => (
+          <TextField key={key} size="small" type="number" label={label} value={form[key] ?? ''} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} sx={{ width: 130 }} />
+        ))}
+      </Stack>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>Feeds production planning. Full capacity fields live in Product Master.</Typography>
+    </CardContent></Card>
   );
 }
 
@@ -340,6 +380,8 @@ function BomEditor({ product, reloadProduct, notify }) {
   const parentId = product?.ppc_item_id || null;
   const [bom, setBom] = useState([]);
   const [items, setItems] = useState([]);
+  const [onHand, setOnHand] = useState({});
+  const [buildQty, setBuildQty] = useState('1');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [row, setRow] = useState({ component_item_id: '', qty_per: '', scrap_pct: '' });
@@ -348,8 +390,14 @@ function BomEditor({ product, reloadProduct, notify }) {
     if (!parentId) { setBom([]); return; }
     setLoading(true);
     try {
-      const [b, its] = await Promise.all([ppcService.listBomForParent(parentId), ppcService.listItems({ includeInactive: false })]);
+      const [b, its, bals] = await Promise.all([
+        ppcService.listBomForParent(parentId),
+        ppcService.listItems({ includeInactive: false }),
+        inventoryLedgerService.getBalances(),
+      ]);
       setBom(b || []); setItems(its || []);
+      const oh = {}; (bals || []).forEach((r) => { oh[r.item_id] = (oh[r.item_id] || 0) + Number(r.on_hand || 0); });
+      setOnHand(oh);
     } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
     setLoading(false);
   }, [parentId, notify]);
@@ -409,6 +457,32 @@ function BomEditor({ product, reloadProduct, notify }) {
             </Stack>
           ))}
         </Stack>
+      )}
+
+      {bom.length > 0 && (
+        <>
+          <Divider sx={{ my: 1.5 }} />
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Material status <Typography component="span" variant="caption" color="text.secondary">(on-hand from the stock ledger)</Typography></Typography>
+            <TextField size="small" type="number" label="Build qty" value={buildQty} onChange={(e) => setBuildQty(e.target.value)} sx={{ width: 110 }} />
+          </Stack>
+          <Stack spacing={0.5}>
+            {bom.map((l) => {
+              const req = Number(l.qty_per) * (1 + (Number(l.scrap_pct) || 0) / 100) * (Number(buildQty) || 0);
+              const oh = onHand[l.component_item_id] || 0;
+              const short = Math.max(0, req - oh);
+              return (
+                <Stack key={l.id + 'm'} direction="row" spacing={1} alignItems="center" sx={{ py: 0.25 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 90 }}>{l.component?.code}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ flex: 1, minWidth: 0 }}>
+                    need {req.toLocaleString('en-IN', { maximumFractionDigits: 1 })} {l.component?.uom} · have {oh.toLocaleString('en-IN')}
+                  </Typography>
+                  <Chip size="small" label={short > 0 ? `short ${short.toLocaleString('en-IN', { maximumFractionDigits: 1 })}` : 'OK'} color={short > 0 ? 'error' : 'success'} sx={{ height: 18 }} />
+                </Stack>
+              );
+            })}
+          </Stack>
+        </>
       )}
     </CardContent></Card>
   );

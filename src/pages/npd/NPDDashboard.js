@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Stack, Card, CardContent, Typography, Button, IconButton, Chip, TextField, MenuItem,
   CircularProgress, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Menu,
-  Tooltip, useTheme, alpha,
+  Tooltip, ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, useTheme, alpha,
 } from '@mui/material';
 import {
   Science as NpdIcon, Add as AddIcon, Refresh as RefreshIcon, ArrowForward as MoveIcon,
 } from '@mui/icons-material';
-import npdService, { NPD_STAGES } from '../../services/npdService';
+import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdService';
 
 const PRIORITY_COLOR = { urgent: 'error', high: 'warning', normal: 'default', low: 'info' };
 
@@ -25,6 +26,7 @@ const NPDDashboard = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [addOpen, setAddOpen] = useState(false);
   const [moveMenu, setMoveMenu] = useState(null); // { anchor, project }
+  const [view, setView] = useState('board'); // 'board' | 'list'
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,7 +85,12 @@ const NPDDashboard = () => {
               <Typography variant="body2" sx={{ opacity: 0.9 }}>Customer requirement to approved production release.</Typography>
             </Box>
           </Box>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <ToggleButtonGroup size="small" exclusive value={view} onChange={(_, v) => v && setView(v)}
+              sx={{ bgcolor: alpha('#fff', 0.15), '& .MuiToggleButton-root': { color: 'white', border: 'none', px: 1.5 }, '& .Mui-selected': { bgcolor: 'white !important', color: theme.palette.secondary.main + ' !important' } }}>
+              <ToggleButton value="board">Board</ToggleButton>
+              <ToggleButton value="list">List</ToggleButton>
+            </ToggleButtonGroup>
             <Button onClick={() => setAddOpen(true)} startIcon={<AddIcon />} variant="contained" color="inherit" sx={{ color: theme.palette.secondary.main }}>New project</Button>
             <Tooltip title="Refresh"><IconButton onClick={load} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
           </Stack>
@@ -99,6 +106,8 @@ const NPDDashboard = () => {
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+      ) : view === 'list' ? (
+        <ReportTable projects={projects} navigate={navigate} />
       ) : (
         <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto', flex: 1, pb: 1 }}>
           {NPD_STAGES.map((stage) => {
@@ -150,6 +159,42 @@ const NPDDashboard = () => {
     </Box>
   );
 };
+
+function ReportTable({ projects, navigate }) {
+  const overdue = (p) => p.target_date && new Date(p.target_date) < new Date() && p.status === 'active';
+  return (
+    <TableContainer component={Paper} sx={{ borderRadius: 2, flex: 1, overflow: 'auto' }}>
+      <Table size="small" stickyHeader>
+        <TableHead>
+          <TableRow>
+            {['Project', 'Product', 'Customer', 'Stage', 'Engineer', 'Target', 'Age', 'Status'].map((h) => (
+              <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {projects.map((p) => (
+            <TableRow key={p.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/npd/${p.id}`)}>
+              <TableCell sx={{ fontWeight: 600 }}>{p.project_no}</TableCell>
+              <TableCell>{p.product_name}</TableCell>
+              <TableCell>{p.company_name || p.customer_code || '—'}</TableCell>
+              <TableCell><Chip size="small" label={NPD_STAGE_LABEL[p.stage] || p.stage} /></TableCell>
+              <TableCell>{(p.npd_engineer_email || '').split('@')[0] || '—'}</TableCell>
+              <TableCell sx={{ color: overdue(p) ? 'error.main' : 'inherit', fontWeight: overdue(p) ? 700 : 400 }}>
+                {p.target_date ? new Date(p.target_date).toLocaleDateString('en-IN') : '—'}
+              </TableCell>
+              <TableCell>{daysSince(p.stage_entered_at)}d</TableCell>
+              <TableCell><Chip size="small" label={p.status} color={p.status === 'approved' ? 'success' : p.status === 'active' ? 'default' : 'warning'} /></TableCell>
+            </TableRow>
+          ))}
+          {projects.length === 0 && (
+            <TableRow><TableCell colSpan={8} sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>No projects yet.</TableCell></TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
 
 function AddProjectDialog({ open, onClose, onCreated, notify }) {
   const blank = { product_name: '', company_name: '', customer_code: '', customer_part_no: '', project_type: 'sample', priority: 'normal', target_date: '', npd_engineer_email: '' };
