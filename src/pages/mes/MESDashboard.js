@@ -54,6 +54,20 @@ const MESDashboard = () => {
             <Kpi label="Downtime today" value={`${k.todayDowntime || 0}m`} color={theme.palette.warning.main} />
           </Stack>
 
+          {data.outputByPart && (
+            <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+              {data.outputByPart.map((p) => (
+                <Card key={p.part} sx={{ flex: 1, minWidth: 150, borderRadius: 2, borderLeft: '4px solid', borderColor: p.part === 'Molding' ? 'error.main' : p.part === 'Packing' ? 'warning.main' : 'primary.main' }}>
+                  <CardContent sx={{ py: 1.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.58rem', display: 'block' }}>{p.part} (today)</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>{(p.good || 0).toLocaleString('en-IN')}</Typography>
+                    <Typography variant="caption" color="text.secondary">{p.reject || 0} reject{p.part === 'Molding' ? ' · bottleneck' : ''}</Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          )}
+
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
             <Card sx={{ borderRadius: 2, flex: 1, minWidth: 0 }}><CardContent>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Stage load <Typography component="span" variant="caption" color="text.secondary">(open work across stages)</Typography></Typography>

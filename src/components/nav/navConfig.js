@@ -108,6 +108,7 @@ export const NAV_GROUPS = [
       { label: "Job Cards", path: "/job-cards", icon: ic(AssignmentOutlined) },
       { label: "MES Dashboard", path: "/mes-dashboard", icon: ic(InsightsOutlined) },
       { label: "Daily Plan", path: "/daily-plan", icon: ic(AssignmentOutlined) },
+      { label: "Capacity & Overtime", path: "/capacity-planner", icon: ic(FactoryOutlined) },
       { label: "MES Setup", path: "/mes-setup", icon: ic(BuildOutlined) },
     ],
   },

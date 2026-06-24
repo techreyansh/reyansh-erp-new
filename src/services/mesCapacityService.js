@@ -9,6 +9,14 @@ import { supabase } from '../lib/supabaseClient';
 function throwIf(error, ctx) { if (error) throw new Error(`${ctx ? ctx + ': ' : ''}${error.message}`); }
 const num = (x) => Number(x) || 0;
 
+/** Map a stage name to the 3 production parts (Assembly / Molding / Packing). */
+export function stagePart(stageName = '') {
+  const s = stageName.toLowerCase();
+  if (/mold/.test(s)) return 'Molding';
+  if (/pack|fold|test|hv|visual|inspect/.test(s)) return 'Packing';
+  return 'Assembly'; // cutting + A/B-side assembly + crimping + sleeve + ...
+}
+
 /** Forked molding capacity (review fix): cavities x cycles/hr, not machine-hours. */
 export function moldingCapacityPerHour(cavityCount, cycleTimeSec) {
   const cav = num(cavityCount) || 1; const cyc = num(cycleTimeSec);
@@ -66,9 +74,14 @@ export async function getDashboard() {
   const recent = [...log].sort((a, b) => b.logged_at.localeCompare(a.logged_at)).slice(0, 12)
     .map((l) => ({ ...l, stage: stageName[l.stage_id] || '—' }));
 
+  // Output by the 3 parts (Assembly / Molding / Packing) — job cards linked part-wise
+  const partMap = { Assembly: { part: 'Assembly', good: 0, reject: 0 }, Molding: { part: 'Molding', good: 0, reject: 0 }, Packing: { part: 'Packing', good: 0, reject: 0 } };
+  log.forEach((l) => { const p = stagePart(stageName[l.stage_id] || ''); partMap[p].good += num(l.output_qty); partMap[p].reject += num(l.reject_qty); });
+  const outputByPart = Object.values(partMap);
+
   return {
     kpis: { openWos: wos.length, running, todayGood, todayReject, rejectPct, todayDowntime },
-    stageLoad, outputByStage, downtimeByReason, recent,
+    stageLoad, outputByStage, outputByPart, downtimeByReason, recent,
   };
 }
 
