@@ -173,7 +173,7 @@ function AddProductDialog({ open, onClose, onCreated, notify }) {
   );
 }
 
-const TABS = ['Overview', 'Costing', 'Process', 'Documents', 'Revisions', 'Activity'];
+const TABS = ['Overview', 'Costing', 'Process', 'Quality Plan', 'Documents', 'Revisions', 'Activity'];
 
 function Product360({ productId, onBack, notify, snack, setSnack }) {
   const theme = useTheme();
@@ -211,6 +211,7 @@ function Product360({ productId, onBack, notify, snack, setSnack }) {
       {visibleTabs[tab] === 'Overview' && <OverviewTab p={p} onSaved={load} notify={notify} />}
       {visibleTabs[tab] === 'Costing' && <CostingTab p={p} notify={notify} />}
       {visibleTabs[tab] === 'Process' && <ProcessTab p={p} notify={notify} />}
+      {visibleTabs[tab] === 'Quality Plan' && <QualityPlanTab p={p} notify={notify} />}
       {visibleTabs[tab] === 'Documents' && <DocumentsTab p={p} notify={notify} />}
       {visibleTabs[tab] === 'Revisions' && <RevisionsTab p={p} />}
       {visibleTabs[tab] === 'Activity' && <ActivityTab p={p} />}
@@ -356,6 +357,39 @@ function ProcessTab({ p, notify }) {
         </Stack>
       ))}
       <Box sx={{ mt: 1, textAlign: 'right' }}><Button variant="contained" onClick={save}>Save routing</Button></Box>
+    </CardContent></Card>
+  );
+}
+
+const QP_STAGES = ['incoming', 'in_process', 'final', 'dispatch'];
+function QualityPlanTab({ p, notify }) {
+  const [rows, setRows] = useState([]);
+  useEffect(() => { plm.listQualityPlan(p.id).then(setRows); }, [p.id]);
+  const add = () => setRows((s) => [...s, { stage: 'in_process', characteristic: '', specification: '', method: '', frequency: '', sample_size: '', reaction_plan: '' }]);
+  const upd = (i, k, v) => setRows((s) => s.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
+  const del = (i) => setRows((s) => s.filter((_, j) => j !== i));
+  const save = async () => { try { await plm.saveQualityPlan(p.id, rows); notify('Quality plan saved'); } catch (e) { notify(e.message, 'error'); } };
+  return (
+    <Card variant="outlined" sx={{ borderRadius: 2 }}><CardContent>
+      <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>Quality plan (control plan)</Typography>
+        <Button size="small" startIcon={<AddIcon />} onClick={add}>Add check</Button>
+      </Stack>
+      {rows.map((r, i) => (
+        <Stack key={i} direction="row" spacing={1} sx={{ mb: 1 }} alignItems="center" flexWrap="wrap" useFlexGap>
+          <TextField size="small" select label="Stage" value={r.stage} onChange={(e) => upd(i, 'stage', e.target.value)} sx={{ width: 120 }}>
+            {QP_STAGES.map((x) => <MenuItem key={x} value={x}>{x.replace('_', ' ')}</MenuItem>)}
+          </TextField>
+          <TextField size="small" placeholder="Characteristic" value={r.characteristic} onChange={(e) => upd(i, 'characteristic', e.target.value)} sx={{ flex: 1, minWidth: 140 }} />
+          <TextField size="small" placeholder="Spec" value={r.specification} onChange={(e) => upd(i, 'specification', e.target.value)} sx={{ width: 130 }} />
+          <TextField size="small" placeholder="Method" value={r.method} onChange={(e) => upd(i, 'method', e.target.value)} sx={{ width: 120 }} />
+          <TextField size="small" placeholder="Freq" value={r.frequency} onChange={(e) => upd(i, 'frequency', e.target.value)} sx={{ width: 100 }} />
+          <TextField size="small" placeholder="Sample" value={r.sample_size} onChange={(e) => upd(i, 'sample_size', e.target.value)} sx={{ width: 80 }} />
+          <TextField size="small" placeholder="On fail" value={r.reaction_plan} onChange={(e) => upd(i, 'reaction_plan', e.target.value)} sx={{ width: 120 }} />
+          <IconButton size="small" color="error" onClick={() => del(i)}><DeleteOutline fontSize="small" /></IconButton>
+        </Stack>
+      ))}
+      <Box sx={{ mt: 1, textAlign: 'right' }}><Button variant="contained" onClick={save}>Save quality plan</Button></Box>
     </CardContent></Card>
   );
 }

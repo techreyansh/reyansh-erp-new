@@ -354,7 +354,100 @@ function EngineeringTab({ project, onChanged, notify, navigate }) {
 
       <UphCard product={product} reloadProduct={reload} notify={notify} />
       <BomEditor product={product} reloadProduct={reload} notify={notify} />
+      <RoutingEditor product={product} notify={notify} />
+      <QualityPlanEditor product={product} notify={notify} />
     </Stack>
+  );
+}
+
+const ROUTING_COLS = [
+  { k: 'step_name', l: 'Operation', w: 160 }, { k: 'department', l: 'Dept', w: 110 },
+  { k: 'machine', l: 'Machine / work centre', w: 150 }, { k: 'standard_time_sec', l: 'Time (s)', w: 90, num: true },
+  { k: 'manpower', l: 'Men', w: 70, num: true },
+];
+function RoutingEditor({ product, notify }) {
+  const [steps, setSteps] = useState(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { plmProductService.listProcess(product.id).then(setSteps).catch(() => setSteps([])); }, [product.id]);
+  const upd = (i, k, v) => setSteps((s) => s.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  const add = () => setSteps((s) => [...(s || []), { step_name: '', department: '', machine: '', standard_time_sec: '', manpower: '' }]);
+  const del = (i) => setSteps((s) => s.filter((_, j) => j !== i));
+  const save = async () => {
+    setBusy(true);
+    try {
+      await plmProductService.saveProcess(product.id, (steps || []).map((s) => ({ ...s, standard_time_sec: s.standard_time_sec || null, manpower: s.manpower || null })));
+      notify({ open: true, message: 'Routing saved.', severity: 'success' });
+    } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  if (steps === null) return null;
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Production routing <Typography component="span" variant="caption" color="text.secondary">(travels to production on release)</Typography></Typography>
+        <Stack direction="row" spacing={1}><Button size="small" onClick={add}>+ Step</Button><Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save'}</Button></Stack>
+      </Stack>
+      <Divider sx={{ mb: 1 }} />
+      {steps.length === 0 ? <Typography variant="body2" color="text.secondary">No routing yet — add the operation sequence (e.g. cutting → crimping → molding → testing).</Typography> : (
+        <Stack spacing={1}>
+          {steps.map((r, i) => (
+            <Stack key={i} direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <Chip size="small" label={i + 1} sx={{ height: 22 }} />
+              {ROUTING_COLS.map((c) => (
+                <TextField key={c.k} size="small" label={c.l} type={c.num ? 'number' : 'text'} value={r[c.k] ?? ''} onChange={(e) => upd(i, c.k, e.target.value)} sx={{ width: c.w }} />
+              ))}
+              <Button size="small" color="error" onClick={() => del(i)}>Remove</Button>
+            </Stack>
+          ))}
+        </Stack>
+      )}
+    </CardContent></Card>
+  );
+}
+
+const QP_STAGES = ['incoming', 'in_process', 'final', 'dispatch'];
+const QP_COLS = [
+  { k: 'characteristic', l: 'Characteristic', w: 150 }, { k: 'specification', l: 'Spec / tolerance', w: 140 },
+  { k: 'method', l: 'Method / gauge', w: 130 }, { k: 'frequency', l: 'Frequency', w: 110 },
+  { k: 'sample_size', l: 'Sample', w: 80 }, { k: 'reaction_plan', l: 'On fail', w: 130 },
+];
+function QualityPlanEditor({ product, notify }) {
+  const [rows, setRows] = useState(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { plmProductService.listQualityPlan(product.id).then(setRows).catch(() => setRows([])); }, [product.id]);
+  const upd = (i, k, v) => setRows((s) => s.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  const add = () => setRows((s) => [...(s || []), { stage: 'in_process', characteristic: '', specification: '', method: '', frequency: '', sample_size: '', reaction_plan: '' }]);
+  const del = (i) => setRows((s) => s.filter((_, j) => j !== i));
+  const save = async () => {
+    setBusy(true);
+    try { await plmProductService.saveQualityPlan(product.id, rows || []); notify({ open: true, message: 'Quality plan saved.', severity: 'success' }); }
+    catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
+    setBusy(false);
+  };
+  if (rows === null) return null;
+  return (
+    <Card sx={{ borderRadius: 2 }}><CardContent>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Quality plan <Typography component="span" variant="caption" color="text.secondary">(control plan — inspection points)</Typography></Typography>
+        <Stack direction="row" spacing={1}><Button size="small" onClick={add}>+ Check</Button><Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save'}</Button></Stack>
+      </Stack>
+      <Divider sx={{ mb: 1 }} />
+      {rows.length === 0 ? <Typography variant="body2" color="text.secondary">No quality plan yet — add the checks (characteristic, spec, method, frequency).</Typography> : (
+        <Stack spacing={1}>
+          {rows.map((r, i) => (
+            <Stack key={i} direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <TextField size="small" select label="Stage" value={r.stage} onChange={(e) => upd(i, 'stage', e.target.value)} sx={{ width: 120 }}>
+                {QP_STAGES.map((x) => <MenuItem key={x} value={x}>{x.replace('_', ' ')}</MenuItem>)}
+              </TextField>
+              {QP_COLS.map((c) => (
+                <TextField key={c.k} size="small" label={c.l} value={r[c.k] ?? ''} onChange={(e) => upd(i, c.k, e.target.value)} sx={{ width: c.w }} />
+              ))}
+              <Button size="small" color="error" onClick={() => del(i)}>Remove</Button>
+            </Stack>
+          ))}
+        </Stack>
+      )}
+    </CardContent></Card>
   );
 }
 
@@ -667,7 +760,7 @@ function ApprovalsTab({ project, onChanged, notify }) {
       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Approval & production release</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
         {released ? 'This project is released to production.'
-          : canRelease ? 'Release flips the linked product to Production (no data copy — the product, BOM and costing already live in their own modules).'
+          : canRelease ? 'Release flips the linked product to Production. Its BOM, costing, routing and quality plan all travel with it (they key to the product), so Production Planning gets the approved set — no re-entry.'
           : 'The project must reach the Approved stage (with a linked product) before production release.'}
       </Typography>
       <Button variant="contained" color="secondary" onClick={release} disabled={busy || !canRelease || !project.product_id || released}>

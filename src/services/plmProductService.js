@@ -111,10 +111,27 @@ export async function listProductDocuments(productId) {
   const { data } = await supabase.from('product_document').select('*').eq('product_id', productId).order('created_at', { ascending: false });
   return data || [];
 }
+export async function listQualityPlan(productId) {
+  const { data } = await supabase.from('product_quality_plan').select('*').eq('product_id', productId).order('sequence');
+  return data || [];
+}
+export async function saveQualityPlan(productId, rows) {
+  await supabase.from('product_quality_plan').delete().eq('product_id', productId);
+  if (rows.length) {
+    const insert = rows.map((r, i) => ({
+      product_id: productId, sequence: i, stage: r.stage || 'in_process',
+      characteristic: r.characteristic || null, specification: r.specification || null,
+      method: r.method || null, frequency: r.frequency || null, sample_size: r.sample_size || null,
+      reaction_plan: r.reaction_plan || null,
+    }));
+    const { error } = await supabase.from('product_quality_plan').insert(insert);
+    if (error) throw error;
+  }
+}
 
 const plmProductService = {
   listProducts, getProduct, createProduct, updateProduct, duplicateProduct,
   archiveProduct, restoreProduct, setProductStatus, checkDeletable, deleteProduct,
-  listRevisions, addRevision, listProcess, saveProcess, listProductDocuments,
+  listRevisions, addRevision, listProcess, saveProcess, listQualityPlan, saveQualityPlan, listProductDocuments,
 };
 export default plmProductService;
