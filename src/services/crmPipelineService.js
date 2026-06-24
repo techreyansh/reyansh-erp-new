@@ -1008,6 +1008,13 @@ export async function listClientStageDefs() {
   return data || [];
 }
 
+// Permanently delete a CRM account (prospect/client) + its CRM children.
+// ERP records (orders/invoices by customer_code) are left intact.
+export async function deleteCompany(id) {
+  const { error } = await supabase.rpc("crm_delete_account", { p_id: id });
+  if (error) throw error;
+}
+
 // Unified chronological timeline for one account (activities/stage moves/
 // quotations/orders/invoices/payments/complaints/KIT) — see everything at once.
 export async function clientTimeline(account) {

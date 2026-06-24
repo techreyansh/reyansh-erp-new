@@ -98,6 +98,7 @@ import {
   deleteContact,
   clientHealth,
   convertToClient,
+  deleteCompany,
   assignOwner,
   addCompany,
   updateCompany,
@@ -1269,6 +1270,8 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
   const [headerMenu, setHeaderMenu] = useState(null);
   const [stageAnchor, setStageAnchor] = useState(null);
   const [converting, setConverting] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Contacts + edit-company dialogs.
   const [contactDialog, setContactDialog] = useState(null); // null | "new" | contact object
@@ -1458,6 +1461,20 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
       setErr(e?.message || "Failed to convert to client.");
     } finally {
       setConverting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteCompany(id);
+      setConfirmDel(false);
+      onChanged?.();
+      onClose?.();
+    } catch (e) {
+      notify(e?.message || "Failed to delete account.", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -2149,7 +2166,34 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
         >
           <PrecisionManufacturingIcon fontSize="small" sx={{ mr: 1 }} /> Create work order
         </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => { setHeaderMenu(null); setConfirmDel(true); }}
+          sx={{ fontSize: 13, color: "error.main" }}
+        >
+          <DeleteOutlineIcon fontSize="small" sx={{ mr: 1 }} /> Delete account
+        </MenuItem>
       </Menu>
+
+      {/* Delete confirmation */}
+      <Dialog open={confirmDel} onClose={deleting ? undefined : () => setConfirmDel(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 800 }}>Delete this account?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Permanently deletes <b>{detail?.company?.company_name || "this account"}</b> and its CRM data
+            (activities, contacts, quotations, complaints, history). This cannot be undone.
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+            ERP records (sales orders, invoices) are kept.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDel(false)} disabled={deleting}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting} startIcon={<DeleteOutlineIcon />}>
+            {deleting ? "Deleting…" : "Delete permanently"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <StageMoveMenu
         anchorEl={stageAnchor}

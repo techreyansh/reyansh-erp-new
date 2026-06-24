@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box, Paper, Stack, Typography, Button, TextField, MenuItem, Switch, FormControlLabel,
   IconButton, Divider, Chip, CircularProgress, Slider, Tooltip, Autocomplete, Alert,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import {
   ArrowBackRounded, AddRounded, DeleteOutline, SaveRounded, AutoAwesomeRounded,
@@ -21,6 +22,7 @@ export default function CampaignBuilder({ campaignId, onBack, notify }) {
   const [toEnroll, setToEnroll] = useState([]);
   const [savingSettings, setSavingSettings] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState(null);   // { to, subject, preview_text, body }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,9 +104,10 @@ export default function CampaignBuilder({ campaignId, onBack, notify }) {
     }
   };
 
-  const previewFirstStep = async () => {
+  const previewFirstStep = async (existing) => {
     const step = steps[0];
-    const sample = contacts[0] || { email: 'sample@acme.com', first_name: 'Sample', company: 'Acme Cables' };
+    const sample = existing?.to ? contacts.find((c) => c.email === existing.to) || contacts[0]
+      : contacts[0] || { email: 'sample@acme.com', first_name: 'Sample', company: 'Acme Cables' };
     if (!step?.goal) { notify('Add a goal to step 1 first', 'warning'); return; }
     setPreviewing(true);
     try {
@@ -113,8 +116,7 @@ export default function CampaignBuilder({ campaignId, onBack, notify }) {
         campaign,
         step: { step_order: 1, goal: step.goal, subject_hint: step.subject_hint },
       });
-      notify(`Preview for ${sample.email} — Subject: ${draft.subject}`, 'info');
-      window.alert(`Subject: ${draft.subject}\n\n${draft.body}`);
+      setPreview({ to: sample.email, subject: draft.subject, preview_text: draft.preview_text, body: draft.body });
     } catch (e) {
       notify(e.message, 'error');
     } finally {
@@ -195,8 +197,8 @@ export default function CampaignBuilder({ campaignId, onBack, notify }) {
           <Button variant="contained" startIcon={<SaveRounded />} onClick={saveSettings} disabled={savingSettings} sx={{ textTransform: 'none' }}>
             {savingSettings ? 'Saving…' : 'Save settings'}
           </Button>
-          <Button variant="outlined" startIcon={<AutoAwesomeRounded />} onClick={previewFirstStep} disabled={previewing} sx={{ textTransform: 'none' }}>
-            {previewing ? 'Generating…' : 'Preview step 1 draft'}
+          <Button variant="outlined" startIcon={<AutoAwesomeRounded />} onClick={() => previewFirstStep()} disabled={previewing} sx={{ textTransform: 'none' }}>
+            {previewing ? 'Generating…' : 'Preview AI email'}
           </Button>
         </Stack>
       </Paper>
@@ -280,6 +282,30 @@ export default function CampaignBuilder({ campaignId, onBack, notify }) {
           </Stack>
         )}
       </Paper>
+
+      {/* AI EMAIL PREVIEW */}
+      <Dialog open={!!preview} onClose={() => setPreview(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 800 }}>
+          AI email preview
+          <Typography variant="caption" color="text.secondary" display="block">Sample for {preview?.to} · this is exactly what each recipient gets, personalised to them.</Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          {preview && (
+            <Stack spacing={1.5}>
+              <Box><Typography variant="caption" color="text.secondary">SUBJECT</Typography><Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{preview.subject}</Typography></Box>
+              {preview.preview_text && <Box><Typography variant="caption" color="text.secondary">PREVIEW TEXT</Typography><Typography variant="body2" color="text.secondary">{preview.preview_text}</Typography></Box>}
+              <Divider />
+              <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 2 }}>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{preview.body}</Typography>
+              </Box>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPreview(null)}>Close</Button>
+          <Button variant="contained" startIcon={<AutoAwesomeRounded />} disabled={previewing} onClick={() => previewFirstStep(preview)}>{previewing ? 'Regenerating…' : 'Regenerate'}</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
