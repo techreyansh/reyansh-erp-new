@@ -43,10 +43,34 @@ export async function getProject(id) {
   return data;
 }
 
-/** Create a project (race-safe project_no minted server-side). */
+/** All developments for one CRM customer (by code or account id). */
+export async function listByCustomer({ customerCode, accountId } = {}) {
+  let q = supabase.from('npd_project').select('*');
+  if (accountId && customerCode) q = q.or(`account_id.eq.${accountId},customer_code.eq.${customerCode}`);
+  else if (accountId) q = q.eq('account_id', accountId);
+  else if (customerCode) q = q.eq('customer_code', customerCode);
+  else return [];
+  const { data, error } = await q.order('created_at', { ascending: false });
+  throwIf(error, 'List customer developments');
+  return data || [];
+}
+
+/**
+ * Create a development (race-safe project_no minted server-side). Columns the
+ * RPC doesn't take (development_type / opportunity / account_id) are patched
+ * straight after.
+ */
 export async function createProject(payload) {
-  const { data, error } = await supabase.rpc('npd_create_project', { p_payload: payload });
+  const { development_type, opportunity, account_id, ...core } = payload || {};
+  const { data, error } = await supabase.rpc('npd_create_project', { p_payload: core });
   throwIf(error, 'Create NPD project');
+  const extra = {};
+  if (development_type) extra.development_type = development_type;
+  if (opportunity) extra.opportunity = opportunity;
+  if (account_id) extra.account_id = account_id;
+  if (data?.id && Object.keys(extra).length) {
+    try { return await updateProject(data.id, extra); } catch { /* non-fatal */ }
+  }
   return data;
 }
 
@@ -146,7 +170,7 @@ export async function releaseToProduction(projectId) {
 
 const npdService = {
   NPD_STAGES, NPD_STAGE_LABEL,
-  listProjects, getProject, createProject, updateProject,
+  listProjects, listByCustomer, getProject, createProject, updateProject,
   moveStage, getStageHistory, listDocuments, uploadDocument, documentUrl,
   listSamples, addSample, updateSample, listQualityChecks, addQualityCheck,
   listFeedback, addFeedback, releaseToProduction,
