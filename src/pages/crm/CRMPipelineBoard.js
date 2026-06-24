@@ -101,6 +101,8 @@ import {
   deleteCompany,
   assignOwner,
   addCompany,
+  peekNextCode,
+  setCode,
   updateCompany,
   listAssignableUsers,
   getCurrentUserEmail,
@@ -543,6 +545,16 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
+  const [codePreview, setCodePreview] = useState("");
+  const [overrideCode, setOverrideCode] = useState(false);
+  const [codeValue, setCodeValue] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setOverrideCode(false);
+    setCodeValue("");
+    peekNextCode("prospect").then((c) => setCodePreview(c || "")).catch(() => setCodePreview(""));
+  }, [open]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -566,6 +578,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
         kind: "prospect",
         owner_email: currentEmail || null,
         is_active: true,
+        customer_code: overrideCode && codeValue.trim() ? codeValue.trim().toUpperCase() : null,
       });
       setForm(empty);
       onClose();
@@ -601,6 +614,24 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
             fullWidth
             autoFocus
           />
+          <Stack direction="row" spacing={1} alignItems="flex-start">
+            <TextField
+              label="Code"
+              size="small"
+              value={overrideCode ? codeValue : (codePreview || "auto")}
+              onChange={overrideCode ? (e) => setCodeValue(e.target.value) : undefined}
+              InputProps={{ readOnly: !overrideCode }}
+              helperText={overrideCode ? "Custom code — must start with PC" : "Auto-assigned on save"}
+              sx={{ maxWidth: 240 }}
+            />
+            <Button
+              size="small"
+              onClick={() => { setOverrideCode((v) => !v); if (!overrideCode) setCodeValue(codePreview); }}
+              sx={{ mt: 1 }}
+            >
+              {overrideCode ? "Use auto" : "Override"}
+            </Button>
+          </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField label="Contact person" value={form.contact_person} onChange={set("contact_person")} fullWidth />
             <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth />
@@ -1337,6 +1368,24 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
     }
   };
 
+  const [editingCode, setEditingCode] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+
+  const saveCode = async () => {
+    const v = codeInput.trim().toUpperCase();
+    if (!v) { setEditingCode(false); return; }
+    try {
+      const res = await setCode(id, v);
+      if (res && res.ok === false) { setErr(res.message || "Could not change the code."); return; }
+      setEditingCode(false);
+      await load();
+      onChanged?.();
+      notify(`Code updated to ${res.customer_code}.`, "success");
+    } catch (e) {
+      setErr(e?.message || "Could not change the code.");
+    }
+  };
+
   const reloadContacts = useCallback(async () => {
     try {
       const c = await listContacts(id);
@@ -1611,6 +1660,21 @@ function CompanyDrawer({ id, open, onClose, onChanged, users, userMap, collabora
                 useFlexGap
                 divider={<Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: "text.disabled" }} />}
               >
+                {editingCode ? (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <TextField value={codeInput} onChange={(e) => setCodeInput(e.target.value)} size="small" variant="standard" sx={{ width: 110 }} autoFocus />
+                    <Button size="small" onClick={saveCode}>Save</Button>
+                    <Button size="small" onClick={() => setEditingCode(false)}>Cancel</Button>
+                  </Stack>
+                ) : (
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={company.customer_code || "set code"}
+                    onClick={() => { setCodeInput(company.customer_code || ""); setEditingCode(true); }}
+                    sx={{ height: 20, cursor: "pointer" }}
+                  />
+                )}
                 <Stack direction="row" spacing={0.5} alignItems="center">
                   <PersonIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="caption" color="text.secondary">

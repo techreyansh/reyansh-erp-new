@@ -411,13 +411,30 @@ export async function assignOwner(id, email) {
   return data;
 }
 
-/** Create a new pipeline company. */
+/** Create a new pipeline company. Race-safe: the RPC mints the code (if none
+ *  supplied) + inserts under one advisory lock. */
 export async function addCompany(payload) {
-  const { data, error } = await supabase
-    .from("crm_pipeline")
-    .insert(payload)
-    .select("*")
-    .single();
+  const { data, error } = await supabase.rpc("crm_add_company", { p_payload: payload });
+  throwIf(error);
+  return data;
+}
+
+/** Preview the next auto-generated code for a kind ('prospect'|'client'). */
+export async function peekNextCode(kind = "prospect") {
+  const { data, error } = await supabase.rpc("crm_next_code", {
+    p_prefix: kind === "client" ? "C" : "PC",
+  });
+  throwIf(error);
+  return data;
+}
+
+/** Edit an account's code. Returns { ok, blocked, message, customer_code }.
+ *  Server blocks the change when the old code is referenced by orders/invoices/WOs. */
+export async function setCode(accountId, newCode) {
+  const { data, error } = await supabase.rpc("crm_set_code", {
+    p_account_id: accountId,
+    p_new_code: newCode,
+  });
   throwIf(error);
   return data;
 }
@@ -933,6 +950,8 @@ const crmPipelineService = {
   convertToClient,
   assignOwner,
   addCompany,
+  peekNextCode,
+  setCode,
   updateCompany,
   listOrderCycles,
   moveOrderCycle,
