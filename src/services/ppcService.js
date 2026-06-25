@@ -790,6 +790,17 @@ async function finishWorkOrder(woId, qty) {
   return data || null;
 }
 
+/** WO status-change audit trail (newest first). */
+async function listWoStatusLog(woId) {
+  if (!woId) return [];
+  const { data } = await supabase
+    .from('ppc_wo_status_log')
+    .select('id, old_status, new_status, changed_by_email, changed_at')
+    .eq('wo_id', woId)
+    .order('changed_at', { ascending: false });
+  return data || [];
+}
+
 /** Cancel a cable work order (sets status='cancelled'; guarded server-side). */
 async function cancelWorkOrder(woId) {
   if (!woId) throw new Error('Cancel work order: no work order selected');
@@ -949,6 +960,7 @@ const ppcService = {
   advanceStage,
   finishWorkOrder,
   cancelWorkOrder,
+  listWoStatusLog,
   issueMaterial,
   issueKitLine,
   issueKit,
