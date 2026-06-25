@@ -344,7 +344,12 @@ export async function addContact(accountId, c) {
       designation: c.designation || null,
       department: c.department || null,
       phone: c.phone || null,
+      alt_phone: c.alt_phone || null,
       email: c.email || null,
+      linkedin: c.linkedin || null,
+      birthday: c.birthday || null,
+      is_decision_maker: !!c.is_decision_maker,
+      preferred_comm: c.preferred_comm || null,
       is_primary: !!c.is_primary,
       notes: c.notes || null,
     })

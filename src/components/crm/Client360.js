@@ -14,6 +14,7 @@ import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
+import CompanyContacts from './CompanyContacts';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 
 const AI_ACTIONS = [
@@ -211,20 +212,9 @@ export default function Client360({ account, onClose, notify }) {
               </Grid>
             </Grid>
           )}
-          {/* 1 CONTACTS */}
-          {tab === 1 && (
-            <Stack spacing={1}>
-              {(crm?.contacts || []).map((ct, i) => (
-                <Stack key={i} direction="row" spacing={1.5} alignItems="center" sx={{ p: 1, borderRadius: 1.5, border: 1, borderColor: 'divider' }}>
-                  <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{(ct.contact_person || ct.full_name || '?')[0]}</Avatar>
-                  <Box sx={{ flexGrow: 1, minWidth: 0 }}><Typography variant="body2" sx={{ fontWeight: 700 }}>{ct.contact_person || ct.full_name}{ct.is_primary ? ' ★' : ''}</Typography><Typography variant="caption" color="text.secondary">{[ct.designation, ct.department].filter(Boolean).join(' · ')}</Typography></Box>
-                  {ct.phone && <Tooltip title="Call"><IconButton size="small" component="a" href={`tel:${ct.phone}`}><CallRounded fontSize="small" /></IconButton></Tooltip>}
-                  {ct.phone && <Tooltip title="WhatsApp"><IconButton size="small" component="a" href={`https://wa.me/${String(ct.phone).replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsApp fontSize="small" /></IconButton></Tooltip>}
-                  {ct.email && <Tooltip title="Email"><IconButton size="small" component="a" href={`mailto:${ct.email}`}><EmailOutlined fontSize="small" /></IconButton></Tooltip>}
-                </Stack>
-              ))}
-              {!crm?.contacts?.length && <Typography variant="body2" color="text.secondary">No contacts.</Typography>}
-            </Stack>
+          {/* 1 CONTACTS — full multi-contact management (CRM 360 P2) */}
+          {tab === 1 && account?.id && (
+            <CompanyContacts accountId={account.id} />
           )}
           {/* 2 PRODUCTS */}
           {tab === 2 && <MiniTable cols={['Code', 'Product', 'Status', 'Rev']} rows={data.products} empty="No products linked." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.product_code}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.status}</TableCell><TableCell>{r.current_revision}</TableCell></>} />}
