@@ -419,6 +419,22 @@ export async function addCompany(payload) {
   return data;
 }
 
+/**
+ * Claim a hidden company by name (UNOWNED-ONLY). Backed by the
+ * `crm_claim_company` SECURITY DEFINER RPC, which can see + take ownership of a
+ * row that RLS hides from the caller — but ONLY when it currently has no owner.
+ * The RPC returns { ok, reason?, message?, id?, company_name?, owner_email? }
+ * and signals logical failures via ok:false rather than throwing, so callers
+ * must inspect data.ok (only transport/SQL errors are thrown).
+ */
+export async function claimCompanyByName(companyName) {
+  const { data, error } = await supabase.rpc("crm_claim_company", {
+    p_company_name: companyName,
+  });
+  throwIf(error);
+  return data;
+}
+
 /** Preview the next auto-generated code for a kind ('prospect'|'client'). */
 export async function peekNextCode(kind = "prospect") {
   const { data, error } = await supabase.rpc("crm_next_code", {
@@ -950,6 +966,7 @@ const crmPipelineService = {
   convertToClient,
   assignOwner,
   addCompany,
+  claimCompanyByName,
   peekNextCode,
   setCode,
   updateCompany,

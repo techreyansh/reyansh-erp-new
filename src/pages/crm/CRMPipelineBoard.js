@@ -102,6 +102,7 @@ import {
   deleteCompany,
   assignOwner,
   addCompany,
+  claimCompanyByName,
   peekNextCode,
   setCode,
   updateCompany,
@@ -533,7 +534,7 @@ function BoardSkeleton() {
 /* Add company dialog                                                       */
 /* ----------------------------------------------------------------------- */
 
-function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
+function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) {
   const empty = {
     company_name: "",
     contact_person: "",
@@ -546,6 +547,8 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
+  const [canClaim, setCanClaim] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const [codePreview, setCodePreview] = useState("");
   const [overrideCode, setOverrideCode] = useState(false);
   const [codeValue, setCodeValue] = useState("");
@@ -554,10 +557,46 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
     if (!open) return;
     setOverrideCode(false);
     setCodeValue("");
+    setCanClaim(false);
+    setErr(null);
     peekNextCode("prospect").then((c) => setCodePreview(c || "")).catch(() => setCodePreview(""));
   }, [open]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Try to self-claim the existing (hidden) company instead of inserting a dup.
+  // UNOWNED-ONLY: the RPC only succeeds when the company has no current owner.
+  const claim = async () => {
+    setClaiming(true);
+    setErr(null);
+    try {
+      const res = await claimCompanyByName(form.company_name.trim());
+      if (res && res.ok) {
+        setForm(empty);
+        setCanClaim(false);
+        onClaimed?.();
+        onClose();
+        return;
+      }
+      const reason = res?.reason;
+      if (reason === "owned") {
+        setCanClaim(false);
+        setErr(res?.message || "This company is assigned to someone else — ask an admin to reassign it.");
+      } else if (reason === "already_yours") {
+        setCanClaim(false);
+        setErr("It's already in your pipeline — refresh.");
+      } else if (reason === "not_found") {
+        setCanClaim(false);
+        setErr("Couldn't find it — try a different name.");
+      } else {
+        setErr("Couldn't claim that company — try again.");
+      }
+    } catch (e) {
+      setErr(e?.message || "Couldn't claim that company.");
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   const submit = async () => {
     if (!form.company_name.trim()) {
@@ -566,6 +605,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
     }
     setSaving(true);
     setErr(null);
+    setCanClaim(false);
     try {
       await onSubmit({
         company_name: form.company_name.trim(),
@@ -586,10 +626,12 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
     } catch (e) {
       const raw = String(e?.message || "");
       if (/company_name_uniq/i.test(raw) || (/duplicate key/i.test(raw) && /company_name/i.test(raw))) {
+        setCanClaim(true);
         setErr(
           `A company named "${form.company_name.trim()}" is already in the CRM. ` +
           `It may be assigned to another salesperson, which hides it from your pipeline. ` +
-          `Ask an admin to reassign it to you, or add it under a different name.`
+          `If nobody owns it yet you can claim it below — otherwise ask an admin to ` +
+          `reassign it, or add it under a different name.`
         );
       } else if (/duplicate key/i.test(raw) && /customer_code/i.test(raw)) {
         setErr("That company code is already in use — please use a different code.");
@@ -606,7 +648,26 @@ function AddCompanyDialog({ open, onClose, onSubmit, currentEmail }) {
       <DialogTitle sx={{ fontWeight: 700 }}>Add company</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 0.5 }}>
-          {err && <Alert severity="error">{err}</Alert>}
+          {err && (
+            <Alert
+              severity={canClaim ? "warning" : "error"}
+              action={
+                canClaim ? (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={claim}
+                    disabled={claiming || saving}
+                    sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
+                  >
+                    {claiming ? "Claiming…" : "Claim it"}
+                  </Button>
+                ) : undefined
+              }
+            >
+              {err}
+            </Alert>
+          )}
           <TextField
             label="Company name"
             value={form.company_name}
@@ -3397,6 +3458,7 @@ export default function CRMPipelineBoard() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddCompany}
+        onClaimed={loadAll}
         currentEmail={currentEmail}
       />
 
