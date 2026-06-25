@@ -36,5 +36,13 @@ export async function saveCostRates(rates) {
   return row;
 }
 
-const ieService = { getCostRates, saveCostRates };
+/** The shared molding-machine fleet (ie_molding_machine). */
+export async function listMoldingMachines() {
+  try {
+    const { data } = await supabase.from('ie_molding_machine').select('*').order('machine_code', { ascending: true });
+    return data || [];
+  } catch { return []; }
+}
+
+const ieService = { getCostRates, saveCostRates, listMoldingMachines };
 export default ieService;
