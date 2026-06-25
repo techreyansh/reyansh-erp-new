@@ -95,6 +95,7 @@ const TL_COLOR = { call: '#0288d1', whatsapp: '#25d366', email: '#5d4037', meeti
 function TimelineTab({ account }) {
   const [events, setEvents] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [q, setQ] = useState('');
   useEffect(() => {
     let on = true;
     crmPipelineService.clientTimeline(account).then((e) => on && setEvents(e || [])).catch(() => on && setEvents([]));
@@ -102,12 +103,16 @@ function TimelineTab({ account }) {
   }, [account]);
   if (!events) return <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={22} /></Stack>;
   const kinds = ['all', ...Array.from(new Set(events.map((e) => e.kind)))];
-  const shown = filter === 'all' ? events : events.filter((e) => e.kind === filter);
+  const ql = q.trim().toLowerCase();
+  const shown = events
+    .filter((e) => filter === 'all' || e.kind === filter)
+    .filter((e) => !ql || `${e.title || ''} ${e.detail || ''} ${e.owner || ''}`.toLowerCase().includes(ql));
   return (
     <Box>
-      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
         {kinds.map((k) => <Chip key={k} size="small" label={k === 'all' ? `All (${events.length})` : k} variant={filter === k ? 'filled' : 'outlined'} color={filter === k ? 'primary' : 'default'} onClick={() => setFilter(k)} sx={{ cursor: 'pointer', textTransform: 'capitalize' }} />)}
       </Stack>
+      <TextField size="small" fullWidth placeholder="Search the timeline…" value={q} onChange={(e) => setQ(e.target.value)} sx={{ mb: 1.5 }} />
       {shown.length === 0 ? <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No events yet.</Typography> : (
         <Box sx={{ position: 'relative', pl: 2, '&::before': { content: '""', position: 'absolute', left: 6, top: 6, bottom: 6, width: 2, bgcolor: 'divider' } }}>
           {shown.map((e, i) => (
@@ -116,8 +121,10 @@ function TimelineTab({ account }) {
               <Stack direction="row" alignItems="baseline" spacing={1}>
                 <Chip size="small" label={e.kind} sx={{ height: 18, textTransform: 'capitalize', bgcolor: TL_COLOR[e.kind] || 'grey.500', color: '#fff', '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem', fontWeight: 700 } }} />
                 <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1, minWidth: 0 }}>{e.title}</Typography>
+                {e.status && e.status !== 'open' && <Chip size="small" variant="outlined" color={e.status === 'completed' ? 'success' : e.status === 'cancelled' ? 'default' : 'warning'} label={e.status} sx={{ height: 16, '& .MuiChip-label': { px: 0.6, fontSize: '0.6rem' } }} />}
                 <Typography variant="caption" color="text.disabled">{dt(e.at)}</Typography>
               </Stack>
+              {e.outcome && <Typography variant="caption" color="success.main" sx={{ display: 'block', ml: 0.5, fontWeight: 600 }}>Outcome: {e.outcome}</Typography>}
               {e.detail && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', whiteSpace: 'pre-wrap', ml: 0.5 }}>{e.detail}</Typography>}
               {e.owner && <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>· {String(e.owner).split('@')[0]}</Typography>}
             </Box>
