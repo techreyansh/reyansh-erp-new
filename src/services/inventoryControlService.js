@@ -14,18 +14,20 @@ export async function dashboard() {
 const TYPE_GROUP = (t) => (t === 'raw_material' ? 'Raw Material' : t === 'semi_finished' ? 'Semi-Finished' : ['finished_good', 'cable', 'power_cord', 'harness'].includes(t) ? 'Finished Goods' : 'Component');
 
 export async function listStock() {
+  // Config (reorder/safety/max/location) now lives on ppc_items; on_hand/reserved
+  // stay on ppc_stock until the on-hand cutover.
   const { data, error } = await supabase.from('ppc_stock')
-    .select('on_hand, reserved, safety_stock, max_qty, location, ppc_items(id, code, name, item_type, uom, unit_cost, reorder_point)');
+    .select('on_hand, reserved, ppc_items(id, code, name, item_type, uom, unit_cost, reorder_point, safety_stock, max_qty, location)');
   if (error) throw error;
   return (data || []).map((r) => {
     const it = r.ppc_items || {};
-    const on = num(r.on_hand); const res = num(r.reserved); const ro = num(it.reorder_point);
+    const on = num(r.on_hand); const res = num(r.reserved); const ro = num(it.reorder_point); const safety = num(it.safety_stock);
     return {
       item_id: it.id, code: it.code, name: it.name, type: it.item_type, group: TYPE_GROUP(it.item_type), uom: it.uom,
       unit_cost: num(it.unit_cost), on_hand: on, reserved: res, available: on - res,
-      reorder: ro, safety: num(r.safety_stock), location: r.location,
+      reorder: ro, safety, location: it.location,
       value: on * num(it.unit_cost),
-      status: on <= 0 ? 'out' : (ro > 0 && on <= ro) ? 'reorder' : (num(r.safety_stock) > 0 && on <= num(r.safety_stock)) ? 'low' : 'ok',
+      status: on <= 0 ? 'out' : (ro > 0 && on <= ro) ? 'reorder' : (safety > 0 && on <= safety) ? 'low' : 'ok',
     };
   }).sort((a, b) => a.name?.localeCompare(b.name));
 }

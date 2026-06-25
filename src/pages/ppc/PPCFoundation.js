@@ -1102,10 +1102,8 @@ function MaterialsTab({ items, notify }) {
                 </MenuItem>
               ))}
             </TextField>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField label="On hand" type="number" value={form.on_hand} onChange={(e) => setForm({ ...form, on_hand: e.target.value })} fullWidth />
-              <TextField label="Reorder point" type="number" value={form.reorder_point} onChange={(e) => setForm({ ...form, reorder_point: e.target.value })} fullWidth />
-            </Stack>
+            {/* On-hand is owned by the inventory ledger now — set it via Receive / Adjust, not here. */}
+            <TextField label="Reorder point" type="number" value={form.reorder_point} onChange={(e) => setForm({ ...form, reorder_point: e.target.value })} fullWidth helperText="Quantity (on hand) is set via Receive / Adjust — these are planning thresholds." />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField label="Safety stock" type="number" value={form.safety_stock} onChange={(e) => setForm({ ...form, safety_stock: e.target.value })} fullWidth />
               <TextField label="Lead time (days)" type="number" value={form.lead_time_days} onChange={(e) => setForm({ ...form, lead_time_days: e.target.value })} fullWidth />

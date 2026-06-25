@@ -140,13 +140,19 @@ async function listStock() {
     await supabase
       .from('ppc_stock')
       .select(
-        'id, item_id, on_hand, safety_stock, lead_time_days, location, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost, reorder_point)'
+        'id, item_id, on_hand, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost, reorder_point, safety_stock, lead_time_days, location)'
       ),
     'List stock'
   );
-  // reorder_point now lives on ppc_items; surface it at the top level so the
-  // existing read contract (rows expose .reorder_point) is preserved.
-  return (data || []).map((r) => ({ ...r, reorder_point: r.item?.reorder_point ?? 0 }));
+  // reorder_point / safety_stock / lead_time_days / location now live on
+  // ppc_items; surface them at the top level so the read contract is preserved.
+  return (data || []).map((r) => ({
+    ...r,
+    reorder_point: r.item?.reorder_point ?? 0,
+    safety_stock: r.item?.safety_stock ?? 0,
+    lead_time_days: r.item?.lead_time_days ?? 0,
+    location: r.item?.location ?? null,
+  }));
 }
 
 /**
@@ -158,19 +164,22 @@ async function recomputeClassification() {
   return data;
 }
 
-/** Insert or update a stock row keyed on the unique item_id. */
+/**
+ * Save planning config for an item. Config now lives on ppc_items (single
+ * source — the planning RPCs read it from there), so this writes the item
+ * master, not ppc_stock. on_hand is NOT set here — the inv_ledger owns it;
+ * adjust on-hand via inv_adjust, never by editing config.
+ */
 async function upsertStock(payload) {
   const row = {
-    item_id: payload.item_id,
-    on_hand: Number(payload.on_hand) || 0,
     reorder_point: Number(payload.reorder_point) || 0,
     safety_stock: Number(payload.safety_stock) || 0,
     lead_time_days: Number(payload.lead_time_days) || 0,
     location: payload.location?.trim() || null,
   };
   return unwrap(
-    await supabase.from('ppc_stock').upsert(row, { onConflict: 'item_id' }).select().single(),
-    'Save stock'
+    await supabase.from('ppc_items').update(row).eq('id', payload.item_id).select().single(),
+    'Save stock config'
   );
 }
 
