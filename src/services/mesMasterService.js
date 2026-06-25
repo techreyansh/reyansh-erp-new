@@ -46,5 +46,17 @@ export async function releasePlanToFloor(planId) {
   return data;
 }
 
-const mesMasterService = { listRows, saveRow, deleteRow, options, releasePlanToFloor };
+/**
+ * Atomically commit an auto-planned set: insert daily_production_plan rows and
+ * bump each source production_demand.planned_qty / status in one transaction.
+ * Each row needs: demand_id, product_id, product_name, planned_qty, plan_date,
+ * priority, department_id, shift_id, notes.
+ */
+export async function autoCommitPlan(rows) {
+  const { data, error } = await supabase.rpc('mes_auto_commit_plan', { p_rows: rows });
+  throwIf(error, 'Commit auto-plan');
+  return data;
+}
+
+const mesMasterService = { listRows, saveRow, deleteRow, options, releasePlanToFloor, autoCommitPlan };
 export default mesMasterService;

@@ -6,11 +6,12 @@ import {
 } from '@mui/material';
 import {
   EventNote as PlanIcon, Add as AddIcon, Refresh as RefreshIcon, DeleteOutline as DelIcon,
-  PlayArrow as ReleaseIcon, Assignment as JobIcon,
+  PlayArrow as ReleaseIcon, Assignment as JobIcon, AutoFixHigh as AutoIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import mesMasterService from '../../services/mesMasterService';
 import * as plmProductService from '../../services/plmProductService';
+import AutoPlanDialog from './AutoPlanDialog';
 
 const PRIORITY_COLOR = { urgent: 'error', high: 'warning', normal: 'default', low: 'info' };
 const STATUS_COLOR = { planned: 'default', in_production: 'primary', done: 'success', cancelled: 'warning' };
@@ -26,6 +27,7 @@ const DailyPlan = () => {
   const [loading, setLoading] = useState(true);
   const [releasing, setReleasing] = useState('');
   const [editing, setEditing] = useState(null);
+  const [autoOpen, setAutoOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const load = useCallback(async () => {
@@ -76,7 +78,8 @@ const DailyPlan = () => {
               <Typography variant="body2" sx={{ opacity: 0.9 }}>What runs, where, and on which shift.</Typography></Box>
           </Box>
           <Stack direction="row" spacing={1}>
-            <Button onClick={() => setEditing({ plan_date: new Date().toISOString().slice(0, 10), priority: 'normal' })} startIcon={<AddIcon />} variant="contained" color="inherit" sx={{ color: theme.palette.secondary.main }}>Add plan</Button>
+            <Button onClick={() => setAutoOpen(true)} startIcon={<AutoIcon />} variant="contained" color="inherit" sx={{ color: theme.palette.secondary.main, fontWeight: 700 }}>Auto-plan</Button>
+            <Button onClick={() => setEditing({ plan_date: new Date().toISOString().slice(0, 10), priority: 'normal' })} startIcon={<AddIcon />} variant="outlined" color="inherit" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.6)' }}>Add plan</Button>
             <Tooltip title="Refresh"><IconButton onClick={load} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
           </Stack>
         </CardContent>
@@ -120,6 +123,7 @@ const DailyPlan = () => {
       )}
 
       <PlanDialog plan={editing} depts={depts} shifts={shifts} products={products} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} notify={setSnackbar} />
+      <AutoPlanDialog open={autoOpen} depts={depts} shifts={shifts} onClose={() => setAutoOpen(false)} onCommitted={load} notify={setSnackbar} />
       <Snackbar open={snackbar.open} autoHideDuration={3500} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>
