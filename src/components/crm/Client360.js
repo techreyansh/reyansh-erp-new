@@ -16,6 +16,7 @@ import aiCopilot from '../../services/aiCopilotService';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
 import CompanyContacts from './CompanyContacts';
 import CompanyAddresses from './CompanyAddresses';
+import CompanyDocuments from './CompanyDocuments';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 
 const AI_ACTIONS = [
@@ -271,7 +272,7 @@ export default function Client360({ account, onClose, notify }) {
           {/* 11 TASKS */}
           {tab === 11 && <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No client-linked tasks. (Tasks are managed in the Task module; account-linked tasks will appear here once tasks reference this account.)</Typography>}
           {/* 12 DOCUMENTS */}
-          {tab === 12 && <MiniTable cols={['Document', 'Type', 'Added']} rows={data.documents} empty="No documents." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.file_name || r.name || r.title || r.document_name || '—'}</TableCell><TableCell>{r.doc_type || r.type || '—'}</TableCell><TableCell>{dt(r.created_at)}</TableCell></>} />}
+          {tab === 12 && account?.id && <CompanyDocuments accountId={account.id} />}
           {/* 13 COMPLAINTS */}
           {tab === 13 && <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />}
           {/* 14 AI COPILOT */}
