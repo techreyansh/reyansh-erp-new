@@ -41,6 +41,12 @@ export async function listDefects() {
   return data || [];
 }
 
+export async function listMolds() {
+  const { data, error } = await supabase.from('molding_master').select('id, mold_number, mold_type, cavity_count, shots_done, tool_life_shots').eq('status', 'active').order('mold_number');
+  throwIf(error, 'Load molds');
+  return data || [];
+}
+
 export async function listStageLog(stageId) {
   const { data, error } = await supabase
     .from('stage_execution_log')
@@ -53,11 +59,11 @@ export async function listStageLog(stageId) {
 }
 
 /** Post a job-card entry. Returns { ok, output_total, reject_total, downtime_total }. */
-export async function postJobcard({ stageId, output, reject = 0, downtime = 0, downtimeReason = null, defect = null, operator = null, machine = null, note = null }) {
+export async function postJobcard({ stageId, output, reject = 0, downtime = 0, downtimeReason = null, defect = null, operator = null, machine = null, note = null, mold = null }) {
   const { data, error } = await supabase.rpc('ppc_post_jobcard', {
     p_stage_id: stageId, p_output: Number(output) || 0, p_reject: Number(reject) || 0,
     p_downtime: Number(downtime) || 0, p_downtime_reason: downtimeReason, p_defect: defect,
-    p_operator: operator, p_machine: machine, p_note: note,
+    p_operator: operator, p_machine: machine, p_note: note, p_mold: mold,
   });
   throwIf(error, 'Post job card');
   return data;

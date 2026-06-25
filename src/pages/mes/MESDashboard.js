@@ -54,6 +54,18 @@ const MESDashboard = () => {
             <Kpi label="Downtime today" value={`${k.todayDowntime || 0}m`} color={theme.palette.warning.main} />
           </Stack>
 
+          {data.moldAlerts && data.moldAlerts.length > 0 && (
+            <Card sx={{ borderRadius: 2, border: '1px solid', borderColor: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }}><CardContent sx={{ py: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'error.main', mb: 0.5 }}>⚠ Mold maintenance due</Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {data.moldAlerts.map((m) => (
+                  <Chip key={m.mold_number} color={m.wear >= 100 ? 'error' : 'warning'} variant={m.wear >= 100 ? 'filled' : 'outlined'}
+                    label={`${m.mold_number}: ${m.wear}% of tool life (${(m.shots_done || 0).toLocaleString('en-IN')}/${(m.tool_life_shots || 0).toLocaleString('en-IN')} shots)`} />
+                ))}
+              </Stack>
+            </CardContent></Card>
+          )}
+
           {data.outputByPart && (
             <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
               {data.outputByPart.map((p) => (

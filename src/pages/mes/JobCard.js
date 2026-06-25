@@ -33,18 +33,19 @@ const JobCard = () => {
   const [stage, setStage] = useState(null);
   const [reasons, setReasons] = useState([]);
   const [defects, setDefects] = useState([]);
+  const [molds, setMolds] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const blank = { operator: '', output: '', reject: '', downtime: '', downtimeReason: null, defect: null, note: '' };
+  const blank = { operator: '', output: '', reject: '', downtime: '', downtimeReason: null, defect: null, note: '', mold: null };
   const [form, setForm] = useState(blank);
 
   const loadWos = useCallback(async () => {
     setLoading(true);
     try {
-      const [w, r, d] = await Promise.all([jobcardService.listOpenWorkOrders(), jobcardService.listReasons(), jobcardService.listDefects()]);
-      setWos(w); setReasons(r); setDefects(d);
+      const [w, r, d, m] = await Promise.all([jobcardService.listOpenWorkOrders(), jobcardService.listReasons(), jobcardService.listDefects(), jobcardService.listMolds()]);
+      setWos(w); setReasons(r); setDefects(d); setMolds(m);
     } catch (e) { setSnackbar({ open: true, message: e.message, severity: 'error' }); }
     setLoading(false);
   }, []);
@@ -67,7 +68,7 @@ const JobCard = () => {
     try {
       const res = await jobcardService.postJobcard({
         stageId: stage.id, output: form.output, reject: form.reject, downtime: form.downtime,
-        downtimeReason: form.downtimeReason, defect: form.defect, operator: form.operator, note: form.note,
+        downtimeReason: form.downtimeReason, defect: form.defect, operator: form.operator, note: form.note, mold: form.mold,
       });
       setSnackbar({ open: true, message: `Saved. Stage total: ${res.output_total} good, ${res.reject_total} reject.`, severity: 'success' });
       setForm((f) => ({ ...blank, operator: f.operator })); // keep operator for the next entry
@@ -104,6 +105,17 @@ const JobCard = () => {
             Target {target} · done so far <b>{done}</b> good, {stage.scrap_qty || 0} reject
           </Typography>
           <TextField label="Your name / operator ID" value={form.operator} onChange={(e) => set('operator', e.target.value)} fullWidth sx={{ mb: 2.5 }} />
+          {/mold/i.test(stage.stage_name) && molds.length > 0 && (
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>Which mold?</Typography>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                {molds.map((m) => {
+                  const wear = m.tool_life_shots ? Math.round((Number(m.shots_done || 0) / Number(m.tool_life_shots)) * 100) : null;
+                  return <Chip key={m.id} label={`${m.mold_number}${wear != null ? ` · ${wear}%` : ''}`} onClick={() => set('mold', form.mold === m.id ? null : m.id)} color={form.mold === m.id ? 'secondary' : wear >= 90 ? 'error' : 'default'} variant={form.mold === m.id ? 'filled' : 'outlined'} sx={{ height: 36, fontSize: 15 }} />;
+                })}
+              </Stack>
+            </Box>
+          )}
           <Stack direction="row" spacing={2} justifyContent="space-around" sx={{ mb: 2.5 }}>
             <NumField label="Good" value={form.output} onChange={(v) => set('output', v)} color={theme.palette.success.main} />
             <NumField label="Reject" value={form.reject} onChange={(v) => set('reject', v)} color={theme.palette.error.main} />

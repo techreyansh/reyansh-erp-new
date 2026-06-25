@@ -79,9 +79,17 @@ export async function getDashboard() {
   log.forEach((l) => { const p = stagePart(stageName[l.stage_id] || ''); partMap[p].good += num(l.output_qty); partMap[p].reject += num(l.reject_qty); });
   const outputByPart = Object.values(partMap);
 
+  // Molds nearing / past tool life (maintenance alert)
+  let moldAlerts = [];
+  const { data: molds } = await supabase.from('molding_master').select('mold_number, mold_type, shots_done, tool_life_shots').eq('status', 'active').gt('tool_life_shots', 0);
+  moldAlerts = (molds || [])
+    .map((m) => ({ ...m, wear: Math.round((num(m.shots_done) / num(m.tool_life_shots)) * 100) }))
+    .filter((m) => m.wear >= 85)
+    .sort((a, b) => b.wear - a.wear);
+
   return {
     kpis: { openWos: wos.length, running, todayGood, todayReject, rejectPct, todayDowntime },
-    stageLoad, outputByStage, outputByPart, downtimeByReason, recent,
+    stageLoad, outputByStage, outputByPart, downtimeByReason, recent, moldAlerts,
   };
 }
 
