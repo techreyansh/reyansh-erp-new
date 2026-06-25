@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box, Paper, Stack, Typography, TextField, MenuItem, Button, Chip, Divider,
   CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Alert,
-  useTheme, alpha,
+  Dialog, DialogTitle, DialogContent, DialogActions, useTheme, alpha,
 } from '@mui/material';
 import {
   BoltRounded, CheckCircleRounded, WarningAmberRounded, GroupRounded,
@@ -41,6 +41,8 @@ export default function AssemblyPlanner() {
   const [shiftHours, setShiftHours] = useState(8);
   const [headcountPool, setHeadcountPool] = useState(20);
   const [maxOvertime, setMaxOvertime] = useState(2);
+  const [rateDraft, setRateDraft] = useState(null); // open cost-rate editor when set
+  const [savingRates, setSavingRates] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -94,7 +96,12 @@ export default function AssemblyPlanner() {
     <Box>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
         <BoltRounded color="primary" />
-        <Typography variant="h6" sx={{ fontWeight: 800 }}>Assembly Planner</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 800, flexGrow: 1 }}>Assembly Planner</Typography>
+        <Button size="small" variant="outlined" startIcon={<PaymentsRounded />}
+          onClick={() => setRateDraft({
+            labour_per_hr: rates?.labour_per_hr ?? 80, overtime_multiplier: rates?.overtime_multiplier ?? 1.5,
+            machine_per_hr: rates?.machine_per_hr ?? 50, indirect_pct: rates?.indirect_pct ?? 0.15,
+          })}>Cost rates</Button>
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Enter a daily target — the engine recommends the lowest-cost staffing that hits it, or tells you exactly what's stopping you.
@@ -198,6 +205,29 @@ export default function AssemblyPlanner() {
           </Paper>
         </Stack>
       )}
+
+      <Dialog open={!!rateDraft} onClose={() => !savingRates && setRateDraft(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Cost rates</DialogTitle>
+        <DialogContent dividers>
+          {rateDraft && (
+            <Stack spacing={2} sx={{ mt: 0.5 }}>
+              <TextField label="Labour ₹/hr" type="number" value={rateDraft.labour_per_hr} onChange={(e) => setRateDraft((d) => ({ ...d, labour_per_hr: e.target.value }))} fullWidth />
+              <TextField label="Overtime multiplier" type="number" value={rateDraft.overtime_multiplier} onChange={(e) => setRateDraft((d) => ({ ...d, overtime_multiplier: e.target.value }))} fullWidth helperText="e.g. 1.5 = 150% of the labour rate" />
+              <TextField label="Machine ₹/hr" type="number" value={rateDraft.machine_per_hr} onChange={(e) => setRateDraft((d) => ({ ...d, machine_per_hr: e.target.value }))} fullWidth />
+              <TextField label="Indirect %" type="number" value={rateDraft.indirect_pct} onChange={(e) => setRateDraft((d) => ({ ...d, indirect_pct: e.target.value }))} fullWidth helperText="fraction, e.g. 0.15 = +15%" />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setRateDraft(null)} disabled={savingRates}>Cancel</Button>
+          <Button variant="contained" disabled={savingRates} onClick={async () => {
+            setSavingRates(true);
+            try { await ieService.saveCostRates(rateDraft); setRates(await ieService.getCostRates()); setRateDraft(null); }
+            catch { /* surface via console; non-blocking */ }
+            finally { setSavingRates(false); }
+          }}>{savingRates ? 'Saving…' : 'Save rates'}</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
