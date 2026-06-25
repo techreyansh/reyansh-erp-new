@@ -6,8 +6,11 @@ import {
 } from '@mui/material';
 import {
   EventNote as PlanIcon, Add as AddIcon, Refresh as RefreshIcon, DeleteOutline as DelIcon,
+  PlayArrow as ReleaseIcon, Assignment as JobIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import mesMasterService from '../../services/mesMasterService';
+import * as plmProductService from '../../services/plmProductService';
 
 const PRIORITY_COLOR = { urgent: 'error', high: 'warning', normal: 'default', low: 'info' };
 const STATUS_COLOR = { planned: 'default', in_production: 'primary', done: 'success', cancelled: 'warning' };
@@ -15,25 +18,39 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { weekday: '
 
 const DailyPlan = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [depts, setDepts] = useState([]);
   const [shifts, setShifts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [releasing, setReleasing] = useState('');
   const [editing, setEditing] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, d, s] = await Promise.all([
+      const [p, d, s, pr] = await Promise.all([
         mesMasterService.listRows('daily_production_plan', { orderBy: 'plan_date', ascending: true }),
         mesMasterService.listRows('department'), mesMasterService.listRows('shift_master'),
+        plmProductService.listProducts().catch(() => []),
       ]);
-      setPlans(p); setDepts(d); setShifts(s);
+      setPlans(p); setDepts(d); setShifts(s); setProducts(pr);
     } catch (e) { setSnackbar({ open: true, message: e.message, severity: 'error' }); }
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  const release = async (plan) => {
+    setReleasing(plan.id);
+    try {
+      const res = await mesMasterService.releasePlanToFloor(plan.id);
+      if (res && res.ok === false) setSnackbar({ open: true, message: res.message, severity: 'warning' });
+      else { setSnackbar({ open: true, message: `Released — ${res.wo_number} (${res.stage_count} stages) is now on the Job Cards screen.`, severity: 'success' }); await load(); }
+    } catch (e) { setSnackbar({ open: true, message: e.message, severity: 'error' }); }
+    setReleasing('');
+  };
 
   const deptName = useMemo(() => Object.fromEntries(depts.map((d) => [d.id, d.name])), [depts]);
   const shiftName = useMemo(() => Object.fromEntries(shifts.map((s) => [s.id, s.name])), [shifts]);
@@ -86,8 +103,13 @@ const DailyPlan = () => {
                     {p.shift_id && <Chip size="small" variant="outlined" label={shiftName[p.shift_id] || 'shift'} sx={{ height: 20 }} />}
                     {p.manpower_assigned ? <Typography variant="caption" color="text.secondary">{p.manpower_assigned} men</Typography> : null}
                     {p.priority && p.priority !== 'normal' && <Chip size="small" label={p.priority} color={PRIORITY_COLOR[p.priority]} sx={{ height: 20 }} />}
-                    <Chip size="small" label={p.status} color={STATUS_COLOR[p.status]} sx={{ height: 20 }} />
+                    <Chip size="small" label={(p.status || '').replace('_', ' ')} color={STATUS_COLOR[p.status]} sx={{ height: 20 }} />
                     <Box sx={{ flexGrow: 1 }} />
+                    {p.work_order_id ? (
+                      <Button size="small" startIcon={<JobIcon fontSize="small" />} onClick={() => navigate('/job-cards')}>On floor</Button>
+                    ) : p.status === 'planned' ? (
+                      <Button size="small" variant="contained" color="success" startIcon={releasing === p.id ? <CircularProgress size={14} color="inherit" /> : <ReleaseIcon fontSize="small" />} disabled={releasing === p.id} onClick={() => release(p)}>Release to floor</Button>
+                    ) : null}
                     <IconButton size="small" color="error" onClick={() => del(p.id)}><DelIcon fontSize="small" /></IconButton>
                   </Stack>
                 ))}
@@ -97,7 +119,7 @@ const DailyPlan = () => {
         </Stack>
       )}
 
-      <PlanDialog plan={editing} depts={depts} shifts={shifts} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} notify={setSnackbar} />
+      <PlanDialog plan={editing} depts={depts} shifts={shifts} products={products} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} notify={setSnackbar} />
       <Snackbar open={snackbar.open} autoHideDuration={3500} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>
@@ -105,7 +127,7 @@ const DailyPlan = () => {
   );
 };
 
-function PlanDialog({ plan, depts, shifts, onClose, onSaved, notify }) {
+function PlanDialog({ plan, depts, shifts, products = [], onClose, onSaved, notify }) {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   useEffect(() => { if (plan) setForm({ priority: 'normal', status: 'planned', ...plan }); }, [plan]);
@@ -128,7 +150,12 @@ function PlanDialog({ plan, depts, shifts, onClose, onSaved, notify }) {
       <DialogTitle sx={{ fontWeight: 700 }}>{plan?.id ? 'Edit plan' : 'New production plan'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Product" value={form.product_name || ''} onChange={set('product_name')} fullWidth autoFocus />
+          <TextField select label="Pick a product (uses its routing)" value={form.product_id || ''}
+            onChange={(e) => { const p = products.find((x) => x.id === e.target.value); setForm((f) => ({ ...f, product_id: e.target.value || null, product_name: p ? p.product_name : f.product_name })); }} fullWidth>
+            <MenuItem value="">— free text below —</MenuItem>
+            {products.map((p) => <MenuItem key={p.id} value={p.id}>{p.product_name}</MenuItem>)}
+          </TextField>
+          <TextField label="Product name" value={form.product_name || ''} onChange={set('product_name')} fullWidth autoFocus helperText="Picking a product above uses its configured route; free text creates a generic work order." />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField type="date" label="Date" value={form.plan_date || ''} onChange={set('plan_date')} fullWidth InputLabelProps={{ shrink: true }} />
             <TextField type="number" label="Quantity" value={form.planned_qty ?? ''} onChange={set('planned_qty')} fullWidth />

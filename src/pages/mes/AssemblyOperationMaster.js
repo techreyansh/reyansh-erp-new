@@ -62,7 +62,7 @@ const AssemblyOperationMaster = () => {
                     <TableCell sx={{ fontWeight: 600 }}>{o.name}<Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{o.operation_code}</Typography></TableCell>
                     <TableCell><Chip size="small" label={o.category} color={CAT_COLOR[o.category]} sx={{ height: 20 }} /></TableCell>
                     <TableCell>{o.std_time_sec ?? '—'}</TableCell>
-                    <TableCell>{o.uph ?? '—'}</TableCell>
+                    <TableCell>{o.std_time_sec > 0 ? <Tooltip title="Auto = 3600 / STD time, per operator"><Chip size="small" label={`${Math.round(3600 / o.std_time_sec)}/hr`} color="primary" variant="outlined" sx={{ height: 20 }} /></Tooltip> : (o.uph ?? '—')}</TableCell>
                     <TableCell>{o.manpower_reqd ?? '—'}</TableCell>
                     <TableCell><Typography variant="caption" color="text.secondary">{o.tools_reqd || '—'}</Typography></TableCell>
                     <TableCell>{o.quality_critical ? <Chip size="small" color="warning" label="critical" sx={{ height: 18 }} /> : '—'}</TableCell>

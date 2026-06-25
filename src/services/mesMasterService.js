@@ -39,5 +39,12 @@ export async function options(table, labelCol = 'name', valueCol = 'id', extra =
   return (data || []).map((r) => ({ value: r[valueCol], label: r[labelCol] || r[valueCol] }));
 }
 
-const mesMasterService = { listRows, saveRow, deleteRow, options };
+/** Turn a daily plan into a live work order on the floor (Job Cards). */
+export async function releasePlanToFloor(planId) {
+  const { data, error } = await supabase.rpc('mes_release_plan_to_floor', { p_plan_id: planId });
+  throwIf(error, 'Release to floor');
+  return data;
+}
+
+const mesMasterService = { listRows, saveRow, deleteRow, options, releasePlanToFloor };
 export default mesMasterService;

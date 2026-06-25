@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Box, Stack, Card, CardContent, Typography, TextField, IconButton, Chip, Divider, Tooltip,
+  Box, Stack, Card, CardContent, Typography, TextField, IconButton, Chip, Tooltip, Divider,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress,
   useTheme, alpha,
 } from '@mui/material';
 import {
   Speed as CapIcon, Refresh as RefreshIcon, WarningAmber as WarnIcon, Add as PlusIcon, Remove as MinusIcon,
 } from '@mui/icons-material';
+import mesService from '../../services/mesService';
 import mesMasterService from '../../services/mesMasterService';
 
 // hours (decimal) added to a start hour -> "HH:MM"
@@ -15,62 +17,93 @@ const toTime = (startHour, addHours) => {
   const h = Math.floor(t); const m = Math.round((t - h) * 60);
   return `${String(h).padStart(2, '0')}:${String(m === 60 ? 0 : m).padStart(2, '0')}`;
 };
-const round1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
+const r1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
 
-// Department capacity models (pcs/hour).
-function capPerHour(d) {
-  if (d.model === 'molding') return (Number(d.machines) || 0) * (Number(d.cavities) || 1) * (Number(d.cycleSec) > 0 ? 3600 / Number(d.cycleSec) : 0);
-  if (d.model === 'packing') return (Number(d.operators) || 0) * (Number(d.cycleSec) > 0 ? 3600 / Number(d.cycleSec) : 0);
-  return (Number(d.operators) || 0) * (Number(d.uph) || 0); // assembly
-}
+const DEFAULT_MOLD = { inner_molding: { machines: 2, cavities: 1 }, outer_molding: { machines: 1, cavities: 1 }, grommet_molding: { machines: 1, cavities: 1 } };
 
 const CapacityPlanner = () => {
   const theme = useTheme();
-  const [qty, setQty] = useState(1000);
+  const [ops, setOps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // INPUTS — operators are NOT an input. Target UPH is.
+  const [qty, setQty] = useState(60000);
+  const [targetUph, setTargetUph] = useState(600);
   const [shiftStart, setShiftStart] = useState(9);
   const [shiftHours, setShiftHours] = useState(8);
-  const [depts, setDepts] = useState([
-    { key: 'assembly', name: 'Assembly', model: 'assembly', operators: 12, uph: 35, note: 'planned as one block' },
-    { key: 'molding', name: 'Molding', model: 'molding', machines: 3, cavities: 1, cycleSec: 55, note: 'inner / outer / grommet' },
-    { key: 'packing', name: 'Packing', model: 'packing', operators: 6, cycleSec: 18, note: 'folding is the bottleneck' },
-  ]);
+  const [mold, setMold] = useState(DEFAULT_MOLD); // per molding op: { machines, cavities }
 
-  // Pull molding machine defaults from the master if present
-  const loadDefaults = useCallback(async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const molds = await mesMasterService.listRows('molding_master');
-      const active = molds.filter((m) => m.status === 'active' && m.cycle_time_sec);
+      const o = await mesService.listOperations({ includeInactive: false });
+      setOps(o);
+      // pull machine/cavity defaults from molding_master if present
+      const molds = await mesMasterService.listRows('molding_master').catch(() => []);
+      const active = molds.filter((m) => m.status === 'active');
       if (active.length) {
-        const cav = Math.round(active.reduce((s, m) => s + (Number(m.cavity_count) || 1), 0) / active.length);
-        const cyc = Math.round(active.reduce((s, m) => s + Number(m.cycle_time_sec), 0) / active.length);
-        setDepts((ds) => ds.map((d) => d.key === 'molding' ? { ...d, machines: active.length, cavities: cav, cycleSec: cyc } : d));
+        const byType = {};
+        active.forEach((m) => { const t = `${m.mold_type}_molding`; byType[t] = byType[t] || { machines: 0, cavities: 0, n: 0 }; byType[t].machines += 1; byType[t].cavities += Number(m.cavity_count) || 1; byType[t].n += 1; });
+        setMold((prev) => {
+          const next = { ...prev };
+          Object.entries(byType).forEach(([k, v]) => { if (next[k]) next[k] = { machines: v.machines, cavities: Math.round(v.cavities / v.n) }; });
+          return next;
+        });
       }
-    } catch { /* keep defaults */ }
+    } catch { setOps([]); }
+    setLoading(false);
   }, []);
-  useEffect(() => { loadDefaults(); }, [loadDefaults]);
+  useEffect(() => { load(); }, [load]);
 
-  const setD = (key, field, val) => setDepts((ds) => ds.map((d) => d.key === key ? { ...d, [field]: val } : d));
+  const plan = useMemo(() => {
+    const requiredCycle = targetUph > 0 ? 3600 / targetUph : 0; // sec/pc the LINE must hold
+    const completionHrs = targetUph > 0 ? qty / targetUph : 0;
+    const overtime = Math.max(0, completionHrs - shiftHours);
 
-  const computed = useMemo(() => {
-    const rows = depts.map((d) => {
-      const cap = capPerHour(d);
-      const reqHr = cap > 0 ? qty / cap : Infinity;
-      const ot = Math.max(0, reqHr - shiftHours);
-      return { ...d, cap: round1(cap), reqHr: cap > 0 ? round1(reqHr) : null, ot: round1(ot), end: cap > 0 ? toTime(shiftStart, reqHr) : '—' };
+    const sectionFor = (c) => (c === 'molding' ? 'Molding' : c === 'packing' ? 'Packing' : c === 'testing' ? 'Packing' : 'Assembly');
+    const stations = ops.filter((o) => Number(o.std_time_sec) > 0).map((o) => {
+      const cycle = Number(o.std_time_sec);
+      if (o.category === 'molding') {
+        const cfg = mold[o.operation_code] || { machines: 1, cavities: 1 };
+        const perMachine = cfg.cavities * (3600 / cycle);          // pcs/hr per machine
+        const reqMachines = perMachine > 0 ? Math.ceil(targetUph / perMachine) : Infinity;
+        const avail = cfg.machines;
+        const capacity = avail * perMachine;
+        return {
+          ...o, section: 'Molding', type: 'machine', cycle, perMachine: r1(perMachine),
+          reqMachines, avail, capacity: r1(capacity), util: capacity > 0 ? Math.round((targetUph / capacity) * 100) : 0,
+          short: reqMachines > avail, resource: `${reqMachines} machine(s)`, recommend: reqMachines,
+        };
+      }
+      // labour station: one operator does 3600/cycle; operators needed (parallel) to hold the line rate
+      const reqOps = Math.max(1, Math.ceil(cycle / requiredCycle));
+      const throughput = reqOps * (3600 / cycle);
+      return {
+        ...o, section: sectionFor(o.category), type: 'labour', cycle,
+        reqOps, throughput: r1(throughput), util: throughput > 0 ? Math.round((targetUph / throughput) * 100) : 0,
+        short: false, resource: `${reqOps} operator(s)`, recommend: reqOps,
+      };
     });
-    const valid = rows.filter((r) => r.reqHr != null);
-    const maxReq = valid.length ? Math.max(...valid.map((r) => r.reqHr)) : 0;
-    return rows.map((r) => ({ ...r, bottleneck: r.reqHr != null && r.reqHr === maxReq && maxReq > 0 }));
-  }, [depts, qty, shiftHours, shiftStart]);
 
-  const Stepper = ({ label, value, onChange, step = 1 }) => (
+    // bottleneck: any machine station short of machines is a hard bottleneck;
+    // else the labour station that needs the most operators (slowest single station).
+    const hardBn = stations.filter((s) => s.short);
+    const labour = stations.filter((s) => s.type === 'labour');
+    const maxOps = labour.length ? Math.max(...labour.map((s) => s.reqOps)) : 0;
+    const tagged = stations.map((s) => ({ ...s, bottleneck: s.short || (s.type === 'labour' && s.reqOps === maxOps && maxOps > 1) }));
+
+    const totalOperators = stations.filter((s) => s.type === 'labour').reduce((a, s) => a + s.reqOps, 0);
+    const sections = ['Assembly', 'Molding', 'Packing'].map((sec) => ({ name: sec, rows: tagged.filter((s) => s.section === sec) })).filter((s) => s.rows.length);
+    return { requiredCycle: r1(requiredCycle), completionHrs: r1(completionHrs), overtime: r1(overtime), finish: toTime(shiftStart, completionHrs), totalOperators, sections, tagged, hardBn };
+  }, [ops, qty, targetUph, shiftStart, shiftHours, mold]);
+
+  const Stepper = ({ value, onChange, step = 1, w = 70 }) => (
     <Stack direction="row" spacing={0.5} alignItems="center">
       <IconButton size="small" onClick={() => onChange(Math.max(0, (Number(value) || 0) - step))}><MinusIcon fontSize="small" /></IconButton>
-      <TextField size="small" value={value} onChange={(e) => onChange(e.target.value.replace(/[^0-9.]/g, ''))} label={label}
-        inputProps={{ inputMode: 'numeric', style: { textAlign: 'center', width: 56 } }} />
+      <TextField size="small" value={value} onChange={(e) => onChange(e.target.value.replace(/[^0-9.]/g, ''))} inputProps={{ inputMode: 'numeric', style: { textAlign: 'center', width: w } }} />
       <IconButton size="small" onClick={() => onChange((Number(value) || 0) + step)}><PlusIcon fontSize="small" /></IconButton>
     </Stack>
   );
+  const setMoldCfg = (code, k, v) => setMold((m) => ({ ...m, [code]: { ...m[code], [k]: Number(v) || 0 } }));
 
   return (
     <Box sx={{ p: 3 }}>
@@ -78,82 +111,96 @@ const CapacityPlanner = () => {
         <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, py: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <CapIcon sx={{ fontSize: 32 }} />
-            <Box><Typography variant="h5" sx={{ fontWeight: 700 }}>Capacity & Overtime Planner</Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>Hours, overtime and the bottleneck across Assembly · Molding · Packing.</Typography></Box>
+            <Box><Typography variant="h5" sx={{ fontWeight: 700 }}>Line Balancing & Capacity Engine</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Target UPH → required cycle → operators &amp; machines are the output.</Typography></Box>
           </Box>
-          <Tooltip title="Reload mold defaults"><IconButton onClick={loadDefaults} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
+          <Tooltip title="Reload"><IconButton onClick={load} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
         </CardContent>
       </Card>
 
-      {/* Inputs */}
+      {/* INPUTS */}
       <Card sx={{ borderRadius: 2, mb: 2 }}><CardContent>
-        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center">
-          <TextField type="number" label="Quantity to make" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} sx={{ width: 170 }} />
+        <Typography variant="overline" color="text.secondary">Plan inputs</Typography>
+        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center" sx={{ mt: 0.5 }}>
+          <TextField type="number" label="Order quantity" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} sx={{ width: 160 }} />
+          <TextField type="number" label="Target UPH (line rate)" value={targetUph} onChange={(e) => setTargetUph(Number(e.target.value) || 0)} sx={{ width: 190 }} />
           <TextField type="number" label="Shift start (hr)" value={shiftStart} onChange={(e) => setShiftStart(Number(e.target.value) || 0)} sx={{ width: 130 }} />
           <TextField type="number" label="Shift hours" value={shiftHours} onChange={(e) => setShiftHours(Number(e.target.value) || 0)} sx={{ width: 120 }} />
-          <Typography variant="body2" color="text.secondary">Normal shift: {toTime(shiftStart, 0)} → {toTime(shiftStart, shiftHours)}</Typography>
         </Stack>
       </CardContent></Card>
 
-      {/* Department cards */}
-      <Stack spacing={2}>
-        {computed.map((d) => (
-          <Card key={d.key} sx={{ borderRadius: 2, border: '2px solid', borderColor: d.bottleneck ? 'error.main' : 'divider' }}>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} sx={{ mb: 1.5 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{d.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">{d.note}</Typography>
-                  {d.bottleneck && <Chip size="small" color="error" icon={<WarnIcon />} label="BOTTLENECK" />}
-                </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">Capacity/hr</Typography><Typography variant="h6" sx={{ fontWeight: 700 }}>{d.cap}</Typography></Box>
-                  <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">Hours needed</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: d.bottleneck ? 'error.main' : 'text.primary' }}>{d.reqHr ?? '—'}</Typography></Box>
-                  <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">Overtime</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: d.ot > 0 ? 'warning.main' : 'success.main' }}>{d.ot > 0 ? `${d.ot}h` : '—'}</Typography></Box>
-                  <Box sx={{ textAlign: 'center', minWidth: 110, bgcolor: alpha(theme.palette.primary.main, 0.06), borderRadius: 1, px: 1, py: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary">Come → Leave</Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{toTime(shiftStart, 0)} → {d.end}</Typography>
-                  </Box>
-                </Stack>
-              </Stack>
-              <Divider sx={{ mb: 1.5 }} />
-              <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap alignItems="center">
-                {d.model === 'molding' ? (
-                  <>
-                    <Stepper label="Machines" value={d.machines} onChange={(v) => setD(d.key, 'machines', v)} />
-                    <Stepper label="Cavities" value={d.cavities} onChange={(v) => setD(d.key, 'cavities', v)} />
-                    <Stepper label="Cycle (s)" value={d.cycleSec} onChange={(v) => setD(d.key, 'cycleSec', v)} step={5} />
-                    <Typography variant="caption" color="text.secondary">per machine: {round1((Number(d.cavities) || 1) * (Number(d.cycleSec) > 0 ? 3600 / Number(d.cycleSec) : 0))}/hr</Typography>
-                  </>
-                ) : d.model === 'packing' ? (
-                  <>
-                    <Stepper label="Operators" value={d.operators} onChange={(v) => setD(d.key, 'operators', v)} />
-                    <Stepper label="Fold cycle (s)" value={d.cycleSec} onChange={(v) => setD(d.key, 'cycleSec', v)} step={2} />
-                  </>
-                ) : (
-                  <>
-                    <Stepper label="Operators" value={d.operators} onChange={(v) => setD(d.key, 'operators', v)} />
-                    <Stepper label="UPH/op" value={d.uph} onChange={(v) => setD(d.key, 'uph', v)} step={5} />
-                  </>
-                )}
-              </Stack>
-              {d.bottleneck && d.ot > 0 && (
-                <Typography variant="body2" sx={{ mt: 1.5, color: 'error.main', fontWeight: 600 }}>
-                  ⚠ {d.name} is the bottleneck — needs {d.ot}h overtime (leave by {d.end}). Add {d.model === 'molding' ? 'a machine' : 'an operator'} or run the overtime.
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
-
-      <Card sx={{ borderRadius: 2, mt: 2, bgcolor: alpha(theme.palette.warning.main, 0.06) }}><CardContent>
-        <Typography variant="body2">
-          <b>Plan summary:</b> to make {qty} pcs, the line is paced by <b>{computed.find((d) => d.bottleneck)?.name || '—'}</b> at{' '}
-          {computed.find((d) => d.bottleneck)?.reqHr ?? '—'}h. Other departments finish earlier and can be planned as a block.
-          Adjust machines / operators / cycle above to clear overtime.
+      {/* LINE SUMMARY (outputs) */}
+      <Card sx={{ borderRadius: 2, mb: 2, bgcolor: alpha(theme.palette.primary.main, 0.04) }}><CardContent>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', sm: 'repeat(3,1fr)', md: 'repeat(6,1fr)' }, gap: 2 }}>
+          {[['Required cycle', `${plan.requiredCycle}s/pc`, 'primary.main'], ['Completion', `${plan.completionHrs}h`, 'text.primary'],
+            ['Overtime', plan.overtime > 0 ? `${plan.overtime}h` : '—', plan.overtime > 0 ? 'warning.main' : 'success.main'],
+            ['Finish by', plan.finish, 'text.primary'], ['Operators needed', plan.totalOperators, 'secondary.main'],
+            ['Bottleneck', plan.hardBn.length ? plan.hardBn[0].name : (plan.tagged.find((s) => s.bottleneck)?.name || 'none'), 'error.main']].map(([l, v, c]) => (
+            <Box key={l}><Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.56rem', display: 'block' }}>{l}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: c }}>{v}</Typography></Box>
+          ))}
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          To run at {targetUph}/hr the line must hold a {plan.requiredCycle}s cycle. Each station below is staffed/machined to keep that pace — that's how the bottleneck is freed. Operators are the result, not a dial that changes UPH.
         </Typography>
       </CardContent></Card>
+
+      {loading ? <Box sx={{ textAlign: 'center', py: 6 }}><CircularProgress /></Box> : plan.sections.length === 0 ? (
+        <Card sx={{ borderRadius: 2 }}><CardContent sx={{ textAlign: 'center', py: 5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>No operations with STD time</Typography>
+          <Typography variant="body2" color="text.secondary">Set STD cycle time on operations in MES Setup → Assembly Operations.</Typography>
+        </CardContent></Card>
+      ) : plan.sections.map((sec) => (
+        <Card key={sec.name} sx={{ borderRadius: 2, mb: 2 }}><CardContent>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>{sec.name}{sec.name === 'Molding' && <Typography component="span" variant="caption" color="text.secondary"> — machine-constrained, planned per machine</Typography>}</Typography>
+          <Divider sx={{ mb: 1 }} />
+          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+            <Table size="small">
+              <TableHead><TableRow>
+                {(sec.name === 'Molding'
+                  ? ['Operation', 'Cycle (s)', 'Machines', 'Cavities', 'Per machine/hr', 'Req machines', 'Util', 'Split / machine']
+                  : ['Operation', 'Cycle (s)', 'Req cycle (s)', 'Operators needed', 'Throughput/hr', 'Util', '']
+                ).map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}
+              </TableRow></TableHead>
+              <TableBody>
+                {sec.rows.map((s) => (
+                  <TableRow key={s.id} hover sx={{ bgcolor: s.bottleneck ? alpha(theme.palette.error.main, 0.07) : 'inherit' }}>
+                    <TableCell sx={{ fontWeight: 600 }}>{s.name}{s.bottleneck && <Chip size="small" color="error" icon={<WarnIcon />} label="bottleneck" sx={{ height: 18, ml: 0.5 }} />}</TableCell>
+                    <TableCell>{s.cycle}</TableCell>
+                    {s.type === 'machine' ? (
+                      <>
+                        <TableCell><Stepper value={s.avail} onChange={(v) => setMoldCfg(s.operation_code, 'machines', v)} w={40} /></TableCell>
+                        <TableCell><Stepper value={(mold[s.operation_code] || {}).cavities ?? 1} onChange={(v) => setMoldCfg(s.operation_code, 'cavities', v)} w={40} /></TableCell>
+                        <TableCell>{s.perMachine}</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: s.short ? 'error.main' : 'inherit' }}>{s.reqMachines}{s.short ? ` (have ${s.avail})` : ''}</TableCell>
+                        <TableCell><Chip size="small" label={`${s.util}%`} color={s.util > 100 ? 'error' : s.util > 85 ? 'warning' : 'default'} sx={{ height: 20 }} /></TableCell>
+                        <TableCell>{Math.round(qty / Math.max(s.avail, 1)).toLocaleString('en-IN')} pcs × {s.avail}</TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell>{plan.requiredCycle}</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: s.bottleneck ? 'error.main' : 'inherit' }}>{s.reqOps}</TableCell>
+                        <TableCell>{s.throughput}{s.throughput >= targetUph && <Chip size="small" color="success" label="ok" sx={{ height: 16, ml: 0.5 }} />}</TableCell>
+                        <TableCell><Chip size="small" label={`${s.util}%`} color={s.util > 100 ? 'error' : s.util > 85 ? 'warning' : 'default'} sx={{ height: 20 }} /></TableCell>
+                        <TableCell />
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent></Card>
+      ))}
+
+      {plan.hardBn.length > 0 && (
+        <Card sx={{ borderRadius: 2, border: '1px solid', borderColor: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }}><CardContent sx={{ py: 1.5 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, color: 'error.main' }}>
+            <WarnIcon sx={{ verticalAlign: 'middle', mr: 0.5 }} fontSize="small" /> Hard bottleneck: {plan.hardBn.map((b) => `${b.name} needs ${b.reqMachines} machines (have ${b.avail})`).join('; ')}.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Add a machine, lower the target UPH, or add overtime to clear it. (Operators alone won't lift a machine-constrained station.)</Typography>
+        </CardContent></Card>
+      )}
     </Box>
   );
 };
