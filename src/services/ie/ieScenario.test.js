@@ -1,6 +1,6 @@
 import { resolveStandard } from '../routingCapacity';
 import { planCost } from './costModel';
-import { requiredUph, planForTarget } from './ieScenario';
+import { requiredUph, planForTarget, planScenarios } from './ieScenario';
 
 const DEF = { default_oee: 1 };
 const RATES = { labour_per_hr: 100, overtime_multiplier: 1.5, machine_per_hr: 50, indirect_pct: 0 };
@@ -92,6 +92,22 @@ describe('planForTarget — infeasible (headcount pool too small)', () => {
     expect(r.feasible).toBe(false);
     expect(r.unlock.type).toBe('labour');
     expect(r.unlock.extraOperatorsNeeded).toBe(1); // needs 3, pool 2
+  });
+});
+
+describe('planScenarios — labelled options + a recommended pick', () => {
+  test('returns 3 trade-off-labelled scenarios and flags exactly one recommended when feasible', () => {
+    const s = planScenarios(line(), { headcountPool: 10, targetQty: 2000, shiftHours: 8, maxOvertimeHours: 2, rates: RATES });
+    expect(s.map((x) => x.key)).toEqual(['no_ot', 'balanced', 'fewest_ops']);
+    const recs = s.filter((x) => x.recommended);
+    expect(recs.length).toBe(1);
+    expect(recs[0].result.feasible).toBe(true);
+  });
+
+  test('no scenario recommended when the target is infeasible for all', () => {
+    // 3000/day on a 2400/day machine line, OT capped low → all infeasible.
+    const s = planScenarios(line(), { headcountPool: 10, targetQty: 4000, shiftHours: 8, maxOvertimeHours: 0, rates: RATES });
+    expect(s.every((x) => !x.recommended)).toBe(true);
   });
 });
 

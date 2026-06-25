@@ -20,7 +20,7 @@ import mesMasterService from '../../services/mesMasterService';
 import plmProductService from '../../services/plmProductService';
 import ieService from '../../services/ieService';
 import { resolveStandard } from '../../services/routingCapacity';
-import { planForTarget } from '../../services/ie/ieScenario';
+import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
 
 const fmt = (x) => Math.round(Number(x) || 0).toLocaleString('en-IN');
 const money = (x) => `₹${(Number(x) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -82,6 +82,11 @@ export default function AssemblyPlanner() {
     shiftHours: Number(shiftHours) || 0,
     maxOvertimeHours: Number(maxOvertime) || 0,
     rates: rates || {},
+  }), [resolvedOps, headcountPool, target, shiftHours, maxOvertime, rates]);
+
+  const scenarios = useMemo(() => planScenarios(resolvedOps, {
+    headcountPool: Number(headcountPool) || 0, targetQty: Number(target) || 0,
+    shiftHours: Number(shiftHours) || 0, maxOvertimeHours: Number(maxOvertime) || 0, rates: rates || {},
   }), [resolvedOps, headcountPool, target, shiftHours, maxOvertime, rates]);
 
   const validCount = resolvedOps.filter((r) => r.valid).length;
@@ -168,6 +173,35 @@ export default function AssemblyPlanner() {
             {feasible && (
               <Button variant="contained" size="small" sx={{ mt: 1.5 }} disabled>Apply this plan</Button>
             )}
+          </Paper>
+
+          {/* Compare options (scenarios) */}
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography sx={{ fontWeight: 700, mb: 1.5 }}>Compare options</Typography>
+            <Stack direction="row" spacing={1.5} sx={{ overflowX: 'auto', pb: 1, pt: 1 }}>
+              {scenarios.map((s) => {
+                const r = s.result;
+                return (
+                  <Paper key={s.key} variant="outlined"
+                    onClick={() => setMaxOvertime(s.key === 'no_ot' ? 0 : s.key === 'fewest_ops' ? Math.max(Number(maxOvertime) || 0, 4) : (Number(maxOvertime) || 2))}
+                    sx={{ p: 1.5, minWidth: 150, flexShrink: 0, cursor: 'pointer', position: 'relative',
+                      borderColor: s.recommended ? 'success.main' : 'divider', borderWidth: s.recommended ? 1.5 : 1 }}>
+                    {s.recommended && <Chip size="small" color="success" label="Recommended" sx={{ position: 'absolute', top: -10, right: 8, height: 18 }} />}
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{s.label}</Typography>
+                    {r.feasible ? (
+                      <>
+                        <Typography variant="caption" color="text.secondary" display="block">{r.plan.totalOperators} ops · {r.overtimeHours}h OT</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: s.recommended ? 'success.main' : 'text.primary' }}>
+                          {money(r.cost?.costPerPc)}<Typography component="span" variant="caption" color="text.secondary">/pc</Typography>
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="caption" color="error">Not achievable</Typography>
+                    )}
+                  </Paper>
+                );
+              })}
+            </Stack>
           </Paper>
 
           {/* Per-station plan */}
