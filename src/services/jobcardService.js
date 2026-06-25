@@ -69,5 +69,5 @@ export async function postJobcard({ stageId, output, reject = 0, downtime = 0, d
   return data;
 }
 
-const jobcardService = { listOpenWorkOrders, listStages, listReasons, listDefects, listStageLog, postJobcard };
+const jobcardService = { listOpenWorkOrders, listStages, listReasons, listDefects, listMolds, listStageLog, postJobcard };
 export default jobcardService;
