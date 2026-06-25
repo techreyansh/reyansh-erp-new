@@ -118,23 +118,23 @@ const inventoryLedgerService = {
 
   /**
    * Unified inventory view for the desktop screen: merges balances with the
-   * item master, locations, and the reorder threshold (still on ppc_stock
-   * during transition). One row per item x location with on-hand + value +
-   * status. Returns { rows, locations }.
+   * item master, locations, and the reorder threshold (now on ppc_items).
+   * One row per item x location with on-hand + value + status.
+   * Returns { rows, locations }.
    */
   async getInventoryView() {
-    const [balRes, itemRes, locRes, stockRes] = await Promise.all([
+    const [balRes, itemRes, locRes, reorderRes] = await Promise.all([
       supabase.from('inv_balance').select('item_id, location_id, on_hand, reserved, valuation_rate, stock_value, updated_at'),
       supabase.from('ppc_items').select('id, code, name, item_type, uom, is_active'),
       supabase.from('inv_location').select('id, code, name, kind'),
-      supabase.from('ppc_stock').select('item_id, reorder_point'),
+      supabase.from('ppc_items').select('id, reorder_point'),
     ]);
-    for (const r of [balRes, itemRes, locRes, stockRes]) {
+    for (const r of [balRes, itemRes, locRes, reorderRes]) {
       if (r.error) throw new Error(r.error.message);
     }
     const items = new Map((itemRes.data || []).map((i) => [i.id, i]));
     const locs = new Map((locRes.data || []).map((l) => [l.id, l]));
-    const reorder = new Map((stockRes.data || []).map((s) => [s.item_id, Number(s.reorder_point) || 0]));
+    const reorder = new Map((reorderRes.data || []).map((i) => [i.id, Number(i.reorder_point) || 0]));
 
     const rows = (balRes.data || []).map((b) => {
       const item = items.get(b.item_id) || {};

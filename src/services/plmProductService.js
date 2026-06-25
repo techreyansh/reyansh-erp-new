@@ -95,17 +95,50 @@ export async function addRevision(productId, { revision, change_reason, snapshot
   const { error } = await supabase.from('product_revision').insert({ product_id: productId, revision, change_reason, snapshot, changed_by_email: email });
   if (error) throw error;
 }
+/** The product's currently-active routing version (null before any save/backfill). */
+export async function getActiveRoutingVersion(productId) {
+  const { data } = await supabase.from('routing_version').select('*')
+    .eq('product_id', productId).eq('status', 'active')
+    .order('effective_from', { ascending: false, nullsFirst: false }).limit(1).maybeSingle();
+  return data || null;
+}
+
+/** Routing steps of the active version. Falls back to legacy unversioned rows
+ *  (pre-backfill products) so the editor keeps working during the rollout. */
 export async function listProcess(productId) {
-  const { data } = await supabase.from('product_process_step').select('*').eq('product_id', productId).order('sequence');
+  const ver = await getActiveRoutingVersion(productId);
+  if (ver?.id) {
+    const { data } = await supabase.from('product_process_step').select('*')
+      .eq('routing_version_id', ver.id).order('sequence');
+    return data || [];
+  }
+  const { data } = await supabase.from('product_process_step').select('*')
+    .eq('product_id', productId).is('routing_version_id', null).order('sequence');
   return data || [];
 }
+
+/** Version-scoped save (atomic RPC): mints a new active version, supersedes the
+ *  prior one, and preserves history. Replaces the old delete-all-then-insert
+ *  that destroyed versioning (autoplan eng gate C1). */
 export async function saveProcess(productId, steps) {
-  await supabase.from('product_process_step').delete().eq('product_id', productId);
-  if (steps.length) {
-    const rows = steps.map((s, i) => ({ ...s, product_id: productId, sequence: i }));
-    const { error } = await supabase.from('product_process_step').insert(rows);
-    if (error) throw error;
-  }
+  const payload = (steps || []).map((s, i) => ({ ...s, sequence: i }));
+  const { data, error } = await supabase.rpc('mes_save_routing', { p_product_id: productId, p_steps: payload });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/** All routing versions for a product, newest first (for the history tab). */
+export async function listRoutingVersions(productId) {
+  const { data } = await supabase.from('routing_version').select('*')
+    .eq('product_id', productId).order('version_number', { ascending: false });
+  return data || [];
+}
+
+/** Steps belonging to a specific routing version (for the history diff view). */
+export async function listProcessForVersion(versionId) {
+  const { data } = await supabase.from('product_process_step').select('*')
+    .eq('routing_version_id', versionId).order('sequence');
+  return data || [];
 }
 export async function listProductDocuments(productId) {
   const { data } = await supabase.from('product_document').select('*').eq('product_id', productId).order('created_at', { ascending: false });
@@ -147,6 +180,7 @@ const plmProductService = {
   listProducts, getProduct, createProduct, updateProduct, duplicateProduct,
   archiveProduct, restoreProduct, setProductStatus, checkDeletable, deleteProduct,
   listRevisions, addRevision, listProcess, saveProcess, listQualityPlan, saveQualityPlan,
+  getActiveRoutingVersion, listRoutingVersions, listProcessForVersion,
   listSideConfig, saveSideConfig, listProductDocuments,
 };
 export default plmProductService;

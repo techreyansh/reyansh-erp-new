@@ -136,15 +136,29 @@ async function deleteBomLine(id) {
 // Stock
 // ---------------------------------------------------------------------------
 async function listStock() {
-  const data = unwrap(
-    await supabase
-      .from('ppc_stock')
-      .select(
-        'id, item_id, on_hand, reorder_point, safety_stock, lead_time_days, location, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost)'
-      ),
-    'List stock'
-  );
-  return data || [];
+  const [data, bal] = await Promise.all([
+    unwrap(
+      await supabase
+        .from('ppc_stock')
+        .select(
+          'id, item_id, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost, reorder_point, safety_stock, lead_time_days, location)'
+        ),
+      'List stock'
+    ),
+    unwrap(await supabase.from('inv_balance').select('item_id, on_hand'), 'Balances'),
+  ]);
+  // on_hand now comes from the inv_balance ledger (summed across locations);
+  // config (reorder/safety/lead/location) from ppc_items.
+  const onHand = new Map();
+  (bal || []).forEach((b) => onHand.set(b.item_id, (onHand.get(b.item_id) || 0) + (Number(b.on_hand) || 0)));
+  return (data || []).map((r) => ({
+    ...r,
+    on_hand: onHand.get(r.item_id) || 0,
+    reorder_point: r.item?.reorder_point ?? 0,
+    safety_stock: r.item?.safety_stock ?? 0,
+    lead_time_days: r.item?.lead_time_days ?? 0,
+    location: r.item?.location ?? null,
+  }));
 }
 
 /**
@@ -156,19 +170,22 @@ async function recomputeClassification() {
   return data;
 }
 
-/** Insert or update a stock row keyed on the unique item_id. */
+/**
+ * Save planning config for an item. Config now lives on ppc_items (single
+ * source — the planning RPCs read it from there), so this writes the item
+ * master, not ppc_stock. on_hand is NOT set here — the inv_ledger owns it;
+ * adjust on-hand via inv_adjust, never by editing config.
+ */
 async function upsertStock(payload) {
   const row = {
-    item_id: payload.item_id,
-    on_hand: Number(payload.on_hand) || 0,
     reorder_point: Number(payload.reorder_point) || 0,
     safety_stock: Number(payload.safety_stock) || 0,
     lead_time_days: Number(payload.lead_time_days) || 0,
     location: payload.location?.trim() || null,
   };
   return unwrap(
-    await supabase.from('ppc_stock').upsert(row, { onConflict: 'item_id' }).select().single(),
-    'Save stock'
+    await supabase.from('ppc_items').update(row).eq('id', payload.item_id).select().single(),
+    'Save stock config'
   );
 }
 
@@ -191,6 +208,18 @@ async function receiveStock(itemId, { qty, vendorCode, vendorName, unitCost, ref
     }),
     'Receive stock'
   );
+  // Mirror into the perpetual ledger (best-effort) — listStock now reads inv_balance.
+  try {
+    if (data?.ok && data?.item_id && Number(qty) > 0) {
+      await supabase.rpc('inv_post_by_id', {
+        p_item_id: data.item_id, p_location_code: 'STORE', p_type: 'RECEIPT',
+        p_qty_delta: Math.abs(Number(qty)),
+        p_rate: unitCost != null && unitCost !== '' ? Number(unitCost) : null,
+        p_ref_type: 'ppc_receive', p_ref_id: reference ? String(reference) : null,
+        p_reason: vendorName || vendorCode || null,
+      });
+    }
+  } catch (e) { console.warn('[inv] receiveStock ledger mirror failed:', e?.message); }
   return data || null;
 }
 
@@ -205,6 +234,21 @@ async function adjustStock(itemId, newQty, reason) {
     }),
     'Adjust stock'
   );
+  // Mirror into the perpetual ledger as a delta so inv_balance reaches newQty.
+  try {
+    if (data?.ok && data?.item_id) {
+      const { data: bal } = await supabase.from('inv_balance').select('on_hand').eq('item_id', data.item_id);
+      const cur = (bal || []).reduce((s, b) => s + (Number(b.on_hand) || 0), 0);
+      const delta = (Number(newQty) || 0) - cur;
+      if (delta !== 0) {
+        await supabase.rpc('inv_post_by_id', {
+          p_item_id: data.item_id, p_location_code: 'STORE', p_type: 'ADJUST',
+          p_qty_delta: delta, p_ref_type: 'ppc_adjust', p_ref_id: null,
+          p_reason: reason?.trim() || 'cycle count',
+        });
+      }
+    }
+  } catch (e) { console.warn('[inv] adjustStock ledger mirror failed:', e?.message); }
   return data || null;
 }
 
@@ -756,6 +800,18 @@ async function issueMaterial(woMaterialId, qty) {
     }),
     'Issue material'
   );
+  // Mirror RM consumption into the perpetual stock ledger (best-effort; never blocks).
+  // Source from the RM store (STORE) as MFG_CONSUME, matching the inv_issue_kit_line
+  // path so the kit-line RPC and this legacy path post the same movement type.
+  try {
+    if (data?.ok && data?.item_id && Number(qty) > 0) {
+      await supabase.rpc('inv_post_by_id', {
+        p_item_id: data.item_id, p_location_code: 'STORE', p_type: 'MFG_CONSUME',
+        p_qty_delta: -Math.abs(Number(qty)), p_ref_type: 'wo_material',
+        p_ref_id: String(woMaterialId), p_reason: 'RM issue to production',
+      });
+    }
+  } catch (e) { console.warn('[inv] issueMaterial ledger mirror failed:', e?.message); }
   return data || null;
 }
 
