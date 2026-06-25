@@ -15,6 +15,7 @@ import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
 import CompanyContacts from './CompanyContacts';
+import CompanyAddresses from './CompanyAddresses';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 
 const AI_ACTIONS = [
@@ -155,7 +156,7 @@ export default function Client360({ account, onClose, notify }) {
 
   const s = data?.summary || {};
   const c = crm?.company || account;
-  const TABS = ['Overview', 'Contacts', 'Products', 'Quotations', 'Sales Orders', 'Production', 'Dispatch', 'Invoices', 'Payments', 'Timeline', 'KIT', 'Tasks', 'Documents', 'Complaints', 'AI Copilot', 'Development'];
+  const TABS = ['Overview', 'Contacts', 'Products', 'Quotations', 'Sales Orders', 'Production', 'Dispatch', 'Invoices', 'Payments', 'Timeline', 'KIT', 'Tasks', 'Documents', 'Complaints', 'AI Copilot', 'Development', 'Addresses'];
 
   return (
     <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', md: 980 }, maxWidth: '100%' } }}>
@@ -277,6 +278,7 @@ export default function Client360({ account, onClose, notify }) {
           {tab === 14 && <AICopilotTab account={account} notify={notify} />}
           {/* 15 DEVELOPMENT (NPD) */}
           {tab === 15 && <NPDDevelopmentPanel accountId={account.id} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
+          {tab === 16 && account?.id && <CompanyAddresses accountId={account.id} />}
         </Box>
       )}
     </Drawer>

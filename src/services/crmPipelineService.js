@@ -396,6 +396,34 @@ export async function listAddresses(accountId) {
   }
 }
 
+const ADDR_FIELDS = ['address_type', 'line1', 'line2', 'city', 'state', 'state_code', 'pincode', 'country', 'gstin', 'maps_url', 'is_default'];
+const pickAddr = (a) => ADDR_FIELDS.reduce((o, k) => (k in a ? { ...o, [k]: a[k] === '' ? null : a[k] } : o), {});
+
+/** Add an address to an account. */
+export async function addAddress(accountId, a) {
+  const { data, error } = await supabase
+    .from("crm_account_addresses")
+    .insert({ account_id: accountId, ...pickAddr(a), is_default: !!a.is_default })
+    .select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** Patch an address. */
+export async function updateAddress(id, patch) {
+  const { data, error } = await supabase
+    .from("crm_account_addresses").update(pickAddr(patch)).eq("id", id).select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** Delete an address. */
+export async function deleteAddress(id) {
+  const { error } = await supabase.from("crm_account_addresses").delete().eq("id", id);
+  if (error) throw error;
+  return true;
+}
+
 /** Convert a prospect into a client in place via the server-side RPC. */
 export async function convertToClient(accountId, clientCode) {
   const { data, error } = await supabase.rpc("crm_convert_to_client", {
@@ -968,6 +996,9 @@ const crmPipelineService = {
   updateContact,
   deleteContact,
   listAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
   convertToClient,
   assignOwner,
   addCompany,
