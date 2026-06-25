@@ -756,6 +756,18 @@ async function issueMaterial(woMaterialId, qty) {
     }),
     'Issue material'
   );
+  // Mirror RM consumption into the perpetual stock ledger (best-effort; never blocks).
+  // Source from the RM store (STORE) as MFG_CONSUME, matching the inv_issue_kit_line
+  // path so the kit-line RPC and this legacy path post the same movement type.
+  try {
+    if (data?.ok && data?.item_id && Number(qty) > 0) {
+      await supabase.rpc('inv_post_by_id', {
+        p_item_id: data.item_id, p_location_code: 'STORE', p_type: 'MFG_CONSUME',
+        p_qty_delta: -Math.abs(Number(qty)), p_ref_type: 'wo_material',
+        p_ref_id: String(woMaterialId), p_reason: 'RM issue to production',
+      });
+    }
+  } catch (e) { console.warn('[inv] issueMaterial ledger mirror failed:', e?.message); }
   return data || null;
 }
 
