@@ -344,7 +344,12 @@ export async function addContact(accountId, c) {
       designation: c.designation || null,
       department: c.department || null,
       phone: c.phone || null,
+      alt_phone: c.alt_phone || null,
       email: c.email || null,
+      linkedin: c.linkedin || null,
+      birthday: c.birthday || null,
+      is_decision_maker: !!c.is_decision_maker,
+      preferred_comm: c.preferred_comm || null,
       is_primary: !!c.is_primary,
       notes: c.notes || null,
     })
@@ -389,6 +394,69 @@ export async function listAddresses(accountId) {
   } catch {
     return [];
   }
+}
+
+const ADDR_FIELDS = ['address_type', 'line1', 'line2', 'city', 'state', 'state_code', 'pincode', 'country', 'gstin', 'maps_url', 'is_default'];
+const pickAddr = (a) => ADDR_FIELDS.reduce((o, k) => (k in a ? { ...o, [k]: a[k] === '' ? null : a[k] } : o), {});
+
+/** Add an address to an account. */
+export async function addAddress(accountId, a) {
+  const { data, error } = await supabase
+    .from("crm_account_addresses")
+    .insert({ account_id: accountId, ...pickAddr(a), is_default: !!a.is_default })
+    .select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** Patch an address. */
+export async function updateAddress(id, patch) {
+  const { data, error } = await supabase
+    .from("crm_account_addresses").update(pickAddr(patch)).eq("id", id).select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** Delete an address. */
+export async function deleteAddress(id) {
+  const { error } = await supabase.from("crm_account_addresses").delete().eq("id", id);
+  if (error) throw error;
+  return true;
+}
+
+/** Documents attached to an account (stored in the shared 'documents' bucket). */
+export async function listDocuments(accountId) {
+  try {
+    const { data } = await supabase.from("crm_account_documents").select("*").eq("account_id", accountId).order("created_at", { ascending: false });
+    return data || [];
+  } catch { return []; }
+}
+
+export async function uploadDocument(accountId, file, docType) {
+  const safe = String(file.name).replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `crm/${accountId}/${Date.now()}-${safe}`;
+  const up = await supabase.storage.from("documents").upload(path, file, { upsert: true });
+  if (up.error) throw up.error;
+  let email = null;
+  try { email = (await supabase.auth.getUser()).data?.user?.email || null; } catch { /* anon */ }
+  const { data, error } = await supabase.from("crm_account_documents")
+    .insert({ account_id: accountId, doc_type: docType || null, file_name: file.name, storage_path: path, uploaded_by_email: email })
+    .select().single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getDocumentUrl(storagePath) {
+  const { data, error } = await supabase.storage.from("documents").createSignedUrl(storagePath, 3600);
+  if (error) throw error;
+  return data?.signedUrl;
+}
+
+export async function deleteDocument(id, storagePath) {
+  if (storagePath) { try { await supabase.storage.from("documents").remove([storagePath]); } catch { /* ignore storage miss */ } }
+  const { error } = await supabase.from("crm_account_documents").delete().eq("id", id);
+  if (error) throw error;
+  return true;
 }
 
 /** Convert a prospect into a client in place via the server-side RPC. */
@@ -963,6 +1031,13 @@ const crmPipelineService = {
   updateContact,
   deleteContact,
   listAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  listDocuments,
+  uploadDocument,
+  getDocumentUrl,
+  deleteDocument,
   convertToClient,
   assignOwner,
   addCompany,

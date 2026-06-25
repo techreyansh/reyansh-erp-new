@@ -14,6 +14,9 @@ import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
+import CompanyContacts from './CompanyContacts';
+import CompanyAddresses from './CompanyAddresses';
+import CompanyDocuments from './CompanyDocuments';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 
 const AI_ACTIONS = [
@@ -92,6 +95,7 @@ const TL_COLOR = { call: '#0288d1', whatsapp: '#25d366', email: '#5d4037', meeti
 function TimelineTab({ account }) {
   const [events, setEvents] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [q, setQ] = useState('');
   useEffect(() => {
     let on = true;
     crmPipelineService.clientTimeline(account).then((e) => on && setEvents(e || [])).catch(() => on && setEvents([]));
@@ -99,12 +103,16 @@ function TimelineTab({ account }) {
   }, [account]);
   if (!events) return <Stack alignItems="center" sx={{ py: 4 }}><CircularProgress size={22} /></Stack>;
   const kinds = ['all', ...Array.from(new Set(events.map((e) => e.kind)))];
-  const shown = filter === 'all' ? events : events.filter((e) => e.kind === filter);
+  const ql = q.trim().toLowerCase();
+  const shown = events
+    .filter((e) => filter === 'all' || e.kind === filter)
+    .filter((e) => !ql || `${e.title || ''} ${e.detail || ''} ${e.owner || ''}`.toLowerCase().includes(ql));
   return (
     <Box>
-      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
         {kinds.map((k) => <Chip key={k} size="small" label={k === 'all' ? `All (${events.length})` : k} variant={filter === k ? 'filled' : 'outlined'} color={filter === k ? 'primary' : 'default'} onClick={() => setFilter(k)} sx={{ cursor: 'pointer', textTransform: 'capitalize' }} />)}
       </Stack>
+      <TextField size="small" fullWidth placeholder="Search the timeline…" value={q} onChange={(e) => setQ(e.target.value)} sx={{ mb: 1.5 }} />
       {shown.length === 0 ? <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No events yet.</Typography> : (
         <Box sx={{ position: 'relative', pl: 2, '&::before': { content: '""', position: 'absolute', left: 6, top: 6, bottom: 6, width: 2, bgcolor: 'divider' } }}>
           {shown.map((e, i) => (
@@ -113,8 +121,10 @@ function TimelineTab({ account }) {
               <Stack direction="row" alignItems="baseline" spacing={1}>
                 <Chip size="small" label={e.kind} sx={{ height: 18, textTransform: 'capitalize', bgcolor: TL_COLOR[e.kind] || 'grey.500', color: '#fff', '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem', fontWeight: 700 } }} />
                 <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1, minWidth: 0 }}>{e.title}</Typography>
+                {e.status && e.status !== 'open' && <Chip size="small" variant="outlined" color={e.status === 'completed' ? 'success' : e.status === 'cancelled' ? 'default' : 'warning'} label={e.status} sx={{ height: 16, '& .MuiChip-label': { px: 0.6, fontSize: '0.6rem' } }} />}
                 <Typography variant="caption" color="text.disabled">{dt(e.at)}</Typography>
               </Stack>
+              {e.outcome && <Typography variant="caption" color="success.main" sx={{ display: 'block', ml: 0.5, fontWeight: 600 }}>Outcome: {e.outcome}</Typography>}
               {e.detail && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', whiteSpace: 'pre-wrap', ml: 0.5 }}>{e.detail}</Typography>}
               {e.owner && <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>· {String(e.owner).split('@')[0]}</Typography>}
             </Box>
@@ -154,7 +164,7 @@ export default function Client360({ account, onClose, notify }) {
 
   const s = data?.summary || {};
   const c = crm?.company || account;
-  const TABS = ['Overview', 'Contacts', 'Products', 'Quotations', 'Sales Orders', 'Production', 'Dispatch', 'Invoices', 'Payments', 'Timeline', 'KIT', 'Tasks', 'Documents', 'Complaints', 'AI Copilot', 'Development'];
+  const TABS = ['Overview', 'Contacts', 'Products', 'Quotations', 'Sales Orders', 'Production', 'Dispatch', 'Invoices', 'Payments', 'Timeline', 'KIT', 'Tasks', 'Documents', 'Complaints', 'AI Copilot', 'Development', 'Addresses'];
 
   return (
     <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', md: 980 }, maxWidth: '100%' } }}>
@@ -211,20 +221,9 @@ export default function Client360({ account, onClose, notify }) {
               </Grid>
             </Grid>
           )}
-          {/* 1 CONTACTS */}
-          {tab === 1 && (
-            <Stack spacing={1}>
-              {(crm?.contacts || []).map((ct, i) => (
-                <Stack key={i} direction="row" spacing={1.5} alignItems="center" sx={{ p: 1, borderRadius: 1.5, border: 1, borderColor: 'divider' }}>
-                  <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{(ct.contact_person || ct.full_name || '?')[0]}</Avatar>
-                  <Box sx={{ flexGrow: 1, minWidth: 0 }}><Typography variant="body2" sx={{ fontWeight: 700 }}>{ct.contact_person || ct.full_name}{ct.is_primary ? ' ★' : ''}</Typography><Typography variant="caption" color="text.secondary">{[ct.designation, ct.department].filter(Boolean).join(' · ')}</Typography></Box>
-                  {ct.phone && <Tooltip title="Call"><IconButton size="small" component="a" href={`tel:${ct.phone}`}><CallRounded fontSize="small" /></IconButton></Tooltip>}
-                  {ct.phone && <Tooltip title="WhatsApp"><IconButton size="small" component="a" href={`https://wa.me/${String(ct.phone).replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsApp fontSize="small" /></IconButton></Tooltip>}
-                  {ct.email && <Tooltip title="Email"><IconButton size="small" component="a" href={`mailto:${ct.email}`}><EmailOutlined fontSize="small" /></IconButton></Tooltip>}
-                </Stack>
-              ))}
-              {!crm?.contacts?.length && <Typography variant="body2" color="text.secondary">No contacts.</Typography>}
-            </Stack>
+          {/* 1 CONTACTS — full multi-contact management (CRM 360 P2) */}
+          {tab === 1 && account?.id && (
+            <CompanyContacts accountId={account.id} />
           )}
           {/* 2 PRODUCTS */}
           {tab === 2 && <MiniTable cols={['Code', 'Product', 'Status', 'Rev']} rows={data.products} empty="No products linked." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.product_code}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.status}</TableCell><TableCell>{r.current_revision}</TableCell></>} />}
@@ -280,13 +279,14 @@ export default function Client360({ account, onClose, notify }) {
           {/* 11 TASKS */}
           {tab === 11 && <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No client-linked tasks. (Tasks are managed in the Task module; account-linked tasks will appear here once tasks reference this account.)</Typography>}
           {/* 12 DOCUMENTS */}
-          {tab === 12 && <MiniTable cols={['Document', 'Type', 'Added']} rows={data.documents} empty="No documents." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.file_name || r.name || r.title || r.document_name || '—'}</TableCell><TableCell>{r.doc_type || r.type || '—'}</TableCell><TableCell>{dt(r.created_at)}</TableCell></>} />}
+          {tab === 12 && account?.id && <CompanyDocuments accountId={account.id} />}
           {/* 13 COMPLAINTS */}
           {tab === 13 && <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />}
           {/* 14 AI COPILOT */}
           {tab === 14 && <AICopilotTab account={account} notify={notify} />}
           {/* 15 DEVELOPMENT (NPD) */}
           {tab === 15 && <NPDDevelopmentPanel accountId={account.id} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
+          {tab === 16 && account?.id && <CompanyAddresses accountId={account.id} />}
         </Box>
       )}
     </Drawer>
