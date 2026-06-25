@@ -61,6 +61,13 @@ export default function CableProductionPlanWizard() {
 
   const shortfalls = mrp.map((m) => ({ ...m, on_hand: stock[m.code] || 0, short: Math.max(0, m.qty_required - (stock[m.code] || 0)) })).filter((m) => m.short > 0);
 
+  // R3 — rough release-time feasibility: total production hours across stages vs
+  // days to due (≈2 shifts/16h/day on a single line). Soft warning, never blocks.
+  const totalHrs = capacityRows.reduce((s, r) => s + (r.hrs || 0), 0);
+  const daysToDue = form.due_date ? Math.ceil((new Date(form.due_date).getTime() - Date.now()) / 86400000) : null;
+  const daysNeeded = totalHrs > 0 ? Math.ceil(totalHrs / 16) : 0;
+  const tightCapacity = daysToDue != null && daysToDue >= 0 && daysNeeded > daysToDue;
+
   const canNext = () => {
     if (active === 0) return !!cable && Number(form.qty) > 0;
     return true;
@@ -226,6 +233,16 @@ export default function CableProductionPlanWizard() {
                 <RocketLaunchRounded color="primary" sx={{ fontSize: 56, mb: 1 }} />
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>Release this plan?</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Saves the plan and creates a work order with its routed stages + material kit.</Typography>
+                {shortfalls.length > 0 && (
+                  <Alert severity="warning" icon={<WarningAmberRounded />} sx={{ mb: 1.5, textAlign: "left", maxWidth: 520, mx: "auto" }}>
+                    <b>{shortfalls.length} material{shortfalls.length === 1 ? "" : "s"} short.</b> Raise a purchase indent from the MRP dashboard before releasing — the kit will be created unfulfilled.
+                  </Alert>
+                )}
+                {tightCapacity && (
+                  <Alert severity="warning" sx={{ mb: 1.5, textAlign: "left", maxWidth: 520, mx: "auto" }}>
+                    <b>Tight schedule.</b> ~{Math.round(totalHrs)} production-hours (~{daysNeeded} day{daysNeeded === 1 ? "" : "s"} at 2 shifts) but only {daysToDue} day{daysToDue === 1 ? "" : "s"} to the due date — this order may slip.
+                  </Alert>
+                )}
                 <Button variant="contained" size="large" startIcon={<RocketLaunchRounded />} onClick={release} disabled={busy}>Release to Work Order</Button>
               </>
             )}

@@ -39,6 +39,7 @@ export default function CableOrderTracking() {
   const [dispatch, setDispatch] = useState(null); // { qty, customer }
   const [completeStage, setCompleteStage] = useState(null); // { id, name, output, scrap }
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [statusLog, setStatusLog] = useState([]);
 
   const loadList = useCallback(async () => {
     setLoading(true);
@@ -62,8 +63,10 @@ export default function CableOrderTracking() {
   const loadDetail = useCallback(async (id) => {
     if (!id) return;
     setDetailLoading(true);
-    try { setDetail(await ppcService.getWorkOrder(id)); }
-    catch { setDetail(null); }
+    try {
+      const [d, log] = await Promise.all([ppcService.getWorkOrder(id), ppcService.listWoStatusLog(id)]);
+      setDetail(d); setStatusLog(log || []);
+    } catch { setDetail(null); setStatusLog([]); }
     finally { setDetailLoading(false); }
   }, []);
   useEffect(() => { if (selId) loadDetail(selId); }, [selId, loadDetail]);
@@ -320,6 +323,27 @@ export default function CableOrderTracking() {
                         <Tooltip title={fmtDT(q.checked_at)}>
                           <Chip size="small" color={String(q.result).toLowerCase().includes("pass") ? "success" : String(q.result).toLowerCase().includes("fail") ? "error" : "default"} label={q.result} />
                         </Tooltip>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Paper>
+              )}
+
+              {/* Status history (R4 audit log) */}
+              {statusLog.length > 0 && (
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Typography sx={{ fontWeight: 700, mb: 1 }}>Status history</Typography>
+                  <Stack spacing={0.5}>
+                    {statusLog.map((h) => (
+                      <Stack key={h.id} direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          {h.old_status && <Chip size="small" variant="outlined" label={h.old_status} />}
+                          {h.old_status && <ArrowForwardRounded fontSize="small" color="disabled" />}
+                          <Chip size="small" color={STATUS_COLOR[woStatusBucket(h.new_status)] || "default"} label={h.new_status} />
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {h.changed_by_email || "—"} · {fmtDT(h.changed_at)}
+                        </Typography>
                       </Stack>
                     ))}
                   </Stack>
