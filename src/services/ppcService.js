@@ -140,11 +140,13 @@ async function listStock() {
     await supabase
       .from('ppc_stock')
       .select(
-        'id, item_id, on_hand, reorder_point, safety_stock, lead_time_days, location, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost)'
+        'id, item_id, on_hand, safety_stock, lead_time_days, location, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost, reorder_point)'
       ),
     'List stock'
   );
-  return data || [];
+  // reorder_point now lives on ppc_items; surface it at the top level so the
+  // existing read contract (rows expose .reorder_point) is preserved.
+  return (data || []).map((r) => ({ ...r, reorder_point: r.item?.reorder_point ?? 0 }));
 }
 
 /**
