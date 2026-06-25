@@ -21,6 +21,7 @@ import plmProductService from '../../services/plmProductService';
 import ieService from '../../services/ieService';
 import { resolveStandard } from '../../services/routingCapacity';
 import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
+import { poolCapacityByType } from '../../services/ie/moldingPool';
 
 const fmt = (x) => Math.round(Number(x) || 0).toLocaleString('en-IN');
 const money = (x) => `₹${(Number(x) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -33,6 +34,7 @@ export default function AssemblyPlanner() {
   const [molds, setMolds] = useState([]);
   const [operations, setOperations] = useState([]);
   const [rates, setRates] = useState(null);
+  const [moldingMachines, setMoldingMachines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [routingLoading, setRoutingLoading] = useState(false);
 
@@ -47,13 +49,14 @@ export default function AssemblyPlanner() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [prods, mlds, ops, cr] = await Promise.all([
+      const [prods, mlds, ops, cr, mm] = await Promise.all([
         plmProductService.listProducts().catch(() => []),
         mesMasterService.listRows('molding_master').catch(() => []),
         mesService.listOperations({ includeInactive: false }).catch(() => []),
         ieService.getCostRates().catch(() => null),
+        ieService.listMoldingMachines().catch(() => []),
       ]);
-      setProducts(prods); setMolds(mlds); setOperations(ops); setRates(cr);
+      setProducts(prods); setMolds(mlds); setOperations(ops); setRates(cr); setMoldingMachines(mm);
       if (prods.length && !productId) setProductId(prods[0].id);
     } catch { setProducts([]); }
     setLoading(false);
@@ -89,6 +92,7 @@ export default function AssemblyPlanner() {
     shiftHours: Number(shiftHours) || 0, maxOvertimeHours: Number(maxOvertime) || 0, rates: rates || {},
   }), [resolvedOps, headcountPool, target, shiftHours, maxOvertime, rates]);
 
+  const moldPool = useMemo(() => poolCapacityByType(moldingMachines), [moldingMachines]);
   const validCount = resolvedOps.filter((r) => r.valid).length;
   const anyDefault = resolvedOps.some((r) => r.valid && r.cycleSource === 'default');
   const selected = products.find((p) => p.id === productId);
@@ -237,6 +241,28 @@ export default function AssemblyPlanner() {
               Required line rate: {fmt(result.requiredUph)}/hr · pool: {headcountPool} operators · cost rates {rates ? `(₹${rates.labour_per_hr}/hr labour)` : '(defaults)'}
             </Typography>
           </Paper>
+
+          {/* Shared molding pool (IE P3) */}
+          {moldingMachines.length > 0 && (
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Typography sx={{ fontWeight: 700, mb: 1 }}>Shared molding pool</Typography>
+              <Stack direction="row" spacing={3} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+                {['inner', 'outer', 'grommet'].map((t) => (
+                  <Box key={t}>
+                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>{t} mold</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>{fmt(moldPool[t] || 0)}<Typography component="span" variant="caption" color="text.secondary">/day</Typography></Typography>
+                    {target > 0 && (moldPool[t] || 0) > 0 && (
+                      <Chip size="small" color={(moldPool[t] || 0) >= Number(target) ? 'success' : 'error'} variant="outlined"
+                        label={`${Math.round((Number(target) / (moldPool[t] || 1)) * 100)}% of target`} sx={{ height: 18, mt: 0.25 }} />
+                    )}
+                  </Box>
+                ))}
+              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                {moldingMachines.length} machines (shared across lines). Edit the fleet in MES masters; daily capacity = cavities × (3600/cycle) × hours.
+              </Typography>
+            </Paper>
+          )}
         </Stack>
       )}
 
