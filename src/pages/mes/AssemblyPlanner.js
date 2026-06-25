@@ -22,6 +22,7 @@ import ieService from '../../services/ieService';
 import { resolveStandard } from '../../services/routingCapacity';
 import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
 import { poolCapacityByType } from '../../services/ie/moldingPool';
+import MoldingFleetDialog from '../../components/mes/MoldingFleetDialog';
 
 const fmt = (x) => Math.round(Number(x) || 0).toLocaleString('en-IN');
 const money = (x) => `₹${(Number(x) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -45,6 +46,7 @@ export default function AssemblyPlanner() {
   const [maxOvertime, setMaxOvertime] = useState(2);
   const [rateDraft, setRateDraft] = useState(null); // open cost-rate editor when set
   const [savingRates, setSavingRates] = useState(false);
+  const [fleetOpen, setFleetOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -245,7 +247,10 @@ export default function AssemblyPlanner() {
           {/* Shared molding pool (IE P3) */}
           {moldingMachines.length > 0 && (
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography sx={{ fontWeight: 700, mb: 1 }}>Shared molding pool</Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <Typography sx={{ fontWeight: 700 }}>Shared molding pool</Typography>
+                <Button size="small" variant="text" onClick={() => setFleetOpen(true)}>Edit fleet</Button>
+              </Stack>
               <Stack direction="row" spacing={3} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
                 {['inner', 'outer', 'grommet'].map((t) => (
                   <Box key={t}>
@@ -288,6 +293,9 @@ export default function AssemblyPlanner() {
           }}>{savingRates ? 'Saving…' : 'Save rates'}</Button>
         </DialogActions>
       </Dialog>
+
+      <MoldingFleetDialog open={fleetOpen} onClose={() => setFleetOpen(false)}
+        onSaved={async () => { try { setMoldingMachines(await ieService.listMoldingMachines()); } catch { /* keep last */ } }} />
     </Box>
   );
 }
