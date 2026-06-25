@@ -24,6 +24,8 @@ import {
   Skeleton,
   Snackbar,
   Stack,
+  Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
@@ -2527,38 +2529,45 @@ function ContactDialog({ open, contact, onClose, onSaved, onError, addContact, u
 /* ----------------------------------------------------------------------- */
 
 const RATING_OPTIONS = ["1", "2", "3", "4", "5"];
+const CUSTOMER_TYPES = ["OEM", "Distributor", "Dealer", "Exporter", "Retailer", "Trader", "End User", "Other"];
+const CURRENCIES = ["INR", "USD", "EUR", "AED", "GBP"];
+const COMM_METHODS = ["Phone", "Email", "WhatsApp"];
 
 function EditCompanyDialog({ open, company, isProspect, isClient, onClose, onSaved, onError }) {
   const str = (v) => (v == null ? "" : String(v));
+  const dstr = (v) => (v ? String(v).slice(0, 10) : "");
   const buildForm = (c) => ({
-    company_name: str(c.company_name),
-    phone: str(c.phone),
-    email: str(c.email),
-    industry: str(c.industry),
-    city: str(c.city),
-    product_category: str(c.product_category),
-    business_type: str(c.business_type),
+    company_name: str(c.company_name), legal_name: str(c.legal_name),
+    phone: str(c.phone), email: str(c.email),
+    industry: str(c.industry), city: str(c.city),
+    customer_category: str(c.customer_category), customer_type: str(c.customer_type),
+    product_category: str(c.product_category), business_type: str(c.business_type),
     website: str(c.website),
-    gstin: str(c.gstin),
-    pan: str(c.pan),
-    payment_terms: str(c.payment_terms),
-    credit_limit: str(c.credit_limit),
-    credit_period: str(c.credit_period),
-    delivery_terms: str(c.delivery_terms),
-    lead_source: str(c.lead_source),
-    rating: str(c.rating),
-    prospect_stage: str(c.prospect_stage),
-    client_stage: str(c.client_stage),
+    num_employees: str(c.num_employees), annual_turnover: str(c.annual_turnover),
+    company_description: str(c.company_description),
+    products_manufactured: str(c.products_manufactured),
+    markets_served: str(c.markets_served), existing_suppliers: str(c.existing_suppliers),
+    gstin: str(c.gstin), pan: str(c.pan), cin: str(c.cin), iec: str(c.iec),
+    payment_terms: str(c.payment_terms), credit_limit: str(c.credit_limit),
+    credit_period: str(c.credit_period), delivery_terms: str(c.delivery_terms),
+    lead_source: str(c.lead_source), rating: str(c.rating),
+    territory: str(c.territory), currency: str(c.currency) || "INR",
+    preferred_comm: str(c.preferred_comm),
+    prospect_stage: str(c.prospect_stage), client_stage: str(c.client_stage),
     annual_potential: str(c.annual_potential),
-    probability: str(c.probability),
-    expected_value: str(c.expected_value),
+    probability: str(c.probability), expected_value: str(c.expected_value),
+    current_products: str(c.current_products), interested_products: str(c.interested_products),
+    monthly_consumption: str(c.monthly_consumption), competitors: str(c.competitors),
+    last_meeting_date: dstr(c.last_meeting_date), expected_close_date: dstr(c.expected_close_date),
+    tags: Array.isArray(c.tags) ? c.tags : [],
   });
 
   const [form, setForm] = useState(() => buildForm(company || {}));
+  const [tab, setTab] = useState(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (open && company) setForm(buildForm(company));
+    if (open && company) { setForm(buildForm(company)); setTab(0); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, company]);
 
@@ -2581,21 +2590,42 @@ function EditCompanyDialog({ open, company, isProspect, isClient, onClose, onSav
       };
       const patch = {
         company_name: form.company_name.trim(),
+        legal_name: textVal(form.legal_name),
         phone: textVal(form.phone),
         email: textVal(form.email),
         industry: textVal(form.industry),
         city: textVal(form.city),
+        customer_category: textVal(form.customer_category),
+        customer_type: textVal(form.customer_type),
         product_category: textVal(form.product_category),
         business_type: textVal(form.business_type),
         website: textVal(form.website),
+        num_employees: numVal(form.num_employees),
+        annual_turnover: numVal(form.annual_turnover),
+        company_description: textVal(form.company_description),
+        products_manufactured: textVal(form.products_manufactured),
+        markets_served: textVal(form.markets_served),
+        existing_suppliers: textVal(form.existing_suppliers),
         gstin: textVal(form.gstin),
         pan: textVal(form.pan),
+        cin: textVal(form.cin),
+        iec: textVal(form.iec),
         payment_terms: textVal(form.payment_terms),
         credit_limit: numVal(form.credit_limit),
         credit_period: numVal(form.credit_period),
         delivery_terms: textVal(form.delivery_terms),
         lead_source: textVal(form.lead_source),
         rating: numVal(form.rating),
+        territory: textVal(form.territory),
+        currency: textVal(form.currency),
+        preferred_comm: textVal(form.preferred_comm),
+        current_products: textVal(form.current_products),
+        interested_products: textVal(form.interested_products),
+        monthly_consumption: textVal(form.monthly_consumption),
+        competitors: textVal(form.competitors),
+        last_meeting_date: textVal(form.last_meeting_date),
+        expected_close_date: textVal(form.expected_close_date),
+        tags: form.tags && form.tags.length ? form.tags : null,
       };
       if (isProspect) {
         if (form.prospect_stage) patch.prospect_stage = form.prospect_stage;
@@ -2616,97 +2646,144 @@ function EditCompanyDialog({ open, company, isProspect, isClient, onClose, onSav
   };
 
   return (
-    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth scroll="paper">
-      <DialogTitle sx={{ fontWeight: 700 }}>Edit company</DialogTitle>
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="md" fullWidth scroll="paper">
+      <DialogTitle sx={{ fontWeight: 700, pb: 0 }}>Edit company — {form.company_name || "—"}</DialogTitle>
+      <Tabs value={tab} onChange={(_e, v) => setTab(v)} variant="scrollable" scrollButtons="auto"
+        sx={{ px: 2, borderBottom: 1, borderColor: "divider" }}>
+        <Tab label="Company" />
+        <Tab label="Identity & Tax" />
+        <Tab label="Commercial" />
+        <Tab label="Business" />
+        <Tab label="Tags" />
+      </Tabs>
       <DialogContent dividers>
-        <Stack spacing={2.5} sx={{ mt: 0.5 }}>
-          <Box>
-            <SectionTitle>Company</SectionTitle>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField label="Company name" value={form.company_name} onChange={set("company_name")} required fullWidth />
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth />
-                <TextField label="Email" type="email" value={form.email} onChange={set("email")} fullWidth />
-              </Stack>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField label="Industry" value={form.industry} onChange={set("industry")} fullWidth />
-                <TextField label="City" value={form.city} onChange={set("city")} fullWidth />
-              </Stack>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField label="Product category" value={form.product_category} onChange={set("product_category")} fullWidth />
-                <TextField label="Business type" value={form.business_type} onChange={set("business_type")} fullWidth />
-              </Stack>
-              <TextField label="Website" value={form.website} onChange={set("website")} fullWidth />
+        {tab === 0 && (
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField label="Company name" value={form.company_name} onChange={set("company_name")} required fullWidth />
+            <TextField label="Legal name" value={form.legal_name} onChange={set("legal_name")} fullWidth />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth />
+              <TextField label="Email" type="email" value={form.email} onChange={set("email")} fullWidth />
             </Stack>
-          </Box>
-
-          <Box>
-            <SectionTitle>Tax &amp; terms</SectionTitle>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField label="GSTIN" value={form.gstin} onChange={set("gstin")} fullWidth />
-                <TextField label="PAN" value={form.pan} onChange={set("pan")} fullWidth />
-              </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Industry" value={form.industry} onChange={set("industry")} fullWidth />
+              <TextField label="City" value={form.city} onChange={set("city")} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField select label="Customer type" value={form.customer_type} onChange={set("customer_type")} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {CUSTOMER_TYPES.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              </TextField>
+              <TextField label="Customer category" value={form.customer_category} onChange={set("customer_category")} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Product category" value={form.product_category} onChange={set("product_category")} fullWidth />
+              <TextField label="Business type" value={form.business_type} onChange={set("business_type")} fullWidth />
+            </Stack>
+            <TextField label="Website" value={form.website} onChange={set("website")} fullWidth />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="No. of employees" type="number" value={form.num_employees} onChange={set("num_employees")} fullWidth />
+              <TextField label="Annual turnover (₹)" type="number" value={form.annual_turnover} onChange={set("annual_turnover")} fullWidth />
+            </Stack>
+            <TextField label="Company description" value={form.company_description} onChange={set("company_description")} fullWidth multiline minRows={2} />
+            <TextField label="Products manufactured" value={form.products_manufactured} onChange={set("products_manufactured")} fullWidth multiline minRows={2} />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Markets served" value={form.markets_served} onChange={set("markets_served")} fullWidth />
+              <TextField label="Existing suppliers" value={form.existing_suppliers} onChange={set("existing_suppliers")} fullWidth />
+            </Stack>
+          </Stack>
+        )}
+        {tab === 1 && (
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="GSTIN" value={form.gstin} onChange={set("gstin")} fullWidth />
+              <TextField label="PAN" value={form.pan} onChange={set("pan")} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="CIN" value={form.cin} onChange={set("cin")} fullWidth />
+              <TextField label="IEC (export code)" value={form.iec} onChange={set("iec")} fullWidth />
+            </Stack>
+          </Stack>
+        )}
+        {tab === 2 && (
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField select label="Lead source" value={form.lead_source} onChange={set("lead_source")} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {SOURCES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+              </TextField>
+              <TextField select label="Rating" value={form.rating} onChange={set("rating")} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {RATING_OPTIONS.map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
+              </TextField>
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Territory / region" value={form.territory} onChange={set("territory")} fullWidth />
+              <TextField select label="Currency" value={form.currency} onChange={set("currency")} fullWidth>
+                {CURRENCIES.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+              </TextField>
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField label="Payment terms" value={form.payment_terms} onChange={set("payment_terms")} fullWidth />
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField label="Credit limit (₹)" type="number" value={form.credit_limit} onChange={set("credit_limit")} fullWidth />
-                <TextField label="Credit period (days)" type="number" value={form.credit_period} onChange={set("credit_period")} fullWidth />
-              </Stack>
-              <TextField label="Delivery terms" value={form.delivery_terms} onChange={set("delivery_terms")} fullWidth />
+              <TextField select label="Preferred contact" value={form.preferred_comm} onChange={set("preferred_comm")} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {COMM_METHODS.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+              </TextField>
             </Stack>
-          </Box>
-
-          <Box>
-            <SectionTitle>Commercial</SectionTitle>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField select label="Lead source" value={form.lead_source} onChange={set("lead_source")} fullWidth>
-                  <MenuItem value="">—</MenuItem>
-                  {SOURCES.map((s) => (
-                    <MenuItem key={s} value={s}>
-                      {s}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField select label="Rating" value={form.rating} onChange={set("rating")} fullWidth>
-                  <MenuItem value="">—</MenuItem>
-                  {RATING_OPTIONS.map((r) => (
-                    <MenuItem key={r} value={r}>
-                      {r}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Stack>
-              {isProspect && (
-                <>
-                  <TextField select label="Stage" value={form.prospect_stage} onChange={set("prospect_stage")} fullWidth>
-                    {PROSPECT_STAGES.map((s) => (
-                      <MenuItem key={s.key} value={s.key}>
-                        {s.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                    <TextField label="Probability (%)" type="number" value={form.probability} onChange={set("probability")} fullWidth />
-                    <TextField label="Expected value (₹)" type="number" value={form.expected_value} onChange={set("expected_value")} fullWidth />
-                  </Stack>
-                </>
-              )}
-              {isClient && (
-                <>
-                  <TextField select label="Stage" value={form.client_stage} onChange={set("client_stage")} fullWidth>
-                    {CLIENT_STAGES.map((s) => (
-                      <MenuItem key={s.key} value={s.key}>
-                        {s.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField label="Annual potential (₹)" type="number" value={form.annual_potential} onChange={set("annual_potential")} fullWidth />
-                </>
-              )}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Credit limit (₹)" type="number" value={form.credit_limit} onChange={set("credit_limit")} fullWidth />
+              <TextField label="Credit period (days)" type="number" value={form.credit_period} onChange={set("credit_period")} fullWidth />
             </Stack>
-          </Box>
-        </Stack>
+            <TextField label="Delivery terms" value={form.delivery_terms} onChange={set("delivery_terms")} fullWidth />
+            {isProspect && (
+              <>
+                <TextField select label="Stage" value={form.prospect_stage} onChange={set("prospect_stage")} fullWidth>
+                  {PROSPECT_STAGES.map((s) => <MenuItem key={s.key} value={s.key}>{s.label}</MenuItem>)}
+                </TextField>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                  <TextField label="Probability (%)" type="number" value={form.probability} onChange={set("probability")} fullWidth />
+                  <TextField label="Expected value (₹)" type="number" value={form.expected_value} onChange={set("expected_value")} fullWidth />
+                </Stack>
+              </>
+            )}
+            {isClient && (
+              <>
+                <TextField select label="Stage" value={form.client_stage} onChange={set("client_stage")} fullWidth>
+                  {CLIENT_STAGES.map((s) => <MenuItem key={s.key} value={s.key}>{s.label}</MenuItem>)}
+                </TextField>
+                <TextField label="Annual potential (₹)" type="number" value={form.annual_potential} onChange={set("annual_potential")} fullWidth />
+              </>
+            )}
+          </Stack>
+        )}
+        {tab === 3 && (
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <TextField label="Current products purchased" value={form.current_products} onChange={set("current_products")} fullWidth multiline minRows={2} />
+            <TextField label="Interested products" value={form.interested_products} onChange={set("interested_products")} fullWidth multiline minRows={2} />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Monthly consumption" value={form.monthly_consumption} onChange={set("monthly_consumption")} fullWidth />
+              <TextField label="Competitors" value={form.competitors} onChange={set("competitors")} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField label="Last meeting" type="date" InputLabelProps={{ shrink: true }} value={form.last_meeting_date} onChange={set("last_meeting_date")} fullWidth />
+              <TextField label="Expected closure" type="date" InputLabelProps={{ shrink: true }} value={form.expected_close_date} onChange={set("expected_close_date")} fullWidth />
+            </Stack>
+          </Stack>
+        )}
+        {tab === 4 && (
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Autocomplete multiple freeSolo options={[]} value={form.tags}
+              onChange={(_e, v) => setForm((f) => ({ ...f, tags: v }))}
+              renderTags={(value, getTagProps) => value.map((option, index) => (
+                <Chip variant="outlined" label={option} {...getTagProps({ index })} key={option + index} />
+              ))}
+              renderInput={(params) => <TextField {...params} label="Tags" placeholder="Type a tag and press Enter" />}
+            />
+            <Typography variant="caption" color="text.secondary">
+              Tags help filter &amp; segment companies (e.g. "key-account", "export", "needs-follow-up").
+            </Typography>
+          </Stack>
+        )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={saving}>
