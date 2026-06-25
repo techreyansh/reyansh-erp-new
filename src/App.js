@@ -164,6 +164,7 @@ const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashbo
 const MISHome = lazy(() => import("./pages/mis/MISHome"));
 const PerformanceReview = lazy(() => import("./pages/performance/PerformanceReview"));
 const PPCFoundation = lazy(() => import("./pages/ppc/PPCFoundation"));
+const MobileApp = lazy(() => import("./mobile/shell/MobileApp"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
@@ -1119,6 +1120,13 @@ function AppContent() {
                       </ProtectedRouteGate>
                     }
                   />
+
+                  {/* Factory Ops App (mobile PWA) — gated as dashboard; per-module gating is inside. */}
+                  <Route path="/app/*" element={
+                    <ProtectedRouteGate>
+                      <MobileApp />
+                    </ProtectedRouteGate>
+                  } />
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

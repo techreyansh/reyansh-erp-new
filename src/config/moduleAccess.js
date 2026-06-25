@@ -42,6 +42,9 @@ export const MODULE_UNLOCKS = {
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
 
 const ROUTE_MODULE_RULES = [
+  // Factory Ops App (mobile PWA): the shell itself is dashboard-gated; per-module
+  // gating (requiredModule) happens inside via the module registry + capabilities.
+  { test: (path) => path === '/app' || path.startsWith('/app/'), moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/home' || path === '/welcome' || path === '/dashboard' || path === '/operations-tower', moduleKey: MODULE_KEYS.DASHBOARD },
   { test: (path) => path === '/ceo-command' || path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/employee-dashboard' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES },
