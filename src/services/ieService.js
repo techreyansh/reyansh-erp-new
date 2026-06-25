@@ -44,5 +44,25 @@ export async function listMoldingMachines() {
   } catch { return []; }
 }
 
-const ieService = { getCostRates, saveCostRates, listMoldingMachines };
+/** Insert/update a molding machine in the fleet. */
+export async function saveMoldingMachine(m) {
+  const row = {
+    machine_code: m.machine_code || null, name: m.name || null,
+    mold_type: m.mold_type || 'inner',
+    cycle_time_sec: m.cycle_time_sec === '' || m.cycle_time_sec == null ? null : Number(m.cycle_time_sec),
+    cavities: Number(m.cavities) || 1, available_hours: Number(m.available_hours) || 8,
+    is_active: m.is_active !== false,
+  };
+  if (m.id) { const { error } = await supabase.from('ie_molding_machine').update(row).eq('id', m.id); if (error) throw error; }
+  else { const { error } = await supabase.from('ie_molding_machine').insert(row); if (error) throw error; }
+  return true;
+}
+
+export async function deleteMoldingMachine(id) {
+  const { error } = await supabase.from('ie_molding_machine').delete().eq('id', id);
+  if (error) throw error;
+  return true;
+}
+
+const ieService = { getCostRates, saveCostRates, listMoldingMachines, saveMoldingMachine, deleteMoldingMachine };
 export default ieService;
