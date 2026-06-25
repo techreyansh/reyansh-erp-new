@@ -7,6 +7,7 @@ describe("woStatusBucket", () => {
   test("maps assorted status strings to stable buckets", () => {
     expect(woStatusBucket("DONE")).toBe("completed");
     expect(woStatusBucket("in_progress")).toBe("running");
+    expect(woStatusBucket("qc")).toBe("qc");
     expect(woStatusBucket("released")).toBe("planned");
     expect(woStatusBucket("cancelled")).toBe("cancelled");
     expect(woStatusBucket("open")).toBe("open");
@@ -33,7 +34,7 @@ describe("workOrderDashboard", () => {
   const dash = workOrderDashboard(wos, WED(0));
 
   test("counts by bucket + active/total", () => {
-    expect(dash.counts).toEqual({ open: 1, planned: 0, running: 2, completed: 1, cancelled: 1 });
+    expect(dash.counts).toEqual({ open: 1, planned: 0, running: 2, qc: 0, completed: 1, cancelled: 1 });
     expect(dash.active).toBe(3);
     expect(dash.total).toBe(5);
   });

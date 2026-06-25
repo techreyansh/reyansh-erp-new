@@ -10,6 +10,7 @@ export function woStatusBucket(status) {
   const s = String(status || "").toLowerCase();
   if (s.includes("cancel")) return "cancelled";
   if (s.includes("done") || s.includes("complete") || s.includes("closed")) return "completed";
+  if (s === "qc" || s.includes("quality") || s.includes("inspect")) return "qc";
   if (s.includes("progress") || s.includes("running") || s.includes("wip")) return "running";
   if (s.includes("plan") || s.includes("release") || s.includes("schedule")) return "planned";
   return "open";
@@ -30,7 +31,7 @@ export function woProgress(wo) {
 export function workOrderDashboard(workOrders = [], baseDate = new Date(), opts = {}) {
   const { dueSoonDays = 3, progressFloor = 0.5 } = opts;
   const today = startOfDay(baseDate);
-  const counts = { open: 0, planned: 0, running: 0, completed: 0, cancelled: 0 };
+  const counts = { open: 0, planned: 0, running: 0, qc: 0, completed: 0, cancelled: 0 };
   let plannedQty = 0, producedQty = 0, scrapQty = 0;
   const atRisk = [], overdue = [];
 
@@ -58,7 +59,7 @@ export function workOrderDashboard(workOrders = [], baseDate = new Date(), opts 
 
   atRisk.sort((a, b) => b.riskScore - a.riskScore);
   overdue.sort((a, b) => b.daysOverdue - a.daysOverdue);
-  const active = counts.open + counts.planned + counts.running;
+  const active = counts.open + counts.planned + counts.running + counts.qc;
   const total = active + counts.completed + counts.cancelled;
 
   return {

@@ -10,14 +10,14 @@ import {
 } from "@mui/material";
 import {
   RefreshRounded, CheckCircleRounded, PlayCircleRounded, RadioButtonUncheckedRounded,
-  ArrowForwardRounded, ScienceRounded, Inventory2Rounded, LocalShippingRounded,
+  ArrowForwardRounded, ScienceRounded, Inventory2Rounded, LocalShippingRounded, CancelRounded,
 } from "@mui/icons-material";
 import { woStatusBucket, woProgress } from "../../services/cablePlanner";
 import ppcService from "../../services/ppcService";
 
 const fmtDT = (d) => (d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }) : "—");
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "—");
-const STATUS_COLOR = { open: "default", planned: "info", running: "warning", completed: "success", cancelled: "default" };
+const STATUS_COLOR = { open: "default", planned: "info", running: "warning", qc: "secondary", completed: "success", cancelled: "default" };
 
 const stageIcon = (status) => {
   const s = String(status || "").toLowerCase();
@@ -37,6 +37,8 @@ export default function CableOrderTracking() {
   const [acting, setActing] = useState(false);
   const [snack, setSnack] = useState(null);
   const [dispatch, setDispatch] = useState(null); // { qty, customer }
+  const [completeStage, setCompleteStage] = useState(null); // { id, name, output, scrap }
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const loadList = useCallback(async () => {
     setLoading(true);
@@ -97,6 +99,37 @@ export default function CableOrderTracking() {
     } finally { setActing(false); }
   };
 
+  // Start a stage (pending → running). Complete opens a small output dialog.
+  const startStage = async (s) => {
+    setActing(true);
+    try {
+      await ppcService.advanceStage(s.id, "running");
+      await loadDetail(detail.id);
+    } catch (e) { setSnack({ severity: "error", message: e.message || "Could not start stage." }); }
+    finally { setActing(false); }
+  };
+  const doCompleteStage = async () => {
+    if (!completeStage) return;
+    setActing(true);
+    try {
+      await ppcService.advanceStage(completeStage.id, "done", completeStage.output, completeStage.scrap);
+      setCompleteStage(null);
+      await Promise.all([loadDetail(detail.id), loadList()]);
+    } catch (e) { setSnack({ severity: "error", message: e.message || "Could not complete stage." }); }
+    finally { setActing(false); }
+  };
+  const cancelWO = async () => {
+    if (!detail) return;
+    setActing(true);
+    try {
+      await ppcService.cancelWorkOrder(detail.id);
+      setConfirmCancel(false);
+      setSnack({ severity: "success", message: "Work order cancelled." });
+      await Promise.all([loadList(), loadDetail(detail.id)]);
+    } catch (e) { setSnack({ severity: "error", message: e.message || "Could not cancel work order." }); }
+    finally { setActing(false); }
+  };
+
   const bucket = detail ? woStatusBucket(detail.status) : null;
   const canFinish = detail && bucket !== "completed" && bucket !== "cancelled";
   const isStocked = !!detail?.fg_stocked_at;
@@ -112,6 +145,7 @@ export default function CableOrderTracking() {
           <TextField select size="small" label="Show" value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ minWidth: 140 }}>
             <MenuItem value="active">Active</MenuItem>
             <MenuItem value="running">Running</MenuItem>
+            <MenuItem value="qc">QC</MenuItem>
             <MenuItem value="open">Open / Planned</MenuItem>
             <MenuItem value="completed">Completed</MenuItem>
             <MenuItem value="all">All</MenuItem>
@@ -191,6 +225,13 @@ export default function CableOrderTracking() {
                       Dispatch FG
                     </Button>
                   )}
+                  {bucket !== "completed" && bucket !== "cancelled" && (
+                    <Button size="small" variant="outlined" color="error" startIcon={<CancelRounded />}
+                      disabled={acting} onClick={() => setConfirmCancel(true)} sx={{ ml: "auto" }}>
+                      Cancel WO
+                    </Button>
+                  )}
+                  {bucket === "cancelled" && <Chip size="small" color="default" variant="outlined" label="Cancelled" sx={{ ml: "auto" }} />}
                 </Stack>
               </Paper>
 
@@ -213,6 +254,23 @@ export default function CableOrderTracking() {
                           {s.operator_name && <Typography variant="caption" display="block">👷 {s.operator_name}</Typography>}
                           {(s.output_qty != null) && <Typography variant="caption" display="block">out {s.output_qty}{s.scrap_qty ? ` · scrap ${s.scrap_qty}` : ""}</Typography>}
                           {s.started_at && <Typography variant="caption" color="text.secondary" display="block">{fmtDT(s.started_at)}</Typography>}
+                          {bucket !== "completed" && bucket !== "cancelled" && (() => {
+                            const st = String(s.status || "").toLowerCase();
+                            if (st.includes("done") || st.includes("complete")) return null;
+                            if (st.includes("progress") || st.includes("running"))
+                              return (
+                                <Button fullWidth size="small" variant="contained" color="warning" sx={{ mt: 0.75 }}
+                                  disabled={acting} onClick={() => setCompleteStage({ id: s.id, name: s.stage_name, output: detail.qty || "", scrap: "" })}>
+                                  Complete
+                                </Button>
+                              );
+                            return (
+                              <Button fullWidth size="small" variant="outlined" sx={{ mt: 0.75 }}
+                                disabled={acting} onClick={() => startStage(s)}>
+                                Start
+                              </Button>
+                            );
+                          })()}
                         </Box>
                         {i < detail.stages.length - 1 && (
                           <Stack justifyContent="center" sx={{ px: 0.5 }}><ArrowForwardRounded fontSize="small" color="disabled" /></Stack>
@@ -288,6 +346,38 @@ export default function CableOrderTracking() {
         <DialogActions>
           <Button onClick={() => setDispatch(null)} disabled={acting}>Cancel</Button>
           <Button variant="contained" onClick={doDispatch} disabled={acting || !(Number(dispatch?.qty) > 0)}>Dispatch</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Complete a stage — record output + scrap */}
+      <Dialog open={!!completeStage} onClose={() => !acting && setCompleteStage(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Complete stage · {completeStage?.name}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">Marks this stage done and records its output.</Typography>
+            <TextField label="Output qty" type="number" size="small" value={completeStage?.output ?? ""}
+              onChange={(e) => setCompleteStage((s) => ({ ...s, output: e.target.value }))} autoFocus />
+            <TextField label="Scrap qty (optional)" type="number" size="small" value={completeStage?.scrap ?? ""}
+              onChange={(e) => setCompleteStage((s) => ({ ...s, scrap: e.target.value }))} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCompleteStage(null)} disabled={acting}>Cancel</Button>
+          <Button variant="contained" color="warning" onClick={doCompleteStage} disabled={acting}>Mark done</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cancel work order — confirm */}
+      <Dialog open={confirmCancel} onClose={() => !acting && setConfirmCancel(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Cancel work order?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            {detail?.wo_number || "This work order"} will be marked <strong>cancelled</strong>. Already-recorded stage output and material issues are kept for the record. This can't be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmCancel(false)} disabled={acting}>Keep it</Button>
+          <Button variant="contained" color="error" onClick={cancelWO} disabled={acting}>Cancel WO</Button>
         </DialogActions>
       </Dialog>
 
