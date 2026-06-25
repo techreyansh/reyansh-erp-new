@@ -95,21 +95,34 @@ export const NAV_GROUPS = [
   },
   {
     key: "production",
-    label: "Production",
+    label: "Production (Planning & NPD)",
     icon: ic(BuildOutlined),
     items: [
       { label: "Product Development (NPD)", path: "/npd", icon: ic(AutoAwesomeOutlined), moduleKey: "npd" },
       { label: "Production Planning", path: "/ppc", icon: ic(AssignmentOutlined) },
       { label: "Production Demand", path: "/production-demand", icon: ic(FactoryOutlined) },
-      { label: "Cable Production", path: "/cable-production", icon: ic(CableOutlined) },
-      { label: "Molding Production", path: "/molding", icon: ic(PrecisionManufacturingOutlined) },
       { label: "Production Log", path: "/production-log", icon: ic(GridViewOutlined) },
       { label: "Production Intelligence", path: "/production-intelligence", icon: ic(InsightsOutlined) },
-      { label: "Job Cards", path: "/job-cards", icon: ic(AssignmentOutlined) },
-      { label: "MES Dashboard", path: "/mes-dashboard", icon: ic(InsightsOutlined) },
-      { label: "Daily Plan", path: "/daily-plan", icon: ic(AssignmentOutlined) },
+    ],
+  },
+  {
+    key: "cable",
+    label: "Cable Production",
+    icon: ic(CableOutlined),
+    items: [
+      { label: "Cable Production", path: "/cable-production", icon: ic(CableOutlined) },
+    ],
+  },
+  {
+    key: "powercord",
+    label: "Power Cord — Assembly · Molding · Packing",
+    icon: ic(PrecisionManufacturingOutlined),
+    items: [
       { label: "Capacity & Overtime", path: "/capacity-planner", icon: ic(FactoryOutlined) },
-      { label: "MES Setup", path: "/mes-setup", icon: ic(BuildOutlined) },
+      { label: "Daily Plan", path: "/daily-plan", icon: ic(AssignmentOutlined) },
+      { label: "Job Cards (shop floor)", path: "/job-cards", icon: ic(AssignmentOutlined) },
+      { label: "Production Board", path: "/mes-dashboard", icon: ic(InsightsOutlined) },
+      { label: "MES Setup (masters)", path: "/mes-setup", icon: ic(BuildOutlined) },
     ],
   },
   {
