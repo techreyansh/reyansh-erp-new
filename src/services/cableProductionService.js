@@ -80,37 +80,37 @@ export function computeMRP(cableRow, metres) {
   ].filter((m) => m.qty_required > 0);
 }
 
-// On-hand stock for a set of item codes → { code: on_hand }.
+// Sum on-hand from the perpetual ledger (inv_balance, across locations) for a
+// set of ppc_items ids → Map(item_id → on_hand).
+async function ledgerOnHand(itemIds) {
+  const onHand = new Map();
+  if (!itemIds.length) return onHand;
+  const { data } = await supabase.from('inv_balance').select('item_id, on_hand').in('item_id', itemIds);
+  (data || []).forEach((b) => onHand.set(b.item_id, (onHand.get(b.item_id) || 0) + (Number(b.on_hand) || 0)));
+  return onHand;
+}
+
+// On-hand stock for a set of item codes → { code: on_hand }. Sourced from the
+// inv_balance ledger (single source of truth), not ppc_stock.
 export async function stockFor(codes) {
   if (!codes.length) return {};
-  const { data, error } = await supabase
-    .from('ppc_items')
-    .select('code, ppc_stock(on_hand)')
-    .in('code', codes);
-  if (error) return {};
+  const { data: items, error } = await supabase.from('ppc_items').select('id, code').in('code', codes);
+  if (error || !items) return {};
+  const onHand = await ledgerOnHand(items.map((i) => i.id));
   const out = {};
-  (data || []).forEach((r) => {
-    const st = Array.isArray(r.ppc_stock) ? r.ppc_stock[0] : r.ppc_stock;
-    out[r.code] = st ? Number(st.on_hand) || 0 : 0;
-  });
+  items.forEach((i) => { out[i.code] = onHand.get(i.id) || 0; });
   return out;
 }
 
 // On-hand + unit cost for item codes → { code: { on_hand, unit_cost } }.
-// Cost = ppc_items.unit_cost (the item master's standard cost). Used to value
-// the MRP (Phase 5 costing integration).
+// on_hand from the inv_balance ledger; cost = ppc_items.unit_cost (standard cost).
 export async function stockAndCostFor(codes) {
   if (!codes.length) return {};
-  const { data, error } = await supabase
-    .from('ppc_items')
-    .select('code, unit_cost, ppc_stock(on_hand)')
-    .in('code', codes);
-  if (error) return {};
+  const { data: items, error } = await supabase.from('ppc_items').select('id, code, unit_cost').in('code', codes);
+  if (error || !items) return {};
+  const onHand = await ledgerOnHand(items.map((i) => i.id));
   const out = {};
-  (data || []).forEach((r) => {
-    const st = Array.isArray(r.ppc_stock) ? r.ppc_stock[0] : r.ppc_stock;
-    out[r.code] = { on_hand: st ? Number(st.on_hand) || 0 : 0, unit_cost: Number(r.unit_cost) || 0 };
-  });
+  items.forEach((i) => { out[i.code] = { on_hand: onHand.get(i.id) || 0, unit_cost: Number(i.unit_cost) || 0 }; });
   return out;
 }
 

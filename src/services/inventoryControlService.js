@@ -14,14 +14,21 @@ export async function dashboard() {
 const TYPE_GROUP = (t) => (t === 'raw_material' ? 'Raw Material' : t === 'semi_finished' ? 'Semi-Finished' : ['finished_good', 'cable', 'power_cord', 'harness'].includes(t) ? 'Finished Goods' : 'Component');
 
 export async function listStock() {
-  // Config (reorder/safety/max/location) now lives on ppc_items; on_hand/reserved
-  // stay on ppc_stock until the on-hand cutover.
-  const { data, error } = await supabase.from('ppc_stock')
-    .select('on_hand, reserved, ppc_items(id, code, name, item_type, uom, unit_cost, reorder_point, safety_stock, max_qty, location)');
+  // Config (reorder/safety/max/location) lives on ppc_items; on_hand/reserved come
+  // from the inv_balance ledger (single source of truth), summed across locations.
+  const [{ data, error }, balRes] = await Promise.all([
+    supabase.from('ppc_stock').select('ppc_items(id, code, name, item_type, uom, unit_cost, reorder_point, safety_stock, max_qty, location)'),
+    supabase.from('inv_balance').select('item_id, on_hand, reserved'),
+  ]);
   if (error) throw error;
+  const onHand = new Map(); const reserved = new Map();
+  (balRes.data || []).forEach((b) => {
+    onHand.set(b.item_id, (onHand.get(b.item_id) || 0) + num(b.on_hand));
+    reserved.set(b.item_id, (reserved.get(b.item_id) || 0) + num(b.reserved));
+  });
   return (data || []).map((r) => {
     const it = r.ppc_items || {};
-    const on = num(r.on_hand); const res = num(r.reserved); const ro = num(it.reorder_point); const safety = num(it.safety_stock);
+    const on = onHand.get(it.id) || 0; const res = reserved.get(it.id) || 0; const ro = num(it.reorder_point); const safety = num(it.safety_stock);
     return {
       item_id: it.id, code: it.code, name: it.name, type: it.item_type, group: TYPE_GROUP(it.item_type), uom: it.uom,
       unit_cost: num(it.unit_cost), on_hand: on, reserved: res, available: on - res,
