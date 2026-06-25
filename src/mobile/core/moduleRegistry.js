@@ -20,9 +20,10 @@
 
 import { hasCap } from './capabilities';
 import demoModule from '../modules/_demo/module';
+import storeModule from '../modules/store/module';
 
 // The live registry. Real modules append their descriptor here as they land.
-export const moduleRegistry = [demoModule];
+export const moduleRegistry = [storeModule, demoModule];
 
 /**
  * PURE: filter a registry down to the modules a user can actually see.
