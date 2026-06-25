@@ -25,6 +25,10 @@ export function resolveStandard(op = {}, mold = null, processDefault = {}) {
   const scrapPct = clamp(firstNum(op.scrap_pct) ?? 0, 0, 0.99);
   const constraintType = op.constraint_type || processDefault.constraint_type || (cavities > 1 ? 'machine' : 'labour');
   const parallelMachines = Math.max(1, firstNum(op.parallel_machines) ?? 1);
+  // Whether multiple operators may work this station in parallel. Default true;
+  // a station flagged parallel_allowed=false can hold at most ONE operator.
+  const parallelAllowed = op.parallel_allowed != null ? !!op.parallel_allowed
+    : (processDefault.parallel_allowed != null ? !!processDefault.parallel_allowed : true);
 
   let minOps = Math.max(1, firstNum(op.min_operators) ?? 1);
   let maxOps = Math.max(1, firstNum(op.max_operators) ?? 99);
@@ -36,7 +40,7 @@ export function resolveStandard(op = {}, mold = null, processDefault = {}) {
     label: op.step_name || op.operation_code || op.key || 'Operation',
     cycle: valid ? cycle : 0,
     cavities, outputPerCycle, oee, scrapPct, constraintType, parallelMachines,
-    minOps, maxOps,
+    parallelAllowed, minOps, maxOps,
     moldBound: !!(op.mold_id || mold?.id),
     // provenance: did this op carry its own cycle, or did it fall back? (UI badge)
     cycleSource: num(op.cycle_time_sec) != null ? 'routing' : (num(mold?.cycle_time_sec) != null ? 'mold' : 'default'),
@@ -66,13 +70,25 @@ export function lineCapacity(resolvedOps = []) {
   const usable = resolvedOps.filter((r) => r && r.valid);
   if (!usable.length) return { achievableUph: 0, bottleneck: null, ops: resolvedOps };
 
+  // A labour op's MAX throughput is its single-operator rate times the most
+  // operators it may run (1 if parallel isn't allowed). Machine ops are fixed.
+  const labourMaxCap = (r) => standardRatePerHour(r) * (r.parallelAllowed === false ? 1 : r.maxOps);
+
   const machineOps = usable.filter((r) => r.constraintType === 'machine');
   let bottleneck;
   let achievableUph;
   if (machineOps.length) {
     bottleneck = machineOps.reduce((m, r) => (machineThroughput(r) < machineThroughput(m) ? r : m));
     achievableUph = machineThroughput(bottleneck);
+    // A labour op that can't reach the machine rate even fully staffed caps the
+    // line lower — otherwise we'd report a target a maxed-out station can't hold.
+    for (const r of usable) {
+      if (r.constraintType === 'machine') continue;
+      const cap = labourMaxCap(r);
+      if (cap < achievableUph) { achievableUph = cap; bottleneck = r; }
+    }
   } else {
+    // Labour-only baseline = slowest single-operator station (scale up via operatorsFor).
     bottleneck = usable.reduce((m, r) => (standardRatePerHour(r) < standardRatePerHour(m) ? r : m));
     achievableUph = standardRatePerHour(bottleneck);
   }
@@ -83,8 +99,11 @@ export function lineCapacity(resolvedOps = []) {
 export function operatorsFor(r, lineUph) {
   if (!r || !r.valid) return 0;
   const rate = standardRatePerHour(r);
-  if (rate <= 0) return r.maxOps;
-  return clamp(Math.ceil(lineUph / rate), r.minOps, r.maxOps);
+  // A station that doesn't allow parallel work holds at most one operator.
+  const maxOps = r.parallelAllowed === false ? 1 : r.maxOps;
+  const minOps = Math.min(r.minOps, maxOps);
+  if (rate <= 0) return maxOps;
+  return clamp(Math.ceil(lineUph / rate), minOps, maxOps);
 }
 
 const routingCapacity = { resolveStandard, standardRatePerHour, machineThroughput, lineCapacity, operatorsFor };

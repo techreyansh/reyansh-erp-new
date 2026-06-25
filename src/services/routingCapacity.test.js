@@ -116,4 +116,48 @@ describe('operatorsFor — labour stations sized to hold the line', () => {
     const pack = resolveStandard({ constraint_type: 'labour', cycle_time_sec: 30, oee: 1, min_operators: 1, max_operators: 2 }, null, DEFAULT);
     expect(operatorsFor(pack, 300)).toBe(2); // wants 3, capped at 2
   });
+
+  test('parallel_allowed=false → at most ONE operator regardless of demand (bug fix)', () => {
+    const weld = resolveStandard({ constraint_type: 'labour', cycle_time_sec: 30, oee: 1, min_operators: 1, max_operators: 4, parallel_allowed: false }, null, DEFAULT);
+    expect(weld.parallelAllowed).toBe(false);
+    expect(operatorsFor(weld, 300)).toBe(1); // would need 3, but no parallel work allowed
+  });
+
+  test('parallel_allowed defaults true → unchanged behaviour', () => {
+    const r = resolveStandard({ constraint_type: 'labour', cycle_time_sec: 30, oee: 1, max_operators: 4 }, null, DEFAULT);
+    expect(r.parallelAllowed).toBe(true);
+    expect(operatorsFor(r, 300)).toBe(3);
+  });
+});
+
+describe('lineCapacity — mixed labour/machine bottleneck (bug fix)', () => {
+  test('a labour op that cannot reach the machine rate even fully staffed caps the line', () => {
+    // inner machine 300/hr; weld is labour, single-op 120/hr, capped at 2 operators
+    // and NOT parallel-allowed → max labour cap = 120, below the 300 machine rate.
+    const ops = [
+      { key: 'inner', constraint_type: 'machine', cycle_time_sec: 24, cavities: 2, oee: 1, parallel_machines: 1 }, // 300
+      { key: 'weld', constraint_type: 'labour', cycle_time_sec: 30, oee: 1, max_operators: 2, parallel_allowed: false }, // 120, can't scale
+    ].map((o) => resolveStandard(o, null, DEFAULT));
+    const r = lineCapacity(ops);
+    expect(r.bottleneck.key).toBe('weld');
+    expect(r.achievableUph).toBe(120); // not 300 — the maxed labour station is the real cap
+  });
+
+  test('labour op with ample max operators does NOT cap a machine line (no regression)', () => {
+    const ops = [
+      { key: 'inner', constraint_type: 'machine', cycle_time_sec: 24, cavities: 2, oee: 1, parallel_machines: 1 }, // 300
+      { key: 'crimp', constraint_type: 'labour', cycle_time_sec: 20, oee: 1, max_operators: 99 }, // 180/op × 99 ≫ 300
+    ].map((o) => resolveStandard(o, null, DEFAULT));
+    const r = lineCapacity(ops);
+    expect(r.bottleneck.key).toBe('inner');
+    expect(r.achievableUph).toBe(300);
+  });
+
+  test('all-invalid line → 0 UPH, null bottleneck (null-guard)', () => {
+    const ops = [{ constraint_type: 'labour', cycle_time_sec: 0 }, { constraint_type: 'machine', cycle_time_sec: null }]
+      .map((o) => resolveStandard(o, null, { default_cycle_sec: null }));
+    const r = lineCapacity(ops);
+    expect(r.achievableUph).toBe(0);
+    expect(r.bottleneck).toBeNull();
+  });
 });
