@@ -28,8 +28,8 @@ describe("requiredStages", () => {
   test("3-core stranded → all four stages", () => {
     expect(keys(cable3c)).toEqual(["bunching", "core", "laying", "sheathing"]);
   });
-  test("single-core → skips laying", () => {
-    expect(keys(cableSingle)).toEqual(["bunching", "core", "sheathing"]);
+  test("single-core, no sheath → bunching + core only (R1: no phantom sheathing/laying)", () => {
+    expect(keys(cableSingle)).toEqual(["bunching", "core"]);
   });
   test("solid wire (strandCount < 24) → skips bunching", () => {
     expect(keys(cableSolid)).toEqual(["core", "sheathing"]);

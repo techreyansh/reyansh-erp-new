@@ -44,6 +44,7 @@ import crmService from '../../services/crmService';
 import { getAllClients as getAllProspectsClients } from '../../services/prospectsClientService';
 import { getAllClients } from '../../services/clientService';
 import clientDashboardService from '../../services/clientDashboardService';
+import ClientProductsPanel from './ClientProductsPanel';
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -308,6 +309,7 @@ const ClientDashboardModal = ({ open, onClose, client }) => {
                 <Tab label={`Payments (${crmData.payments.length})`} />
                 <Tab label={`Call Logs (${crmData.callLogs.length})`} />
                 <Tab label={`Notes (${crmData.notes.length})`} />
+                <Tab label="Products" />
               </Tabs>
             </Box>
 
@@ -782,6 +784,9 @@ const ClientDashboardModal = ({ open, onClose, client }) => {
                     )}
                   </>
                 )}
+              </TabPanel>
+              <TabPanel value={activeTab} index={7}>
+                <ClientProductsPanel clientCode={clientData?.clientCode || client?.clientCode} />
               </TabPanel>
             </Box>
           </Box>

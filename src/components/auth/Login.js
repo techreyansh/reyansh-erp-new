@@ -24,6 +24,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { getGoogleSignInWithOAuthOptions } from "../../lib/oauthCallbackParams";
+import { takeIntendedPath } from "../../lib/postLoginRedirect";
 
 const Login = () => {
   const theme = useTheme();
@@ -58,7 +59,7 @@ const Login = () => {
       const hasSession = await syncUserFromSupabase();
       if (cancelled) return;
       if (hasSession) {
-        navigate("/home", { replace: true });
+        navigate(takeIntendedPath() || "/home", { replace: true });
       }
     })();
     return () => {

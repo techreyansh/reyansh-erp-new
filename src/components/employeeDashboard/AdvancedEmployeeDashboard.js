@@ -14,7 +14,6 @@ import {
   Button,
   Paper,
   IconButton,
-  Badge,
   Fab,
   Slide,
   Zoom,
@@ -56,7 +55,6 @@ import {
   Assignment as TaskIcon,
   TrendingUp as PerformanceIcon,
   Schedule as AttendanceIcon,
-  Notifications as NotificationIcon,
   Dashboard as DashboardIcon,
 
   Refresh as RefreshIcon,
@@ -91,7 +89,6 @@ import AdvancedProfileTab from './AdvancedProfileTab';
 import EnhancedTasksTab from './EnhancedTasksTab';
 import PerformanceTab from './PerformanceTab';
 import EnhancedAttendanceTab from './EnhancedAttendanceTab';
-import NotificationsTab from './NotificationsTab';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import AdminAccessControlSection from './AdminAccessControlSection';
@@ -184,51 +181,21 @@ const AdvancedEmployeeDashboard = () => {
       setEmployees(employeesData);
       
       if (!canManageEmployeeRecords) {
-        // Restrict non-CEO users to their own profile
-        // Try multiple matching strategies to support both mock and real logins
+        // Restrict non-management users to their own profile.
         const currentEmail = (user?.email || '').toLowerCase().trim();
-        const currentRole = (user?.role || '').toLowerCase().trim();
 
-        // Try exact email match first
-        let selfEmp = (employeesData || []).find(emp => 
+        // Match by email — exact first, then by the prefix before @.
+        let selfEmp = (employeesData || []).find(emp =>
           (emp.Email || '').toLowerCase().trim() === currentEmail
         );
-        
-        // If not found and it's a mock user, try matching by role/designation
-        if (!selfEmp && currentEmail.includes('mock')) {
-          // Clean up the role for matching (remove spaces and special chars)
-          const roleKeywords = currentRole.toLowerCase().split(' ').filter(word => word.length > 2);
-          
-          selfEmp = (employeesData || []).find(emp => {
-            const designation = (emp.Designation || '').toLowerCase();
-            const department = (emp.Department || '').toLowerCase();
-            const email = (emp.Email || '').toLowerCase();
-            
-            // Check if any role keyword matches designation, department, or email
-            return roleKeywords.some(keyword => 
-              designation.includes(keyword) || 
-              department.includes(keyword) ||
-              email.includes(keyword)
-            );
-          });
-          
-          // If still not found, try matching the full role string
-          if (!selfEmp) {
-            selfEmp = (employeesData || []).find(emp => 
-              (emp.Designation || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '') ||
-              (emp.Department || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '')
-            );
-          }
-        }
-        
-        // If still not found, try partial email match (before @)
-        if (!selfEmp) {
-          const emailPrefix = currentEmail.split('@')[0].replace('mock.', '');
-          selfEmp = (employeesData || []).find(emp => 
+
+        if (!selfEmp && currentEmail) {
+          const emailPrefix = currentEmail.split('@')[0];
+          selfEmp = (employeesData || []).find(emp =>
             (emp.Email || '').toLowerCase().includes(emailPrefix)
           );
         }
-        
+
         if (selfEmp) {
           setFilteredEmployees([selfEmp]);
           setSelectedEmployee(selfEmp);
@@ -271,51 +238,22 @@ const AdvancedEmployeeDashboard = () => {
   };
 
   const filterAndSearchEmployees = () => {
-    // For non-CEO users, only show their own profile - don't apply other filters
+    // For non-management users, only show their own profile - don't apply other filters
     if (!canManageEmployeeRecords) {
       const currentEmail = (user?.email || '').toLowerCase().trim();
-      const currentRole = (user?.role || '').toLowerCase().trim();
-      
-      // Try exact email match first
-      let selfEmp = employees.find(emp => 
+
+      // Match by email — exact first, then by the prefix before @.
+      let selfEmp = employees.find(emp =>
         (emp.Email || '').toLowerCase().trim() === currentEmail
       );
-      
-      // If not found and it's a mock user, try matching by role/designation
-      if (!selfEmp && currentEmail.includes('mock')) {
-        // Clean up the role for matching (remove spaces and special chars)
-        const roleKeywords = currentRole.toLowerCase().split(' ').filter(word => word.length > 2);
-        
-        selfEmp = employees.find(emp => {
-          const designation = (emp.Designation || '').toLowerCase();
-          const department = (emp.Department || '').toLowerCase();
-          const email = (emp.Email || '').toLowerCase();
-          
-          // Check if any role keyword matches designation, department, or email
-          return roleKeywords.some(keyword => 
-            designation.includes(keyword) || 
-            department.includes(keyword) ||
-            email.includes(keyword)
-          );
-        });
-        
-        // If still not found, try matching the full role string
-        if (!selfEmp) {
-          selfEmp = employees.find(emp => 
-            (emp.Designation || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '') ||
-            (emp.Department || '').toLowerCase().replace(/\s+/g, '') === currentRole.replace(/\s+/g, '')
-          );
-        }
-      }
-      
-      // If still not found, try partial email match (before @)
-      if (!selfEmp) {
-        const emailPrefix = currentEmail.split('@')[0].replace('mock.', '');
-        selfEmp = employees.find(emp => 
+
+      if (!selfEmp && currentEmail) {
+        const emailPrefix = currentEmail.split('@')[0];
+        selfEmp = employees.find(emp =>
           (emp.Email || '').toLowerCase().includes(emailPrefix)
         );
       }
-      
+
       setFilteredEmployees(selfEmp ? [selfEmp] : []);
       setPage(0);
       return;
@@ -366,11 +304,13 @@ const AdvancedEmployeeDashboard = () => {
           bValue = b.EmployeeCode || '';
       }
 
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
+      let cmp;
+      if (aValue instanceof Date && bValue instanceof Date) {
+        cmp = aValue.getTime() - bValue.getTime();
       } else {
-        return aValue < bValue ? 1 : -1;
+        cmp = String(aValue).localeCompare(String(bValue));
       }
+      return sortOrder === 'asc' ? cmp : -cmp;
     });
 
     setFilteredEmployees(filtered);
@@ -820,9 +760,9 @@ const AdvancedEmployeeDashboard = () => {
               gap: 2,
               gridTemplateColumns: {
                 xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-                lg: 'repeat(4, 1fr)',
+                sm: 'repeat(2, minmax(0, 1fr))',
+                md: 'repeat(3, minmax(0, 1fr))',
+                lg: 'repeat(4, minmax(0, 1fr))',
               },
             }}
           >
@@ -961,16 +901,20 @@ const AdvancedEmployeeDashboard = () => {
                   >
                     <RefreshIcon />
                   </IconButton>
-                  <IconButton
-                    onClick={() => alert('Settings coming soon!')}
-                    sx={{
-                      bgcolor: 'background.paper',
-                      boxShadow: theme.shadows[2],
-                      '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
-                    }}
-                  >
-                    <SettingsIcon />
-                  </IconButton>
+                  <Tooltip title="Coming soon">
+                    <span>
+                      <IconButton
+                        disabled
+                        sx={{
+                          bgcolor: 'background.paper',
+                          boxShadow: theme.shadows[2],
+                          '&:hover': { bgcolor: alpha(theme.palette.background.paper, 0.9) }
+                        }}
+                      >
+                        <SettingsIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
                 </Box>
               </Box>
             </Paper>
@@ -1014,16 +958,6 @@ const AdvancedEmployeeDashboard = () => {
                 <Tab
                   icon={<AttendanceIcon />}
                   label="Attendance"
-                  sx={{ gap: 1 }}
-                />
-
-                <Tab
-                  icon={
-                    <Badge badgeContent={dashboardSummary?.notifications?.unread || 0} color="error">
-                      <NotificationIcon />
-                    </Badge>
-                  }
-                  label="Notifications"
                   sx={{ gap: 1 }}
                 />
                 {canManageAccess && (
@@ -1084,15 +1018,8 @@ const AdvancedEmployeeDashboard = () => {
                    />
                  </TabPanel>
 
-                <TabPanel value={activeTab} index={5}>
-                  <NotificationsTab
-                    employeeCode={selectedEmployee?.EmployeeCode}
-                    notifications={dashboardSummary?.notifications?.recent || []}
-                    onNotificationRead={() => loadEmployeeData(selectedEmployee)}
-                  />
-                </TabPanel>
                 {canManageAccess && (
-                  <TabPanel value={activeTab} index={6}>
+                  <TabPanel value={activeTab} index={5}>
                     <AdminAccessControlSection userEmail={user?.email} />
                   </TabPanel>
                 )}

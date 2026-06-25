@@ -7,3 +7,6 @@ export * from "./time.js";
 export * from "./scheduler.js";
 export * from "./jobSpecs.js";
 export * from "./analytics.js";
+export * from "./machineAdapter.js";
+export * from "./drum.js";
+export * from "./woDashboard.js";

@@ -854,12 +854,46 @@ const CompanyKittingSheet = () => {
   const handleDeleteIssuedItem = async (issue) => {
     if (window.confirm(`Are you sure you want to delete this issued item: ${issue.itemCode}?`)) {
       try {
-        // Delete from the Company Material Issues sheet
-        await sheetService.deleteRow("Company Material Issues", issue.rowIndex);
-        
+        // The generated issue objects don't carry a sheet rowIndex; each batch row holds
+        // multiple items in itemIssueDetails. Locate the batch row and remove only this item.
+        const kittingIssues = await sheetService.getSheetData("Company Material Issues");
+        const rowIndex = (kittingIssues || []).findIndex(r =>
+          r.uniqueKittingId === issue.uniqueKittingId && String(r.bomId) === String(issue.bomId)
+        );
+
+        if (rowIndex === undefined || rowIndex < 0) {
+          throw new Error("Could not find the kitting batch row for this item.");
+        }
+
+        const existingRow = kittingIssues[rowIndex];
+        let itemDetailsArray = [];
+        try {
+          const existingDetails = typeof existingRow.itemIssueDetails === 'string'
+            ? JSON.parse(existingRow.itemIssueDetails)
+            : existingRow.itemIssueDetails;
+          itemDetailsArray = Array.isArray(existingDetails) ? existingDetails : [existingDetails];
+        } catch (_) {
+          itemDetailsArray = [];
+        }
+
+        // Remove only the selected item from the batch row's array
+        const updatedDetails = itemDetailsArray.filter(d => d && d.itemCode !== issue.itemCode);
+
+        if (updatedDetails.length === 0) {
+          // No items left in this batch row -> remove the whole row
+          await sheetService.deleteRow("Company Material Issues", rowIndex + 2);
+        } else {
+          // Rewrite the batch row with the remaining items
+          const updatedRow = {
+            ...existingRow,
+            itemIssueDetails: JSON.stringify(updatedDetails)
+          };
+          await sheetService.updateRow("Company Material Issues", rowIndex + 2, updatedRow);
+        }
+
         // Refresh the issued items list
         await generateIssuedItemsList();
-        
+
         showSnackbar("Issued item deleted successfully", "success");
       } catch (error) {
         console.error("Error deleting issued item:", error);

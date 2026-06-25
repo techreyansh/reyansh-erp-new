@@ -115,7 +115,7 @@ const AccountabilityRoster = () => {
       <TableContainer>
         <Table size="small" stickyHeader>
           <TableHead>
-            <TableRow sx={{ '& th': { bgcolor: 'grey.100', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.03em', color: 'text.secondary', whiteSpace: 'nowrap' } }}>
+            <TableRow sx={{ '& th': { bgcolor: 'action.hover', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.03em', color: 'text.secondary', whiteSpace: 'nowrap' } }}>
               <TableCell>Employee</TableCell>
               <TableCell>Role</TableCell>
               <TableCell align="center">Login</TableCell>

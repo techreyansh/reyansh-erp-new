@@ -78,7 +78,9 @@ const SubmitInvoice = () => {
       // or localStorage file ID (starts with "doc_")
       if (fileId.startsWith('doc_')) {
         // localStorage file - download and open
-        const file = await sheetService.getFileById(fileId);
+        const file = typeof sheetService.getFileById === 'function'
+          ? await sheetService.getFileById(fileId)
+          : null;
         if (file && file.content) {
           // Create a blob URL and open it
           const byteCharacters = atob(file.content.split(',')[1] || file.content);

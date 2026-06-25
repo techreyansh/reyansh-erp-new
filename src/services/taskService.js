@@ -40,7 +40,11 @@ const TASK_BASE_SELECT = `
   assigned_name,
   assigned_by,
   priority,
+  difficulty,
   due_date,
+  original_due_date,
+  reschedule_count,
+  completed_at,
   task_status,
   department,
   created_at,
@@ -157,6 +161,7 @@ export async function createTask(task, assignedBy, assignee = null) {
     assigned_name: assigneeName,
     assigned_by: assignedBy,
     priority: task.priority || 'medium',
+    difficulty: Number.isFinite(Number(task.difficulty)) ? Number(task.difficulty) : 2,
     due_date: task.due_date || null,
     task_status: task.task_status || 'pending',
     department: assigneeDepartment,
@@ -221,6 +226,46 @@ export async function updateMyTaskStatus(taskId, taskStatus, email) {
   }
 
   return data;
+}
+
+/**
+ * Reschedule a task to a new due date with a required reason. Goes through
+ * updateTask -> UPDATE public.tasks so the reschedule trigger fires (logs the
+ * slip into task_reschedules, bumps reschedule_count, preserves original_due_date).
+ * The reason is appended to the task description with a timestamp because the
+ * tasks table has no dedicated reason column.
+ */
+export async function rescheduleMyTask(task, newDueDate, reason) {
+  if (!task?.id) throw new Error('A task is required to reschedule.');
+  if (!newDueDate) throw new Error('A new due date is required.');
+  const trimmedReason = String(reason || '').trim();
+  if (!trimmedReason) throw new Error('A reason is required to reschedule.');
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  const note = `[Rescheduled ${stamp} → ${newDueDate}] ${trimmedReason}`;
+  const nextDescription = task.description ? `${task.description}\n${note}` : note;
+
+  return updateTask(task.id, {
+    due_date: newDueDate,
+    description: nextDescription,
+  });
+}
+
+/**
+ * Append a free-text proof/completion note to a task's description (the tasks
+ * table has no dedicated notes column). Stamped with the date so the history
+ * stays readable. Routes through updateTask so DB triggers still fire.
+ */
+export async function appendMyTaskNote(task, noteText) {
+  if (!task?.id) throw new Error('A task is required to add a note.');
+  const trimmed = String(noteText || '').trim();
+  if (!trimmed) throw new Error('A note is required.');
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  const note = `[Note ${stamp}] ${trimmed}`;
+  const nextDescription = task.description ? `${task.description}\n${note}` : note;
+
+  return updateTask(task.id, { description: nextDescription });
 }
 
 export async function deleteTask(taskId) {

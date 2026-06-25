@@ -1284,9 +1284,13 @@ const CRMManagement = () => {
                             <Chip label={order.status || 'Pending'} color={order.status === 'Completed' ? 'success' : 'default'} size="small" />
                           </TableCell>
                           <TableCell>
-                            <IconButton size="small">
-                              <Edit />
-                            </IconButton>
+                            <Tooltip title="Coming soon">
+                              <span>
+                                <IconButton size="small" disabled>
+                                  <Edit />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1604,9 +1608,13 @@ const CRMManagement = () => {
                           </TableCell>
                           <TableCell>{log.notes || 'N/A'}</TableCell>
                           <TableCell>
-                            <IconButton size="small">
-                              <Edit />
-                            </IconButton>
+                            <Tooltip title="Coming soon">
+                              <span>
+                                <IconButton size="small" disabled>
+                                  <Edit />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1682,9 +1690,13 @@ const CRMManagement = () => {
                             <Chip label={payment.status || 'Pending'} color={payment.status === 'Completed' ? 'success' : 'default'} size="small" />
                           </TableCell>
                           <TableCell>
-                            <IconButton size="small">
-                              <Edit />
-                            </IconButton>
+                            <Tooltip title="Coming soon">
+                              <span>
+                                <IconButton size="small" disabled>
+                                  <Edit />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))

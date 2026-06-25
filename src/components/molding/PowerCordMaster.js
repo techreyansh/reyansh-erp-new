@@ -259,6 +259,22 @@ const PowerCordMaster = () => {
     navigate('/molding/production-planning');
   };
 
+  // Resolve the real 1-based sheet row index of a Power Cord Master record by its
+  // business key (Product Code). The list rows carry a Dispatch business id, NOT a
+  // Power Cord Master row index, so index-based updateRow/deleteRow must be given the
+  // actual index of the matching master record. Returns null when no master row exists.
+  const findPowerCordRowIndex = async (productCode) => {
+    if (!productCode) return null;
+    const masterRows = await sheetService.getSheetData("Power Cord Master").catch(() => []);
+    const arrayIndex = (masterRows || []).findIndex(
+      (pc) => pc["Product Code"] === productCode || pc["ProductCode"] === productCode
+    );
+    if (arrayIndex === -1) return null;
+    // getTableRows is data-only (no header row); updateRowByIndex/deleteRowByIndex
+    // compute dataIndex = rowIndex - 2, so the first data row is index 2.
+    return arrayIndex + 2;
+  };
+
   const handleSubmit = async () => {
     try {
       // Validate required fields
@@ -296,8 +312,15 @@ const PowerCordMaster = () => {
         "Last Updated": new Date().toISOString()
       };
 
-      if (editingProduct) {
-        await sheetService.updateRow("Power Cord Master", editingProduct.id, dataToSave);
+      // The list row's `id` is a Dispatch business id, not a Power Cord Master row
+      // index. Resolve the real master row index by Product Code; if no master record
+      // exists yet, create one instead of updating a non-existent row.
+      const masterRowIndex = editingProduct
+        ? await findPowerCordRowIndex(editingProduct.productCode || formData.productCode)
+        : null;
+
+      if (editingProduct && masterRowIndex != null) {
+        await sheetService.updateRow("Power Cord Master", masterRowIndex, dataToSave);
         setSnackbar({
           open: true,
           message: "Power cord updated successfully",
@@ -344,10 +367,21 @@ const PowerCordMaster = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (product) => {
     if (window.confirm("Are you sure you want to delete this power cord?")) {
       try {
-        await sheetService.deleteRow("Power Cord Master", id);
+        // The list row's `id` is a Dispatch business id, so resolve the matching
+        // Power Cord Master row index by Product Code before deleting.
+        const masterRowIndex = await findPowerCordRowIndex(product?.productCode);
+        if (masterRowIndex == null) {
+          setSnackbar({
+            open: true,
+            message: "No Power Cord Master record exists for this item to delete",
+            severity: "info"
+          });
+          return;
+        }
+        await sheetService.deleteRow("Power Cord Master", masterRowIndex);
         setSnackbar({
           open: true,
           message: "Power cord deleted successfully",
@@ -529,7 +563,7 @@ const PowerCordMaster = () => {
             <IconButton onClick={() => handleEdit(cord)} color="primary" size="small">
               <EditIcon />
             </IconButton>
-            <IconButton onClick={() => handleDelete(cord.id)} color="error" size="small">
+            <IconButton onClick={() => handleDelete(cord)} color="error" size="small">
               <DeleteIcon />
             </IconButton>
           </Box>
@@ -911,7 +945,7 @@ const PowerCordMaster = () => {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton onClick={() => handleDelete(cord.id)} color="error" size="small">
+                        <IconButton onClick={() => handleDelete(cord)} color="error" size="small">
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>

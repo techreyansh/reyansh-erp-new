@@ -37,6 +37,22 @@ import {
   Insights as InsightsIcon,
   Refresh as RefreshIcon,
   ErrorOutline as ErrorIcon,
+  CableRounded as CableMasterIcon,
+  PrecisionManufacturingRounded as MachineMasterIcon,
+  AssignmentRounded as ProductionPlansIcon,
+  InventoryRounded as MrpIcon,
+  SpeedRounded as CapacityIcon,
+  CalendarMonthRounded as CalendarIcon,
+  ViewInArRounded as DrumIcon,
+  TrackChangesRounded as TrackingIcon,
+  InsightsRounded as ManagerIcon,
+  PaletteRounded as ColourIcon,
+  StraightenRounded as SizeIcon,
+  ScienceRounded as MaterialIcon,
+  RouteRounded as RoutingIcon,
+  AccountTreeRounded as BomIcon,
+  TuneRounded as PresetIcon,
+  AutoFixHighRounded as WizardIcon,
 } from "@mui/icons-material";
 
 // Import components
@@ -45,6 +61,22 @@ import CableProductionPlanning from "./CableProductionPlanning";
 import MachineScheduling from "./MachineScheduling";
 import CableAutoPlanner from "./CableAutoPlanner";
 import CableJobCards from "./CableJobCards";
+import CableMaster from "./CableMaster";
+import MachineMaster from "./MachineMaster";
+import CableProductionPlans from "./CableProductionPlans";
+import CableMrpDashboard from "./CableMrpDashboard";
+import CableCapacityBoard from "./CableCapacityBoard";
+import CableProductionCalendar from "./CableProductionCalendar";
+import CableDrumPlanning from "./CableDrumPlanning";
+import CableOrderTracking from "./CableOrderTracking";
+import CableManagerDashboard from "./CableManagerDashboard";
+import ColourMaster from "./ColourMaster";
+import SizeMaster from "./SizeMaster";
+import MaterialMaster from "./MaterialMaster";
+import RoutingTemplate from "./RoutingTemplate";
+import BomTemplate from "./BomTemplate";
+import PlanningPreset from "./PlanningPreset";
+import CableProductionPlanWizard from "./CableProductionPlanWizard";
 import WhatsAppButton from "../common/WhatsAppButton";
 import sheetService from "../../services/sheetService";
 
@@ -619,6 +651,118 @@ const CableProductionModule = () => {
       component: <MachineScheduling />,
       description: "Resource allocation",
       route: "/cable-production/machine-scheduling",
+    },
+    {
+      label: "Plan Wizard",
+      icon: <WizardIcon />,
+      component: <CableProductionPlanWizard />,
+      description: "Guided 6-step plan → release",
+      route: "/cable-production/plan-wizard",
+    },
+    {
+      label: "Production Plans",
+      icon: <ProductionPlansIcon />,
+      component: <CableProductionPlans />,
+      description: "Plan, route & release WOs",
+      route: "/cable-production/plans",
+    },
+    {
+      label: "MRP",
+      icon: <MrpIcon />,
+      component: <CableMrpDashboard />,
+      description: "Material requirement",
+      route: "/cable-production/mrp",
+    },
+    {
+      label: "Capacity",
+      icon: <CapacityIcon />,
+      component: <CableCapacityBoard />,
+      description: "Machine load & bottlenecks",
+      route: "/cable-production/capacity",
+    },
+    {
+      label: "Calendar",
+      icon: <CalendarIcon />,
+      component: <CableProductionCalendar />,
+      description: "Week / month schedule",
+      route: "/cable-production/calendar",
+    },
+    {
+      label: "Drums",
+      icon: <DrumIcon />,
+      component: <CableDrumPlanning />,
+      description: "Multi-drum split per stage",
+      route: "/cable-production/drums",
+    },
+    {
+      label: "Order Tracking",
+      icon: <TrackingIcon />,
+      component: <CableOrderTracking />,
+      description: "Per-order stage workflow",
+      route: "/cable-production/tracking",
+    },
+    {
+      label: "Manager Dashboard",
+      icon: <ManagerIcon />,
+      component: <CableManagerDashboard />,
+      description: "Loading, at-risk & overdue",
+      route: "/cable-production/manager",
+    },
+    {
+      label: "Cable Master",
+      icon: <CableMasterIcon />,
+      component: <CableMaster />,
+      description: "Cable & power-cord specs",
+      route: "/cable-production/cable-master",
+    },
+    {
+      label: "Machine Master",
+      icon: <MachineMasterIcon />,
+      component: <MachineMaster />,
+      description: "Machine specs & capacity",
+      route: "/cable-production/machine-master",
+    },
+    {
+      label: "Colour Master",
+      icon: <ColourIcon />,
+      component: <ColourMaster />,
+      description: "Core & sheath colours",
+      route: "/cable-production/colour-master",
+    },
+    {
+      label: "Size Master",
+      icon: <SizeIcon />,
+      component: <SizeMaster />,
+      description: "Conductor sizes & strands",
+      route: "/cable-production/size-master",
+    },
+    {
+      label: "Material Master",
+      icon: <MaterialIcon />,
+      component: <MaterialMaster />,
+      description: "Copper, PVC & raw materials",
+      route: "/cable-production/material-master",
+    },
+    {
+      label: "Routing Template",
+      icon: <RoutingIcon />,
+      component: <RoutingTemplate />,
+      description: "Reusable stage sequences",
+      route: "/cable-production/routing-template",
+    },
+    {
+      label: "BOM Template",
+      icon: <BomIcon />,
+      component: <BomTemplate />,
+      description: "Reusable material line-sets",
+      route: "/cable-production/bom-template",
+    },
+    {
+      label: "Planning Presets",
+      icon: <PresetIcon />,
+      component: <PlanningPreset />,
+      description: "One-click planner option sets",
+      route: "/cable-production/planning-presets",
     },
   ];
 

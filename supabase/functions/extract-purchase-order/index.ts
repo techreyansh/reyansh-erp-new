@@ -9,7 +9,8 @@
 //   supabase secrets set GEMINI_API_KEY=AIza...   (same key as the Production Log fn)
 //
 // Model: gemini-2.5-flash (vision + structured outputs) — see ../_shared/gemini.ts.
-import { CORS, json, generateJson, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
+import { CORS, json, GEMINI_MODEL, type GeminiPart } from "../_shared/gemini.ts";
+import { aiConfigured, generateJson, AI_NOT_CONFIGURED } from "../_shared/llm.ts";
 
 const PO_SCHEMA = {
   type: "object",
@@ -56,8 +57,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set on the Edge Function." }, 500);
+  if (!aiConfigured()) return json({ error: AI_NOT_CONFIGURED }, 503);
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { result, usage } = await generateJson({ apiKey, system: SYSTEM, parts, schema: PO_SCHEMA });
+    const { result, usage } = await generateJson({ system: SYSTEM, parts, schema: PO_SCHEMA });
     return json({ model: GEMINI_MODEL, result, usage });
   } catch (e) {
     return json({ error: e?.message || String(e) }, 500);

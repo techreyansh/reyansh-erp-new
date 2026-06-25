@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert, Avatar, Box, Button, Card, CardContent, Chip, FormControl,
-  Grid, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack,
-  Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TextField, Tooltip, Typography,
+  Alert, Avatar, Box, Button, Card, CardContent, Checkbox, Chip, Collapse,
+  Divider, FormControl, FormControlLabel, Grid, InputAdornment, InputLabel,
+  MenuItem, Paper, Select, Stack, Switch, TextField, Tooltip, Typography,
+  alpha,
 } from '@mui/material';
 import {
   Search as SearchIcon, PersonAdd, Visibility, VerifiedUser, Block,
-  ContentCopy, CheckCircle, RadioButtonUnchecked, Lock,
+  ContentCopy, CheckCircle, Lock, Save as SaveIcon, FlashOn,
+  Dashboard, ShoppingCart, Groups, Factory, Inventory2, LocalShipping,
+  AccountBalance, Badge, AssignmentTurnedIn, Assessment, Settings, ViewModule,
 } from '@mui/icons-material';
 import { usePermissions } from '../../context/PermissionContext';
 import LoadingScreen from '../common/LoadingScreen';
@@ -35,6 +37,22 @@ const ROLE_PRESETS = {
 };
 const ACTIONS = ['can_view', 'can_create', 'can_edit', 'can_delete'];
 const ACTION_LABEL = { can_view: 'View', can_create: 'Create', can_edit: 'Edit', can_delete: 'Delete' };
+
+// Friendly icon + accent colour per module key (purely presentational).
+const MODULE_META = {
+  dashboard: { icon: Dashboard, color: 'primary' },
+  crm: { icon: Groups, color: 'info' },
+  sales: { icon: ShoppingCart, color: 'success' },
+  production: { icon: Factory, color: 'secondary' },
+  inventory: { icon: Inventory2, color: 'warning' },
+  dispatch: { icon: LocalShipping, color: 'info' },
+  accounts: { icon: AccountBalance, color: 'success' },
+  employees: { icon: Badge, color: 'secondary' },
+  tasks: { icon: AssignmentTurnedIn, color: 'primary' },
+  reports: { icon: Assessment, color: 'info' },
+  settings: { icon: Settings, color: 'secondary' },
+};
+const moduleMeta = (key) => MODULE_META[key] || { icon: ViewModule, color: 'primary' };
 
 const roleLabel = (role) => role?.role_name || role?.name || role?.code || 'Unassigned';
 const initials = (name, email) => (name || email || '?').trim().slice(0, 1).toUpperCase();
@@ -213,15 +231,6 @@ function AccessManagementPage() {
     }));
   };
 
-  const toggleColumn = (field, checked) => {
-    setModuleDraft((prev) => prev.map((row) => {
-      const next = { ...row, [field]: checked };
-      if (field === 'can_view' && !checked) { next.can_create = next.can_edit = next.can_delete = false; }
-      if (field !== 'can_view' && checked) { next.can_view = true; }
-      return next;
-    }));
-  };
-
   const applyPreset = (presetKey) => {
     const keys = ROLE_PRESETS[presetKey] || [];
     setModuleDraft((prev) => prev.map((row) => {
@@ -263,7 +272,7 @@ function AccessManagementPage() {
   const StatCard = ({ label, value, color, icon }) => (
     <Paper variant="outlined" elevation={0} sx={{ p: 2, borderRadius: 2, flex: 1 }}>
       <Stack direction="row" spacing={1.5} alignItems="center">
-        <Avatar variant="rounded" sx={{ bgcolor: `${color}.light`, color: `${color}.dark`, width: 40, height: 40 }}>{icon}</Avatar>
+        <Avatar variant="rounded" sx={{ bgcolor: (t) => alpha(t.palette[color].main, 0.14), color: `${color}.dark`, width: 40, height: 40 }}>{icon}</Avatar>
         <Box>
           <Typography variant="h5" fontWeight={800} lineHeight={1}>{value}</Typography>
           <Typography variant="caption" color="text.secondary">{label}</Typography>
@@ -271,6 +280,9 @@ function AccessManagementPage() {
       </Stack>
     </Paper>
   );
+
+  const isNew = !form.id;
+  const headerName = form.full_name || selectedEmployee?.full_name || (isNew ? 'New employee' : selectedEmployee?.email || '');
 
   return (
     <Box sx={{ maxWidth: 1500, mx: 'auto', pb: 6 }}>
@@ -282,7 +294,7 @@ function AccessManagementPage() {
             <Chip size="small" color="primary" variant="outlined" label="CEO only" />
           </Stack>
           <Typography variant="body2" color="text.secondary">
-            Add employees, set their department &amp; role, and choose exactly which modules they see after they log in with their email.
+            Pick a team member, then choose exactly which modules they see after they log in with their email.
           </Typography>
         </Box>
 
@@ -296,17 +308,17 @@ function AccessManagementPage() {
           <StatCard label="No access yet" value={stats.noAccess} color="warning" icon={<Block fontSize="small" />} />
         </Stack>
 
-        <Grid container spacing={2.5}>
-          {/* LEFT: employee list */}
-          <Grid item xs={12} md={5} lg={4}>
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <Grid container spacing={2.5} alignItems="flex-start">
+          {/* LEFT: searchable, person-first employee list */}
+          <Grid item xs={12} md={4} lg={3.5} sx={{ width: { md: 360 } }}>
+            <Card variant="outlined" sx={{ borderRadius: 3, position: { md: 'sticky' }, top: { md: 16 } }}>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-                  <Typography variant="h6" fontWeight={700}>Employees</Typography>
+                  <Typography variant="h6" fontWeight={700}>Team</Typography>
                   <Button size="small" variant="contained" startIcon={<PersonAdd />} onClick={startNewEmployee}>Add</Button>
                 </Stack>
                 <TextField
-                  size="small" fullWidth placeholder="Search name, email, role…" value={search}
+                  size="small" fullWidth placeholder="Search name, email, department…" value={search}
                   onChange={(e) => setSearch(e.target.value)} sx={{ mb: 1.5 }}
                   InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
                 />
@@ -328,38 +340,46 @@ function AccessManagementPage() {
                     </Select>
                   </FormControl>
                 </Stack>
-                <Box sx={{ maxHeight: 560, overflow: 'auto', mx: -1 }}>
-                  <Stack spacing={0.5} sx={{ px: 1 }}>
+                <Box sx={{ maxHeight: { md: 'calc(100vh - 360px)' }, overflow: 'auto', mx: -1 }}>
+                  <Stack spacing={0.75} sx={{ px: 1 }}>
                     {filteredEmployees.length === 0 && (
-                      <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>No employees match.</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>No team members match.</Typography>
                     )}
                     {filteredEmployees.map((emp) => {
                       const count = moduleCountFor(emp.id);
                       const selected = emp.id === selectedEmployeeId;
+                      const inactive = emp.is_active === false;
                       return (
                         <Paper
                           key={emp.id} variant="outlined" onClick={() => setSelectedEmployeeId(emp.id)}
                           sx={{
-                            p: 1, borderRadius: 2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5,
+                            p: 1.25, borderRadius: 2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5,
                             borderColor: selected ? 'primary.main' : 'divider',
-                            bgcolor: selected ? 'primary.lighter' : 'background.paper',
+                            bgcolor: (t) => (selected ? alpha(t.palette.primary.main, 0.08) : 'background.paper'),
+                            transition: 'border-color .15s, background-color .15s',
                             '&:hover': { borderColor: 'primary.light' },
                           }}
                         >
-                          <Avatar sx={{ width: 36, height: 36, bgcolor: emp.is_active !== false ? 'primary.main' : 'grey.400' }}>
-                            {initials(emp.full_name, emp.email)}
-                          </Avatar>
+                          <Box sx={{ position: 'relative' }}>
+                            <Avatar sx={{ width: 40, height: 40, fontWeight: 700, bgcolor: inactive ? 'grey.400' : 'primary.main' }}>
+                              {initials(emp.full_name, emp.email)}
+                            </Avatar>
+                            <Box sx={{
+                              position: 'absolute', right: -1, bottom: -1, width: 12, height: 12, borderRadius: '50%',
+                              border: '2px solid', borderColor: 'background.paper',
+                              bgcolor: inactive ? 'grey.400' : 'success.main',
+                            }} />
+                          </Box>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography variant="body2" fontWeight={700} noWrap>{emp.full_name || emp.email}</Typography>
-                            <Typography variant="caption" color="text.secondary" noWrap display="block">{emp.email}</Typography>
-                            <Stack direction="row" spacing={0.5} mt={0.5} flexWrap="wrap" useFlexGap>
-                              {emp.department && <Chip size="small" label={emp.department} sx={{ height: 18, fontSize: 10 }} />}
-                              <Chip size="small" variant="outlined" label={roleLabel(emp.roles)} sx={{ height: 18, fontSize: 10 }} />
-                            </Stack>
+                            <Typography variant="caption" color="text.secondary" noWrap display="block">
+                              {[roleLabel(emp.roles), emp.department].filter(Boolean).join(' · ')}
+                            </Typography>
                           </Box>
                           <Stack alignItems="flex-end" spacing={0.5}>
-                            <Chip size="small" color={count > 0 ? 'info' : 'default'} label={`${count} mod`} sx={{ height: 20 }} />
-                            {emp.is_active === false && <Chip size="small" color="warning" label="off" sx={{ height: 18, fontSize: 10 }} />}
+                            <Chip size="small" color={count > 0 ? 'info' : 'default'} variant={count > 0 ? 'filled' : 'outlined'}
+                              label={`${count} modules`} sx={{ height: 22, fontWeight: 600 }} />
+                            {inactive && <Chip size="small" color="warning" variant="outlined" label="inactive" sx={{ height: 18, fontSize: 10 }} />}
                           </Stack>
                         </Paper>
                       );
@@ -370,146 +390,229 @@ function AccessManagementPage() {
             </Card>
           </Grid>
 
-          {/* RIGHT: editor */}
-          <Grid item xs={12} md={7} lg={8}>
-            <Stack spacing={2.5}>
-              {/* Identity */}
-              <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>{form.id ? 'Edit Employee' : 'Add Employee'}</Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}><TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} fullWidth size="small" helperText="The Google email they log in with" /></Grid>
-                    <Grid item xs={12} sm={6}><TextField label="Full name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} fullWidth size="small" /></Grid>
-                    <Grid item xs={12} sm={6}><TextField label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} fullWidth size="small" /></Grid>
-                    <Grid item xs={12} sm={3}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Department</InputLabel>
-                        <Select label="Department" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
-                          {DEPARTMENT_OPTIONS.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Role</InputLabel>
-                        <Select label="Role" value={form.role_id} onChange={(e) => setForm({ ...form, role_id: e.target.value })}>
-                          {roles.map((role) => <MenuItem key={role.id} value={role.id}>{roleLabel(role)}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" mt={2}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body2">Active</Typography>
-                      <Switch checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
-                      <Typography variant="caption" color="text.secondary">{form.is_active ? 'Can log in' : 'Login blocked'}</Typography>
-                    </Stack>
-                    <Button variant="outlined" onClick={() => void handleSaveEmployee()} disabled={saving || !form.email}>Save details</Button>
-                  </Stack>
+          {/* RIGHT: person-first editor */}
+          <Grid item xs={12} md={8} lg={8.5} sx={{ flexGrow: 1 }}>
+            {!selectedEmployee && !isNew ? (
+              <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                <CardContent sx={{ py: 10, textAlign: 'center' }}>
+                  <Avatar sx={{ width: 64, height: 64, mx: 'auto', mb: 2, bgcolor: (t) => alpha(t.palette.primary.main, 0.12), color: 'primary.main' }}>
+                    <Badge />
+                  </Avatar>
+                  <Typography variant="h6" fontWeight={700}>Select a team member</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Select a team member to manage what they can access.
+                  </Typography>
                 </CardContent>
               </Card>
+            ) : (
+              <Stack spacing={2.5}>
+                {/* 1. Identity header card */}
+                <Card variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                  <Box sx={{ height: 64, bgcolor: (t) => alpha(t.palette.primary.main, 0.10) }} />
+                  <CardContent sx={{ pt: 0 }}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'flex-end' }} sx={{ mt: -4 }}>
+                      <Avatar sx={{ width: 72, height: 72, fontSize: 28, fontWeight: 700, border: '3px solid', borderColor: 'background.paper', bgcolor: form.is_active ? 'primary.main' : 'grey.400' }}>
+                        {initials(form.full_name, form.email)}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0, pb: 0.5 }}>
+                        <Typography variant="h6" fontWeight={800} noWrap>{headerName}</Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap>{form.email || 'Add an email so they can log in'}</Typography>
+                      </Box>
+                      <FormControlLabel
+                        sx={{ m: 0 }}
+                        control={(
+                          <Switch
+                            checked={Boolean(form.is_active)}
+                            onChange={(e) => {
+                              setForm({ ...form, is_active: e.target.checked });
+                              if (selectedEmployee) void handleToggleActive(selectedEmployee);
+                            }}
+                          />
+                        )}
+                        label={<Typography variant="caption" color="text.secondary">{form.is_active ? 'Active · can log in' : 'Inactive · login blocked'}</Typography>}
+                        labelPlacement="start"
+                      />
+                    </Stack>
 
-              {/* Preview — what they'll see */}
-              <Card variant="outlined" sx={{ borderRadius: 2, borderColor: 'info.light', bgcolor: 'info.lighter' }}>
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-                    <Visibility fontSize="small" color="info" />
-                    <Typography variant="subtitle1" fontWeight={700}>What {form.full_name || 'this employee'} will see after login</Typography>
-                  </Stack>
-                  {visibleModules.length === 0 ? (
-                    <Alert severity="warning" sx={{ py: 0.5 }}>No modules selected — they will log in to an empty ERP. Apply a preset or tick modules below.</Alert>
-                  ) : (
-                    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-                      {visibleModules.map((m) => (
-                        <Chip key={m.module_id} color="info" label={m.module_name}
-                          icon={<CheckCircle sx={{ fontSize: 16 }} />} sx={{ fontWeight: 600 }} />
+                    <Divider sx={{ my: 2 }} />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}><TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} fullWidth size="small" helperText="The Google email they log in with" /></Grid>
+                      <Grid item xs={12} sm={6}><TextField label="Full name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} fullWidth size="small" /></Grid>
+                      <Grid item xs={12} sm={4}><TextField label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} fullWidth size="small" /></Grid>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Department</InputLabel>
+                          <Select label="Department" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
+                            {DEPARTMENT_OPTIONS.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Role</InputLabel>
+                          <Select label="Role" value={form.role_id} onChange={(e) => setForm({ ...form, role_id: e.target.value })}>
+                            {roles.map((role) => <MenuItem key={role.id} value={role.id}>{roleLabel(role)}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                    <Stack direction="row" justifyContent="flex-end" mt={2}>
+                      <Button variant="outlined" startIcon={<SaveIcon />} onClick={() => void handleSaveEmployee()} disabled={saving || !form.email}>Save identity</Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+                {/* 2. Quick setup — the fast path */}
+                <Card variant="outlined" sx={{ borderRadius: 3, borderColor: 'primary.light' }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
+                      <FlashOn fontSize="small" color="primary" />
+                      <Typography variant="h6" fontWeight={700}>Quick setup</Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">Apply a role preset in one click, then fine-tune below.</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+                      {Object.keys(ROLE_PRESETS).map((k) => (
+                        <Button key={k} size="small" variant="outlined" onClick={() => applyPreset(k)} disabled={!canAssignPermissions}>{`Apply ${k}`}</Button>
                       ))}
                     </Stack>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Matrix + presets */}
-              <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>Module access</Typography>
-                  <Typography variant="caption" color="text.secondary">Quick presets (then fine-tune &amp; Save):</Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ my: 1.5 }}>
-                    {Object.keys(ROLE_PRESETS).map((k) => (
-                      <Button key={k} size="small" variant="outlined" onClick={() => applyPreset(k)} disabled={!canAssignPermissions}>{k}</Button>
-                    ))}
-                    <Button size="small" variant="outlined" color="success" startIcon={<VerifiedUser />} onClick={handleFullAccess} disabled={!canAssignPermissions}>Full access</Button>
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Block />} onClick={handleClearAll} disabled={!canAssignPermissions}>Clear all</Button>
-                    <FormControl size="small" sx={{ minWidth: 180 }}>
-                      <InputLabel>Copy access from…</InputLabel>
-                      <Select label="Copy access from…" value="" onChange={(e) => copyFrom(e.target.value)} disabled={!canAssignPermissions}
-                        renderValue={() => 'Copy access from…'}>
-                        {employees.filter((e) => e.id !== selectedEmployeeId).map((e) => (
-                          <MenuItem key={e.id} value={e.id}><ContentCopy fontSize="small" sx={{ mr: 1 }} />{e.full_name || e.email}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Stack>
-
-                  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-                    <Table size="small" stickyHeader>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: 700 }}>Module</TableCell>
-                          {ACTIONS.map((a) => (
-                            <TableCell key={a} align="center" sx={{ fontWeight: 700 }}>
-                              <Stack alignItems="center" spacing={0}>
-                                <span>{ACTION_LABEL[a]}</span>
-                                <Tooltip title={`Toggle ${ACTION_LABEL[a]} for all`}>
-                                  <span>
-                                    <Switch size="small" disabled={!canAssignPermissions}
-                                      checked={moduleDraft.length > 0 && moduleDraft.every((r) => r[a])}
-                                      onChange={(e) => toggleColumn(a, e.target.checked)} />
-                                  </span>
-                                </Tooltip>
-                              </Stack>
-                            </TableCell>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }} alignItems="center">
+                      <Button size="small" variant="contained" color="success" startIcon={<VerifiedUser />} onClick={handleFullAccess} disabled={!canAssignPermissions}>Full access</Button>
+                      <Button size="small" variant="outlined" color="warning" startIcon={<Block />} onClick={handleClearAll} disabled={!canAssignPermissions}>Clear all</Button>
+                      <FormControl size="small" sx={{ minWidth: 200 }}>
+                        <InputLabel>Copy from…</InputLabel>
+                        <Select label="Copy from…" value="" onChange={(e) => copyFrom(e.target.value)} disabled={!canAssignPermissions}
+                          renderValue={() => 'Copy from…'}>
+                          {employees.filter((e) => e.id !== selectedEmployeeId).map((e) => (
+                            <MenuItem key={e.id} value={e.id}><ContentCopy fontSize="small" sx={{ mr: 1 }} />{e.full_name || e.email}</MenuItem>
                           ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {moduleDraft.map((row) => (
-                          <TableRow key={row.module_id} hover sx={{ bgcolor: row.can_view ? 'action.hover' : 'inherit' }}>
-                            <TableCell>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                {row.can_view ? <CheckCircle fontSize="small" color="success" /> : <RadioButtonUnchecked fontSize="small" color="disabled" />}
-                                <Typography variant="body2" fontWeight={row.can_view ? 700 : 400}>{row.module_name}</Typography>
-                              </Stack>
-                            </TableCell>
-                            {ACTIONS.map((a) => (
-                              <TableCell key={a} align="center">
-                                <Switch size="small" checked={Boolean(row[a])} disabled={!canAssignPermissions}
-                                  onChange={(e) => handleDraftChange(row.module_id, a, e.target.checked)} />
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                        </Select>
+                      </FormControl>
+                    </Stack>
+                  </CardContent>
+                </Card>
 
-                  <Stack direction="row" justifyContent="flex-end" spacing={1} mt={2}>
-                    {selectedEmployee && (
-                      <Button color="warning" variant="text" disabled={saving || !canAssignPermissions}
-                        onClick={async () => {
-                          if (!window.confirm(`Revoke ALL access for ${selectedEmployee.email}?`)) return;
-                          setSaving(true);
-                          try { await revokeEmployeeAccess(selectedEmployee.id); setModuleDraft(buildModuleDraft(modules, [])); await loadData(); setSuccess('Access revoked.'); await refreshAccess(); }
-                          catch (err) { setError(err.message); } finally { setSaving(false); }
-                        }}>Revoke all</Button>
+                {/* 3. Module access — clean person-first rows */}
+                <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                  <CardContent>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
+                      <Typography variant="h6" fontWeight={700}>Module access</Typography>
+                      <Chip size="small" variant="outlined" color="info" label={`${visibleModules.length} of ${moduleDraft.length} on`} />
+                    </Stack>
+                    <Stack spacing={1}>
+                      {moduleDraft.map((row) => {
+                        const meta = moduleMeta(row.module_key);
+                        const Icon = meta.icon;
+                        const on = Boolean(row.can_view);
+                        return (
+                          <Paper
+                            key={row.module_id} variant="outlined"
+                            sx={{
+                              p: 1.5, borderRadius: 2,
+                              borderColor: on ? `${meta.color}.light` : 'divider',
+                              bgcolor: (t) => (on ? alpha(t.palette[meta.color].main, 0.06) : 'background.paper'),
+                              transition: 'border-color .15s, background-color .15s',
+                            }}
+                          >
+                            <Stack direction="row" alignItems="center" spacing={1.5}>
+                              <Avatar variant="rounded" sx={{
+                                width: 38, height: 38,
+                                bgcolor: (t) => alpha(t.palette[meta.color].main, on ? 0.16 : 0.08),
+                                color: on ? `${meta.color}.dark` : 'text.disabled',
+                              }}>
+                                <Icon fontSize="small" />
+                              </Avatar>
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography variant="body2" fontWeight={on ? 700 : 500} noWrap>{row.module_name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{on ? 'Visible after login' : 'Hidden'}</Typography>
+                              </Box>
+                              <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Typography variant="caption" color={on ? `${meta.color}.dark` : 'text.disabled'} fontWeight={600}>Access</Typography>
+                                <Switch
+                                  color={meta.color}
+                                  checked={on}
+                                  disabled={!canAssignPermissions}
+                                  onChange={(e) => handleDraftChange(row.module_id, 'can_view', e.target.checked)}
+                                />
+                              </Stack>
+                            </Stack>
+                            <Collapse in={on} unmountOnExit>
+                              <Box sx={{ pl: { sm: 7 }, pt: 1.25 }}>
+                                <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center">
+                                  <Typography variant="caption" color="text.secondary">Can also:</Typography>
+                                  {ACTIONS.filter((a) => a !== 'can_view').map((a) => (
+                                    <FormControlLabel
+                                      key={a}
+                                      sx={{ m: 0 }}
+                                      control={(
+                                        <Checkbox
+                                          size="small"
+                                          color={meta.color}
+                                          checked={Boolean(row[a])}
+                                          disabled={!canAssignPermissions || !on}
+                                          onChange={(e) => handleDraftChange(row.module_id, a, e.target.checked)}
+                                        />
+                                      )}
+                                      label={<Typography variant="body2">{ACTION_LABEL[a]}</Typography>}
+                                    />
+                                  ))}
+                                </Stack>
+                              </Box>
+                            </Collapse>
+                          </Paper>
+                        );
+                      })}
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+                {/* 4. What they'll see — preview chips */}
+                <Card variant="outlined" sx={{ borderRadius: 3, borderColor: 'info.light', bgcolor: (t) => alpha(t.palette.info.main, 0.05) }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={1} mb={1.25}>
+                      <Visibility fontSize="small" color="info" />
+                      <Typography variant="subtitle1" fontWeight={700}>What {form.full_name || 'this person'} will see after login</Typography>
+                    </Stack>
+                    {visibleModules.length === 0 ? (
+                      <Alert severity="warning" sx={{ py: 0.5 }}>No modules selected — they will log in to an empty ERP. Use Quick setup above or turn on a module.</Alert>
+                    ) : (
+                      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                        {visibleModules.map((m) => {
+                          const Icon = moduleMeta(m.module_key).icon;
+                          return (
+                            <Chip key={m.module_id} color="info" variant="outlined" label={m.module_name}
+                              icon={<Icon sx={{ fontSize: 16 }} />} sx={{ fontWeight: 600, bgcolor: 'background.paper' }} />
+                          );
+                        })}
+                      </Stack>
                     )}
-                    <Button variant="contained" size="large" disabled={saving || !canAssignPermissions || !form.email} onClick={() => void handleSaveAccess()}>
-                      {saving ? 'Saving…' : 'Save Access'}
-                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* 5. Save access — prominent primary action */}
+                <Paper variant="outlined" sx={{ borderRadius: 3, p: 2, position: 'sticky', bottom: 12, bgcolor: 'background.paper', boxShadow: 3 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Typography variant="body2" color="text.secondary">
+                      {visibleModules.length} module{visibleModules.length === 1 ? '' : 's'} selected — changes apply when you save.
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      {selectedEmployee && (
+                        <Button color="warning" variant="text" disabled={saving || !canAssignPermissions}
+                          onClick={async () => {
+                            if (!window.confirm(`Revoke ALL access for ${selectedEmployee.email}?`)) return;
+                            setSaving(true);
+                            try { await revokeEmployeeAccess(selectedEmployee.id); setModuleDraft(buildModuleDraft(modules, [])); await loadData(); setSuccess('Access revoked.'); await refreshAccess(); }
+                            catch (err) { setError(err.message); } finally { setSaving(false); }
+                          }}>Revoke all</Button>
+                      )}
+                      <Button variant="contained" size="large" startIcon={<SaveIcon />} disabled={saving || !canAssignPermissions || !form.email} onClick={() => void handleSaveAccess()}>
+                        {saving ? 'Saving…' : 'Save access'}
+                      </Button>
+                    </Stack>
                   </Stack>
-                </CardContent>
-              </Card>
-            </Stack>
+                </Paper>
+              </Stack>
+            )}
           </Grid>
         </Grid>
       </Stack>

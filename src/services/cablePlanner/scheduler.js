@@ -33,7 +33,12 @@ export function requiredStages(cable) {
   if ((cable.cores || 0) >= CONST.LAYING_TRIGGER_CORES) {
     stages.push({ stage: "laying", perCore: false });
   }
-  stages.push({ stage: "sheathing", perCore: false });
+  // Sheath only when the cable actually has a sheath: multi-core (≥2) or an
+  // explicit sheath thickness. Single-core wire (shThick 0) has no sheathing op
+  // (R1 fix — was always pushed, contradicting the MRP which returns 0 sheath).
+  if ((cable.cores || 1) >= CONST.SHEATH_TRIGGER_CORES || (cable.shThick || 0) > 0) {
+    stages.push({ stage: "sheathing", perCore: false });
+  }
   return stages;
 }
 

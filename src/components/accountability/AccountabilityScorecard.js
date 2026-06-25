@@ -100,7 +100,10 @@ const AccountabilityScorecard = () => {
 
   const sc = data?.registered ? data.scorecard : null;
   const kpis = data?.registered ? data.kpis : [];
-  const locked = !sc || sc.status === 'LOCKED' || sc.status === 'SUBMITTED' || sc.week?.is_locked;
+  // Only a truly LOCKED scorecard (or a locked week) is fully read-only. A SUBMITTED
+  // scorecard stays editable so the user can amend and resubmit.
+  const locked = !sc || sc.status === 'LOCKED' || sc.week?.is_locked;
+  const submitted = sc?.status === 'SUBMITTED';
   const band = sc?.band;
   const score = sc?.final_score_pct;
 
@@ -189,7 +192,15 @@ const AccountabilityScorecard = () => {
                 {score != null ? `${score}%` : '—'}
               </Typography>
               {band && <Chip label={band} sx={{ fontWeight: 800, bgcolor: alpha(BAND[band], 0.14), color: BAND[band] }} />}
-              {!locked && (
+              {!locked && submitted && (
+                <Box sx={{ mt: 2 }}>
+                  <Chip label="Submitted" color="success" variant="outlined" sx={{ fontWeight: 700, mb: 1.5 }} />
+                  <Button fullWidth variant="outlined" startIcon={<SendOutlined />} onClick={submit}>
+                    Edit & resubmit
+                  </Button>
+                </Box>
+              )}
+              {!locked && !submitted && (
                 <Button fullWidth variant="contained" startIcon={<SendOutlined />} sx={{ mt: 2 }} onClick={submit}>
                   Submit for review
                 </Button>
@@ -223,7 +234,7 @@ const AccountabilityScorecard = () => {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ '& th': { bgcolor: 'grey.100', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.03em', color: 'text.secondary', whiteSpace: 'nowrap' } }}>
+                    <TableRow sx={{ '& th': { bgcolor: 'action.hover', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.03em', color: 'text.secondary', whiteSpace: 'nowrap' } }}>
                       <TableCell>KPI</TableCell>
                       <TableCell align="center">Wt</TableCell>
                       <TableCell align="center">Dir</TableCell>

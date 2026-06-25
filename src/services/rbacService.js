@@ -10,8 +10,16 @@ const EMPLOYEE_SELECT = `
   full_name,
   phone,
   department,
+  designation,
+  employee_code,
+  employment_type,
+  joining_date,
+  reporting_manager,
+  reporting_manager_id,
+  status,
   role_id,
   is_active,
+  archived_at,
   created_at,
   updated_at,
   roles:role_id (
@@ -146,6 +154,53 @@ export async function setEmployeeActive(employeeId, isActive) {
   if (error) {
     console.error('CRUD error:', error);
     throw error;
+  }
+}
+
+/** Patch arbitrary columns on one employee (transfer dept, change manager…). */
+export async function updateEmployeeFields(employeeId, fields) {
+  if (!employeeId) throw new Error('Employee id is required.');
+  const { data, error } = await supabase
+    .from('employees')
+    .update(fields)
+    .eq('id', employeeId)
+    .select(EMPLOYEE_SELECT)
+    .single();
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  return data;
+}
+
+/** Archive an employee: hide from the directory + remove access. Reversible. */
+export async function archiveEmployee(employeeId) {
+  return updateEmployeeFields(employeeId, { archived_at: new Date().toISOString(), is_active: false });
+}
+
+/** Restore an archived employee (clears archived_at; does not auto-reactivate access). */
+export async function unarchiveEmployee(employeeId) {
+  return updateEmployeeFields(employeeId, { archived_at: null });
+}
+
+/**
+ * Hard-delete an employee. Dependent rows (permissions, documents, attendance,
+ * leave) cascade via FK. Uses an exact row count so a silent RLS denial (0 rows
+ * removed, no error) surfaces as a real error instead of a false success.
+ * Irreversible — callers must confirm.
+ */
+export async function deleteEmployee(employeeId) {
+  if (!employeeId) throw new Error('Employee id is required.');
+  const { error, count } = await supabase
+    .from('employees')
+    .delete({ count: 'exact' })
+    .eq('id', employeeId);
+  if (error) {
+    console.error('CRUD error:', error);
+    throw error;
+  }
+  if (!count) {
+    throw new Error('Delete was blocked — you may not have permission to delete employees.');
   }
 }
 

@@ -200,9 +200,7 @@ const MoldingMainNavigation = () => {
                 </Tooltip>
                 <Tooltip title="System Status">
                   <IconButton sx={{ color: 'common.white' }}>
-                    <Badge badgeContent={4} color="error">
-                      <AnalyticsIcon />
-                    </Badge>
+                    <AnalyticsIcon />
                   </IconButton>
                 </Tooltip>
               </Stack>
@@ -297,11 +295,13 @@ const MoldingMainNavigation = () => {
       {/* Quick Stats Overview */}
       <Fade in timeout={1000}>
         <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Values shown as "—": these were fabricated static figures not backed
+              by live data. Restore once wired to a production data source. */}
           {[
-            { label: "Active Orders", value: "24", icon: <PowerCordIcon />, color: theme.palette.primary.main },
-            { label: "Production Plans", value: "8", icon: <PlanningIcon />, color: theme.palette.primary.main },
-            { label: "Machines Running", value: "8/10", icon: <SpeedIcon />, color: theme.palette.success.main },
-            { label: "Efficiency", value: "97%", icon: <TrendingUpIcon />, color: theme.palette.warning.main }
+            { label: "Active Orders", value: "—", icon: <PowerCordIcon />, color: theme.palette.primary.main },
+            { label: "Production Plans", value: "—", icon: <PlanningIcon />, color: theme.palette.primary.main },
+            { label: "Machines Running", value: "—", icon: <SpeedIcon />, color: theme.palette.success.main },
+            { label: "Efficiency", value: "—", icon: <TrendingUpIcon />, color: theme.palette.warning.main }
           ].map((stat, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Card 

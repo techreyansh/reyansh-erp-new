@@ -23,6 +23,8 @@ import {
   loadHeatmap, orderRiskWatchlist, rmBurndown,
 } from "../../services/cablePlanner";
 import { rowToCable, rowToOrder, jobToScheduleRow } from "../../services/cablePlanner/erpAdapter";
+import { loadEngineMachines } from "../../services/cableProductionService";
+import { listRows } from "../../services/refMasterService";
 
 // Categorical stage-identity palette (one distinct hue per production stage) — data/legend colors, kept literal so stages stay visually distinguishable.
 const STAGE_COLOR = { bunching: "#6366f1", core: "#0ea5e9", laying: "#f59e0b", sheathing: "#10b981" };
@@ -53,6 +55,11 @@ export default function CableAutoPlanner() {
   const [loading, setLoading] = useState(true);
   const [cables, setCables] = useState([]);
   const [orders, setOrders] = useState([]);
+  // Machine Master (ppc_machines) → engine machines; DEFAULT_MACHINES until loaded.
+  const [machines, setMachines] = useState(DEFAULT_MACHINES);
+  // Planning presets (named option sets) the planner can apply in one click.
+  const [presets, setPresets] = useState([]);
+  const [presetId, setPresetId] = useState("");
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [snack, setSnack] = useState(null);
@@ -77,12 +84,14 @@ export default function CableAutoPlanner() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [cp, plans] = await Promise.all([
+      const [cp, plans, eng] = await Promise.all([
         sheetService.getSheetData("Cable Products"),
         sheetService.getSheetData("Cable Production Plans"),
+        loadEngineMachines(),
       ]);
       setCables((cp || []).map(rowToCable).filter((c) => c.code));
       setOrders((plans || []).map(rowToOrder).filter((o) => o.cableId && o.qtyM > 0));
+      if (Array.isArray(eng) && eng.length) setMachines(eng);
     } catch (e) {
       notify(`Failed to load data: ${e.message}`, "error");
     } finally {
@@ -91,6 +100,15 @@ export default function CableAutoPlanner() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { listRows("planning_preset", "code").then((r) => setPresets((r || []).filter((p) => !p.archived_at))).catch(() => {}); }, []);
+
+  // Apply a named preset to the planning options (engine unchanged).
+  const applyPreset = (id) => {
+    setPresetId(id);
+    const p = presets.find((x) => x.id === id);
+    if (!p) return;
+    setOpts((o) => ({ ...o, priority: p.priority || o.priority, mode: p.mode || o.mode, batching: !!p.batching, batchWindow: p.batch_window || o.batchWindow, checkStock: p.check_stock || o.checkStock, scope: p.scope || o.scope }));
+  };
 
   const cablesById = useMemo(() => Object.fromEntries(cables.map((c) => [c.id, c])), [cables]);
 
@@ -98,7 +116,7 @@ export default function CableAutoPlanner() {
     if (!orders.length) { notify("No production plans with a quantity to schedule", "warning"); return; }
     try {
       const res = runAutoSchedule({
-        cables, machines: DEFAULT_MACHINES, speeds: [], orders,
+        cables, machines, speeds: [], orders,
         options: { ...opts, stock, startDate: new Date(`${opts.startDate}T09:00:00`) },
       });
       setResult(res);
@@ -126,6 +144,18 @@ export default function CableAutoPlanner() {
     }
   };
 
+  // Drag-to-reschedule: move one job to a new start (duration preserved), mark it
+  // manually moved. Save persists the adjusted times to Machine Schedules.
+  const reschedule = useCallback((jobId, startISO, endISO) => {
+    setResult((r) => {
+      if (!r) return r;
+      const schedule = r.schedule.map((j) =>
+        j.id === jobId ? { ...j, startTime: startISO, endTime: endISO, manuallyMoved: true } : j);
+      return { ...r, schedule };
+    });
+    setSnack({ message: "Job rescheduled — Save to persist", severity: "info" });
+  }, []);
+
   const materials = useMemo(() => {
     if (!result) return null;
     const items = result.plannedOrderIds
@@ -137,7 +167,7 @@ export default function CableAutoPlanner() {
 
   // Decision support: who's at risk, where's the bottleneck.
   const watchlist = useMemo(() => orderRiskWatchlist(orders, result?.schedule || []), [orders, result]);
-  const heatmap = useMemo(() => (result ? loadHeatmap(DEFAULT_MACHINES, result.schedule, 14) : []), [result]);
+  const heatmap = useMemo(() => (result ? loadHeatmap(machines, result.schedule, 14) : []), [result, machines]);
   const hasStock = stock.copperKg > 0 || stock.pvcInsKg > 0 || stock.pvcShKg > 0;
   const burndown = useMemo(
     () => (result?.schedule?.length && hasStock ? rmBurndown(result.schedule, cablesById, stock, 30) : null),
@@ -221,6 +251,13 @@ export default function CableAutoPlanner() {
         </Stack>
 
         <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap alignItems="center">
+          {presets.length > 0 && (
+            <TextField select size="small" label="Preset" value={presetId} onChange={(e) => applyPreset(e.target.value)} sx={{ width: 210 }}
+              helperText="Apply a saved planning preset">
+              <MenuItem value="">— none —</MenuItem>
+              {presets.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+            </TextField>
+          )}
           <TextField size="small" type="date" label="Plan start" InputLabelProps={{ shrink: true }}
             value={opts.startDate} onChange={(e) => setOpts({ ...opts, startDate: e.target.value })} sx={{ width: 160 }} />
           <TextField select size="small" label="Mode" value={opts.mode} onChange={(e) => setOpts({ ...opts, mode: e.target.value })} sx={{ width: 150 }}>
@@ -386,7 +423,7 @@ export default function CableAutoPlanner() {
           <Heatmap heatmap={heatmap} theme={theme} />
 
           {/* GANTT */}
-          <Gantt schedule={result.schedule} machines={DEFAULT_MACHINES} theme={theme} />
+          <Gantt schedule={result.schedule} machines={machines} theme={theme} onReschedule={reschedule} />
 
           {/* TABLE */}
           <Paper variant="outlined" sx={{ borderRadius: 2.5, mt: 2, overflow: "hidden" }}>
@@ -509,7 +546,11 @@ function Heatmap({ heatmap, theme }) {
 }
 
 // Compact 7-day Gantt: one row per machine, bars positioned across the window.
-function Gantt({ schedule, machines, theme }) {
+// Bars are draggable horizontally to reschedule (onReschedule(jobId, startISO,
+// endISO)); duration is preserved and the new start snaps to 15 minutes.
+const SNAP_MS = 15 * 60000;
+function Gantt({ schedule, machines, theme, onReschedule }) {
+  const [drag, setDrag] = useState(null); // { id, startX, trackW, leftPct, widthPct, previewLeftPct, origStartMs, durMs }
   if (!schedule.length) return null;
   const starts = schedule.map((j) => new Date(j.startTime).getTime());
   const ends = schedule.map((j) => new Date(j.endTime).getTime());
@@ -519,9 +560,38 @@ function Gantt({ schedule, machines, theme }) {
   const days = [];
   for (let t = min; t <= max; t += 86400000) days.push(new Date(t));
 
+  const onDown = (e, j, left, width) => {
+    if (!onReschedule) return;
+    e.preventDefault();
+    const track = e.currentTarget.parentElement.getBoundingClientRect();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* noop */ }
+    setDrag({
+      id: j.id, startX: e.clientX, trackW: track.width || 1, leftPct: left, widthPct: width,
+      previewLeftPct: left, origStartMs: new Date(j.startTime).getTime(),
+      durMs: new Date(j.endTime).getTime() - new Date(j.startTime).getTime(),
+    });
+  };
+  const onMove = (e, jid) => {
+    if (!drag || drag.id !== jid) return;
+    const dPct = ((e.clientX - drag.startX) / drag.trackW) * 100;
+    const previewLeftPct = Math.max(0, Math.min(100 - drag.widthPct, drag.leftPct + dPct));
+    setDrag((d) => (d ? { ...d, previewLeftPct } : d));
+  };
+  const onUp = (e, j) => {
+    if (!drag || drag.id !== j.id) { setDrag(null); return; }
+    const deltaMs = ((drag.previewLeftPct - drag.leftPct) / 100) * span;
+    setDrag(null);
+    if (Math.abs(deltaMs) < 60000) return; // ignore <1min nudges / plain clicks
+    const newStart = Math.round((drag.origStartMs + deltaMs) / SNAP_MS) * SNAP_MS;
+    onReschedule(j.id, new Date(newStart).toISOString(), new Date(newStart + drag.durMs).toISOString());
+  };
+
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, overflow: "hidden" }}>
-      <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>Timeline (Gantt)</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>Timeline (Gantt)</Typography>
+        {onReschedule && <Typography variant="caption" color="text.secondary">Drag a bar to reschedule · Save to persist</Typography>}
+      </Stack>
       <Box sx={{ overflowX: "auto", mt: 1 }}>
         <Box sx={{ minWidth: 720 }}>
           {/* day axis */}
@@ -539,16 +609,27 @@ function Gantt({ schedule, machines, theme }) {
                 <Box sx={{ width: 120, flexShrink: 0, fontSize: 12, fontWeight: 700 }}>{mac.name}</Box>
                 <Box sx={{ position: "relative", flex: 1, height: 26, bgcolor: alpha(theme.palette.text.primary, 0.03), borderRadius: 1 }}>
                   {jobs.map((j) => {
-                    const left = ((new Date(j.startTime).getTime() - min) / span) * 100;
+                    const baseLeft = ((new Date(j.startTime).getTime() - min) / span) * 100;
                     const width = Math.max(((new Date(j.endTime).getTime() - new Date(j.startTime).getTime()) / span) * 100, 0.5);
+                    const dragging = drag && drag.id === j.id;
+                    const left = dragging ? drag.previewLeftPct : baseLeft;
                     return (
-                      <Tooltip key={j.id} title={`${STAGE_LABEL[j.stage]} · ${j.cableId} · ${m(j.plannedM)} · ${fmtDT(j.startTime)}→${fmtDT(j.endTime)}`}>
-                        <Box sx={{
-                          position: "absolute", left: `${left}%`, width: `${width}%`, top: 3, height: 20,
-                          bgcolor: STAGE_COLOR[j.stage], borderRadius: 0.75, color: "common.white", fontSize: 10,
-                          px: 0.5, overflow: "hidden", whiteSpace: "nowrap", cursor: "default",
-                          display: "flex", alignItems: "center", boxShadow: 1,
-                        }}>
+                      <Tooltip key={j.id} title={dragging ? "" : `${STAGE_LABEL[j.stage]} · ${j.cableId} · ${m(j.plannedM)} · ${fmtDT(j.startTime)}→${fmtDT(j.endTime)}`}>
+                        <Box
+                          onPointerDown={(e) => onDown(e, j, baseLeft, width)}
+                          onPointerMove={(e) => onMove(e, j.id)}
+                          onPointerUp={(e) => onUp(e, j)}
+                          sx={{
+                            position: "absolute", left: `${left}%`, width: `${width}%`, top: 3, height: 20,
+                            bgcolor: STAGE_COLOR[j.stage], borderRadius: 0.75, color: "common.white", fontSize: 10,
+                            px: 0.5, overflow: "hidden", whiteSpace: "nowrap",
+                            cursor: onReschedule ? (dragging ? "grabbing" : "grab") : "default",
+                            touchAction: "none", userSelect: "none",
+                            zIndex: dragging ? 5 : 1,
+                            outline: dragging ? `2px solid ${theme.palette.common.white}` : j.manuallyMoved ? `2px solid ${alpha(theme.palette.common.white, 0.7)}` : "none",
+                            display: "flex", alignItems: "center", boxShadow: dragging ? 4 : 1,
+                          }}
+                        >
                           {j.coreColor ? j.coreColor[0] : STAGE_LABEL[j.stage][0]}
                         </Box>
                       </Tooltip>

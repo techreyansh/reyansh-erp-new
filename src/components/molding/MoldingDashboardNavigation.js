@@ -32,52 +32,43 @@ import KPICard from "../common/KPICard";
 const MoldingDashboardNavigation = () => {
   const theme = useTheme();
 
+  // NOTE: KPI figures below were fabricated static placeholders. Values/trends/
+  // progress are neutralized ("—") until wired to live production data so the
+  // app does not present fake metrics as real.
   const kpiCards = [
     {
       title: "Power Cord Master",
       description: "Manage power cord specifications (2-pin, 3-pin, 6A, 16A variants).",
-      value: "24",
+      value: "—",
       subtitle: "Active Products",
       icon: <PowerCordIcon />,
-      progress: 85,
-      trend: "+12%",
-      trendUp: true,
       variant: "default",
       color: "warning",
     },
     {
       title: "Production Planning",
       description: "Optimize cutting, assembly, and molding workflows with batch scheduling.",
-      value: "3",
+      value: "—",
       subtitle: "Active Plans",
       icon: <PlanningIcon />,
-      progress: 72,
-      trend: "+8%",
-      trendUp: true,
       variant: "gradient",
       color: "secondary",
     },
     {
       title: "Production Management",
       description: "Real-time monitoring of assembly lines and molding machines.",
-      value: "97%",
+      value: "—",
       subtitle: "Overall Efficiency",
       icon: <ProductionIcon />,
-      progress: 97,
-      trend: "+3%",
-      trendUp: true,
       variant: "default",
       color: "success",
     },
     {
       title: "Machine Monitoring",
       description: "Track 4 assembly lines and 6 molding machines with live status.",
-      value: "8/10",
+      value: "—",
       subtitle: "Running",
       icon: <MoldIcon />,
-      progress: 80,
-      trend: "+15%",
-      trendUp: true,
       variant: "gradient",
       color: "info",
     },

@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { buildAppTheme } from "./theme/buildAppTheme";
 import { ThemeModeProvider, useThemeMode } from "./context/ThemeModeContext";
+import VersionGate from "./components/common/VersionGate";
 import { setGlobalErrorNotifier } from "./lib/supabaseErrorHandler";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionProvider, usePermissions } from "./context/PermissionContext";
@@ -24,14 +25,14 @@ import { UserProvider } from "./context/UserContext";
 import { StepStatusProvider } from './context/StepStatusContext';
 
 import Header from "./components/common/Header";
+import SidebarNav from "./components/nav/SidebarNav";
+import { useNavPrefs } from "./hooks/useNavPrefs";
 import ScrollProgressBar from "./components/common/ScrollProgressBar";
 import Login from "./components/auth/Login";
 import ProfilePage from "./components/common/ProfilePage";
 import SettingsPage from "./components/common/SettingsPage";
 import HelpPage from "./components/common/HelpPage";
 import SalesOrderIngestion from "./components/poIngestion/POIngestion";
-import ClientManager from "./components/common/ClientManager";
-import ProspectsClientManager from "./components/common/ProspectsClientManager";
 import FlowManagement from "./components/flowManagement/FlowManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RootRedirect from "./components/auth/RootRedirect";
@@ -106,7 +107,6 @@ import MoldingDashboardNavigation from './components/molding/MoldingDashboardNav
 import PowerCordMasterNavigation from './components/molding/PowerCordMasterNavigation';
 import ProductionPlanningNavigation from './components/molding/ProductionPlanningNavigation';
 import ProductionManagementNavigation from './components/molding/ProductionManagementNavigation';
-import ClientDashboard from './components/clientDashboard/ClientDashboard';
 import DocumentLibrary from './components/DocumentLibrary/DocumentLibrary';
 
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
@@ -114,18 +114,56 @@ const WelcomePage = lazy(() => import("./pages/WelcomePage"));
 const CEOExecutiveDashboard = lazy(() => import("./components/ceoDashboard/CEOExecutiveDashboard"));
 const PlantHeadDashboard = lazy(() => import("./components/plantDashboard/PlantHeadDashboard"));
 const ProductionLogModule = lazy(() => import("./components/productionLog/ProductionLogModule"));
+const ProductionIntelligence = lazy(() => import("./pages/production/ProductionIntelligence"));
+const AssemblyOperationMaster = lazy(() => import("./pages/mes/AssemblyOperationMaster"));
+const JobCard = lazy(() => import("./pages/mes/JobCard"));
+const MESSetup = lazy(() => import("./pages/mes/MESSetup"));
+const MESDashboard = lazy(() => import("./pages/mes/MESDashboard"));
+const DailyPlan = lazy(() => import("./pages/mes/DailyPlan"));
+const CapacityPlanner = lazy(() => import("./pages/mes/CapacityPlanner"));
+const LineBalancing = lazy(() => import("./pages/mes/LineBalancing"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
-const AccountabilityScorecard = lazy(() => import("./components/accountability/AccountabilityScorecard"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
-const PPCModulePage = lazy(() => import("./pages/ppc/PPCModulePage"));
+const CRMPipelineBoard = lazy(() => import("./pages/crm/CRMPipelineBoard"));
+const CollectionsPage = lazy(() => import("./pages/crm/CollectionsPage"));
+const RepWorklist = lazy(() => import("./pages/crm/RepWorklist"));
+const CrmTeam = lazy(() => import("./pages/crm/CrmTeam"));
+const AISalesCopilot = lazy(() => import("./pages/crm/AISalesCopilot"));
+const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
+const PaymentFollowUp = lazy(() => import("./pages/crm/PaymentFollowUp"));
+const ClientReports = lazy(() => import("./pages/crm/ClientReports"));
+const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
+const InventoryLedger = lazy(() => import("./pages/inventory/InventoryLedger"));
+const NPDDashboard = lazy(() => import("./pages/npd/NPDDashboard"));
+const NPDProject = lazy(() => import("./pages/npd/NPDProject"));
+const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
 const AdminTaskApprovalPanel = lazy(() => import("./components/taskCompliance/AdminTaskApprovalPanel"));
+const ChecklistTemplateAdmin = lazy(() => import("./components/taskCompliance/ChecklistTemplateAdmin"));
 const AccessManagementPage = lazy(() => import("./components/access/AccessManagementPage"));
+const EmployeeManagement = lazy(() => import("./pages/employees/EmployeeManagement"));
+const ProductMaster = lazy(() => import("./pages/products/ProductMaster"));
+const SalesOrders = lazy(() => import("./pages/salesOrder/SalesOrders"));
+const DispatchControlTower = lazy(() => import("./pages/dispatch/DispatchControlTower"));
+const ProductionDemand = lazy(() => import("./pages/production/ProductionDemand"));
+const MaterialRequirements = lazy(() => import("./pages/mrp/MaterialRequirements"));
+const PurchaseRequisitions = lazy(() => import("./pages/purchase/PurchaseRequisitions"));
+const Invoicing = lazy(() => import("./pages/invoicing/Invoicing"));
+const OperationsControlTower = lazy(() => import("./pages/operations/OperationsControlTower"));
+const DemandForecast = lazy(() => import("./pages/forecast/DemandForecast"));
+const CustomerPortal = lazy(() => import("./pages/portal/CustomerPortal"));
+const CustomerPortalAdmin = lazy(() => import("./pages/portal/CustomerPortalAdmin"));
+const CostControl = lazy(() => import("./pages/costControl/CostControl"));
+const CablePlanningWorkbench = lazy(() => import("./pages/temp/CablePlanningWorkbench"));
+const AccessPreview = lazy(() => import("./pages/admin/AccessPreview"));
 const MyTasksView = lazy(() => import("./components/tasks/MyTasksView"));
 const TaskScheduler = lazy(() => import("./components/tasks/TaskScheduler"));
 const TeamTasksDashboard = lazy(() => import("./components/tasks/TeamTasksDashboard"));
+const MISHome = lazy(() => import("./pages/mis/MISHome"));
+const PerformanceReview = lazy(() => import("./pages/performance/PerformanceReview"));
+const PPCFoundation = lazy(() => import("./pages/ppc/PPCFoundation"));
 
 const ProtectedRouteGate = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
@@ -150,8 +188,11 @@ function AppContent() {
   const { loading: userLoading } = useUser();
   const { loading: permissionsLoading } = usePermissions();
   const location = useLocation();
+  const navPrefs = useNavPrefs();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const isPublicEntry =
-    location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied";
+    location.pathname === "/login" || location.pathname === "/" || location.pathname === "/access-denied" ||
+    location.pathname.startsWith("/portal/");
   if (!isPublicEntry && (authLoading || userLoading || permissionsLoading)) {
     return <FullScreenLogoLoader />;
   }
@@ -164,8 +205,23 @@ function AppContent() {
         backgroundColor: "background.default",
       }}
     >
-      {!isPublicEntry && <Header />}
+      {!isPublicEntry && <Header onMenuClick={() => setMobileOpen(true)} />}
       {!isPublicEntry && <ScrollProgressBar />}
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+        {!isPublicEntry && (
+          <SidebarNav
+            collapsed={navPrefs.collapsed}
+            onToggleCollapsed={navPrefs.toggleCollapsed}
+            mobileOpen={mobileOpen}
+            onMobileClose={() => setMobileOpen(false)}
+            favorites={navPrefs.favorites}
+            isFavorite={navPrefs.isFavorite}
+            toggleFavorite={navPrefs.toggleFavorite}
+            recents={navPrefs.recents}
+            pushRecent={navPrefs.pushRecent}
+          />
+        )}
+        <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
       <Box component="main" sx={{ flex: 1, py: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2, md: 3 }, maxWidth: "100%" }}>
         <Box
           key={location.pathname}
@@ -178,6 +234,31 @@ function AppContent() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<RootRedirect />} />
                   <Route path="/access-denied" element={<AccessDenied />} />
+                  <Route path="/portal/:token" element={<CustomerPortal />} />
+
+                  <Route path="/portal-admin" element={
+                    <ProtectedRouteGate>
+                      <CustomerPortalAdmin />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/cost-control" element={
+                    <ProtectedRouteGate>
+                      <CostControl />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/temp/cable-planning" element={
+                    <ProtectedRouteGate>
+                      <CablePlanningWorkbench />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/access-preview" element={
+                    <CEOOnlyRoute>
+                      <AccessPreview />
+                    </CEOOnlyRoute>
+                  } />
 
                   <Route path="/home" element={
                     <ProtectedRouteGate>
@@ -215,20 +296,67 @@ function AppContent() {
                       <ProductionLogModule />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/production-intelligence" element={
+                    <ProtectedRouteGate>
+                      <ProductionIntelligence />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/assembly-operations" element={
+                    <ProtectedRouteGate>
+                      <AssemblyOperationMaster />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/job-cards" element={
+                    <ProtectedRouteGate>
+                      <JobCard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/mes-setup" element={
+                    <ProtectedRouteGate>
+                      <MESSetup />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/mes-dashboard" element={
+                    <ProtectedRouteGate>
+                      <MESDashboard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/daily-plan" element={
+                    <ProtectedRouteGate>
+                      <DailyPlan />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/capacity-planner" element={
+                    <ProtectedRouteGate>
+                      <CapacityPlanner />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/line-balancing" element={
+                    <ProtectedRouteGate>
+                      <LineBalancing />
+                    </ProtectedRouteGate>
+                  } />
                   <Route path="/crm-import" element={
                     <ProtectedRouteGate>
                       <CRMImport />
                     </ProtectedRouteGate>
                   } />
-                  <Route path="/accountability" element={
+                  <Route path="/crm-pipeline" element={
                     <ProtectedRouteGate>
-                      <AccountabilityScorecard />
+                      <CRMPipelineBoard />
                     </ProtectedRouteGate>
                   } />
+                  <Route path="/accountability" element={
+                    <Navigate to="/mis/executive-meeting" replace />
+                  } />
+                  <Route path="/employee-management" element={
+                    <ProtectedRouteGate>
+                      <EmployeeManagement />
+                    </ProtectedRouteGate>
+                  } />
+                  {/* Access Management is now a tab inside Employee Management */}
                   <Route path="/access-management" element={
-                    <CEOOnlyRoute>
-                      <AccessManagementPage />
-                    </CEOOnlyRoute>
+                    <Navigate to="/employee-management" replace />
                   } />
                   <Route path="/profile" element={
                     <ProtectedRouteGate>
@@ -246,27 +374,93 @@ function AppContent() {
                     </ProtectedRouteGate>
                   } />
 
+                  {/* Legacy clients2-backed screens retired — redirect to the unified CRM master board */}
                   <Route path="/clients" element={
-                    <ProtectedRouteGate>
-                      <ClientManager />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=clients" replace />
                   } />
 
                   <Route path="/prospects-clients" element={
-                    <ProtectedRouteGate>
-                      <ProspectsClientManager />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=prospects" replace />
                   } />
 
                   <Route path="/client-dashboard" element={
-                    <ProtectedRouteGate>
-                      <ClientDashboard />
-                    </ProtectedRouteGate>
+                    <Navigate to="/crm-pipeline?view=clients" replace />
                   } />
 
                   <Route path="/products" element={
                     <ProtectedRouteGate>
                       <ProductManagement />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/product-master" element={
+                    <ProtectedRouteGate>
+                      <ProductMaster />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/sales-orders" element={
+                    <ProtectedRouteGate>
+                      <SalesOrders />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/dispatch-control" element={
+                    <ProtectedRouteGate>
+                      <DispatchControlTower />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/production-demand" element={
+                    <ProtectedRouteGate>
+                      <ProductionDemand />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/mrp" element={
+                    <ProtectedRouteGate>
+                      <MaterialRequirements />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/inventory-control" element={
+                    <ProtectedRouteGate>
+                      <InventoryLedger />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/npd" element={
+                    <ProtectedRouteGate>
+                      <NPDDashboard />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/npd/:id" element={
+                    <ProtectedRouteGate>
+                      <NPDProject />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/purchase-requisitions" element={
+                    <ProtectedRouteGate>
+                      <PurchaseRequisitions />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/invoicing" element={
+                    <ProtectedRouteGate>
+                      <Invoicing />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/operations-tower" element={
+                    <ProtectedRouteGate>
+                      <OperationsControlTower />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/demand-forecast" element={
+                    <ProtectedRouteGate>
+                      <DemandForecast />
                     </ProtectedRouteGate>
                   } />
 
@@ -340,6 +534,86 @@ function AppContent() {
                     </ProtectedRouteGate>
                   } />
                   <Route path="/cable-production/machine-scheduling" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/cable-master" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/machine-master" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/plan-wizard" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/plans" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/mrp" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/capacity" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/calendar" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/drums" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/tracking" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/manager" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/colour-master" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/size-master" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/material-master" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/routing-template" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/bom-template" element={
+                    <ProtectedRouteGate>
+                      <CableProductionModule />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/cable-production/planning-presets" element={
                     <ProtectedRouteGate>
                       <CableProductionModule />
                     </ProtectedRouteGate>
@@ -427,7 +701,7 @@ function AppContent() {
                     path="/inventory"
                     element={
                       <ProtectedRouteGate>
-                        <InventoryMainNavigation />
+                        <InventoryLedger />
                       </ProtectedRouteGate>
                     } />
 
@@ -692,22 +966,10 @@ function AppContent() {
                     }
                   />
 
-                  <Route
-                    path="/client-dashboard"
-                    element={
-                      <ProtectedRouteGate>
-                        <ClientDashboard />
-                      </ProtectedRouteGate>
-                    }
-                  />
-
+                  {/* Employee Dashboard consolidated into Employee Management (Admin) */}
                   <Route
                     path="/employee-dashboard"
-                    element={
-                      <ProtectedRouteGate>
-                        <AdvancedEmployeeDashboard />
-                      </ProtectedRouteGate>
-                    }
+                    element={<Navigate to="/employee-management" replace />}
                   />
 
                   <Route
@@ -735,12 +997,76 @@ function AppContent() {
                       </ProtectedRouteGate>
                     }
                   />
+                  <Route
+                    path="/checklist-templates"
+                    element={
+                      <ProtectedRouteGate>
+                        <ChecklistTemplateAdmin />
+                      </ProtectedRouteGate>
+                    }
+                  />
 
                   <Route
                     path="/crm"
                     element={
                       <ProtectedRouteGate>
                         <Navigate to="/crm/dashboard" replace />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/collections"
+                    element={
+                      <ProtectedRouteGate>
+                        <CollectionsPage />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/worklist"
+                    element={
+                      <ProtectedRouteGate>
+                        <RepWorklist />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/team"
+                    element={
+                      <ProtectedRouteGate>
+                        <CrmTeam />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/copilot"
+                    element={
+                      <ProtectedRouteGate>
+                        <AISalesCopilot />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/client-pipeline"
+                    element={
+                      <ProtectedRouteGate>
+                        <ClientPipeline />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/payments"
+                    element={
+                      <ProtectedRouteGate>
+                        <PaymentFollowUp />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route
+                    path="/crm/client-reports"
+                    element={
+                      <ProtectedRouteGate>
+                        <ClientReports />
                       </ProtectedRouteGate>
                     }
                   />
@@ -753,10 +1079,35 @@ function AppContent() {
                     }
                   />
                   <Route
+                    path="/kit"
+                    element={
+                      <ProtectedRouteGate>
+                        <KitModule />
+                      </ProtectedRouteGate>
+                    }
+                  />
+                  <Route path="/mis" element={
+                    <ProtectedRouteGate>
+                      <MISHome />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/performance" element={
+                    <ProtectedRouteGate>
+                      <PerformanceReview />
+                    </ProtectedRouteGate>
+                  } />
+                  {/* EM Executive Meeting was rebuilt as the Performance Review system. */}
+                  <Route path="/mis/executive-meeting" element={
+                    <ProtectedRouteGate>
+                      <PerformanceReview />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route
                     path="/ppc"
                     element={
                       <ProtectedRouteGate>
-                        <Navigate to="/ppc/production-plan" replace />
+                        <PPCFoundation />
                       </ProtectedRouteGate>
                     }
                   />
@@ -764,7 +1115,7 @@ function AppContent() {
                     path="/ppc/:section"
                     element={
                       <ProtectedRouteGate>
-                        <PPCModulePage />
+                        <Navigate to="/ppc" replace />
                       </ProtectedRouteGate>
                     }
                   />
@@ -791,6 +1142,8 @@ function AppContent() {
                   {new Date().getFullYear()}
                 </Typography>
               </Box>
+        </Box>
+      </Box>
             </Box>
   );
 }
@@ -848,6 +1201,7 @@ function ThemedApp() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <VersionGate />
       <GlobalErrorToaster>
         <AppShell />
       </GlobalErrorToaster>

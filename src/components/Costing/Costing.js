@@ -40,11 +40,13 @@ import {
   CableOutlined,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import costingService from '../../services/costingService';
 import { StatCard } from '../common/kit';
 
 const Costing = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [costingEntries, setCostingEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -92,7 +94,7 @@ const Costing = () => {
     try {
       setLoading(true);
       const data = await costingService.getAllCostingEntries();
-      setCostingEntries(data);
+      setCostingEntries(Array.isArray(data) ? data : []);
     } catch (error) {
       setSnackbar({ 
         open: true, 
@@ -201,7 +203,8 @@ const Costing = () => {
 
   // Default order: newest costing entries first.
   const sortedEntries = useMemo(() => {
-    return [...costingEntries].sort((a, b) => {
+    const arr = Array.isArray(costingEntries) ? costingEntries : [];
+    return [...arr].sort((a, b) => {
       const da = new Date(a.Date || a.date || 0).getTime();
       const db = new Date(b.Date || b.date || 0).getTime();
       return (db || 0) - (da || 0);
@@ -294,6 +297,15 @@ const Costing = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: { xs: 2, md: 3 } }}>
+      {/* This is the legacy quick-calculator. Point users to the dynamic engine. */}
+      <Alert
+        severity="info"
+        sx={{ mb: 2, borderRadius: 2 }}
+        action={<Button color="inherit" size="small" variant="outlined" onClick={() => navigate('/cost-control')}>Open Cost Control →</Button>}
+      >
+        This is a quick cable-cost <strong>calculator</strong> — saved entries are fixed snapshots and do <strong>not</strong> change when you edit the copper/PVC rates here. For <strong>dynamic costing</strong>, where a rate change automatically recomputes every product, quote &amp; order, use <strong>Cost Control</strong>.
+      </Alert>
+
       {/* Header */}
       <Paper
         variant="outlined"
@@ -591,18 +603,18 @@ const Costing = () => {
                 ⚡ Live Cost Breakdown
               </Typography>
               <Chip
-                label={`Cord Cost  ₹${(liveCost?.cordCost || 0).toFixed(2)}`}
+                label={`Cord Cost  ₹${(Number(liveCost?.cordCost) || 0).toFixed(2)}`}
                 color="primary"
                 sx={{ fontWeight: 800, fontSize: '0.85rem', height: 30 }}
               />
             </Stack>
             <Grid container spacing={1.25}>
               {[
-                { label: 'Final Copper', value: `${(liveCost?.finalCopper || 0).toFixed(3)}`, unit: 'kg/100m' },
-                { label: 'Final PVC', value: `${((liveCost?.finalPVCRound || 0) + (liveCost?.finalPVCFlat || 0)).toFixed(3)}`, unit: 'kg/100m' },
-                { label: 'RMC', value: `₹${(liveCost?.rmc || 0).toFixed(2)}`, unit: '/100m' },
-                { label: 'Wire / metre', value: `₹${(liveCost?.costOfWirePerMtr || 0).toFixed(2)}`, unit: 'per m' },
-                { label: 'Wire Cost', value: `₹${(liveCost?.wireCost || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
+                { label: 'Final Copper', value: `${(Number(liveCost?.finalCopper) || 0).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'Final PVC', value: `${((Number(liveCost?.finalPVCRound) || 0) + (Number(liveCost?.finalPVCFlat) || 0)).toFixed(3)}`, unit: 'kg/100m' },
+                { label: 'RMC', value: `₹${(Number(liveCost?.rmc) || 0).toFixed(2)}`, unit: '/100m' },
+                { label: 'Wire / metre', value: `₹${(Number(liveCost?.costOfWirePerMtr) || 0).toFixed(2)}`, unit: 'per m' },
+                { label: 'Wire Cost', value: `₹${(Number(liveCost?.wireCost) || 0).toFixed(2)}`, unit: `× ${formData.lengthReq || 0} m` },
                 { label: 'Plug + Terminal', value: `₹${((parseFloat(formData.plugCost) || 0) + (parseFloat(formData.terminalAccCost) || 0)).toFixed(2)}`, unit: 'add-ons' },
               ].map((m) => (
                 <Grid item xs={6} sm={4} md={2} key={m.label}>

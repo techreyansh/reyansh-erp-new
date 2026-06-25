@@ -4,6 +4,7 @@ import { Box, Typography } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import ceoDashboardAccessLog from '../../services/ceoDashboardAccessLog';
+import { rememberIntendedPath } from '../../lib/postLoginRedirect';
 
 /**
  * Compatibility guard for the executive area. Access is permission-based:
@@ -37,6 +38,7 @@ const CEOOnlyRoute = ({ children }) => {
   }
 
   if (!user) {
+    rememberIntendedPath(location.pathname + location.search);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

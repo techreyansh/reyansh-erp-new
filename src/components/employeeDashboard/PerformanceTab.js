@@ -103,15 +103,15 @@ const PerformanceTab = ({ employeeCode, performance }) => {
     target: metric.target
   }));
 
-  // Radar chart data for skills assessment
-  const skillsData = [
-    { skill: 'Technical Skills', score: 85, fullMark: 100 },
-    { skill: 'Communication', score: 78, fullMark: 100 },
-    { skill: 'Leadership', score: 72, fullMark: 100 },
-    { skill: 'Problem Solving', score: 88, fullMark: 100 },
-    { skill: 'Teamwork', score: 82, fullMark: 100 },
-    { skill: 'Initiative', score: 75, fullMark: 100 }
-  ];
+  // Radar chart data for skills assessment.
+  // Previously hardcoded fabricated scores; left empty until a real skills data
+  // source exists so the app does not present fake metrics.
+  const skillsData = [];
+
+  // Goals/targets and achievements were previously hardcoded fabricated data.
+  // Left empty until backed by a real data source.
+  const goals = [];
+  const achievements = [];
 
   return (
     <Box>
@@ -256,27 +256,39 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                 Skills Assessment
               </Typography>
               
-              <Box sx={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={skillsData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12 }} />
-                    <PolarRadiusAxis 
-                      angle={90} 
-                      domain={[0, 100]} 
-                      tick={{ fontSize: 10 }}
-                    />
-                    <Radar
-                      name="Score"
-                      dataKey="score"
-                      stroke={theme.palette.primary.main}
-                      fill={theme.palette.primary.main}
-                      fillOpacity={0.3}
-                      strokeWidth={2}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </Box>
+              {skillsData.length > 0 ? (
+                <Box sx={{ height: 300 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={skillsData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12 }} />
+                      <PolarRadiusAxis
+                        angle={90}
+                        domain={[0, 100]}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <Radar
+                        name="Score"
+                        dataKey="score"
+                        stroke={theme.palette.primary.main}
+                        fill={theme.palette.primary.main}
+                        fillOpacity={0.3}
+                        strokeWidth={2}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </Box>
+              ) : (
+                <Box sx={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'text.secondary'
+                }}>
+                  No skills assessment data available
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -393,35 +405,38 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                 Current Goals & Targets
               </Typography>
               
-              <Box sx={{ space: 2 }}>
-                {[
-                  { goal: 'Quarterly Performance Target', current: 85, target: 90 },
-                  { goal: 'Project Completion Rate', current: 92, target: 95 },
-                  { goal: 'Team Collaboration Score', current: 88, target: 85 },
-                  { goal: 'Skill Development', current: 75, target: 80 }
-                ].map((item, index) => (
-                  <Box key={index} sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {item.goal}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.current}/{item.target}
-                      </Typography>
+              {/* Goals were fabricated static placeholders; hidden until a real
+                  goals data source exists. */}
+              {goals.length > 0 ? (
+                <Box sx={{ space: 2 }}>
+                  {goals.map((item, index) => (
+                    <Box key={index} sx={{ mb: 3 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {item.goal}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.current}/{item.target}
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={(item.current / item.target) * 100}
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: 'grey.200'
+                        }}
+                        color={item.current >= item.target ? 'success' : 'primary'}
+                      />
                     </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={(item.current / item.target) * 100}
-                      sx={{ 
-                        height: 8, 
-                        borderRadius: 4,
-                        backgroundColor: 'grey.200'
-                      }}
-                      color={item.current >= item.target ? 'success' : 'primary'}
-                    />
-                  </Box>
-                ))}
-              </Box>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No goals or targets available
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -434,42 +449,34 @@ const PerformanceTab = ({ employeeCode, performance }) => {
                 Recent Achievements
               </Typography>
               
-              <Box>
-                {[
-                  { 
-                    title: 'Project Excellence Award', 
-                    date: '2024-01-15',
-                    description: 'Outstanding performance in Q4 project delivery'
-                  },
-                  { 
-                    title: 'Team Player Recognition', 
-                    date: '2023-12-20',
-                    description: 'Exceptional collaboration and support to team members'
-                  },
-                  { 
-                    title: 'Innovation Bonus', 
-                    date: '2023-11-10',
-                    description: 'Implemented cost-saving process improvement'
-                  }
-                ].map((achievement, index) => (
-                  <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: 'success.lighter' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <StarIcon sx={{ color: 'success.main' }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {achievement.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {achievement.description}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(achievement.date).toLocaleDateString()}
-                        </Typography>
+              {/* Achievements were fabricated static placeholders; hidden until a
+                  real achievements data source exists. */}
+              {achievements.length > 0 ? (
+                <Box>
+                  {achievements.map((achievement, index) => (
+                    <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: 'success.lighter' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <StarIcon sx={{ color: 'success.main' }} />
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {achievement.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {achievement.description}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(achievement.date).toLocaleDateString()}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
+                    </Paper>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No achievements recorded yet
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>

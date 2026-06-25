@@ -33,7 +33,6 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard,
-  ListAlt,
   Assignment,
   Person,
   ExitToApp,
@@ -70,14 +69,19 @@ import {
   ExpandLess,
   ExpandMore,
   MarkEmailRead as CampaignIcon,
+  ReceiptLong as ReceiptLongIcon,
+  Forum as ForumIcon,
+  PlaylistAddCheck as WorklistIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 import { usePermissions } from "../../context/PermissionContext";
 import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
+import TaskBell from "./TaskBell";
 
-const Header = () => {
+const Header = ({ onMenuClick } = {}) => {
   const theme = useTheme();
   const { mode, toggleMode } = useThemeMode();
   const { user, signOut, role: userRole } = useAuth();
@@ -93,6 +97,7 @@ const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openSections, setOpenSections] = useState({});
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   const toggleSection = (key) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -150,6 +155,32 @@ const Header = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Fetch the current user's profile photo once (for the top-right avatar).
+  useEffect(() => {
+    let active = true;
+    if (!user?.email) {
+      setProfilePhoto(null);
+      return undefined;
+    }
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('employees_data')
+          .select('ProfilePhoto')
+          .ilike('Email', user.email)
+          .maybeSingle();
+        if (active) setProfilePhoto(data?.ProfilePhoto || null);
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Header: could not load profile photo', err);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user?.email]);
+
   const canManageEmployees = permissions.canManageEmployees;
 
   /** Roles that can open CRM / PPC module menus (aligns with operational teams). */
@@ -205,273 +236,45 @@ const Header = () => {
    * 
    * For detailed documentation, see: ROLE_ACCESS_DOCUMENTATION.md
    */
+  const systemItems = !config.useLocalStorage
+    ? [
+        { subheader: "System", label: "Setup Sheets", path: "/setup-sheets", icon: <TableChart />, roles: ["all"] },
+        { subheader: "System", label: "Troubleshoot", path: "/troubleshoot-sheets", icon: <DebugIcon />, roles: ["all"] },
+      ]
+    : [
+        { subheader: "System", label: "Storage Debug", path: "/storage-debug", icon: <Storage />, roles: ["all"] },
+      ];
+
   const menuGroups = [
     {
       key: "dashboard",
-      label: "Overview",
+      label: "Home",
       icon: <Dashboard />,
       items: [
-        {
-          label: "Home",
-          path: "/home",
-          icon: <HomeOutlined />,
-          roles: ["all"],
-        },
-        {
-          subheader: "Command Centers",
-          label: "CEO Master Control",
-          path: "/ceo-command",
-          icon: <SecurityIcon />,
-          roles: ["CEO"],
-        },
-        {
-          subheader: "Command Centers",
-          label: "Plant Command",
-          path: "/plant-command",
-          icon: <Dashboard />,
-          roles: [
-            "CEO",
-            "Production Manager",
-            "Process Coordinator",
-            "QC Manager",
-            "Cable Production Supervisor",
-            "Moulding Production Supervisor",
-            "Management/HOD",
-          ],
-        },
-        {
-          subheader: "Command Centers",
-          label: "Main Dashboard",
-          path: "/dashboard",
-          icon: <Dashboard />,
-          roles: ["CEO", "Process Coordinator"],
-        },
-        {
-          subheader: "Dashboards",
-          label: "Employee Dashboard",
-          path: "/employee-dashboard",
-          icon: <EmployeeIcon />,
-          roles: ["CEO", "HR Manager"],
-        },
-        {
-          subheader: "Dashboards",
-          label: "Client Dashboard",
-          path: "/client-dashboard",
-          icon: <Dashboard />,
-          roles: ["Customer Relations Manager", "CEO", "Store Manager"],
-        },
-        {
-          subheader: "Accountability",
-          label: "My Scorecard",
-          path: "/accountability",
-          icon: <SecurityIcon />,
-          roles: ["all"],
-        },
-        {
-          subheader: "Operations",
-          label: "Production Log",
-          path: "/production-log",
-          icon: <GridOnOutlined />,
-          roles: [
-            "CEO",
-            "Production Manager",
-            "Process Coordinator",
-            "QC Manager",
-            "Store Manager",
-            "Cable Production Supervisor",
-            "Moulding Production Supervisor",
-            "Management/HOD",
-          ],
-        },
-        {
-          subheader: "Tasks",
-          label: "Task Scheduler",
-          path: "/task-scheduler",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-          requireCreate: true,
-        },
-        {
-          subheader: "Tasks",
-          label: "Team Tasks",
-          path: "/team-tasks",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-          requireEdit: true,
-        },
-        {
-          subheader: "Tasks",
-          label: "My Tasks",
-          path: "/my-tasks",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-        },
-        {
-          subheader: "Admin & Finance",
-          label: "Employee Access Management",
-          path: "/access-management",
-          icon: <SecurityIcon />,
-          roles: ["CEO"],
-        },
-        {
-          subheader: "Admin & Finance",
-          label: "Costing",
-          path: "/costing",
-          icon: <CostingIcon />,
-          roles: ["CEO"],
-        },
-      ],
-    },
-    {
-      key: "management",
-      label: "Sales & Operations",
-      icon: <Business />,
-      items: [
-        {
-          subheader: "Sales & Clients",
-          label: "Products",
-          path: "/products",
-          icon: <ProductIcon />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Sales & Clients",
-          label: "Clients",
-          path: "/clients",
-          icon: <ListAlt />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Sales & Clients",
-          label: "Prospects Clients",
-          path: "/prospects-clients",
-          icon: <ListAlt />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Sales & Clients",
-          label: "Client Orders",
-          path: "/client-orders",
-          icon: <OrderIcon />,
-          roles: ["Customer Relations Manager", "Sales Executive", "CEO"],
-        },
-        {
-          subheader: "Sales & Clients",
-          label: "Sales Order Ingestion",
-          path: "/po-ingestion",
-          icon: <Input />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Inventory & Dispatch",
-          label: "Inventory",
-          path: "/inventory",
-          icon: <InventoryIcon />,
-          roles: ["Store Manager", "CEO"],
-        },
-        {
-          subheader: "Inventory & Dispatch",
-          label: "Dispatch Planning",
-          path: "/dispatch",
-          icon: <Assignment />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Inventory & Dispatch",
-          label: "Dispatch Management",
-          path: "/dispatch-management",
-          icon: <LocalShipping />,
-          roles: ["Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Inventory & Dispatch",
-          label: "Order to Dispatch System",
-          path: "/flow-management",
-          icon: <Assignment />,
-          roles: ["Store Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "QC Manager", "Process Coordinator", "Customer Relations Manager", "CEO"],
-        },
-        {
-          subheader: "Procurement",
-          label: "Vendors",
-          path: "/vendor-management",
-          icon: <Business />,
-          roles: ["CEO", "Purchase Executive", "Management / HOD"],
-        },
-        {
-          subheader: "Procurement",
-          label: "Purchase Flow",
-          path: "/purchase-flow",
-          icon: <PurchaseIcon />,
-          roles: ["Process Coordinator", "Purchase Executive", "Management / HOD", "Store Manager", "QC Manager", "Accounts Executive", "CEO"],
-        },
-        {
-          subheader: "Documents",
-          label: "Document Library",
-          path: "/document-library",
-          icon: <Storage />,
-          roles: ["CEO"],
-        },
-        {
-          subheader: "Tasks",
-          label: "Task Checklist",
-          path: "/task-checklist",
-          icon: <Assignment />,
-          roles: ["all"],
-        },
-        {
-          subheader: "Tasks",
-          label: "Task Scheduler",
-          path: "/task-scheduler",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-          requireCreate: true,
-        },
-        {
-          subheader: "Tasks",
-          label: "Team Tasks",
-          path: "/team-tasks",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-          requireEdit: true,
-        },
-        {
-          subheader: "Tasks",
-          label: "My Tasks",
-          path: "/my-tasks",
-          icon: <Assignment />,
-          moduleKey: "tasks",
-        },
-        {
-          subheader: "Tasks",
-          label: "Task Compliance Admin",
-          path: "/task-compliance-admin",
-          icon: <TableChart />,
-          roles: ["CEO", "HR Manager", "Management / HOD", "Process Coordinator"],
-        },
+        { label: "Home", path: "/home", icon: <HomeOutlined />, roles: ["all"] },
+        { subheader: "Command Centers", label: "CEO Master Control", path: "/ceo-command", icon: <SecurityIcon />, roles: ["CEO"] },
+        { subheader: "Command Centers", label: "Plant Command", path: "/plant-command", icon: <Dashboard />, roles: ["CEO", "Production Manager", "Process Coordinator", "QC Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "Management / HOD"] },
+        { subheader: "Command Centers", label: "Main Dashboard", path: "/dashboard", icon: <Dashboard />, roles: ["CEO", "Process Coordinator"] },
       ],
     },
     {
       key: "crm",
-      label: "CRM",
+      label: "CRM & Sales",
       icon: <CRMIcon />,
       items: [
-        { subheader: "Get started", label: "CRM Guide", path: "/crm/guide", icon: <HelpIcon />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Leads", path: "/crm/leads", icon: <ListAlt />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Customers", path: "/crm/customers", icon: <PeopleIcon />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Follow-ups", path: "/crm/follow-ups", icon: <Assignment />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Deals", path: "/crm/deals", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Lead Scoring", path: "/crm/lead-scoring", icon: <Analytics />, roles: crmModuleRoles },
-        { subheader: "Pipeline", label: "Activity Timeline", path: "/crm/timeline", icon: <Assignment />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Quotations", path: "/crm/quotations", icon: <TableChart />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Sales Orders", path: "/crm/sales-orders", icon: <ListAlt />, roles: crmModuleRoles },
-        { subheader: "Orders & Billing", label: "Collections", path: "/crm/collections", icon: <TableChart />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Customer 360", path: "/crm/customer-360", icon: <Dashboard />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Documents", path: "/crm/documents", icon: <Storage />, roles: crmModuleRoles },
-        { subheader: "Insights", label: "Sales Performance", path: "/crm/performance", icon: <TrendingUp />, roles: crmModuleRoles },
-        { subheader: "Outreach", label: "Email Campaigns", path: "/crm/campaigns", icon: <CampaignIcon />, roles: crmModuleRoles },
-        { subheader: "Flow", label: "Sales Flow", path: "/sales-flow", icon: <PurchaseIcon />, roles: ["Customer Relations Manager", "Sales Executive", "NPD", "Quality Engineer", "Director", "Production Manager", "Store Manager", "Accounts Executive", "CEO"] },
-        { subheader: "Data", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
+        { subheader: "Pipelines", label: "Daily Worklist", path: "/crm/worklist", icon: <WorklistIcon />, roles: crmModuleRoles },
+        { subheader: "Pipelines", label: "Prospect Management", path: "/crm-pipeline?view=prospects", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Pipelines", label: "Client Management", path: "/crm-pipeline?view=clients", icon: <PeopleIcon />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "CRM Dashboard", path: "/crm/dashboard", icon: <Dashboard />, roles: crmModuleRoles },
+        { subheader: "Insights", label: "Payments / Collections", path: "/crm/collections", icon: <ReceiptLongIcon />, roles: crmModuleRoles },
+        { subheader: "Sales & Clients", label: "Products", path: "/products", icon: <ProductIcon />, roles: ["Customer Relations Manager", "CEO"] },
+        { subheader: "Sales & Clients", label: "Client Orders", path: "/client-orders", icon: <OrderIcon />, roles: ["Customer Relations Manager", "Sales Executive", "CEO"] },
+        { subheader: "Sales & Clients", label: "Sales Order Ingestion", path: "/po-ingestion", icon: <Input />, roles: ["Customer Relations Manager", "CEO"] },
+        { subheader: "Sales & Clients", label: "Sales Flow", path: "/sales-flow", icon: <TrendingUp />, roles: crmModuleRoles },
+        { subheader: "Engage", label: "KIT — Keep In Touch", path: "/kit", icon: <ForumIcon />, roles: crmModuleRoles },
+        { subheader: "Tools", label: "Email Campaigns", path: "/crm/campaigns", icon: <CampaignIcon />, roles: crmModuleRoles },
+        { subheader: "Tools", label: "Import CRM Data", path: "/crm-import", icon: <Input />, roles: ["CEO", "Customer Relations Manager", "Sales Executive"] },
+        { subheader: "Tools", label: "CRM Guide", path: "/crm/guide", icon: <HelpIcon />, roles: crmModuleRoles },
       ],
     },
     {
@@ -479,78 +282,59 @@ const Header = () => {
       label: "Production",
       icon: <ProductionIcon />,
       items: [
-        { subheader: "Planning", label: "Production Plan", path: "/ppc/production-plan", icon: <Assignment />, roles: ppcModuleRoles },
-        { subheader: "Planning", label: "Work Orders", path: "/ppc/work-orders", icon: <ListAlt />, roles: ppcModuleRoles },
-        { subheader: "Planning", label: "BOM", path: "/ppc/bom", icon: <TableChart />, roles: ppcModuleRoles },
-        { subheader: "Planning", label: "MRP", path: "/ppc/mrp", icon: <Analytics />, roles: ppcModuleRoles },
-        { subheader: "Planning", label: "Capacity", path: "/ppc/capacity", icon: <Dashboard />, roles: ppcModuleRoles },
-        { subheader: "Planning", label: "Routing", path: "/ppc/routing", icon: <Assignment />, roles: ppcModuleRoles },
-        { subheader: "Shop Floor", label: "Production Tracking", path: "/ppc/tracking", icon: <TrendingUp />, roles: ppcModuleRoles },
-        { subheader: "Shop Floor", label: "Quality Control", path: "/ppc/qc", icon: <SecurityIcon />, roles: ppcModuleRoles },
-        { subheader: "Shop Floor", label: "Scrap Tracking", path: "/ppc/scrap", icon: <DebugIcon />, roles: ppcModuleRoles },
-        { subheader: "Shop Floor", label: "Maintenance", path: "/ppc/maintenance", icon: <Settings />, roles: ppcModuleRoles },
-        { subheader: "Logistics", label: "Inventory", path: "/ppc/inventory", icon: <InventoryIcon />, roles: ppcModuleRoles },
-        { subheader: "Logistics", label: "Dispatch", path: "/ppc/dispatch", icon: <LocalShipping />, roles: ppcModuleRoles },
-        { subheader: "Logistics", label: "Dispatch Intelligence", path: "/ppc/dispatch-intelligence", icon: <LocalShipping />, roles: ppcModuleRoles },
-        { subheader: "Insights", label: "Reports", path: "/ppc/reports", icon: <Dashboard />, roles: ppcModuleRoles },
-        { subheader: "Insights", label: "Production Costing", path: "/ppc/costing", icon: <CostingIcon />, roles: ppcModuleRoles },
-        { subheader: "Insights", label: "Integrated Dashboard", path: "/ppc/advanced-dashboard", icon: <Dashboard />, roles: ppcModuleRoles },
+        { subheader: "Planning", label: "Production Planning", path: "/ppc", icon: <Assignment />, roles: ppcModuleRoles },
         { subheader: "Lines", label: "Cable Production", path: "/cable-production", icon: <CableIcon />, roles: ["CEO", "Customer Relations Manager", "Cable Production Supervisor"] },
         { subheader: "Lines", label: "Molding Production", path: "/molding", icon: <ProductionIcon />, roles: ["CEO", "Customer Relations Manager", "Moulding Production Supervisor", "Production Manager", "Store Manager"] },
+        { subheader: "Monitoring", label: "Production Log", path: "/production-log", icon: <GridOnOutlined />, roles: ["CEO", "Production Manager", "Process Coordinator", "QC Manager", "Store Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "Management / HOD"] },
       ],
     },
     {
-      key: "master-data",
-      label: "Master Data",
-      icon: <Storage />,
+      key: "inventory",
+      label: "Inventory & Dispatch",
+      icon: <InventoryIcon />,
       items: [
-        {
-          subheader: "Administration",
-          label: "Master Data Hub",
-          path: "/master-data",
-          icon: <GridOnOutlined />,
-          roles: ["CEO", "Management / HOD", "HR Manager"],
-          moduleKey: "employees",
-          requireEdit: true,
-        },
+        { subheader: "Inventory", label: "Inventory", path: "/inventory", icon: <InventoryIcon />, roles: ["Store Manager", "CEO"] },
+        { subheader: "Dispatch", label: "Dispatch Planning", path: "/dispatch", icon: <Assignment />, roles: ["Customer Relations Manager", "CEO"] },
+        { subheader: "Dispatch", label: "Dispatch Management", path: "/dispatch-management", icon: <LocalShipping />, roles: ["Customer Relations Manager", "CEO"] },
+        { subheader: "Dispatch", label: "Order to Dispatch System", path: "/flow-management", icon: <Assignment />, roles: ["Store Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "QC Manager", "Process Coordinator", "Customer Relations Manager", "CEO"] },
       ],
     },
-    // System items
-    ...(!config.useLocalStorage ? [
-      {
-        key: "system",
-        label: "System",
-        icon: <Settings />,
-        items: [
-          {
-            label: "Setup Sheets",
-            path: "/setup-sheets",
-            icon: <TableChart />,
-            roles: ["all"],
-          },
-          {
-            label: "Troubleshoot",
-            path: "/troubleshoot-sheets",
-            icon: <DebugIcon />,
-            roles: ["all"],
-          }
-        ],
-      }
-    ] : [
-      {
-        key: "system",
-        label: "System",
-        icon: <Settings />,
-        items: [
-          {
-            label: "Storage Debug",
-            path: "/storage-debug",
-            icon: <Storage />,
-            roles: ["all"],
-          }
-        ],
-      }
-    ]),
+    {
+      key: "procurement",
+      label: "Procurement",
+      icon: <PurchaseIcon />,
+      items: [
+        { subheader: "Purchasing", label: "Purchase Flow", path: "/purchase-flow", icon: <PurchaseIcon />, roles: ["Process Coordinator", "Purchase Executive", "Management / HOD", "Store Manager", "QC Manager", "Accounts Executive", "CEO"] },
+        { subheader: "Vendors", label: "Vendors", path: "/vendor-management", icon: <Business />, roles: ["CEO", "Purchase Executive", "Management / HOD"] },
+      ],
+    },
+    {
+      key: "operations",
+      label: "Operations",
+      icon: <Assignment />,
+      items: [
+        { subheader: "Tasks", label: "Task Scheduler", path: "/task-scheduler", icon: <Assignment />, moduleKey: "tasks", requireCreate: true },
+        { subheader: "Tasks", label: "Team Tasks", path: "/team-tasks", icon: <Assignment />, moduleKey: "tasks", requireEdit: true },
+        { subheader: "Tasks", label: "My Tasks", path: "/my-tasks", icon: <Assignment />, moduleKey: "tasks" },
+        { subheader: "Checklists", label: "My Checklist", path: "/task-checklist", icon: <Assignment />, roles: ["all"] },
+        { subheader: "Checklists", label: "Checklist Templates", path: "/checklist-templates", icon: <TableChart />, roles: ["CEO", "Management / HOD", "Process Coordinator"] },
+        { subheader: "Checklists", label: "Checklist Compliance", path: "/task-compliance-admin", icon: <TableChart />, roles: ["CEO", "HR Manager", "Management / HOD", "Process Coordinator"] },
+        { subheader: "MIS & Accountability", label: "Performance Review", path: "/performance", icon: <TrendingUp />, roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"] },
+        { subheader: "MIS & Accountability", label: "MIS Home", path: "/mis", icon: <Analytics />, roles: ["CEO", "Management / HOD", "Director", "Process Coordinator"] },
+      ],
+    },
+    {
+      key: "admin",
+      label: "Admin",
+      icon: <Settings />,
+      items: [
+        { subheader: "Master Data", label: "Master Data Hub", path: "/master-data", icon: <GridOnOutlined />, roles: ["CEO", "Management / HOD", "HR Manager"], moduleKey: "employees", requireEdit: true },
+        { subheader: "Master Data", label: "Document Library", path: "/document-library", icon: <Storage />, roles: ["CEO"] },
+        { subheader: "Finance", label: "Costing", path: "/costing", icon: <CostingIcon />, roles: ["CEO"] },
+        { subheader: "People", label: "Employee Management", path: "/employee-management", icon: <EmployeeIcon />, roles: ["CEO", "HR Manager", "Management / HOD"] },
+        ...systemItems,
+      ],
+    },
   ];
 
   const canOpenMenuItem = (item) => {
@@ -595,10 +379,11 @@ const Header = () => {
       }).slice(0, 10) // Limit to top 10 results
     : [];
 
-  // Check if a path is active
+  // Check if a path is active (ignore any query string on the menu item path)
   const isPathActive = (path) => {
-    if (path === "/") return location.pathname === "/";
-    return location.pathname.startsWith(path);
+    const basePath = String(path || "").split("?")[0];
+    if (basePath === "/") return location.pathname === "/";
+    return location.pathname.startsWith(basePath);
   };
 
   // Check if any item in a group is active
@@ -667,7 +452,7 @@ const Header = () => {
               edge="start"
               color="primary"
               aria-label="menu"
-              onClick={toggleDrawer}
+              onClick={onMenuClick || toggleDrawer}
               sx={{ mr: 2 }}
             >
               <MenuIcon />
@@ -720,18 +505,26 @@ const Header = () => {
             </Typography>
           </Box>
 
-          {/* Desktop Navigation */}
-          {!isCompactNav && user && permissions?.loading && (
+          {/* Desktop module navigation moved to the left SidebarNav (App shell). */}
+          {false && user && permissions?.loading && (
             <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center", gap: 1.5, px: 2 }}>
               {[1, 2, 3, 4].map((n) => (
                 <Skeleton key={n} variant="rounded" width={96} height={36} animation="wave" />
               ))}
             </Box>
           )}
-          {!isCompactNav && user && !permissions?.loading && (
-            <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
+          {false && user && !permissions?.loading && (
+            <Box sx={{
+              display: "flex", alignItems: "center", flexGrow: 1,
+              flexWrap: "nowrap", minWidth: 0, overflowX: "auto",
+              "&::-webkit-scrollbar": { display: "none" }, scrollbarWidth: "none",
+            }}>
+              {/* Inner wrapper: m:auto centers the strip when there's room, and
+                  collapses to a scrollable left-align when it overflows — so the
+                  first item ("Home") is never clipped off the left edge. */}
+              <Box sx={{ display: "flex", alignItems: "center", m: "auto", flexShrink: 0 }}>
               {finalMenuGroups.map((group) => (
-                <Box key={group.key} sx={{ position: "relative" }}>
+                <Box key={group.key} sx={{ position: "relative", flexShrink: 0 }}>
                   <Tooltip title={group.label} placement="bottom">
                     <Button
                       color="inherit"
@@ -739,18 +532,22 @@ const Header = () => {
                       endIcon={<ArrowDropDown />}
                       onClick={(e) => handleMenuOpen(e, group.key)}
                       sx={{
-                        mx: 0.5,
-                        py: 1.25,
-                        px: 2.5,
+                        mx: 0.25,
+                        py: 1,
+                        px: 1.25,
                         borderRadius: 1.5,
                         textTransform: "none",
                         fontWeight: 500,
-                        fontSize: "0.9375rem",
+                        fontSize: "0.85rem",
+                        whiteSpace: "nowrap",
+                        lineHeight: 1.2,
                         backgroundColor: isGroupActive(group) ? theme.palette.primary.main + "14" : "transparent",
                         color: isGroupActive(group) ? theme.palette.primary.main : theme.palette.text.secondary,
                         border: "none",
                         minWidth: "auto",
                         transition: "all 0.2s ease",
+                        "& .MuiButton-startIcon": { mr: 0.5, "& svg": { fontSize: 20 } },
+                        "& .MuiButton-endIcon": { ml: 0 },
                         "&:hover": {
                           backgroundColor: theme.palette.primary.main + "0F",
                           color: theme.palette.primary.main,
@@ -829,6 +626,7 @@ const Header = () => {
                   </Menu>
                 </Box>
               ))}
+              </Box>
             </Box>
           )}
 
@@ -890,6 +688,9 @@ const Header = () => {
               </Tooltip>
             )}
 
+            {/* Task Notification Bell */}
+            {user && <TaskBell />}
+
             {/* User Profile */}
             {user ? (
               <Box>
@@ -912,9 +713,9 @@ const Header = () => {
                     >
                       <Avatar
                         alt={user.name}
-                        src={user.imageUrl || "/static/images/avatar/2.jpg"}
-                        sx={{ 
-                          width: 32, 
+                        src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
+                        sx={{
+                          width: 32,
                           height: 32,
                           border: `1px solid ${theme.palette.divider}`,
                           fontSize: "0.875rem",
@@ -979,19 +780,19 @@ const Header = () => {
                     <ListItemText primary="Profile" />
                   </MenuItem>
                   
-                  {/* Employee Dashboard / My Dashboard - Always visible for all users */}
-                  <MenuItem 
+                  {/* Managers -> Employee Management; everyone else -> their own profile */}
+                  <MenuItem
                     onClick={() => {
                       handleProfileMenuClose();
-                      navigate('/employee-dashboard');
-                    }} 
+                      navigate(canManageEmployees ? '/employee-management' : '/profile');
+                    }}
                     sx={{ py: 1.5 }}
                   >
                     <ListItemIcon sx={{ minWidth: 36 }}>
                       <EmployeeIcon sx={{ fontSize: 20 }} />
                     </ListItemIcon>
-                    <ListItemText 
-                      primary={canManageEmployees ? 'Employee Dashboard' : 'My Dashboard'}
+                    <ListItemText
+                      primary={canManageEmployees ? 'Employee Management' : 'My Profile'}
                     />
                   </MenuItem>
                   
@@ -1073,7 +874,7 @@ const Header = () => {
                   >
                     <Avatar
                       alt={user.name}
-                      src={user.imageUrl || "/static/images/avatar/2.jpg"}
+                      src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
                       sx={{ width: 64, height: 64, mb: 1 }}
                     />
                     <Typography variant="subtitle1">{user.name}</Typography>
