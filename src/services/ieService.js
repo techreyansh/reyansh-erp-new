@@ -17,5 +17,24 @@ export async function getCostRates(department = null) {
   }
 }
 
-const ieService = { getCostRates };
+/** Upsert the default (department NULL) cost-rate row. */
+export async function saveCostRates(rates) {
+  const row = {
+    labour_per_hr: Number(rates.labour_per_hr) || 0,
+    overtime_multiplier: Number(rates.overtime_multiplier) || 1.5,
+    machine_per_hr: Number(rates.machine_per_hr) || 0,
+    indirect_pct: Number(rates.indirect_pct) || 0,
+  };
+  const { data: existing } = await supabase.from('ie_cost_rates').select('id').is('department', null).limit(1).maybeSingle();
+  if (existing?.id) {
+    const { error } = await supabase.from('ie_cost_rates').update(row).eq('id', existing.id);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from('ie_cost_rates').insert({ department: null, ...row });
+    if (error) throw error;
+  }
+  return row;
+}
+
+const ieService = { getCostRates, saveCostRates };
 export default ieService;

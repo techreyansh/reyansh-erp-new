@@ -141,5 +141,28 @@ export function planForTarget(resolvedOps = [], opts = {}) {
   };
 }
 
-const ieScenario = { requiredUph, planForTarget };
+/**
+ * Generate trade-off-labelled scenarios for the same order and recommend the
+ * cheapest feasible one. Under the fixed-pool model the meaningful lever is the
+ * overtime allowance: no-OT (most operators / cheapest if the pool covers it),
+ * balanced (the planner's OT cap), and fewest-operators (max OT to shrink crew).
+ *
+ * Returns [{ key, label, result, recommended }] in display order.
+ */
+export function planScenarios(resolvedOps = [], baseOpts = {}) {
+  const baseOt = Number(baseOpts.maxOvertimeHours) || 0;
+  const variants = [
+    { key: 'no_ot', label: 'No overtime', ot: 0 },
+    { key: 'balanced', label: 'Balanced', ot: baseOt },
+    { key: 'fewest_ops', label: 'Fewest operators', ot: Math.max(baseOt, 4) },
+  ];
+  const results = variants.map((v) => ({ key: v.key, label: v.label, result: planForTarget(resolvedOps, { ...baseOpts, maxOvertimeHours: v.ot }) }));
+  const feasible = results.filter((r) => r.result.feasible);
+  const recommended = feasible.length
+    ? feasible.reduce((a, b) => (b.result.cost.total < a.result.cost.total ? b : a))
+    : null;
+  return results.map((r) => ({ ...r, recommended: !!recommended && r.key === recommended.key }));
+}
+
+const ieScenario = { requiredUph, planForTarget, planScenarios };
 export default ieScenario;
