@@ -47,9 +47,10 @@ DECLARE
   v_role_code text;
   v_caps      jsonb;
 BEGIN
-  -- Identify the caller (mirror how get_my_rbac_access resolves identity).
-  v_email := lower(coalesce(auth.jwt() ->> 'email', ''));
-  IF v_email = '' THEN
+  -- Identify the caller using the SAME helper get_my_rbac_access + all RLS use,
+  -- so capability resolution is identical to module resolution.
+  v_email := public.rbac_current_email();
+  IF v_email IS NULL OR v_email = '' THEN
     RETURN '[]'::jsonb;
   END IF;
 
@@ -107,7 +108,7 @@ DECLARE
   v_email     text;
   v_row_count integer := 0;
 BEGIN
-  v_email := coalesce(auth.jwt() ->> 'email', 'unknown');
+  v_email := coalesce(public.rbac_current_email(), auth.jwt() ->> 'email', 'unknown');
 
   INSERT INTO public.mobile_ping_log (idempotency_key, posted_by, ping_value)
   VALUES (p_idempotency_key, v_email, p_value)
