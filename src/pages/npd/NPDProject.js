@@ -4,11 +4,12 @@ import {
   Box, Stack, Card, CardContent, Typography, Button, IconButton, Chip, Tabs, Tab, Divider,
   CircularProgress, Snackbar, Alert, Tooltip, Stepper, Step, StepLabel, Link, TextField, MenuItem,
   useTheme, alpha,
+  Collapse, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon, Refresh as RefreshIcon, ArrowForward as NextIcon, UploadFile as UploadIcon,
   Description as DocIcon, Info as InfoIcon,
-  ArrowUpward as ArrowUpIcon, ArrowDownward as ArrowDownIcon, ContentCopy as CopyIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import npdService, { NPD_STAGES, NPD_STAGE_LABEL } from '../../services/npdService';
 import * as plmProductService from '../../services/plmProductService';
@@ -16,6 +17,8 @@ import * as plmCostingService from '../../services/plmCostingService';
 import ppcService from '../../services/ppcService';
 import inventoryLedgerService from '../../services/inventoryLedgerService';
 import mesService from '../../services/mesService';
+import mesMasterService from '../../services/mesMasterService';
+import RoutingOpEditor from '../mes/RoutingOpEditor';
 
 const SECTIONS = ['Overview', 'Engineering', 'Samples & Quality', 'Activity', 'Approvals'];
 
@@ -408,23 +411,43 @@ function ABSideConfigEditor({ product, notify }) {
   );
 }
 
-const ROUTING_COLS = [
-  { k: 'step_name', l: 'Operation', w: 160 }, { k: 'department', l: 'Dept', w: 110 },
-  { k: 'machine', l: 'Machine / work centre', w: 150 }, { k: 'standard_time_sec', l: 'Time (s)', w: 90, num: true },
-  { k: 'manpower', l: 'Men', w: 70, num: true },
+// Fields persisted per op. Empty string → null so the engine inherits at run time.
+const ROUTING_NUM_FIELDS = [
+  'standard_time_sec', 'cycle_time_sec', 'manpower', 'cavities', 'output_per_cycle',
+  'scrap_pct', 'setup_time_sec', 'changeover_time_sec', 'parallel_machines',
+  'min_operators', 'max_operators', 'oee',
 ];
+const normaliseStep = (s) => {
+  const out = { ...s };
+  ROUTING_NUM_FIELDS.forEach((k) => { out[k] = s[k] === '' || s[k] === undefined ? null : Number(s[k]); });
+  if (out.mold_id === '' || out.mold_id === undefined) out.mold_id = null;
+  out.quality_check_required = !!s.quality_check_required;
+  return out;
+};
+
 function RoutingEditor({ product, notify }) {
   const [steps, setSteps] = useState(null);
   const [ops, setOps] = useState([]);
+  const [molds, setMolds] = useState([]);
   const [pick, setPick] = useState('');
   const [busy, setBusy] = useState(false);
-  useEffect(() => { plmProductService.listProcess(product.id).then(setSteps).catch(() => setSteps([])); }, [product.id]);
+  const [view, setView] = useState('editor'); // 'editor' | 'history'
+
+  const reloadSteps = useCallback(() => {
+    plmProductService.listProcess(product.id).then(setSteps).catch(() => setSteps([]));
+  }, [product.id]);
+  useEffect(() => { reloadSteps(); }, [reloadSteps]);
   useEffect(() => { mesService.listOperations({ includeInactive: false }).then(setOps).catch(() => setOps([])); }, []);
+  useEffect(() => { mesMasterService.listRows('molding_master').then(setMolds).catch(() => setMolds([])); }, []);
+
+  const opFor = useCallback((s) => ops.find((o) => o.id === s.operation_id), [ops]);
   const upd = (i, k, v) => setSteps((s) => s.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
-  const add = () => setSteps((s) => [...(s || []), { step_name: '', department: '', machine: '', standard_time_sec: '', manpower: '' }]);
+  const add = () => setSteps((s) => [...(s || []), { step_name: '', department: '', machine: '' }]);
   const addFromOp = (id) => {
     const o = ops.find((x) => x.id === id); if (!o) return;
-    setSteps((s) => [...(s || []), { step_name: o.name, department: o.category, machine: '', standard_time_sec: o.std_time_sec ?? '', manpower: o.manpower_reqd ?? '', operation_id: o.id }]);
+    // NB: we seed identity only — std time / oee stay blank so they inherit from
+    // the operation default (shown as placeholder), never as a fake editable number.
+    setSteps((s) => [...(s || []), { step_name: o.name, department: o.category, machine: '', operation_id: o.id }]);
     setPick('');
   };
   const del = (i) => setSteps((s) => s.filter((_, j) => j !== i));
@@ -433,8 +456,9 @@ function RoutingEditor({ product, notify }) {
   const save = async () => {
     setBusy(true);
     try {
-      await plmProductService.saveProcess(product.id, (steps || []).map((s) => ({ ...s, standard_time_sec: s.standard_time_sec || null, manpower: s.manpower || null })));
-      notify({ open: true, message: 'Routing saved.', severity: 'success' });
+      await plmProductService.saveProcess(product.id, (steps || []).map(normaliseStep));
+      notify({ open: true, message: 'Routing saved — new version recorded.', severity: 'success' });
+      reloadSteps();
     } catch (e) { notify({ open: true, message: e.message, severity: 'error' }); }
     setBusy(false);
   };
@@ -442,33 +466,107 @@ function RoutingEditor({ product, notify }) {
   return (
     <Card sx={{ borderRadius: 2 }}><CardContent>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" gap={1}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Production routing <Typography component="span" variant="caption" color="text.secondary">(configurable · travels to production on release)</Typography></Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <TextField size="small" select label="Add operation" value={pick} onChange={(e) => addFromOp(e.target.value)} sx={{ width: 200 }}>
-            {ops.map((o) => <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>)}
-          </TextField>
-          <Button size="small" onClick={add}>+ Blank</Button>
-          <Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save'}</Button>
-        </Stack>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Production routing <Typography component="span" variant="caption" color="text.secondary">(configurable · travels to production on release · silently versioned)</Typography></Typography>
+        <ToggleButtonGroup size="small" exclusive value={view} onChange={(_, v) => v && setView(v)}>
+          <ToggleButton value="editor">Editor</ToggleButton>
+          <ToggleButton value="history"><HistoryIcon fontSize="small" sx={{ mr: 0.5 }} />Revision history</ToggleButton>
+        </ToggleButtonGroup>
       </Stack>
-      <Divider sx={{ mb: 1 }} />
-      {steps.length === 0 ? <Typography variant="body2" color="text.secondary">No routing yet — pick operations (cutting → crimping → molding → testing → packing) to build the route.</Typography> : (
-        <Stack spacing={1}>
-          {steps.map((r, i) => (
-            <Stack key={i} direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-              <Chip size="small" label={i + 1} sx={{ height: 22 }} />
-              {ROUTING_COLS.map((c) => (
-                <TextField key={c.k} size="small" label={c.l} type={c.num ? 'number' : 'text'} value={r[c.k] ?? ''} onChange={(e) => upd(i, c.k, e.target.value)} sx={{ width: c.w }} />
+      <Divider sx={{ mb: 1.5 }} />
+
+      {view === 'history' ? (
+        <RoutingHistory product={product} ops={ops} />
+      ) : (
+        <>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" gap={1} sx={{ mb: 1.5 }}>
+            <TextField size="small" select label="Add operation" value={pick} onChange={(e) => addFromOp(e.target.value)} sx={{ width: 220 }}>
+              {ops.map((o) => <MenuItem key={o.id} value={o.id}>{o.name} <Typography component="span" variant="caption" color="text.secondary">· {o.category}</Typography></MenuItem>)}
+            </TextField>
+            <Button size="small" onClick={add}>+ Blank</Button>
+            <Box sx={{ flex: 1 }} />
+            <Button size="small" variant="outlined" onClick={save} disabled={busy}>{busy ? <CircularProgress size={16} /> : 'Save routing'}</Button>
+          </Stack>
+          {steps.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No routing yet — pick operations (cutting → crimping → molding → testing → packing) to build the route. Blank fields inherit defaults at run time.</Typography>
+          ) : (
+            <Stack spacing={1}>
+              {steps.map((r, i) => (
+                <RoutingOpEditor
+                  key={i}
+                  step={r}
+                  index={i}
+                  total={steps.length}
+                  op={opFor(r)}
+                  molds={molds}
+                  onChange={upd}
+                  onMove={move}
+                  onDup={dup}
+                  onDel={del}
+                />
               ))}
-              <Tooltip title="Move up"><span><IconButton size="small" disabled={i === 0} onClick={() => move(i, -1)}><ArrowUpIcon fontSize="small" /></IconButton></span></Tooltip>
-              <Tooltip title="Move down"><span><IconButton size="small" disabled={i === steps.length - 1} onClick={() => move(i, 1)}><ArrowDownIcon fontSize="small" /></IconButton></span></Tooltip>
-              <Tooltip title="Duplicate"><IconButton size="small" onClick={() => dup(i)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
-              <Button size="small" color="error" onClick={() => del(i)}>Remove</Button>
             </Stack>
-          ))}
-        </Stack>
+          )}
+        </>
       )}
     </CardContent></Card>
+  );
+}
+
+// Read-only revision history: list every routing version, expand to see its steps.
+// No approval workflow — silent versioning, view-only.
+function RoutingHistory({ product, ops }) {
+  const [versions, setVersions] = useState(null);
+  const [openId, setOpenId] = useState(null);
+  const [versSteps, setVersSteps] = useState({});
+  useEffect(() => { plmProductService.listRoutingVersions(product.id).then(setVersions).catch(() => setVersions([])); }, [product.id]);
+  const toggle = async (v) => {
+    if (openId === v.id) { setOpenId(null); return; }
+    setOpenId(v.id);
+    if (!versSteps[v.id]) {
+      try {
+        const rows = await plmProductService.listProcessForVersion(v.id);
+        setVersSteps((m) => ({ ...m, [v.id]: rows }));
+      } catch { setVersSteps((m) => ({ ...m, [v.id]: [] })); }
+    }
+  };
+  const opName = (s) => ops.find((o) => o.id === s.operation_id)?.name || s.step_name || '—';
+  if (versions === null) return <CircularProgress size={22} />;
+  if (versions.length === 0) return <Typography variant="body2" color="text.secondary">No saved versions yet — save the routing to start the history.</Typography>;
+  return (
+    <Stack spacing={1}>
+      {versions.map((v) => (
+        <Box key={v.id} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ p: 1, cursor: 'pointer' }} onClick={() => toggle(v)}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>v{v.version_number}</Typography>
+            <Chip size="small" label={v.status || 'unknown'} color={v.status === 'active' ? 'success' : 'default'} sx={{ height: 18 }} />
+            <Typography variant="caption" color="text.secondary">{fmtDate(v.effective_from || v.created_at)}</Typography>
+            <Box sx={{ flex: 1 }} />
+            <Link component="button" type="button" variant="caption">{openId === v.id ? 'hide steps' : 'view steps'}</Link>
+          </Stack>
+          <Collapse in={openId === v.id} unmountOnExit>
+            <Divider />
+            <Box sx={{ p: 1 }}>
+              {(versSteps[v.id] || []).length === 0 ? (
+                <Typography variant="caption" color="text.secondary">{versSteps[v.id] ? 'No steps in this version.' : 'Loading…'}</Typography>
+              ) : (
+                <Stack spacing={0.5}>
+                  {versSteps[v.id].map((s, i) => (
+                    <Stack key={s.id || i} direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Chip size="small" label={(s.sequence ?? i) + 1} sx={{ height: 18 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 140 }}>{opName(s)}</Typography>
+                      {s.department && <Chip size="small" variant="outlined" label={s.department} sx={{ height: 18 }} />}
+                      {s.machine && <Typography variant="caption" color="text.secondary">{s.machine}</Typography>}
+                      {s.cycle_time_sec != null && <Typography variant="caption" color="text.secondary">· {s.cycle_time_sec}s cycle</Typography>}
+                      {s.cavities != null && <Typography variant="caption" color="text.secondary">· {s.cavities} cav</Typography>}
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </Box>
+          </Collapse>
+        </Box>
+      ))}
+    </Stack>
   );
 }
 
