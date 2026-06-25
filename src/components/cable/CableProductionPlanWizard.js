@@ -213,7 +213,12 @@ export default function CableProductionPlanWizard() {
               <>
                 <CheckCircleRounded color="success" sx={{ fontSize: 56, mb: 1 }} />
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>Plan released</Typography>
-                <Typography variant="body2" color="text.secondary">Work order created for {cable?.cable_code} ({metres.toLocaleString("en-IN")} m). Track it in Order Tracking.</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: "primary.main", my: 0.5, letterSpacing: 0.5 }}>
+                  {released.wo?.wo_number || "Work order created"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {cable?.cable_code} · {metres.toLocaleString("en-IN")} m{released.wo?.stage_count ? ` · ${released.wo.stage_count} stages` : ""}. Track it in Order Tracking.
+                </Typography>
                 <Button variant="outlined" sx={{ mt: 2 }} onClick={() => { setReleased(null); setForm({ cable: null, qty: 1000, length_m: "", due_date: "", priority: "medium", customer_name: "", customer_code: "", sales_order_number: "" }); setActive(0); }}>Plan another</Button>
               </>
             ) : (

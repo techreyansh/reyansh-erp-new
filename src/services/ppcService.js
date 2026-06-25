@@ -790,6 +790,15 @@ async function finishWorkOrder(woId, qty) {
   return data || null;
 }
 
+/** Cancel a cable work order (sets status='cancelled'; guarded server-side). */
+async function cancelWorkOrder(woId) {
+  if (!woId) throw new Error('Cancel work order: no work order selected');
+  return unwrap(
+    await supabase.rpc('ppc_cancel_work_order', { p_wo_id: woId }),
+    'Cancel work order'
+  );
+}
+
 /** Issue material to a WO (decrements stock). Legacy ppc_stock path. */
 async function issueMaterial(woMaterialId, qty) {
   if (!woMaterialId) throw new Error('Issue material: no material line selected');
@@ -939,6 +948,7 @@ const ppcService = {
   updateStage,
   advanceStage,
   finishWorkOrder,
+  cancelWorkOrder,
   issueMaterial,
   issueKitLine,
   issueKit,
