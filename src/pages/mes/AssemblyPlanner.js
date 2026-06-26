@@ -21,11 +21,12 @@ import plmProductService from '../../services/plmProductService';
 import ieService from '../../services/ieService';
 import { resolveStandard } from '../../services/routingCapacity';
 import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
-import { poolCapacityByType } from '../../services/ie/moldingPool';
+import { poolCapacityByType, scheduleMolding } from '../../services/ie/moldingPool';
 import MoldingFleetDialog from '../../components/mes/MoldingFleetDialog';
 
 const fmt = (x) => Math.round(Number(x) || 0).toLocaleString('en-IN');
 const money = (x) => `₹${(Number(x) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+const clock = (h) => `${String(Math.floor(h) % 24).padStart(2, '0')}:${String(Math.round((h - Math.floor(h)) * 60)).padStart(2, '0')}`;
 
 export default function AssemblyPlanner() {
   const theme = useTheme();
@@ -95,6 +96,21 @@ export default function AssemblyPlanner() {
   }), [resolvedOps, headcountPool, target, shiftHours, maxOvertime, rates]);
 
   const moldPool = useMemo(() => poolCapacityByType(moldingMachines), [moldingMachines]);
+  // Which mold types this product routes through (from its steps' molds).
+  const usedMoldTypes = useMemo(() => {
+    const set = new Set();
+    (steps || []).forEach((s) => { const m = molds.find((x) => x.id === s.mold_id); if (m?.mold_type) set.add(m.mold_type); });
+    return set;
+  }, [steps, molds]);
+  const moldSchedule = useMemo(() => {
+    const hasMolding = resolvedOps.some((r) => r.valid && r.constraintType === 'machine');
+    const demand = { inner: 0, outer: 0, grommet: 0 };
+    if (hasMolding && Number(target) > 0) {
+      const used = usedMoldTypes.size ? usedMoldTypes : new Set(['inner', 'outer', 'grommet']);
+      used.forEach((t) => { if (t in demand) demand[t] = Number(target); });
+    }
+    return scheduleMolding(moldingMachines, demand, 9).filter((r) => r.assignedQty > 0);
+  }, [moldingMachines, resolvedOps, usedMoldTypes, target]);
   const validCount = resolvedOps.filter((r) => r.valid).length;
   const anyDefault = resolvedOps.some((r) => r.valid && r.cycleSource === 'default');
   const selected = products.find((p) => p.id === productId);
@@ -266,6 +282,36 @@ export default function AssemblyPlanner() {
               <Typography variant="caption" color="text.secondary">
                 {moldingMachines.length} machines (shared across lines). Edit the fleet in MES masters; daily capacity = cavities × (3600/cycle) × hours.
               </Typography>
+            </Paper>
+          )}
+
+          {/* Per-machine molding schedule (IE P3 — finite sequencer) */}
+          {moldSchedule.length > 0 && (
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Typography sx={{ fontWeight: 700, mb: 1 }}>Molding machine schedule</Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Machine</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell align="right">Qty</TableCell>
+                    <TableCell>Window</TableCell>
+                    <TableCell align="right">Util</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {moldSchedule.map((r) => (
+                    <TableRow key={r.machine.id || r.machine.machine_code} hover sx={{ bgcolor: r.utilization >= 100 ? alpha(theme.palette.error.main, 0.05) : 'inherit' }}>
+                      <TableCell sx={{ fontWeight: 600 }}>{r.machine.machine_code}</TableCell>
+                      <TableCell><Chip size="small" variant="outlined" label={r.type} sx={{ height: 20, textTransform: 'capitalize' }} /></TableCell>
+                      <TableCell align="right">{fmt(r.assignedQty)}</TableCell>
+                      <TableCell>{clock(r.startHour)}–{clock(r.finishHour)} · {r.runHours}h</TableCell>
+                      <TableCell align="right"><Chip size="small" color={r.utilization >= 95 ? 'error' : r.utilization >= 75 ? 'warning' : 'success'} label={`${r.utilization}%`} sx={{ height: 20 }} /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Typography variant="caption" color="text.secondary">Each type's demand splits across its machines to finish together (balanced makespan). Start assumed 09:00.</Typography>
             </Paper>
           )}
         </Stack>
