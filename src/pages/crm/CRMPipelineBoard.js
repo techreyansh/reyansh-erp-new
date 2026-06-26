@@ -770,21 +770,24 @@ function LogNextActionDialog({ open, move, onClose, onSaved, onError }) {
       //    crm_pipeline_activity row, so we skip it for the recurring view).
       if (move.kind === "prospect") {
         const subject = note.trim() || `Moved to ${stageLabel}`;
+        // The move log is a COMPLETED record of what happened — never a pending
+        // follow-up. (Stamping next_follow_up_date here made the move itself —
+        // "Moved to Quotation Sent" — linger in My Follow-ups.)
         await addActivity({
           pipeline_id: move.id,
           activity_type: note.trim() ? "note" : "meeting",
           subject,
           body: note.trim() || null,
           activity_at: new Date().toISOString(),
-          next_follow_up_date: nextDate || null,
+          status: "completed",
         });
-        // 2) Save the planned next action so it surfaces on "My Follow-ups".
-        if (nextAction.trim() || nextDate) {
-          await updateCompany(move.id, {
-            next_action: nextAction.trim() || null,
-            next_action_date: nextDate || null,
-          });
-        }
+        // 2) Sync the card's planned next action — ALWAYS, so acting on a card
+        //    clears its stale follow-up when no new one is planned, and the
+        //    follow-up list reflects reality (the single source is the pipeline).
+        await updateCompany(move.id, {
+          next_action: nextAction.trim() || null,
+          next_action_date: nextDate || null,
+        });
       }
       onSaved?.();
     } catch (e) {
