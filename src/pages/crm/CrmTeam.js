@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 import crmPipelineService from '../../services/crmPipelineService';
+import CompanyLink from '../../components/crm/CompanyLink';
 import ReportExportButton from '../../components/common/ReportExportButton';
 
 const inrK = (n) => { const v = Number(n || 0); return v >= 1e7 ? `₹${(v / 1e7).toFixed(2)}Cr` : v >= 1e5 ? `₹${(v / 1e5).toFixed(1)}L` : `₹${v.toLocaleString('en-IN')}`; };
@@ -77,7 +78,7 @@ function ReportsTab({ health, names }) {
             <TableHead><TableRow>{['Client', 'Owner', 'Health', 'Orders', 'Days since order', 'Overdue AR', 'Value (12m)'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }} align={['Health', 'Orders', 'Days since order', 'Overdue AR', 'Value (12m)'].includes(h) ? 'right' : 'left'}>{h}</TableCell>)}</TableRow></TableHead>
             <TableBody>{filtered.map((h, i) => (
               <TableRow key={i} hover>
-                <TableCell sx={{ fontWeight: 600 }}>{h.company_name}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}><CompanyLink code={h.customer_code} name={h.company_name} /></TableCell>
                 <TableCell>{names[(h.owner_email || '').toLowerCase()] || h.owner_email || 'Unassigned'}</TableCell>
                 <TableCell align="right"><Chip size="small" color={BAND[h.band]} variant="outlined" label={h.health_score} /></TableCell>
                 <TableCell align="right">{h.order_count}</TableCell>

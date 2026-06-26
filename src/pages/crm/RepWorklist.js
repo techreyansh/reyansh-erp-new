@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CompanyLink from '../../components/crm/CompanyLink';
 import {
   Box,
   Button,
@@ -178,7 +179,7 @@ function WorklistCard({ row, nameMap, onOpen }) {
           </Tooltip>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }} noWrap>
-              {row.company_name || row.customer_code || 'Account'}
+              <CompanyLink code={row.customer_code} name={row.company_name || row.customer_code || 'Account'} />
             </Typography>
             {row.customer_code && (
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>

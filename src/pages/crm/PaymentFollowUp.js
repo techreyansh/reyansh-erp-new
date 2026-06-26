@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import PaymentsRounded from '@mui/icons-material/PaymentsRounded';
 import { paymentDashboard, updateCollection, listAssignableUsers } from '../../services/crmPipelineService';
+import CompanyLink from '../../components/crm/CompanyLink';
 
 const inr = (n) => { const v = Number(n || 0); return v >= 1e7 ? `₹${(v / 1e7).toFixed(2)}Cr` : v >= 1e5 ? `₹${(v / 1e5).toFixed(2)}L` : `₹${v.toLocaleString('en-IN')}`; };
 const COLLECTION_STATUS = ['pending', 'contacted', 'committed', 'partial', 'escalated', 'disputed', 'paid'];
@@ -87,7 +88,7 @@ export default function PaymentFollowUp() {
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Top Debtors</Typography>
             {(d?.top_debtors || []).slice(0, 6).map((t) => (
               <Stack key={t.customer_code} direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-                <Typography variant="body2" sx={{ flexGrow: 1, minWidth: 0 }} noWrap>{t.customer_name || t.customer_code}</Typography>
+                <Typography variant="body2" sx={{ flexGrow: 1, minWidth: 0 }} noWrap><CompanyLink code={t.customer_code} name={t.customer_name} /></Typography>
                 {t.max_dpd > 0 && <Chip size="small" color="error" variant="outlined" label={`${t.max_dpd}d`} sx={{ height: 18, '& .MuiChip-label': { px: 0.6, fontSize: '0.6rem' } }} />}
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>{inr(t.outstanding)}</Typography>
               </Stack>
@@ -112,7 +113,7 @@ export default function PaymentFollowUp() {
             {invoices.map((v) => (
               <TableRow key={v.id} hover>
                 <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700 }}>{v.invoice_number || '—'}</TableCell>
-                <TableCell>{v.customer_name || v.customer_code}</TableCell>
+                <TableCell><CompanyLink code={v.customer_code} name={v.customer_name || v.customer_code} /></TableCell>
                 <TableCell>{v.invoice_date || '—'}</TableCell>
                 <TableCell>{inr(v.amount)}</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>{inr(v.balance)}</TableCell>

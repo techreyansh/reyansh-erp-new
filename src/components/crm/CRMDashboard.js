@@ -52,6 +52,7 @@ import {
   WarningAmberRounded,
 } from '@mui/icons-material';
 import { usePermissions } from '../../context/PermissionContext';
+import CompanyLink from './CompanyLink';
 import {
   getCustomerAnalytics,
   getCurrentUserEmail,
@@ -456,7 +457,7 @@ function ClientsTab({ ownerScope }) {
                     </Avatar>
                     <Box sx={{ minWidth: 0 }}>
                       <Typography variant="body2" noWrap sx={{ fontWeight: 600, maxWidth: 200 }}>
-                        {c.company_name || c.customer_code || 'Customer'}
+                        <CompanyLink code={c.customer_code} name={c.company_name} />
                       </Typography>
                       <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', maxWidth: 200 }}>
                         {c.customer_code || '—'} · {ownerDisplay(c.owner_email, nameMap)}
@@ -572,7 +573,7 @@ function ClientsTab({ ownerScope }) {
                           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
                             <Box sx={{ minWidth: 0 }}>
                               <Typography variant="body2" noWrap sx={{ fontWeight: 600, maxWidth: 240 }}>
-                                {r.company_name || r.customer_code || 'Customer'}
+                                <CompanyLink code={r.customer_code} name={r.company_name} />
                               </Typography>
                               {meta && (
                                 <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', maxWidth: 240 }}>
@@ -1708,7 +1709,7 @@ export default function CRMDashboard({ data, loading }) {
                           {i + 1}
                         </Avatar>
                         <Typography variant="body2" noWrap sx={{ fontWeight: 500, maxWidth: 130 }}>
-                          {c.name}
+                          <CompanyLink name={c.name} />
                         </Typography>
                       </Stack>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{inrCompact(c.value)}</Typography>
@@ -1799,7 +1800,7 @@ export default function CRMDashboard({ data, loading }) {
                   return (
                     <Stack key={r.client_code || i} direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} sx={{ px: 2, py: 1.25 }}>
                       <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>{r.company_name || r.client_code || 'Customer'}</Typography>
+                        <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}><CompanyLink code={r.client_code} name={r.company_name} /></Typography>
                         <Typography variant="caption" color="text.secondary">
                           {(Number(r.recency_days) || 0)} d ago · cadence {(Number(r.cadence_days) || 0)} d
                           {r.next_expected ? ` · next ${r.next_expected}` : ''}
@@ -1830,7 +1831,7 @@ export default function CRMDashboard({ data, loading }) {
                     <Box key={c.client_code || i}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                         <Typography variant="body2" noWrap sx={{ fontWeight: 500, minWidth: 0, maxWidth: 150 }}>
-                          {c.company_name || c.client_code || 'Customer'}
+                          <CompanyLink code={c.client_code} name={c.company_name} />
                         </Typography>
                         <Chip label={Math.round(score)} size="small" sx={{ bgcolor: `${barColor}1a`, color: barColor, fontWeight: 700 }} />
                       </Stack>
