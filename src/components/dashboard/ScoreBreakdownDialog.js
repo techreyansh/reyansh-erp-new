@@ -12,6 +12,7 @@ const LABELS = {
   on_time: 'On Time',
   checklist: 'Checklist',
   workflow: 'Workflow',
+  followups: 'Follow-ups',
   production: 'Production',
 };
 const n = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
@@ -22,6 +23,7 @@ function evidence(key, v) {
     case 'on_time': return `${n(v.on_time)} task${n(v.on_time) === 1 ? '' : 's'} completed on time`;
     case 'checklist': return `${n(v.ok)} of ${n(v.due)} checklist items on schedule`;
     case 'workflow': return `${n(v.ok)} of ${n(v.due)} workflow steps done on time`;
+    case 'followups': return `${n(v.ok)} of ${n(v.due)} follow-ups completed on time`;
     case 'production': return `${n(v.stages)} stages · ${n(v.output)} good / ${n(v.scrap)} scrap`;
     default: return '';
   }
@@ -29,7 +31,7 @@ function evidence(key, v) {
 
 export default function ScoreBreakdownDialog({ open, onClose, score, onOpenFull }) {
   const cats = (score && score.categories) || {};
-  const order = ['work_completed', 'on_time', 'checklist', 'workflow', 'production'];
+  const order = ['work_completed', 'on_time', 'checklist', 'workflow', 'followups', 'production'];
   const active = order
     .map((key) => ({ key, ...(cats[key] || {}) }))
     .filter((c) => c.pct != null);

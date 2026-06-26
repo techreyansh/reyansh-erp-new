@@ -110,6 +110,7 @@ const PERF_CATEGORIES = [
   { key: "on_time", label: "On Time" },
   { key: "checklist", label: "Checklist" },
   { key: "workflow", label: "Workflow" },
+  { key: "followups", label: "Follow-ups" },
   { key: "production", label: "Production" },
 ];
 
