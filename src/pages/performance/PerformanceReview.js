@@ -361,7 +361,7 @@ function ManagerEvalPanel({ score, locked, canEdit, onSave, saving }) {
     <Paper variant="outlined" sx={{ borderRadius: 2.5, p: { xs: 2, sm: 2.5 } }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Manager Evaluation
+          Manager Notes
         </Typography>
         {locked && (
           <Chip icon={<LockRounded sx={{ fontSize: '1rem' }} />} label="Locked" size="small" color="success" variant="outlined" sx={{ fontWeight: 700 }} />
@@ -374,39 +374,13 @@ function ManagerEvalPanel({ score, locked, canEdit, onSave, saving }) {
         </Alert>
       )}
 
+      <Alert severity="info" variant="outlined" sx={{ mb: 2 }}>
+        Performance scores are now calculated <b>automatically from actual ERP work</b>
+        (tasks done, on-time, checklist, workflow, production) — managers no longer
+        enter Meeting or Manager scores. Add a note below if it helps the employee.
+      </Alert>
+
       <Stack spacing={2.5}>
-        <Box>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Meeting Participation</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>{meeting}</Typography>
-          </Stack>
-          <Slider
-            value={meeting}
-            onChange={(_e, v) => setMeeting(Array.isArray(v) ? v[0] : v)}
-            min={0}
-            max={100}
-            disabled={disabled}
-            valueLabelDisplay="auto"
-            size="small"
-          />
-        </Box>
-
-        <Box>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Manager Evaluation</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>{evalScore}</Typography>
-          </Stack>
-          <Slider
-            value={evalScore}
-            onChange={(_e, v) => setEvalScore(Array.isArray(v) ? v[0] : v)}
-            min={0}
-            max={100}
-            disabled={disabled}
-            valueLabelDisplay="auto"
-            size="small"
-          />
-        </Box>
-
         <TextField
           label="Manager Remarks"
           value={remarks}
@@ -424,7 +398,7 @@ function ManagerEvalPanel({ score, locked, canEdit, onSave, saving }) {
             variant="contained"
             startIcon={<SaveRounded />}
             disabled={disabled || saving}
-            onClick={() => onSave({ meetingParticipation: meeting, managerEval: evalScore, managerRemarks: remarks })}
+            onClick={() => onSave({ meetingParticipation: null, managerEval: null, managerRemarks: remarks })}
             sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 1.5 }}
           >
             {saving ? 'Saving…' : 'Save evaluation'}
