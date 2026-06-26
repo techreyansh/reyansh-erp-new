@@ -592,34 +592,55 @@ export function consolidateFollowups(items) {
   return [...byAccount.values()];
 }
 
-export async function getMyFollowups(email) {
-  const mine = (ownerEmail) =>
-    ownerEmail == null ||
-    (email && String(ownerEmail).toLowerCase() === String(email).toLowerCase());
+/**
+ * Follow-ups for a view scope. STRICT ownership: a follow-up is "mine" only when
+ * its owner_email matches — unowned (NULL) items are NOT mine (they belong to the
+ * 'unassigned' bucket, not everyone's list). This fixes the leak where every
+ * executive saw every unowned follow-up.
+ *   scope 'my'         → owner_email === email (default; the personal view)
+ *   scope 'unassigned' → owner_email IS NULL (managers/CEO claim these)
+ *   scope 'team'       → owner in teamEmails (manager's reports, incl. self)
+ *   scope 'all'        → no owner filter (RLS bounds it; CEO/Admin sees all)
+ */
+export async function getMyFollowups(email, { scope = "my", teamEmails = null } = {}) {
+  const me = email ? String(email).toLowerCase() : "";
+  const teamSet = teamEmails ? new Set(teamEmails.map((e) => String(e).toLowerCase())) : null;
+  const inScope = (ownerEmail) => {
+    const o = ownerEmail == null ? null : String(ownerEmail).toLowerCase();
+    if (scope === "all") return true;
+    if (scope === "unassigned") return o == null;
+    if (scope === "team") return o != null && (o === me || (teamSet ? teamSet.has(o) : false));
+    return o != null && o === me; // 'my'
+  };
+  // Query-level scoping for the common cases (efficiency + defence-in-depth).
+  const scopePipe = (q) => (scope === "my" ? q.eq("owner_email", me)
+    : scope === "unassigned" ? q.is("owner_email", null)
+    : scope === "team" && teamSet ? q.in("owner_email", [...teamSet]) : q);
 
   // 1) Pipeline cards with a planned next action.
-  const { data: pipeRows, error: pErr } = await supabase
-    .from("crm_pipeline")
-    .select("id,company_name,stage,next_action,next_action_date,owner_email")
-    .not("next_action_date", "is", null);
+  const { data: pipeRows, error: pErr } = await scopePipe(
+    supabase
+      .from("crm_pipeline")
+      .select("id,company_name,stage,next_action,next_action_date,owner_email")
+      .not("next_action_date", "is", null),
+  );
   throwIf(pErr);
 
-  // 2) Activities with a planned follow-up. Company name comes from the joined
-  //    pipeline row (foreign-table select on the pipeline_id relationship).
-  //    Exclude COMPLETED activities — a finished follow-up must not linger in
-  //    the widget (this was the source of stale/repeated rows).
-  const { data: actRows, error: aErr } = await supabase
-    .from("crm_pipeline_activity")
-    .select(
-      "id,pipeline_id,subject,activity_type,next_follow_up_date,owner_email,status,crm_pipeline(company_name)",
-    )
-    .not("next_follow_up_date", "is", null)
-    .neq("status", "completed");
+  // 2) Activities with a planned follow-up (excl. completed).
+  const { data: actRows, error: aErr } = await scopePipe(
+    supabase
+      .from("crm_pipeline_activity")
+      .select(
+        "id,pipeline_id,subject,activity_type,next_follow_up_date,owner_email,status,crm_pipeline(company_name)",
+      )
+      .not("next_follow_up_date", "is", null)
+      .neq("status", "completed"),
+  );
   throwIf(aErr);
 
   const items = [];
 
-  (pipeRows || []).filter((r) => mine(r.owner_email)).forEach((r) => {
+  (pipeRows || []).filter((r) => inScope(r.owner_email)).forEach((r) => {
     items.push({
       kind: "action",
       id: r.id,
@@ -631,7 +652,7 @@ export async function getMyFollowups(email) {
     });
   });
 
-  (actRows || []).filter((r) => mine(r.owner_email)).forEach((r) => {
+  (actRows || []).filter((r) => inScope(r.owner_email)).forEach((r) => {
     const company =
       (r.crm_pipeline && r.crm_pipeline.company_name) || "Untitled";
     const typeLabel =
