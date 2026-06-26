@@ -18,6 +18,7 @@ import EventRepeatRounded from '@mui/icons-material/EventRepeatRounded';
 import AddTaskRounded from '@mui/icons-material/AddTaskRounded';
 import RequestQuoteRounded from '@mui/icons-material/RequestQuoteRounded';
 import ScienceRounded from '@mui/icons-material/ScienceRounded';
+import HowToRegRounded from '@mui/icons-material/HowToRegRounded';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
 import CompanyContacts from './CompanyContacts';
 import CompanyAddresses from './CompanyAddresses';
@@ -233,8 +234,9 @@ function NotesTab({ accountId, activities, onAdded, notify }) {
   );
 }
 
-export default function Client360({ account, onClose, notify }) {
+export default function Client360({ account, onClose, onChanged, notify }) {
   const [tab, setTab] = useState('overview');
+  const [converting, setConverting] = useState(false);
   const [data, setData] = useState(null);
   const [crm, setCrm] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -243,12 +245,16 @@ export default function Client360({ account, onClose, notify }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const EMPTY = { products: [], quotations: [], orders: [], prodDemand: [], orderCycles: [], dispatches: [], invoices: [], kit: [], complaints: [], summary: {}, health: null };
       const [bundle, company, contacts] = await Promise.all([
-        client360Service.getClient360(account),
-        crmPipelineService.getCompany(account.id),
-        crmPipelineService.listContacts(account.id),
+        client360Service.getClient360(account).catch(() => null),
+        crmPipelineService.getCompany(account.id).catch(() => ({})),
+        crmPipelineService.listContacts(account.id).catch(() => []),
       ]);
-      setData(bundle); setCrm({ ...company, contacts });
+      // Prospects (or any account with no operational history) get a well-shaped
+      // empty bundle so every tab renders cleanly instead of crashing on .length.
+      setData({ ...EMPTY, ...(bundle || {}) });
+      setCrm({ ...(company || {}), contacts: contacts || [] });
     } finally { setLoading(false); }
   }, [account]);
   useEffect(() => { load(); }, [load]);
@@ -282,8 +288,16 @@ export default function Client360({ account, onClose, notify }) {
     { key: 'complaints', label: 'Complaints' },
     { key: 'ai', label: 'AI Copilot' },
   ];
+  const isProspect = (account.account_type || c.account_type) === 'prospect'
+    || (!!(c.prospect_stage || account.prospect_stage) && !(c.client_stage || account.client_stage));
+  const doConvert = async () => {
+    setConverting(true);
+    try { await crmPipelineService.convertToClient(account.id, null); notify?.('Converted to client'); onChanged?.(); onClose?.(); }
+    catch (e) { notify?.(e.message || 'Convert failed', 'error'); } finally { setConverting(false); }
+  };
   // Quick actions — jump to the relevant tab, or fire a direct channel link.
   const QUICK = [
+    isProspect && { label: converting ? 'Converting…' : 'Convert to client', icon: <HowToRegRounded fontSize="small" />, onClick: doConvert, disabled: converting },
     { label: 'Follow-up', icon: <EventRepeatRounded fontSize="small" />, onClick: () => setTab('timeline') },
     { label: 'Task', icon: <AddTaskRounded fontSize="small" />, onClick: () => setTab('tasks') },
     phoneDigits && { label: 'WhatsApp', icon: <WhatsApp fontSize="small" />, href: `https://wa.me/${phoneDigits}` },
@@ -325,7 +339,7 @@ export default function Client360({ account, onClose, notify }) {
           {QUICK.map((q) => (q.href ? (
             <Button key={q.label} size="small" variant="outlined" startIcon={q.icon} component="a" href={q.href} target="_blank" rel="noreferrer" sx={{ borderRadius: 2, textTransform: 'none' }}>{q.label}</Button>
           ) : (
-            <Button key={q.label} size="small" variant="outlined" startIcon={q.icon} onClick={q.onClick} sx={{ borderRadius: 2, textTransform: 'none' }}>{q.label}</Button>
+            <Button key={q.label} size="small" variant="outlined" startIcon={q.icon} onClick={q.onClick} disabled={q.disabled} sx={{ borderRadius: 2, textTransform: 'none' }}>{q.label}</Button>
           )))}
         </Stack>
       </Box>
