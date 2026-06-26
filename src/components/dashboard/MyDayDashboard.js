@@ -102,14 +102,14 @@ function perfBandMeta(band) {
   return PERF_BANDS[band] || PERF_BANDS.no_data;
 }
 
-// New performance categories (compact bars on the dashboard card).
+// Performance categories — 100% auto-calculated from ERP work. Manager + Meeting
+// scoring removed (the score no longer depends on subjective manual entry).
 const PERF_CATEGORIES = [
   { key: "work_completed", label: "Work Completed" },
   { key: "on_time", label: "On Time" },
   { key: "checklist", label: "Checklist" },
   { key: "workflow", label: "Workflow" },
-  { key: "meeting", label: "Meeting" },
-  { key: "manager", label: "Manager" },
+  { key: "production", label: "Production" },
 ];
 
 // ---------------------------------------------------------------------------
