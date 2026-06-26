@@ -33,25 +33,15 @@ console.log('[clientService] STARTUP - reading clients from crm_pipeline master'
   timestamp: new Date().toISOString(),
 });
 
-// Generate unique client code sequentially (C + 5 digits, e.g., C00001)
-// Sequence is derived from crm_pipeline.customer_code where customer_code ILIKE 'C%'.
+// Generate the next sequential client code (C + 5 digits, e.g., C10001).
+// Single source of truth = the server-side `crm_next_code` RPC (prefix-anchored,
+// minted under an advisory lock by crm_add_company / crm_convert_to_client). The
+// old client-side MAX scan was retired — it raced those two on the same C-number
+// space. Kept as a thin wrapper so existing callers stay unchanged.
 export async function generateSequentialClientCode() {
-  const { data, error } = await supabase
-    .from(CRM_PIPELINE_TABLE)
-    .select('customer_code')
-    .ilike('customer_code', 'C%');
-  const rows = error ? [] : (Array.isArray(data) ? data : []);
-  const max = rows.reduce((acc, row) => {
-    const code = row.customer_code || '';
-    const match = code.match(/^C(\d{5})$/);
-    if (match) {
-      const num = parseInt(match[1], 10);
-      return num > acc ? num : acc;
-    }
-    return acc;
-  }, 0);
-  const next = (max + 1).toString().padStart(5, '0');
-  return `C${next}`;
+  const { data, error } = await supabase.rpc('crm_next_code', { p_prefix: 'C' });
+  if (error) throw error;
+  return data;
 }
 
 export async function checkClientCodeExists(clientCode) {
