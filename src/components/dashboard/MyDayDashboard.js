@@ -214,6 +214,9 @@ function ScoreCard({ score, trend, loading, theme, onOpen }) {
   const lastWk = tw.length >= 2 ? tw[tw.length - 2] : null;
   const delta = thisWk != null && lastWk != null ? Math.round(thisWk - lastWk) : null;
   const monthly = tw.length ? Math.round(tw.reduce((s, v) => s + v, 0) / tw.length) : null;
+  // Consistency streak: consecutive recent weeks scoring in the 'consistent' band (≥60).
+  let streak = 0;
+  for (let i = tw.length - 1; i >= 0; i -= 1) { if (tw[i] >= 60) streak += 1; else break; }
 
   return (
     <>
@@ -273,6 +276,7 @@ function ScoreCard({ score, trend, loading, theme, onOpen }) {
                 label={`${delta >= 0 ? "↑ +" : "↓ "}${delta} vs last wk`} sx={{ height: 20, fontWeight: 700 }} />
             )}
             {monthly != null && <Typography variant="caption" color="text.secondary">Monthly avg {monthly}</Typography>}
+            {streak >= 2 && <Chip size="small" color="warning" variant="outlined" label={`🔥 ${streak}-week streak`} sx={{ height: 20, fontWeight: 700 }} />}
             <Box sx={{ ml: "auto", display: "flex" }}><Sparkline points={trendVals} color={bandColor} /></Box>
           </Stack>
           <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.25 }}>Updated just now</Typography>
