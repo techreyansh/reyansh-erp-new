@@ -36,7 +36,7 @@ import {
   TaskAltOutlined,
 } from "@mui/icons-material";
 import { supabase } from "../../lib/supabaseClient";
-import { getCurrentWeekStart, personScore as getPersonPerfScore } from "../../services/perfService";
+import { getCurrentWeekStart, personScore as getPersonPerfScore, scoreTrend as getScoreTrend } from "../../services/perfService";
 import {
   isTaskOverdue,
   listMyTasks,
@@ -169,7 +169,23 @@ function PillarBar({ label, value }) {
   );
 }
 
-function ScoreCard({ score, loading, theme, onOpen }) {
+// Zero-dependency sparkline — keeps the home page light (no chart lib).
+function Sparkline({ points, color, width = 64, height = 20 }) {
+  const vals = (points || []).filter((v) => v != null);
+  if (vals.length < 2) return null;
+  const max = Math.max(...vals, 1);
+  const min = Math.min(...vals, 0);
+  const range = max - min || 1;
+  const step = width / (vals.length - 1);
+  const d = vals.map((v, i) => `${(i * step).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`).join(" ");
+  return (
+    <svg width={width} height={height} aria-hidden>
+      <polyline points={d} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ScoreCard({ score, trend, loading, theme, onOpen }) {
   const [bdOpen, setBdOpen] = useState(false);
   if (loading) {
     return (
@@ -191,6 +207,13 @@ function ScoreCard({ score, loading, theme, onOpen }) {
       ? theme.palette.text.disabled
       : theme.palette[meta.paletteKey]?.main || theme.palette.text.disabled;
   const categories = score?.categories || {};
+  // Trend: weekly (this week), monthly (avg of available weeks), vs last week.
+  const trendVals = (trend || []).map((t) => t.score);
+  const tw = trendVals.filter((v) => v != null);
+  const thisWk = hasData ? Math.round(Number(score.score)) : (tw.length ? tw[tw.length - 1] : null);
+  const lastWk = tw.length >= 2 ? tw[tw.length - 2] : null;
+  const delta = thisWk != null && lastWk != null ? Math.round(thisWk - lastWk) : null;
+  const monthly = tw.length ? Math.round(tw.reduce((s, v) => s + v, 0) / tw.length) : null;
 
   return (
     <>
@@ -238,11 +261,22 @@ function ScoreCard({ score, loading, theme, onOpen }) {
         </Stack>
 
         {hasData ? (
+          <>
           <Stack spacing={1} sx={{ mt: 1.5 }}>
             {PERF_CATEGORIES.map((c) => (
               <PillarBar key={c.key} label={c.label} value={categories?.[c.key]?.pct} />
             ))}
           </Stack>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1.25 }}>
+            {delta != null && (
+              <Chip size="small" color={delta > 0 ? "success" : delta < 0 ? "error" : "default"}
+                label={`${delta >= 0 ? "↑ +" : "↓ "}${delta} vs last wk`} sx={{ height: 20, fontWeight: 700 }} />
+            )}
+            {monthly != null && <Typography variant="caption" color="text.secondary">Monthly avg {monthly}</Typography>}
+            <Box sx={{ ml: "auto", display: "flex" }}><Sparkline points={trendVals} color={bandColor} /></Box>
+          </Stack>
+          <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.25 }}>Updated just now</Typography>
+          </>
         ) : (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
             No data yet for this week.
@@ -475,6 +509,7 @@ function MyDayDashboard({ email }) {
   const navigate = useNavigate();
 
   const [score, setScore] = useState(null);
+  const [trend, setTrend] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [checklists, setChecklists] = useState({ today: [], overdue: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -493,13 +528,15 @@ function MyDayDashboard({ email }) {
       return;
     }
     try {
-      const [scoreRes, taskRes, checklistRes] = await Promise.all([
+      const [scoreRes, taskRes, checklistRes, trendRes] = await Promise.all([
         getPersonPerfScore(email, getCurrentWeekStart()),
         listMyTasks(email),
         taskComplianceService.getMyChecklistsToday(email),
+        getScoreTrend(email, 4).catch(() => []),
       ]);
       if (!mountedRef.current) return;
       setScore(scoreRes);
+      setTrend(Array.isArray(trendRes) ? trendRes : []);
       setTasks(Array.isArray(taskRes) ? taskRes : []);
       setChecklists(checklistRes || { today: [], overdue: [], total: 0 });
     } catch (e) {
@@ -653,7 +690,7 @@ function MyDayDashboard({ email }) {
           mb: 2,
         }}
       >
-        <ScoreCard score={score} loading={loading} theme={theme} onOpen={() => navigate("/performance")} />
+        <ScoreCard score={score} trend={trend} loading={loading} theme={theme} onOpen={() => navigate("/performance")} />
         <SummaryCard
           label="My Tasks"
           icon={AssignmentTurnedInOutlined}
