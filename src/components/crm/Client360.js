@@ -14,6 +14,7 @@ import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
 import { listAccountTasks, createTask } from '../../services/taskService';
+import { usePermissions } from '../../context/PermissionContext';
 import EventRepeatRounded from '@mui/icons-material/EventRepeatRounded';
 import AddTaskRounded from '@mui/icons-material/AddTaskRounded';
 import RequestQuoteRounded from '@mui/icons-material/RequestQuoteRounded';
@@ -174,6 +175,7 @@ function CompanyFields({ c }) {
 
 // Account-linked tasks: list + quick add (assigned to the account owner).
 function TasksTab({ accountId, ownerEmail, notify }) {
+  const { employee } = usePermissions();
   const [tasks, setTasks] = useState(null);
   const [form, setForm] = useState({ title: '', due_date: '', priority: 'medium' });
   const [busy, setBusy] = useState(false);
@@ -183,7 +185,11 @@ function TasksTab({ accountId, ownerEmail, notify }) {
     if (!form.title.trim()) return;
     setBusy(true);
     try {
-      await createTask({ title: form.title.trim(), due_date: form.due_date || null, priority: form.priority, account_id: accountId, assigned_email: ownerEmail || undefined }, null);
+      // assigned_by MUST be the current employee id — the tasks INSERT RLS policy
+      // checks `assigned_by = rbac_current_employee_id()`. Passing null (the old
+      // bug) made every create fail the row-level security check. Default the
+      // assignee to the current user when the prospect has no owner.
+      await createTask({ title: form.title.trim(), due_date: form.due_date || null, priority: form.priority, account_id: accountId, assigned_email: ownerEmail || employee?.email || undefined }, employee?.id);
       setForm({ title: '', due_date: '', priority: 'medium' }); notify?.('Task created'); reload();
     } catch (e) { notify?.(e.message || 'Could not create task', 'error'); } finally { setBusy(false); }
   };
@@ -215,7 +221,7 @@ function NotesTab({ accountId, activities, onAdded, notify }) {
   const add = async () => {
     if (!text.trim()) return;
     setBusy(true);
-    try { await crmPipelineService.addActivity(accountId, { activity_type: 'note', subject: text.trim().slice(0, 60), body: text.trim() }); setText(''); notify?.('Note added'); onAdded?.(); }
+    try { await crmPipelineService.addActivity({ pipeline_id: accountId, activity_type: 'note', subject: text.trim().slice(0, 60), body: text.trim() }); setText(''); notify?.('Note added'); onAdded?.(); }
     catch (e) { notify?.(e.message || 'Failed', 'error'); } finally { setBusy(false); }
   };
   return (
@@ -261,7 +267,7 @@ export default function Client360({ account, onClose, onChanged, notify }) {
 
   const saveActivity = async () => {
     if (!act.subject && !act.body) return;
-    try { await crmPipelineService.addActivity(account.id, act); setAct({ activity_type: 'note', subject: '', body: '', next_follow_up_date: '' }); notify?.('Activity logged'); load(); }
+    try { await crmPipelineService.addActivity({ pipeline_id: account.id, activity_type: act.activity_type, subject: act.subject || null, body: act.body || null, next_follow_up_date: act.next_follow_up_date || null }); setAct({ activity_type: 'note', subject: '', body: '', next_follow_up_date: '' }); notify?.(act.next_follow_up_date ? 'Follow-up scheduled' : 'Activity logged'); load(); }
     catch (e) { notify?.(e.message || 'Failed', 'error'); }
   };
 
@@ -390,7 +396,8 @@ export default function Client360({ account, onClose, onChanged, notify }) {
                 <Grid container spacing={1} sx={{ mt: 0 }}>
                   <Grid item xs={4}><TextField select size="small" fullWidth label="Type" value={act.activity_type} onChange={(e) => setAct({ ...act, activity_type: e.target.value })}>{['note', 'call', 'meeting', 'whatsapp', 'email'].map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}</TextField></Grid>
                   <Grid item xs={8}><TextField size="small" fullWidth label="Subject" value={act.subject} onChange={(e) => setAct({ ...act, subject: e.target.value })} /></Grid>
-                  <Grid item xs={8}><TextField size="small" fullWidth label="Notes" value={act.body} onChange={(e) => setAct({ ...act, body: e.target.value })} /></Grid>
+                  <Grid item xs={12}><TextField size="small" fullWidth label="Notes" value={act.body} onChange={(e) => setAct({ ...act, body: e.target.value })} /></Grid>
+                  <Grid item xs={8}><TextField type="date" size="small" fullWidth label="Follow-up date" InputLabelProps={{ shrink: true }} value={act.next_follow_up_date} onChange={(e) => setAct({ ...act, next_follow_up_date: e.target.value })} /></Grid>
                   <Grid item xs={4}><Button fullWidth variant="contained" onClick={saveActivity} sx={{ height: '100%', borderRadius: 2 }}>Save</Button></Grid>
                 </Grid>
               </Box>
