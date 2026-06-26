@@ -9,7 +9,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box, Paper, Stack, Typography, TextField, MenuItem, Button, Chip, Divider,
   CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Alert,
-  Dialog, DialogTitle, DialogContent, DialogActions, useTheme, alpha,
+  Dialog, DialogTitle, DialogContent, DialogActions, ToggleButton, ToggleButtonGroup,
+  useTheme, alpha,
 } from '@mui/material';
 import {
   BoltRounded, CheckCircleRounded, WarningAmberRounded, GroupRounded,
@@ -23,6 +24,7 @@ import { resolveStandard } from '../../services/routingCapacity';
 import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
 import { poolCapacityByType, scheduleMolding } from '../../services/ie/moldingPool';
 import MoldingFleetDialog from '../../components/mes/MoldingFleetDialog';
+import IeDashboards from '../../components/mes/IeDashboards';
 
 const fmt = (x) => Math.round(Number(x) || 0).toLocaleString('en-IN');
 const money = (x) => `₹${(Number(x) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -48,6 +50,7 @@ export default function AssemblyPlanner() {
   const [rateDraft, setRateDraft] = useState(null); // open cost-rate editor when set
   const [savingRates, setSavingRates] = useState(false);
   const [fleetOpen, setFleetOpen] = useState(false);
+  const [view, setView] = useState('planner'); // 'planner' | 'dashboards'
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -159,6 +162,15 @@ export default function AssemblyPlanner() {
         </Paper>
       ) : (
         <Stack spacing={2}>
+          <ToggleButtonGroup size="small" exclusive value={view} onChange={(_e, v) => v && setView(v)} sx={{ alignSelf: 'flex-start' }}>
+            <ToggleButton value="planner">Planner</ToggleButton>
+            <ToggleButton value="dashboards">Dashboards</ToggleButton>
+          </ToggleButtonGroup>
+          {view === 'dashboards' ? (
+            <IeDashboards result={result} scenarios={scenarios} moldSchedule={moldSchedule} moldPool={moldPool}
+              target={Number(target) || 0} shiftHours={Number(shiftHours) || 0} headcountPool={Number(headcountPool) || 0} />
+          ) : (
+          <>
           {/* The verdict */}
           <Paper variant="outlined" sx={{ p: 2.5, borderColor: feasible ? 'success.main' : 'error.main', borderWidth: 1.5,
             bgcolor: alpha(feasible ? theme.palette.success.main : theme.palette.error.main, 0.05) }}>
@@ -313,6 +325,8 @@ export default function AssemblyPlanner() {
               </Table>
               <Typography variant="caption" color="text.secondary">Each type's demand splits across its machines to finish together (balanced makespan). Start assumed 09:00.</Typography>
             </Paper>
+          )}
+          </>
           )}
         </Stack>
       )}
