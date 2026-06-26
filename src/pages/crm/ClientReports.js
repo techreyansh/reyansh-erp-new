@@ -11,6 +11,11 @@ import AssessmentRounded from '@mui/icons-material/AssessmentRounded';
 import DownloadRounded from '@mui/icons-material/DownloadRounded';
 import { clientCards, paymentDashboard, listAssignableUsers } from '../../services/crmPipelineService';
 import { listClientStageDefs } from '../../services/crmPipelineService';
+import CompanyLink from '../../components/crm/CompanyLink';
+
+// Tag a customer cell so the table can render it as a clickable 360 link while
+// CSV export still gets the plain name. code is optional (name resolves too).
+const co = (name, code) => ({ __company: true, name, code });
 
 const inr = (n) => { const v = Number(n || 0); return v >= 1e7 ? `₹${(v / 1e7).toFixed(2)}Cr` : v >= 1e5 ? `₹${(v / 1e5).toFixed(2)}L` : `₹${v.toLocaleString('en-IN')}`; };
 const today = () => new Date().toISOString().slice(0, 10);
@@ -28,7 +33,7 @@ const REPORTS = [
 
 function toCSV(columns, rows) {
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  return [columns.map(esc).join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+  return [columns.map(esc).join(','), ...rows.map((r) => r.map((c) => esc(c && c.__company ? c.name : c)).join(','))].join('\n');
 }
 
 export default function ClientReports() {
@@ -63,17 +68,17 @@ export default function ClientReports() {
     }
     if (report === 'outstanding') {
       const inv = (pay.invoices || []);
-      return { columns: ['Invoice', 'Customer', 'Invoice Date', 'Value', 'Outstanding', 'Due Date', 'Days', 'Status'], rows: inv.map((v) => [v.invoice_number, v.customer_name || v.customer_code, v.invoice_date, inr(v.amount), inr(v.balance), v.due_date, v.days_past_due, v.ar_status]) };
+      return { columns: ['Invoice', 'Customer', 'Invoice Date', 'Value', 'Outstanding', 'Due Date', 'Days', 'Status'], rows: inv.map((v) => [v.invoice_number, co(v.customer_name || v.customer_code, v.customer_code), v.invoice_date, inr(v.amount), inr(v.balance), v.due_date, v.days_past_due, v.ar_status]) };
     }
     if (report === 'followup') {
       const rows = cards.filter((c) => c.next_action).sort((a, b) => String(a.next_action_date || '9999').localeCompare(String(b.next_action_date || '9999')))
-        .map((c) => [c.company_name, nmOf(c.owner_email), c.next_action, c.next_action_date || '—', c.next_action_date && c.next_action_date < today() ? 'OVERDUE' : 'upcoming', c.next_action_priority]);
-      const unmanaged = cards.filter((c) => c.is_unmanaged).map((c) => [c.company_name, nmOf(c.owner_email), '⚠ NO NEXT ACTION', '—', 'UNMANAGED', '—']);
+        .map((c) => [co(c.company_name, c.customer_code || c.client_code), nmOf(c.owner_email), c.next_action, c.next_action_date || '—', c.next_action_date && c.next_action_date < today() ? 'OVERDUE' : 'upcoming', c.next_action_priority]);
+      const unmanaged = cards.filter((c) => c.is_unmanaged).map((c) => [co(c.company_name, c.customer_code || c.client_code), nmOf(c.owner_email), '⚠ NO NEXT ACTION', '—', 'UNMANAGED', '—']);
       return { columns: ['Client', 'Owner', 'Next Action', 'Due', 'Status', 'Priority'], rows: [...unmanaged, ...rows] };
     }
     if (report === 'health') {
       const rows = cards.filter((c) => c.health_score != null).sort((a, b) => a.health_score - b.health_score)
-        .map((c) => [c.company_name, nmOf(c.owner_email), c.health_score, c.band, c.days_since_contact != null ? `${c.days_since_contact}d` : '—', inr(c.outstanding)]);
+        .map((c) => [co(c.company_name, c.customer_code || c.client_code), nmOf(c.owner_email), c.health_score, c.band, c.days_since_contact != null ? `${c.days_since_contact}d` : '—', inr(c.outstanding)]);
       return { columns: ['Client', 'Owner', 'Health', 'Band', 'Last Contact', 'Outstanding'], rows };
     }
     if (report === 'manager') {
@@ -84,13 +89,13 @@ export default function ClientReports() {
     if (report === 'risk') {
       const rows = cards.filter((c) => c.band === 'red' || Number(c.outstanding) > 0 || ['dormant', 'lost'].includes(c.pipeline_stage))
         .sort((a, b) => Number(b.revenue || 0) - Number(a.revenue || 0))
-        .map((c) => [c.company_name, nmOf(c.owner_email), inr(c.revenue), inr(c.outstanding), c.band || '—', c.days_since_contact != null ? `${c.days_since_contact}d` : '—', [c.band === 'red' && 'low health', Number(c.outstanding) > 0 && 'overdue', ['dormant', 'lost'].includes(c.pipeline_stage) && c.pipeline_stage].filter(Boolean).join(', ')]);
+        .map((c) => [co(c.company_name, c.customer_code || c.client_code), nmOf(c.owner_email), inr(c.revenue), inr(c.outstanding), c.band || '—', c.days_since_contact != null ? `${c.days_since_contact}d` : '—', [c.band === 'red' && 'low health', Number(c.outstanding) > 0 && 'overdue', ['dormant', 'lost'].includes(c.pipeline_stage) && c.pipeline_stage].filter(Boolean).join(', ')]);
       return { columns: ['Client', 'Owner', 'Revenue At Risk', 'Outstanding', 'Health', 'Last Contact', 'Risk Reason'], rows };
     }
     // dormant
     const rows = cards.filter((c) => c.pipeline_stage === 'dormant' || (c.days_since_contact != null && c.days_since_contact > 90))
       .sort((a, b) => (b.days_since_contact || 0) - (a.days_since_contact || 0))
-      .map((c) => [c.company_name, nmOf(c.owner_email), c.days_since_contact != null ? `${c.days_since_contact}d` : '—', inr(c.revenue), stageLabel(c.pipeline_stage), c.next_action || '⚠ none']);
+      .map((c) => [co(c.company_name, c.customer_code || c.client_code), nmOf(c.owner_email), c.days_since_contact != null ? `${c.days_since_contact}d` : '—', inr(c.revenue), stageLabel(c.pipeline_stage), c.next_action || '⚠ none']);
     return { columns: ['Client', 'Owner', 'Days Since Contact', 'Revenue (12m)', 'Stage', 'Next Action'], rows };
   }, [report, cards, pay, defs, names]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -136,9 +141,10 @@ export default function ClientReports() {
                       <TableRow key={ri} hover>
                         {row.map((cell, ci) => (
                           <TableCell key={ci} align={ci === 0 ? 'left' : 'right'}>
-                            {['OVERDUE', 'UNMANAGED'].includes(cell) ? <Chip size="small" color="error" label={cell} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem' } }} />
-                              : (ci > 0 && BAND[cell]) ? <Chip size="small" color={BAND[cell]} variant="outlined" label={cell} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem' } }} />
-                                : cell}
+                            {cell && cell.__company ? <CompanyLink code={cell.code} name={cell.name} />
+                              : ['OVERDUE', 'UNMANAGED'].includes(cell) ? <Chip size="small" color="error" label={cell} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem' } }} />
+                                : (ci > 0 && BAND[cell]) ? <Chip size="small" color={BAND[cell]} variant="outlined" label={cell} sx={{ height: 18, '& .MuiChip-label': { px: 0.7, fontSize: '0.6rem' } }} />
+                                  : cell}
                           </TableCell>
                         ))}
                       </TableRow>
