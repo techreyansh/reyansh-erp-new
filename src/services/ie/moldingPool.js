@@ -20,5 +20,40 @@ export function poolCapacityByType(machines = []) {
   return out;
 }
 
-const moldingPool = { machineDailyCapacity, poolCapacityByType };
+/**
+ * Per-machine molding schedule for one order. Each mold_type's demand is shared
+ * across that type's active machines proportional to throughput, so all machines
+ * of a type finish together (balanced makespan, minimal completion time). Pure.
+ *
+ * @param machines        ie_molding_machine[]
+ * @param perTypeDemand   { inner, outer, grommet } pieces required per type
+ * @param shiftStartHour  clock hour the shift begins (default 9)
+ * @returns per-machine rows { machine, type, assignedQty, runHours, startHour, finishHour, utilization }
+ */
+export function scheduleMolding(machines = [], perTypeDemand = {}, shiftStartHour = 9) {
+  const rate = (m) => (num(m.cycle_time_sec) > 0 ? (3600 / num(m.cycle_time_sec)) * Math.max(1, num(m.cavities) || 1) : 0);
+  const active = (machines || []).filter((m) => m.is_active !== false && rate(m) > 0);
+  const rows = [];
+  ['inner', 'outer', 'grommet'].forEach((type) => {
+    const demand = Math.max(0, num(perTypeDemand[type]));
+    const mc = active.filter((m) => (m.mold_type || 'inner') === type);
+    const totalRate = mc.reduce((s, m) => s + rate(m), 0);
+    mc.forEach((m) => {
+      const share = totalRate > 0 ? rate(m) / totalRate : 0;
+      const assignedQty = Math.round(demand * share);
+      const runHours = rate(m) > 0 ? assignedQty / rate(m) : 0;
+      const avail = num(m.available_hours) || 8;
+      rows.push({
+        machine: m, type, assignedQty,
+        runHours: +runHours.toFixed(2),
+        startHour: shiftStartHour,
+        finishHour: +(shiftStartHour + runHours).toFixed(2),
+        utilization: avail > 0 ? Math.min(100, Math.round((runHours / avail) * 100)) : 0,
+      });
+    });
+  });
+  return rows;
+}
+
+const moldingPool = { machineDailyCapacity, poolCapacityByType, scheduleMolding };
 export default moldingPool;
