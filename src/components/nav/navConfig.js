@@ -133,6 +133,7 @@ export const NAV_GROUPS = [
     icon: ic(Inventory2Outlined),
     items: [
       { label: "Material Control", path: "/inventory-control", icon: ic(Inventory2Outlined) },
+      { label: "Bins & UoM", path: "/inventory-masters", icon: ic(GridViewOutlined) },
       { label: "Inventory (legacy)", path: "/inventory", icon: ic(Inventory2Outlined) },
       { label: "Material Requirements (MRP)", path: "/mrp", icon: ic(Inventory2Outlined) },
     ],
