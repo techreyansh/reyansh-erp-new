@@ -86,6 +86,7 @@ import ppcService, {
   STAGE_STATUS_COLOR,
 } from '../../services/ppcService';
 import { StatCard, GridBox, inrFull } from '../../components/common/kit';
+import inventoryUomBinService from '../../services/inventoryUomBinService';
 import LegacyBomImporter from '../../components/ppc/LegacyBomImporter';
 import PersonPicker from '../../components/tasks/PersonPicker';
 
@@ -808,7 +809,8 @@ function MaterialsTab({ items, notify }) {
   const [moving, setMoving] = useState(false);
   const [classifying, setClassifying] = useState(false);
 
-  const blankReceive = { qty: '', vendorName: '', vendorCode: '', unitCost: '', reference: '', note: '' };
+  const blankReceive = { qty: '', unit: '', vendorName: '', vendorCode: '', unitCost: '', reference: '', note: '' };
+  const [receiveConvs, setReceiveConvs] = useState([]);
   const blankAdjust = { newQty: '', reason: '' };
   const blankDispatch = { qty: '', customer: '', reference: '' };
   const [receiveForm, setReceiveForm] = useState(blankReceive);
@@ -889,6 +891,8 @@ function MaterialsTab({ items, notify }) {
   const openReceive = (row) => {
     setReceiveForm(blankReceive);
     setReceiveRow(row);
+    setReceiveConvs([]);
+    if (row?.item_id) inventoryUomBinService.listConversions(row.item_id).then((c) => setReceiveConvs(c || [])).catch(() => setReceiveConvs([]));
   };
   const openAdjust = (row) => {
     setAdjustForm({ newQty: String(row.on_hand ?? '0'), reason: '' });
@@ -908,10 +912,18 @@ function MaterialsTab({ items, notify }) {
     }
     setMoving(true);
     try {
-      const res = await ppcService.receiveStock(receiveRow.item_id, receiveForm);
+      // Convert the entered qty to base UoM if an alternate unit was chosen.
+      const conv = receiveConvs.find((c) => c.alt_uom === receiveForm.unit);
+      const baseQty = conv ? Number(receiveForm.qty) * Number(conv.factor_to_base) : Number(receiveForm.qty);
+      const res = await ppcService.receiveStock(receiveRow.item_id, { ...receiveForm, qty: baseQty });
       setReceiveRow(null);
       await load();
-      notify(`Received ${num(receiveForm.qty)} — on hand ${num(res?.on_hand)}`, 'success');
+      notify(
+        conv
+          ? `Received ${num(receiveForm.qty)} ${receiveForm.unit} = ${num(baseQty)} ${receiveRow.item?.uom || ''} — on hand ${num(res?.on_hand)}`
+          : `Received ${num(baseQty)} — on hand ${num(res?.on_hand)}`,
+        'success',
+      );
     } catch (e) {
       notify(e.message, 'error');
     } finally {
@@ -1132,15 +1144,30 @@ function MaterialsTab({ items, notify }) {
             <Typography variant="body2" color="text.secondary">
               {receiveRow?.item?.name} · current on hand {num(receiveRow?.on_hand)} {receiveRow?.item?.uom || ''}
             </Typography>
-            <TextField
-              label="Quantity received"
-              type="number"
-              value={receiveForm.qty}
-              onChange={(e) => setReceiveForm({ ...receiveForm, qty: e.target.value })}
-              fullWidth
-              required
-              autoFocus
-            />
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <TextField
+                label="Quantity received"
+                type="number"
+                value={receiveForm.qty}
+                onChange={(e) => setReceiveForm({ ...receiveForm, qty: e.target.value })}
+                fullWidth
+                required
+                autoFocus
+              />
+              <TextField select label="Unit" value={receiveForm.unit}
+                onChange={(e) => setReceiveForm({ ...receiveForm, unit: e.target.value })} sx={{ minWidth: 130 }}>
+                <MenuItem value="">{receiveRow?.item?.uom || 'base'}</MenuItem>
+                {receiveConvs.map((c) => <MenuItem key={c.id} value={c.alt_uom}>{c.alt_uom}</MenuItem>)}
+              </TextField>
+            </Stack>
+            {(() => {
+              const conv = receiveConvs.find((c) => c.alt_uom === receiveForm.unit);
+              return conv && Number(receiveForm.qty) > 0 ? (
+                <Typography variant="caption" color="text.secondary">
+                  = {num(Number(receiveForm.qty) * Number(conv.factor_to_base))} {receiveRow?.item?.uom || ''} posted to stock (1 {conv.alt_uom} = {conv.factor_to_base} {receiveRow?.item?.uom})
+                </Typography>
+              ) : null;
+            })()}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField label="Vendor name" value={receiveForm.vendorName} onChange={(e) => setReceiveForm({ ...receiveForm, vendorName: e.target.value })} fullWidth />
               <TextField label="Vendor code" value={receiveForm.vendorCode} onChange={(e) => setReceiveForm({ ...receiveForm, vendorCode: e.target.value })} fullWidth />
