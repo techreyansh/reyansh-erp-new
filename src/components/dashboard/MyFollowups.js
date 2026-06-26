@@ -30,12 +30,14 @@ import {
 } from "@mui/icons-material";
 import {
   completeFollowup,
+  getCompany,
   getMyFollowups,
   moveFollowupStage,
   rescheduleFollowup,
   STAGES,
   STAGE_LABELS,
 } from "../../services/crmPipelineService";
+import Client360 from "../crm/Client360";
 
 const CRM_PATH = "/crm-pipeline";
 
@@ -209,7 +211,7 @@ function FollowupGroup({ emoji, title, items, accent, onOpen, onDone, onReschedu
               key={rowKey}
               item={it}
               accent={accent}
-              onOpen={onOpen}
+              onOpen={() => onOpen(it)}
               onDone={() => onDone(it)}
               onReschedule={() => onReschedule(it)}
               onStage={(anchorEl) => onStage(it, anchorEl)}
@@ -238,6 +240,7 @@ function MyFollowups({ email }) {
   const [snack, setSnack] = useState(null); // { severity, message }
   const [reschedule, setReschedule] = useState(null); // { item, value }
   const [stageMenu, setStageMenu] = useState(null); // { item, anchorEl }
+  const [selected, setSelected] = useState(null); // account row to open in the 360 drawer
 
   const rowKey = (it) => `${it.kind}-${it.id}`;
 
@@ -259,6 +262,30 @@ function MyFollowups({ email }) {
   }, [load]);
 
   const openCrm = useCallback(() => navigate(CRM_PATH), [navigate]);
+
+  // Open the company's full 360 profile right here — no jumping to the pipeline
+  // and re-searching. Fetch the full account row first so operational tabs
+  // (orders/invoices keyed by customer_code) load. Falls back to the pipeline
+  // only if the follow-up has no linked account.
+  const openCompany = useCallback(
+    async (item) => {
+      if (!item?.pipelineId) {
+        navigate(CRM_PATH);
+        return;
+      }
+      setBusyId(rowKey(item));
+      try {
+        const res = await getCompany(item.pipelineId);
+        setSelected(res?.company || { id: item.pipelineId, company_name: item.company });
+      } catch (e) {
+        // Couldn't load the account — still open with what we have.
+        setSelected({ id: item.pipelineId, company_name: item.company });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [navigate],
+  );
 
   // Run an action against the CRM, then refresh + toast the outcome.
   const runAction = useCallback(
@@ -376,7 +403,7 @@ function MyFollowups({ email }) {
             title="Overdue"
             items={data.overdue}
             accent={accents.overdue}
-            onOpen={openCrm}
+            onOpen={openCompany}
             onDone={handleDone}
             onReschedule={openReschedule}
             onStage={openStageMenu}
@@ -387,7 +414,7 @@ function MyFollowups({ email }) {
             title="Today"
             items={data.today}
             accent={accents.today}
-            onOpen={openCrm}
+            onOpen={openCompany}
             onDone={handleDone}
             onReschedule={openReschedule}
             onStage={openStageMenu}
@@ -398,7 +425,7 @@ function MyFollowups({ email }) {
             title="Upcoming (next 7 days)"
             items={data.upcoming}
             accent={accents.upcoming}
-            onOpen={openCrm}
+            onOpen={openCompany}
             onDone={handleDone}
             onReschedule={openReschedule}
             onStage={openStageMenu}
@@ -469,6 +496,16 @@ function MyFollowups({ email }) {
           </MenuItem>
         ))}
       </Menu>
+
+      {/* Full company 360 — opens directly from a follow-up, no pipeline detour */}
+      {selected && (
+        <Client360
+          account={selected}
+          onClose={() => setSelected(null)}
+          onChanged={load}
+          notify={(message, severity = "success") => setSnack({ severity, message })}
+        />
+      )}
 
       {/* Outcome toast */}
       <Snackbar
