@@ -810,9 +810,9 @@ function MaterialsTab({ items, notify }) {
   const [classifying, setClassifying] = useState(false);
 
   const blankReceive = { qty: '', unit: '', vendorName: '', vendorCode: '', unitCost: '', reference: '', note: '' };
-  const [receiveConvs, setReceiveConvs] = useState([]);
+  const [movementConvs, setMovementConvs] = useState([]);
   const blankAdjust = { newQty: '', reason: '' };
-  const blankDispatch = { qty: '', customer: '', reference: '' };
+  const blankDispatch = { qty: '', unit: '', customer: '', reference: '' };
   const [receiveForm, setReceiveForm] = useState(blankReceive);
   const [adjustForm, setAdjustForm] = useState(blankAdjust);
   const [dispatchForm, setDispatchForm] = useState(blankDispatch);
@@ -891,16 +891,22 @@ function MaterialsTab({ items, notify }) {
   const openReceive = (row) => {
     setReceiveForm(blankReceive);
     setReceiveRow(row);
-    setReceiveConvs([]);
-    if (row?.item_id) inventoryUomBinService.listConversions(row.item_id).then((c) => setReceiveConvs(c || [])).catch(() => setReceiveConvs([]));
+    setMovementConvs([]);
+    if (row?.item_id) inventoryUomBinService.listConversions(row.item_id).then((c) => setMovementConvs(c || [])).catch(() => setMovementConvs([]));
+  };
+  const loadMovementConvs = (row) => {
+    setMovementConvs([]);
+    if (row?.item_id) inventoryUomBinService.listConversions(row.item_id).then((c) => setMovementConvs(c || [])).catch(() => setMovementConvs([]));
   };
   const openAdjust = (row) => {
-    setAdjustForm({ newQty: String(row.on_hand ?? '0'), reason: '' });
+    setAdjustForm({ newQty: String(row.on_hand ?? '0'), reason: '', unit: '' });
     setAdjustRow(row);
+    loadMovementConvs(row);
   };
   const openDispatch = (row) => {
     setDispatchForm(blankDispatch);
     setDispatchRow(row);
+    loadMovementConvs(row);
   };
 
   // --- stock-movement submits ---
@@ -913,7 +919,7 @@ function MaterialsTab({ items, notify }) {
     setMoving(true);
     try {
       // Convert the entered qty to base UoM if an alternate unit was chosen.
-      const conv = receiveConvs.find((c) => c.alt_uom === receiveForm.unit);
+      const conv = movementConvs.find((c) => c.alt_uom === receiveForm.unit);
       const baseQty = conv ? Number(receiveForm.qty) * Number(conv.factor_to_base) : Number(receiveForm.qty);
       const res = await ppcService.receiveStock(receiveRow.item_id, { ...receiveForm, qty: baseQty });
       setReceiveRow(null);
@@ -939,7 +945,9 @@ function MaterialsTab({ items, notify }) {
     }
     setMoving(true);
     try {
-      const res = await ppcService.adjustStock(adjustRow.item_id, adjustForm.newQty, adjustForm.reason);
+      const cv = movementConvs.find((c) => c.alt_uom === adjustForm.unit);
+      const baseQty = cv ? Number(adjustForm.newQty) * Number(cv.factor_to_base) : Number(adjustForm.newQty);
+      const res = await ppcService.adjustStock(adjustRow.item_id, baseQty, adjustForm.reason);
       setAdjustRow(null);
       await load();
       notify(`Adjusted — on hand ${num(res?.on_hand)}`, 'success');
@@ -958,10 +966,16 @@ function MaterialsTab({ items, notify }) {
     }
     setMoving(true);
     try {
-      const res = await ppcService.dispatchStock(dispatchRow.item_id, dispatchForm);
+      const cv = movementConvs.find((c) => c.alt_uom === dispatchForm.unit);
+      const baseQty = cv ? Number(dispatchForm.qty) * Number(cv.factor_to_base) : Number(dispatchForm.qty);
+      const res = await ppcService.dispatchStock(dispatchRow.item_id, { ...dispatchForm, qty: baseQty });
       setDispatchRow(null);
       await load();
-      notify(`Dispatched ${num(dispatchForm.qty)} — on hand ${num(res?.on_hand)}`, 'success');
+      notify(
+        cv ? `Dispatched ${num(dispatchForm.qty)} ${dispatchForm.unit} = ${num(baseQty)} ${dispatchRow.item?.uom || ''} — on hand ${num(res?.on_hand)}`
+           : `Dispatched ${num(baseQty)} — on hand ${num(res?.on_hand)}`,
+        'success',
+      );
     } catch (e) {
       notify(e.message, 'error');
     } finally {
@@ -1157,11 +1171,11 @@ function MaterialsTab({ items, notify }) {
               <TextField select label="Unit" value={receiveForm.unit}
                 onChange={(e) => setReceiveForm({ ...receiveForm, unit: e.target.value })} sx={{ minWidth: 130 }}>
                 <MenuItem value="">{receiveRow?.item?.uom || 'base'}</MenuItem>
-                {receiveConvs.map((c) => <MenuItem key={c.id} value={c.alt_uom}>{c.alt_uom}</MenuItem>)}
+                {movementConvs.map((c) => <MenuItem key={c.id} value={c.alt_uom}>{c.alt_uom}</MenuItem>)}
               </TextField>
             </Stack>
             {(() => {
-              const conv = receiveConvs.find((c) => c.alt_uom === receiveForm.unit);
+              const conv = movementConvs.find((c) => c.alt_uom === receiveForm.unit);
               return conv && Number(receiveForm.qty) > 0 ? (
                 <Typography variant="caption" color="text.secondary">
                   = {num(Number(receiveForm.qty) * Number(conv.factor_to_base))} {receiveRow?.item?.uom || ''} posted to stock (1 {conv.alt_uom} = {conv.factor_to_base} {receiveRow?.item?.uom})
@@ -1200,15 +1214,24 @@ function MaterialsTab({ items, notify }) {
             <Typography variant="body2" color="text.secondary">
               Set the corrected on-hand quantity (e.g. after a cycle count). Current {num(adjustRow?.on_hand)} {adjustRow?.item?.uom || ''}.
             </Typography>
-            <TextField
-              label="New on-hand qty"
-              type="number"
-              value={adjustForm.newQty}
-              onChange={(e) => setAdjustForm({ ...adjustForm, newQty: e.target.value })}
-              fullWidth
-              required
-              autoFocus
-            />
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <TextField
+                label="New on-hand qty"
+                type="number"
+                value={adjustForm.newQty}
+                onChange={(e) => setAdjustForm({ ...adjustForm, newQty: e.target.value })}
+                fullWidth
+                required
+                autoFocus
+              />
+              <TextField select label="Unit" value={adjustForm.unit}
+                onChange={(e) => setAdjustForm({ ...adjustForm, unit: e.target.value })} sx={{ minWidth: 120 }}>
+                <MenuItem value="">{adjustRow?.item?.uom || 'base'}</MenuItem>
+                {movementConvs.map((c) => <MenuItem key={c.id} value={c.alt_uom}>{c.alt_uom}</MenuItem>)}
+              </TextField>
+            </Stack>
+            {(() => { const cv = movementConvs.find((c) => c.alt_uom === adjustForm.unit); return cv && Number(adjustForm.newQty) > 0
+              ? <Typography variant="caption" color="text.secondary">= {num(Number(adjustForm.newQty) * Number(cv.factor_to_base))} {adjustRow?.item?.uom || ''} on hand</Typography> : null; })()}
             <TextField label="Reason" value={adjustForm.reason} onChange={(e) => setAdjustForm({ ...adjustForm, reason: e.target.value })} fullWidth multiline minRows={2} helperText="Why is this adjustment needed?" />
           </Stack>
         </DialogContent>
@@ -1233,15 +1256,24 @@ function MaterialsTab({ items, notify }) {
             <Typography variant="body2" color="text.secondary">
               {dispatchRow?.item?.name} · available {num(dispatchRow?.on_hand)} {dispatchRow?.item?.uom || ''}
             </Typography>
-            <TextField
-              label="Quantity to dispatch"
-              type="number"
-              value={dispatchForm.qty}
-              onChange={(e) => setDispatchForm({ ...dispatchForm, qty: e.target.value })}
-              fullWidth
-              required
-              autoFocus
-            />
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <TextField
+                label="Quantity to dispatch"
+                type="number"
+                value={dispatchForm.qty}
+                onChange={(e) => setDispatchForm({ ...dispatchForm, qty: e.target.value })}
+                fullWidth
+                required
+                autoFocus
+              />
+              <TextField select label="Unit" value={dispatchForm.unit}
+                onChange={(e) => setDispatchForm({ ...dispatchForm, unit: e.target.value })} sx={{ minWidth: 120 }}>
+                <MenuItem value="">{dispatchRow?.item?.uom || 'base'}</MenuItem>
+                {movementConvs.map((c) => <MenuItem key={c.id} value={c.alt_uom}>{c.alt_uom}</MenuItem>)}
+              </TextField>
+            </Stack>
+            {(() => { const cv = movementConvs.find((c) => c.alt_uom === dispatchForm.unit); return cv && Number(dispatchForm.qty) > 0
+              ? <Typography variant="caption" color="text.secondary">= {num(Number(dispatchForm.qty) * Number(cv.factor_to_base))} {dispatchRow?.item?.uom || ''} out</Typography> : null; })()}
             <TextField label="Customer" value={dispatchForm.customer} onChange={(e) => setDispatchForm({ ...dispatchForm, customer: e.target.value })} fullWidth />
             <TextField label="Reference" value={dispatchForm.reference} onChange={(e) => setDispatchForm({ ...dispatchForm, reference: e.target.value })} fullWidth helperText="DC / invoice no." />
           </Stack>
