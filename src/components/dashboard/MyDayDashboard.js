@@ -580,6 +580,7 @@ function MyDayDashboard({ email }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, handler)
       .on("postgres_changes", { event: "*", schema: "public", table: "task_instances" }, handler)
       .on("postgres_changes", { event: "*", schema: "public", table: "crm_pipeline" }, handler)
+      .on("postgres_changes", { event: "*", schema: "public", table: "crm_pipeline_activity" }, handler)
       .subscribe((status) => {
         if (mountedRef.current) setLive(status === "SUBSCRIBED");
       });
