@@ -1079,6 +1079,7 @@ const crmPipelineService = {
   repWorklist,
   rfmDashboard,
   clientHealth,
+  clientTimeline,
   teamPerformance,
   moveClientPipelineStage,
   repScorecard,
