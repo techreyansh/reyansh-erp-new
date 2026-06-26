@@ -14,6 +14,7 @@ import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
 import { listAccountTasks, createTask } from '../../services/taskService';
+import { usePermissions } from '../../context/PermissionContext';
 import EventRepeatRounded from '@mui/icons-material/EventRepeatRounded';
 import AddTaskRounded from '@mui/icons-material/AddTaskRounded';
 import RequestQuoteRounded from '@mui/icons-material/RequestQuoteRounded';
@@ -174,6 +175,7 @@ function CompanyFields({ c }) {
 
 // Account-linked tasks: list + quick add (assigned to the account owner).
 function TasksTab({ accountId, ownerEmail, notify }) {
+  const { employee } = usePermissions();
   const [tasks, setTasks] = useState(null);
   const [form, setForm] = useState({ title: '', due_date: '', priority: 'medium' });
   const [busy, setBusy] = useState(false);
@@ -183,7 +185,11 @@ function TasksTab({ accountId, ownerEmail, notify }) {
     if (!form.title.trim()) return;
     setBusy(true);
     try {
-      await createTask({ title: form.title.trim(), due_date: form.due_date || null, priority: form.priority, account_id: accountId, assigned_email: ownerEmail || undefined }, null);
+      // assigned_by MUST be the current employee id — the tasks INSERT RLS policy
+      // checks `assigned_by = rbac_current_employee_id()`. Passing null (the old
+      // bug) made every create fail the row-level security check. Default the
+      // assignee to the current user when the prospect has no owner.
+      await createTask({ title: form.title.trim(), due_date: form.due_date || null, priority: form.priority, account_id: accountId, assigned_email: ownerEmail || employee?.email || undefined }, employee?.id);
       setForm({ title: '', due_date: '', priority: 'medium' }); notify?.('Task created'); reload();
     } catch (e) { notify?.(e.message || 'Could not create task', 'error'); } finally { setBusy(false); }
   };
