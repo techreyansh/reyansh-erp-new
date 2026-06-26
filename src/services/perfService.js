@@ -91,6 +91,21 @@ export async function personScore(email, weekStart) {
 }
 
 /**
+ * Score trend over the last `weeks` weeks (oldest → newest; the last entry is the
+ * current week). Returns [{ weekStart, score }] with null where there's no data.
+ * Powers the dashboard's weekly/monthly + vs-last-week trend.
+ */
+export async function scoreTrend(email, weeks = 4) {
+  const p_email = normEmail(email);
+  if (!p_email) return [];
+  const cur = getCurrentWeekStart();
+  const starts = [];
+  for (let i = weeks - 1; i >= 0; i -= 1) starts.push(addWeeks(cur, -i));
+  const results = await Promise.all(starts.map((ws) => personScore(p_email, ws).catch(() => null)));
+  return starts.map((ws, i) => ({ weekStart: ws, score: results[i]?.score ?? null }));
+}
+
+/**
  * Upsert a manager review for one person/week.
  * Keyed on UNIQUE(lower(email), week_start) via onConflict. Defensive: falls back
  * to select-then-update/insert if the upsert is rejected (e.g. conflict target
