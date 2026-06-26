@@ -535,6 +535,24 @@ export async function updateCompany(id, patch) {
   return data;
 }
 
+/**
+ * Resolve a single account row by its customer_code (case-insensitive). Used to
+ * open the full 360 from lists that only carry a code (top customers/debtors,
+ * analytics, AR). Returns the crm_pipeline row, or null if not found / hidden by
+ * RLS. Never throws — callers fall back to a minimal account.
+ */
+export async function getCompanyByCode(code) {
+  if (!code) return null;
+  const { data, error } = await supabase
+    .from("crm_pipeline")
+    .select("*")
+    .ilike("customer_code", String(code).trim())
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return data || null;
+}
+
 /** All order cycles (RLS filters to the caller). */
 export async function listOrderCycles() {
   const { data, error } = await supabase
@@ -1038,6 +1056,7 @@ const crmPipelineService = {
   listClients,
   listRecurring,
   getCompany,
+  getCompanyByCode,
   moveStage,
   moveProspectStage,
   updateClientStage,
