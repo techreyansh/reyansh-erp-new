@@ -5,6 +5,7 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody,
 } from '@mui/material';
 import npdService, { NPD_STAGE_LABEL } from '../../services/npdService';
+import { listAssignableUsers } from '../../services/crmPipelineService';
 
 /**
  * Customer-centric NPD panel — every development for ONE CRM customer
@@ -26,7 +27,8 @@ export default function NPDDevelopmentPanel({ accountId, customerCode, companyNa
   const [devs, setDevs] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const blank = { product_name: '', development_type: 'sample_based', customer_part_no: '', priority: 'normal', target_date: '', npd_engineer_email: '' };
+  const [engineers, setEngineers] = useState([]);
+  const blank = { product_name: '', development_type: 'sample_based', customer_part_no: '', priority: 'normal', target_date: '', npd_engineer_email: '', notes: '' };
   const [form, setForm] = useState(blank);
 
   const load = useCallback(async () => {
@@ -34,6 +36,8 @@ export default function NPDDevelopmentPanel({ accountId, customerCode, companyNa
     catch (e) { setDevs([]); notify?.(e.message, 'error'); }
   }, [customerCode, accountId, notify]);
   useEffect(() => { load(); }, [load]);
+  // Active users for the engineer picker (degrades to [] — field still usable).
+  useEffect(() => { listAssignableUsers().then((u) => setEngineers(u || [])).catch(() => setEngineers([])); }, []);
 
   const summary = (devs || []).reduce((a, d) => {
     if (d.status === 'approved') a.approved++;
@@ -75,7 +79,18 @@ export default function NPDDevelopmentPanel({ accountId, customerCode, companyNa
             <Grid item xs={12} sm={6}><TextField size="small" fullWidth label="Customer part no." value={form.customer_part_no} onChange={set('customer_part_no')} /></Grid>
             <Grid item xs={6} sm={3}><TextField size="small" fullWidth select label="Priority" value={form.priority} onChange={set('priority')}>{['low', 'normal', 'high', 'urgent'].map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}</TextField></Grid>
             <Grid item xs={6} sm={3}><TextField size="small" fullWidth type="date" label="Target" value={form.target_date} onChange={set('target_date')} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid item xs={12} sm={6}><TextField size="small" fullWidth label="Assigned engineer (email)" value={form.npd_engineer_email} onChange={set('npd_engineer_email')} /></Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField size="small" fullWidth select label="Assigned engineer" value={form.npd_engineer_email} onChange={set('npd_engineer_email')}
+                helperText={engineers.length ? undefined : 'No users to pick — assign later from the project'}>
+                <MenuItem value=""><em>Unassigned</em></MenuItem>
+                {engineers.map((u) => (
+                  <MenuItem key={u.email} value={u.email}>
+                    {u.full_name || u.email}{u.department ? ` — ${u.department}` : ''}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12}><TextField size="small" fullWidth multiline minRows={2} label="Note for the engineer" placeholder="Specs, drawings reference, what the customer asked for…" value={form.notes} onChange={set('notes')} /></Grid>
             <Grid item xs={12}><Button variant="contained" color="secondary" onClick={submit} disabled={saving}>{saving ? <CircularProgress size={20} /> : 'Create & open'}</Button></Grid>
           </Grid>
         </Box>
