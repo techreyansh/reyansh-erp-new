@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ScoreBreakdownDialog from "./ScoreBreakdownDialog";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -168,6 +169,7 @@ function PillarBar({ label, value }) {
 }
 
 function ScoreCard({ score, loading, theme, onOpen }) {
+  const [bdOpen, setBdOpen] = useState(false);
   if (loading) {
     return (
       <Card variant="outlined" sx={{ borderRadius: 2.5, height: "100%" }}>
@@ -190,15 +192,17 @@ function ScoreCard({ score, loading, theme, onOpen }) {
   const categories = score?.categories || {};
 
   return (
+    <>
+    <ScoreBreakdownDialog open={bdOpen} onClose={() => setBdOpen(false)} score={score} onOpenFull={onOpen} />
     <Card
       variant="outlined"
-      onClick={onOpen}
+      onClick={() => (hasData ? setBdOpen(true) : onOpen && onOpen())}
       sx={{
         borderRadius: 2.5,
         height: "100%",
-        cursor: onOpen ? "pointer" : "default",
+        cursor: hasData || onOpen ? "pointer" : "default",
         transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-        "&:hover": onOpen
+        "&:hover": (hasData || onOpen)
           ? { borderColor: alpha(bandColor, 0.5), boxShadow: `0 8px 20px -12px ${alpha(bandColor, 0.6)}` }
           : undefined,
       }}
@@ -245,6 +249,7 @@ function ScoreCard({ score, loading, theme, onOpen }) {
         )}
       </CardContent>
     </Card>
+    </>
   );
 }
 
