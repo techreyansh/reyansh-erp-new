@@ -553,6 +553,24 @@ export async function getCompanyByCode(code) {
   return data || null;
 }
 
+/**
+ * Resolve a single account row by company_name (case-insensitive). company_name
+ * is unique in crm_pipeline (crm_pipeline_company_name_uniq), so this is a safe
+ * fallback for lists that carry only a display name (e.g. the Overview summary).
+ * Never throws — returns null if not found / hidden by RLS.
+ */
+export async function getCompanyByName(name) {
+  if (!name) return null;
+  const { data, error } = await supabase
+    .from("crm_pipeline")
+    .select("*")
+    .ilike("company_name", String(name).trim())
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return data || null;
+}
+
 /** All order cycles (RLS filters to the caller). */
 export async function listOrderCycles() {
   const { data, error } = await supabase
@@ -1057,6 +1075,7 @@ const crmPipelineService = {
   listRecurring,
   getCompany,
   getCompanyByCode,
+  getCompanyByName,
   moveStage,
   moveProspectStage,
   updateClientStage,

@@ -1709,7 +1709,7 @@ export default function CRMDashboard({ data, loading }) {
                           {i + 1}
                         </Avatar>
                         <Typography variant="body2" noWrap sx={{ fontWeight: 500, maxWidth: 130 }}>
-                          {c.name}
+                          <CompanyLink name={c.name} />
                         </Typography>
                       </Stack>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{inrCompact(c.value)}</Typography>

@@ -19,16 +19,19 @@ export default function useCompany360(notify) {
   const [loadingKey, setLoadingKey] = useState(null);
 
   const open = useCallback(async ({ id, customer_code, company_name } = {}) => {
-    if (!id && !customer_code) return;
-    const key = id || customer_code;
+    if (!id && !customer_code && !company_name) return;
+    const key = id || customer_code || company_name;
     setLoadingKey(key);
     let acct = null;
     try {
       if (id) {
         const res = await crmPipelineService.getCompany(id);
         acct = res?.company || null;
-      } else {
+      } else if (customer_code) {
         acct = await crmPipelineService.getCompanyByCode(customer_code);
+      } else {
+        // company_name is unique in crm_pipeline — safe last-resort resolve.
+        acct = await crmPipelineService.getCompanyByName(company_name);
       }
     } catch {
       acct = null;
