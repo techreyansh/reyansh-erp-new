@@ -3544,10 +3544,13 @@ export default function CRMPipelineBoard() {
 
       <CrmReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
 
-      {/* Clients open the full Client-360 hub; prospects keep the legacy drawer. */}
+      {/* Every account — client, prospect, or recurring — opens the full 360 hub.
+          Prospects get a "Convert to client" quick-action inside it. */}
       {(() => {
-        const clientAcct = drawerId ? clients.find((x) => x.id === drawerId) : null;
-        if (clientAcct) return <Client360 account={clientAcct} onClose={() => setDrawerId(null)} notify={notify} />;
+        const acct = drawerId
+          ? (clients.find((x) => x.id === drawerId) || prospects.find((x) => x.id === drawerId) || recurring.find((x) => x.id === drawerId))
+          : null;
+        if (acct) return <Client360 account={acct} onClose={() => setDrawerId(null)} onChanged={loadAll} notify={notify} />;
         return (
           <CompanyDrawer
             id={drawerId}
