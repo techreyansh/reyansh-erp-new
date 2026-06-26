@@ -13,6 +13,11 @@ import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
 import aiCopilot from '../../services/aiCopilotService';
+import { listAccountTasks, createTask } from '../../services/taskService';
+import EventRepeatRounded from '@mui/icons-material/EventRepeatRounded';
+import AddTaskRounded from '@mui/icons-material/AddTaskRounded';
+import RequestQuoteRounded from '@mui/icons-material/RequestQuoteRounded';
+import ScienceRounded from '@mui/icons-material/ScienceRounded';
 import NPDDevelopmentPanel from './NPDDevelopmentPanel';
 import CompanyContacts from './CompanyContacts';
 import CompanyAddresses from './CompanyAddresses';
@@ -136,8 +141,100 @@ function TimelineTab({ account }) {
 }
 
 
+// Company master — full field view, grouped. (Editing stays in the CRM board's
+// company dialog; this is the read-complete 360 surface.)
+function CompanyFields({ c }) {
+  const GROUPS = [
+    ['Identity', [['Legal name', c.legal_name], ['Customer type', c.customer_type], ['Industry', c.industry], ['Business type', c.business_type], ['Category', c.customer_category], ['Employees', c.num_employees], ['Annual turnover', c.annual_turnover ? inr(c.annual_turnover) : null], ['Website', c.website], ['Description', c.company_description]]],
+    ['Tax & registration', [['GSTIN', c.gstin], ['PAN', c.pan], ['CIN', c.cin], ['IEC', c.iec]]],
+    ['Commercial', [['Lead source', c.lead_source], ['Rating', c.rating], ['Territory', c.territory], ['Currency', c.currency], ['Payment terms', c.payment_terms], ['Credit limit', c.credit_limit ? inr(c.credit_limit) : null], ['Credit period', c.credit_period], ['Delivery terms', c.delivery_terms], ['Owner', c.owner_email]]],
+    ['Business', [['Products manufactured', c.products_manufactured], ['Markets served', c.markets_served], ['Current products', c.current_products], ['Interested products', c.interested_products], ['Monthly consumption', c.monthly_consumption], ['Competitors', c.competitors], ['Existing suppliers', c.existing_suppliers]]],
+  ];
+  return (
+    <Grid container spacing={2}>
+      {GROUPS.map(([title, rows]) => {
+        const shown = rows.filter(([, v]) => v != null && v !== '');
+        if (!shown.length) return null;
+        return (
+          <Grid item xs={12} sm={6} key={title}>
+            <Typography variant="overline" color="text.secondary">{title}</Typography>
+            {shown.map(([k, v]) => (
+              <Stack key={k} direction="row" justifyContent="space-between" spacing={2} sx={{ py: 0.25 }}>
+                <Typography variant="body2" color="text.secondary">{k}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{String(v)}</Typography>
+              </Stack>
+            ))}
+          </Grid>
+        );
+      })}
+    </Grid>
+  );
+}
+
+// Account-linked tasks: list + quick add (assigned to the account owner).
+function TasksTab({ accountId, ownerEmail, notify }) {
+  const [tasks, setTasks] = useState(null);
+  const [form, setForm] = useState({ title: '', due_date: '', priority: 'medium' });
+  const [busy, setBusy] = useState(false);
+  const reload = useCallback(() => { listAccountTasks(accountId).then(setTasks).catch(() => setTasks([])); }, [accountId]);
+  useEffect(() => { reload(); }, [reload]);
+  const add = async () => {
+    if (!form.title.trim()) return;
+    setBusy(true);
+    try {
+      await createTask({ title: form.title.trim(), due_date: form.due_date || null, priority: form.priority, account_id: accountId, assigned_email: ownerEmail || undefined }, null);
+      setForm({ title: '', due_date: '', priority: 'medium' }); notify?.('Task created'); reload();
+    } catch (e) { notify?.(e.message || 'Could not create task', 'error'); } finally { setBusy(false); }
+  };
+  return (
+    <Stack spacing={2}>
+      <Box sx={{ p: 1.5, borderRadius: 2, border: 1, borderColor: 'divider' }}>
+        <Typography variant="overline" color="text.secondary">New task{ownerEmail ? ` → ${String(ownerEmail).split('@')[0]}` : ''}</Typography>
+        <Grid container spacing={1} sx={{ mt: 0 }}>
+          <Grid item xs={12} sm={5}><TextField size="small" fullWidth label="Task" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></Grid>
+          <Grid item xs={6} sm={3}><TextField size="small" fullWidth type="date" label="Due" InputLabelProps={{ shrink: true }} value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></Grid>
+          <Grid item xs={6} sm={2}><TextField select size="small" fullWidth label="Priority" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>{['low', 'medium', 'high', 'urgent'].map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}</TextField></Grid>
+          <Grid item xs={12} sm={2}><Button fullWidth variant="contained" disabled={busy || !form.title.trim()} onClick={add} sx={{ height: '100%', borderRadius: 2 }}>Add</Button></Grid>
+        </Grid>
+      </Box>
+      {!tasks ? <Stack alignItems="center" sx={{ py: 3 }}><CircularProgress size={20} /></Stack> : (
+        <MiniTable cols={['Task', 'Owner', 'Due', 'Priority', 'Status']} rows={tasks} empty="No tasks on this account yet." render={(r) => (
+          <><TableCell sx={{ fontWeight: 600 }}>{r.title}</TableCell><TableCell>{(r.assigned_name || r.assigned_email || '—').toString().split('@')[0]}</TableCell><TableCell sx={{ color: r.task_status !== 'completed' && r.due_date && new Date(r.due_date) < new Date() ? 'error.main' : 'text.primary' }}>{dt(r.due_date)}</TableCell><TableCell><Chip size="small" variant="outlined" color={r.priority === 'urgent' || r.priority === 'high' ? 'error' : 'default'} label={r.priority} /></TableCell><TableCell><Chip size="small" variant="outlined" color={r.task_status === 'completed' ? 'success' : 'default'} label={String(r.task_status).replace('_', ' ')} /></TableCell></>
+        )} />
+      )}
+    </Stack>
+  );
+}
+
+// Notes — the note-type slice of the activity feed + a quick add.
+function NotesTab({ accountId, activities, onAdded, notify }) {
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const notes = (activities || []).filter((a) => a.activity_type === 'note');
+  const add = async () => {
+    if (!text.trim()) return;
+    setBusy(true);
+    try { await crmPipelineService.addActivity(accountId, { activity_type: 'note', subject: text.trim().slice(0, 60), body: text.trim() }); setText(''); notify?.('Note added'); onAdded?.(); }
+    catch (e) { notify?.(e.message || 'Failed', 'error'); } finally { setBusy(false); }
+  };
+  return (
+    <Stack spacing={2}>
+      <Box sx={{ p: 1.5, borderRadius: 2, border: 1, borderColor: 'divider' }}>
+        <TextField size="small" fullWidth multiline minRows={2} placeholder="Add a note about this account…" value={text} onChange={(e) => setText(e.target.value)} />
+        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}><Button size="small" variant="contained" disabled={busy || !text.trim()} onClick={add} sx={{ borderRadius: 2 }}>Add note</Button></Stack>
+      </Box>
+      {notes.length === 0 ? <Typography variant="body2" color="text.secondary" sx={{ p: 1 }}>No notes yet.</Typography> : notes.map((n, i) => (
+        <Box key={i} sx={{ py: 0.75, borderBottom: 1, borderColor: 'divider' }}>
+          <Stack direction="row" justifyContent="space-between"><Typography variant="body2" sx={{ fontWeight: 600 }}>{n.subject || 'Note'}</Typography><Typography variant="caption" color="text.disabled">{dt(n.activity_at || n.created_at)}</Typography></Stack>
+          {n.body && n.body !== n.subject && <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>{n.body}</Typography>}
+        </Box>
+      ))}
+    </Stack>
+  );
+}
+
 export default function Client360({ account, onClose, notify }) {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState('overview');
   const [data, setData] = useState(null);
   const [crm, setCrm] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -164,7 +261,37 @@ export default function Client360({ account, onClose, notify }) {
 
   const s = data?.summary || {};
   const c = crm?.company || account;
-  const TABS = ['Overview', 'Contacts', 'Products', 'Quotations', 'Sales Orders', 'Production', 'Dispatch', 'Invoices', 'Payments', 'Timeline', 'KIT', 'Tasks', 'Documents', 'Complaints', 'AI Copilot', 'Development', 'Addresses'];
+  const phoneDigits = String(c.phone || account.phone || '').replace(/\D/g, '');
+  // Tab order follows the 360 spec; extra operational tabs (Production…AI) follow.
+  const TABS = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'company', label: 'Company' },
+    { key: 'contacts', label: 'Contacts' },
+    { key: 'addresses', label: 'Addresses' },
+    { key: 'products', label: 'Products' },
+    { key: 'sales', label: 'Sales' },
+    { key: 'npd', label: 'NPD' },
+    { key: 'documents', label: 'Documents' },
+    { key: 'timeline', label: 'Timeline' },
+    { key: 'tasks', label: 'Tasks' },
+    { key: 'financial', label: 'Financial' },
+    { key: 'notes', label: 'Notes' },
+    { key: 'production', label: 'Production' },
+    { key: 'dispatch', label: 'Dispatch' },
+    { key: 'kit', label: 'KIT' },
+    { key: 'complaints', label: 'Complaints' },
+    { key: 'ai', label: 'AI Copilot' },
+  ];
+  // Quick actions — jump to the relevant tab, or fire a direct channel link.
+  const QUICK = [
+    { label: 'Follow-up', icon: <EventRepeatRounded fontSize="small" />, onClick: () => setTab('timeline') },
+    { label: 'Task', icon: <AddTaskRounded fontSize="small" />, onClick: () => setTab('tasks') },
+    phoneDigits && { label: 'WhatsApp', icon: <WhatsApp fontSize="small" />, href: `https://wa.me/${phoneDigits}` },
+    (c.email || account.email) && { label: 'Email', icon: <EmailOutlined fontSize="small" />, href: `mailto:${c.email || account.email}` },
+    { label: 'Quotation', icon: <RequestQuoteRounded fontSize="small" />, onClick: () => setTab('sales') },
+    { label: 'NPD request', icon: <ScienceRounded fontSize="small" />, onClick: () => setTab('npd') },
+    { label: 'AI summary', icon: <AutoAwesomeRounded fontSize="small" />, onClick: () => setTab('ai') },
+  ].filter(Boolean);
 
   return (
     <Drawer anchor="right" open onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', md: 980 }, maxWidth: '100%' } }}>
@@ -193,16 +320,23 @@ export default function Client360({ account, onClose, notify }) {
             <Box key={l}><Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.58rem', display: 'block' }}>{l}</Typography><Typography variant="subtitle2" sx={{ fontWeight: 800, color: col }}>{v ?? 0}</Typography></Box>
           ))}
         </Stack>
+        {/* Quick actions */}
+        <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
+          {QUICK.map((q) => (q.href ? (
+            <Button key={q.label} size="small" variant="outlined" startIcon={q.icon} component="a" href={q.href} target="_blank" rel="noreferrer" sx={{ borderRadius: 2, textTransform: 'none' }}>{q.label}</Button>
+          ) : (
+            <Button key={q.label} size="small" variant="outlined" startIcon={q.icon} onClick={q.onClick} sx={{ borderRadius: 2, textTransform: 'none' }}>{q.label}</Button>
+          )))}
+        </Stack>
       </Box>
 
       <Tabs value={tab} onChange={(e, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        {TABS.map((t) => <Tab key={t} label={t} />)}
+        {TABS.map((t) => <Tab key={t.key} value={t.key} label={t.label} />)}
       </Tabs>
 
       {loading || !data ? <Stack alignItems="center" sx={{ py: 6 }}><CircularProgress /></Stack> : (
         <Box sx={{ p: 2, overflowY: 'auto' }}>
-          {/* 0 OVERVIEW */}
-          {tab === 0 && (
+          {tab === 'overview' && (
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Typography variant="overline" color="text.secondary">Company</Typography>
@@ -221,46 +355,21 @@ export default function Client360({ account, onClose, notify }) {
               </Grid>
             </Grid>
           )}
-          {/* 1 CONTACTS — full multi-contact management (CRM 360 P2) */}
-          {tab === 1 && account?.id && (
-            <CompanyContacts accountId={account.id} />
-          )}
-          {/* 2 PRODUCTS */}
-          {tab === 2 && <MiniTable cols={['Code', 'Product', 'Status', 'Rev']} rows={data.products} empty="No products linked." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.product_code}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.status}</TableCell><TableCell>{r.current_revision}</TableCell></>} />}
-          {/* 3 QUOTATIONS */}
-          {tab === 3 && <MiniTable cols={['Quote', 'Date', 'Valid', 'Total', 'Status']} rows={data.quotations} empty="No quotations." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.quote_number}</TableCell><TableCell>{dt(r.quote_date)}</TableCell><TableCell>{dt(r.valid_until)}</TableCell><TableCell>{inr(r.total)}</TableCell><TableCell>{r.status}</TableCell></>} />}
-          {/* 4 SALES ORDERS */}
-          {tab === 4 && <MiniTable cols={['SO', 'PO', 'Qty', 'Value', 'Expected', 'Status']} rows={data.orders} empty="No sales orders." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{r.po_number || '—'}</TableCell><TableCell>{r.total_qty}</TableCell><TableCell>{inr(r.total_value)}</TableCell><TableCell>{dt(r.expected_dispatch_date)}</TableCell><TableCell>{r.status}</TableCell></>} />}
-          {/* 5 PRODUCTION */}
-          {tab === 5 && (
+          {tab === 'company' && <CompanyFields c={c} />}
+          {tab === 'contacts' && account?.id && <CompanyContacts accountId={account.id} />}
+          {tab === 'addresses' && account?.id && <CompanyAddresses accountId={account.id} />}
+          {tab === 'products' && <MiniTable cols={['Code', 'Product', 'Status', 'Rev']} rows={data.products} empty="No products linked." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.product_code}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.status}</TableCell><TableCell>{r.current_revision}</TableCell></>} />}
+          {tab === 'sales' && (
             <Stack spacing={2}>
-              <Box><Typography variant="overline" color="text.secondary">Production demand ({data.prodDemand.length})</Typography>
-                <MiniTable cols={['SO', 'Product', 'Qty', 'Required', 'Status']} rows={data.prodDemand} empty="No production demand." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.qty} {r.uom}</TableCell><TableCell>{dt(r.required_date)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
-              <Box><Typography variant="overline" color="text.secondary">Order cycles ({data.orderCycles.length})</Typography>
-                <MiniTable cols={['Order', 'Stage', 'Amount', 'Date']} rows={data.orderCycles} empty="No order cycles." render={(r) => <><TableCell>{r.order_number}</TableCell><TableCell><Chip size="small" variant="outlined" label={String(r.cycle_stage || '').replace(/_/g, ' ')} /></TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell>{dt(r.order_date)}</TableCell></>} /></Box>
+              <Box><Typography variant="overline" color="text.secondary">Quotations ({data.quotations?.length || 0})</Typography>
+                <MiniTable cols={['Quote', 'Date', 'Valid', 'Total', 'Status']} rows={data.quotations} empty="No quotations." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.quote_number}</TableCell><TableCell>{dt(r.quote_date)}</TableCell><TableCell>{dt(r.valid_until)}</TableCell><TableCell>{inr(r.total)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
+              <Box><Typography variant="overline" color="text.secondary">Sales orders ({data.orders?.length || 0})</Typography>
+                <MiniTable cols={['SO', 'PO', 'Qty', 'Value', 'Expected', 'Status']} rows={data.orders} empty="No sales orders." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{r.po_number || '—'}</TableCell><TableCell>{r.total_qty}</TableCell><TableCell>{inr(r.total_value)}</TableCell><TableCell>{dt(r.expected_dispatch_date)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
             </Stack>
           )}
-          {/* 6 DISPATCH */}
-          {tab === 6 && <MiniTable cols={['SO', 'Planned', 'Dispatched', 'Value', 'Status']} rows={data.dispatches} empty="No dispatches." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{dt(r.dispatch_date)}</TableCell><TableCell>{dt(r.actual_dispatch_date)}</TableCell><TableCell>{inr(r.total_value)}</TableCell><TableCell>{r.status}</TableCell></>} />}
-          {/* 7 INVOICES */}
-          {tab === 7 && (
-            <Box>
-              <Stack direction="row" spacing={3} sx={{ mb: 1.5 }}>
-                <Box><Typography variant="caption" color="text.secondary">Billed</Typography><Typography variant="h6" sx={{ fontWeight: 800 }}>{inr(s.billed)}</Typography></Box>
-                <Box><Typography variant="caption" color="text.secondary">Outstanding</Typography><Typography variant="h6" sx={{ fontWeight: 800, color: s.outstanding ? 'error.main' : 'success.main' }}>{inr(s.outstanding)}</Typography></Box>
-              </Stack>
-              <MiniTable cols={['Invoice', 'Date', 'Amount', 'Balance', 'Due', 'Status']} rows={data.invoices} empty="No invoices." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.invoice_number}</TableCell><TableCell>{dt(r.invoice_date)}</TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell sx={{ color: Number(r.balance) > 0 ? 'error.main' : 'text.primary', fontWeight: 600 }}>{inr(r.balance)}</TableCell><TableCell>{dt(r.due_date)}</TableCell><TableCell>{r.status}</TableCell></>} />
-            </Box>
-          )}
-          {/* 8 PAYMENTS */}
-          {tab === 8 && (
-            <Box>
-              <Typography variant="overline" color="text.secondary">Outstanding ({inr(s.outstanding)})</Typography>
-              <MiniTable cols={['Invoice', 'Due', 'Amount', 'Balance', 'Status']} rows={data.invoices.filter((i) => Number(i.balance) > 0)} empty="No outstanding payments — all settled." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.invoice_number}</TableCell><TableCell>{dt(r.due_date)}</TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell sx={{ color: 'error.main', fontWeight: 700 }}>{inr(r.balance)}</TableCell><TableCell>{r.status}</TableCell></>} />
-            </Box>
-          )}
-          {/* 9 TIMELINE (+ log activity) */}
-          {tab === 9 && (
+          {tab === 'npd' && <NPDDevelopmentPanel accountId={account.id} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
+          {tab === 'documents' && account?.id && <CompanyDocuments accountId={account.id} />}
+          {tab === 'timeline' && (
             <Stack spacing={2}>
               <Box sx={{ p: 1.5, borderRadius: 2, border: 1, borderColor: 'divider' }}>
                 <Typography variant="overline" color="text.secondary">Log activity</Typography>
@@ -274,19 +383,40 @@ export default function Client360({ account, onClose, notify }) {
               <TimelineTab account={account} />
             </Stack>
           )}
-          {/* 10 KIT */}
-          {tab === 10 && <MiniTable cols={['Channel', 'Dir', 'Subject', 'Status', 'When']} rows={data.kit} empty="No KIT messages." render={(r) => <><TableCell sx={{ textTransform: 'capitalize' }}>{r.channel}</TableCell><TableCell>{r.direction}</TableCell><TableCell>{r.subject || '—'}</TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.sent_at || r.created_at)}</TableCell></>} />}
-          {/* 11 TASKS */}
-          {tab === 11 && <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>No client-linked tasks. (Tasks are managed in the Task module; account-linked tasks will appear here once tasks reference this account.)</Typography>}
-          {/* 12 DOCUMENTS */}
-          {tab === 12 && account?.id && <CompanyDocuments accountId={account.id} />}
-          {/* 13 COMPLAINTS */}
-          {tab === 13 && <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />}
-          {/* 14 AI COPILOT */}
-          {tab === 14 && <AICopilotTab account={account} notify={notify} />}
-          {/* 15 DEVELOPMENT (NPD) */}
-          {tab === 15 && <NPDDevelopmentPanel accountId={account.id} customerCode={c.customer_code || account.customer_code} companyName={c.company_name || account.company_name} notify={notify} />}
-          {tab === 16 && account?.id && <CompanyAddresses accountId={account.id} />}
+          {tab === 'tasks' && account?.id && <TasksTab accountId={account.id} ownerEmail={c.owner_email} notify={notify} />}
+          {tab === 'financial' && (
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="overline" color="text.secondary">Terms</Typography>
+                <Grid container spacing={2}>
+                  {[['Payment terms', c.payment_terms], ['Credit limit', c.credit_limit ? inr(c.credit_limit) : null], ['Credit period', c.credit_period], ['Annual turnover', c.annual_turnover ? inr(c.annual_turnover) : null]].filter(([, v]) => v).map(([k, v]) => (
+                    <Grid item xs={6} sm={3} key={k}><Typography variant="caption" color="text.secondary">{k}</Typography><Typography variant="body2" sx={{ fontWeight: 700 }}>{v}</Typography></Grid>
+                  ))}
+                </Grid>
+              </Box>
+              <Stack direction="row" spacing={3}>
+                <Box><Typography variant="caption" color="text.secondary">Billed</Typography><Typography variant="h6" sx={{ fontWeight: 800 }}>{inr(s.billed)}</Typography></Box>
+                <Box><Typography variant="caption" color="text.secondary">Outstanding</Typography><Typography variant="h6" sx={{ fontWeight: 800, color: s.outstanding ? 'error.main' : 'success.main' }}>{inr(s.outstanding)}</Typography></Box>
+              </Stack>
+              <Box><Typography variant="overline" color="text.secondary">Invoices</Typography>
+                <MiniTable cols={['Invoice', 'Date', 'Amount', 'Balance', 'Due', 'Status']} rows={data.invoices} empty="No invoices." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.invoice_number}</TableCell><TableCell>{dt(r.invoice_date)}</TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell sx={{ color: Number(r.balance) > 0 ? 'error.main' : 'text.primary', fontWeight: 600 }}>{inr(r.balance)}</TableCell><TableCell>{dt(r.due_date)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
+              <Box><Typography variant="overline" color="text.secondary">Outstanding payments</Typography>
+                <MiniTable cols={['Invoice', 'Due', 'Amount', 'Balance', 'Status']} rows={(data.invoices || []).filter((i) => Number(i.balance) > 0)} empty="All settled." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.invoice_number}</TableCell><TableCell>{dt(r.due_date)}</TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell sx={{ color: 'error.main', fontWeight: 700 }}>{inr(r.balance)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
+            </Stack>
+          )}
+          {tab === 'notes' && account?.id && <NotesTab accountId={account.id} activities={crm?.activities} onAdded={load} notify={notify} />}
+          {tab === 'production' && (
+            <Stack spacing={2}>
+              <Box><Typography variant="overline" color="text.secondary">Production demand ({data.prodDemand.length})</Typography>
+                <MiniTable cols={['SO', 'Product', 'Qty', 'Required', 'Status']} rows={data.prodDemand} empty="No production demand." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{r.product_name}</TableCell><TableCell>{r.qty} {r.uom}</TableCell><TableCell>{dt(r.required_date)}</TableCell><TableCell>{r.status}</TableCell></>} /></Box>
+              <Box><Typography variant="overline" color="text.secondary">Order cycles ({data.orderCycles.length})</Typography>
+                <MiniTable cols={['Order', 'Stage', 'Amount', 'Date']} rows={data.orderCycles} empty="No order cycles." render={(r) => <><TableCell>{r.order_number}</TableCell><TableCell><Chip size="small" variant="outlined" label={String(r.cycle_stage || '').replace(/_/g, ' ')} /></TableCell><TableCell>{inr(r.amount)}</TableCell><TableCell>{dt(r.order_date)}</TableCell></>} /></Box>
+            </Stack>
+          )}
+          {tab === 'dispatch' && <MiniTable cols={['SO', 'Planned', 'Dispatched', 'Value', 'Status']} rows={data.dispatches} empty="No dispatches." render={(r) => <><TableCell sx={{ fontFamily: 'monospace' }}>{r.so_number}</TableCell><TableCell>{dt(r.dispatch_date)}</TableCell><TableCell>{dt(r.actual_dispatch_date)}</TableCell><TableCell>{inr(r.total_value)}</TableCell><TableCell>{r.status}</TableCell></>} />}
+          {tab === 'kit' && <MiniTable cols={['Channel', 'Dir', 'Subject', 'Status', 'When']} rows={data.kit} empty="No KIT messages." render={(r) => <><TableCell sx={{ textTransform: 'capitalize' }}>{r.channel}</TableCell><TableCell>{r.direction}</TableCell><TableCell>{r.subject || '—'}</TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.sent_at || r.created_at)}</TableCell></>} />}
+          {tab === 'complaints' && <MiniTable cols={['Subject', 'Severity', 'Status', 'Raised', 'Resolved']} rows={data.complaints} empty="No complaints — clean record." render={(r) => <><TableCell sx={{ fontWeight: 600 }}>{r.subject}</TableCell><TableCell><Chip size="small" color={r.severity === 'high' ? 'error' : 'default'} variant="outlined" label={r.severity || '—'} /></TableCell><TableCell>{r.status}</TableCell><TableCell>{dt(r.created_at)}</TableCell><TableCell>{dt(r.resolved_at)}</TableCell></>} />}
+          {tab === 'ai' && <AICopilotTab account={account} notify={notify} />}
         </Box>
       )}
     </Drawer>
