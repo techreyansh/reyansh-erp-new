@@ -136,6 +136,7 @@ const ClientPipeline = lazy(() => import("./pages/crm/ClientPipeline"));
 const PaymentFollowUp = lazy(() => import("./pages/crm/PaymentFollowUp"));
 const ClientReports = lazy(() => import("./pages/crm/ClientReports"));
 const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl"));
+const InventoryMasters = lazy(() => import("./pages/inventory/InventoryMasters"));
 const InventoryLedger = lazy(() => import("./pages/inventory/InventoryLedger"));
 const NPDDashboard = lazy(() => import("./pages/npd/NPDDashboard"));
 const NPDProject = lazy(() => import("./pages/npd/NPDProject"));
@@ -433,6 +434,11 @@ function AppContent() {
                   <Route path="/inventory-control" element={
                     <ProtectedRouteGate>
                       <InventoryLedger />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/inventory-masters" element={
+                    <ProtectedRouteGate>
+                      <InventoryMasters />
                     </ProtectedRouteGate>
                   } />
 
