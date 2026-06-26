@@ -3226,11 +3226,13 @@ export default function CRMPipelineBoard() {
   const matchesScope = useCallback(
     (row) => {
       if (scope === "all") return true;
+      if (scope === "unassigned") return row?.owner_email == null || row?.owner_email === "";
       if (!currentEmail) return true;
-      // 'my' scope: a rep sees rows they own plus unassigned (claimable) leads.
+      // 'my' scope: STRICT — rows the rep OWNS, plus accounts explicitly SHARED
+      // with them (collaborator). Unassigned leads are NOT shown here; they live
+      // in the 'Unassigned' scope for managers to assign.
       const owner = row?.owner_email;
-      if (owner === currentEmail || owner == null || owner === "") return true;
-      // …and co-worked leads where the rep is a collaborator.
+      if (owner === currentEmail) return true;
       const collabs = collabMap.get(row?.id) || [];
       return collabs.includes(String(currentEmail).toLowerCase());
     },
@@ -3428,6 +3430,7 @@ export default function CRMPipelineBoard() {
             onChange={(_, v) => v && setScope(v)}
           >
             <ToggleButton value="my">My pipeline</ToggleButton>
+            <ToggleButton value="unassigned">Unassigned</ToggleButton>
             <ToggleButton value="all">All</ToggleButton>
           </ToggleButtonGroup>
 
