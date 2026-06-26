@@ -61,13 +61,16 @@ export async function listByCustomer({ customerCode, accountId } = {}) {
  * straight after.
  */
 export async function createProject(payload) {
-  const { development_type, opportunity, account_id, ...core } = payload || {};
+  // `notes` is a real npd_project column but the create RPC doesn't take it, so
+  // (like development_type/opportunity/account_id) it's patched straight after.
+  const { development_type, opportunity, account_id, notes, ...core } = payload || {};
   const { data, error } = await supabase.rpc('npd_create_project', { p_payload: core });
   throwIf(error, 'Create NPD project');
   const extra = {};
   if (development_type) extra.development_type = development_type;
   if (opportunity) extra.opportunity = opportunity;
   if (account_id) extra.account_id = account_id;
+  if (notes && notes.trim()) extra.notes = notes.trim();
   if (data?.id && Object.keys(extra).length) {
     try { return await updateProject(data.id, extra); } catch { /* non-fatal */ }
   }
