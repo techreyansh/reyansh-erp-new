@@ -148,6 +148,22 @@ export async function listTasks() {
   return hydrateTaskEmployees(data || []);
 }
 
+// Tasks linked to a CRM account (Client/Prospect 360 → Tasks tab).
+export async function listAccountTasks(accountId) {
+  if (!accountId) return [];
+  let { data, error } = await supabase
+    .from('tasks')
+    .select(TASK_SELECT)
+    .eq('account_id', accountId)
+    .order('created_at', { ascending: false });
+  if (error) {
+    const fb = await supabase.from('tasks').select(TASK_BASE_SELECT).eq('account_id', accountId).order('created_at', { ascending: false });
+    data = fb.data; error = fb.error;
+  }
+  if (error) throw error;
+  return hydrateTaskEmployees(data || []);
+}
+
 export async function createTask(task, assignedBy, assignee = null) {
   const assigneeEmail = normalizeEmail(assignee?.email || task.assigned_email);
   const assigneeName = assignee?.full_name || task.assigned_name || null;
@@ -165,6 +181,7 @@ export async function createTask(task, assignedBy, assignee = null) {
     due_date: task.due_date || null,
     task_status: task.task_status || 'pending',
     department: assigneeDepartment,
+    account_id: task.account_id || null,
   };
 
   if (!payload.title) throw new Error('Task title is required.');
