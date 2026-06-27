@@ -279,19 +279,29 @@ async function dispatchStock(itemId, { qty, customer, reference } = {}) {
   return data || null;
 }
 
-/** Recent stock transactions for an item, newest first. */
+/** Recent stock movements for an item, newest first. Reads the perpetual ledger
+ *  (inv_ledger) — the legacy ppc_stock_transactions audit froze when ppc_stock
+ *  became a view. Mapped to the fields the PPC stock-transactions panel renders. */
 async function listStockTransactions(itemId) {
   if (!itemId) return [];
   const data = unwrap(
     await supabase
-      .from('ppc_stock_transactions')
-      .select('*')
+      .from('inv_ledger')
+      .select('qty_delta, qty_after, movement_type, ref_type, reason, posted_by, posted_at')
       .eq('item_id', itemId)
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(100),
     'List stock transactions'
   );
-  return data ?? [];
+  return (data ?? []).map((m) => ({
+    quantity_delta: m.qty_delta,
+    on_hand_after: m.qty_after,
+    transaction_type: m.movement_type,
+    reference_type: m.ref_type,
+    notes: m.reason,
+    created_by_email: m.posted_by,
+    created_at: m.posted_at,
+  }));
 }
 
 // ---------------------------------------------------------------------------

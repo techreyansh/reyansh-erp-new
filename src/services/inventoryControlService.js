@@ -41,7 +41,10 @@ export async function listStock() {
 /** Material-360 — movements ledger + suppliers for one item. */
 export async function getMaterial360(itemId) {
   const [tx, vn] = await Promise.all([
-    supabase.from('ppc_stock_transactions').select('quantity_delta, on_hand_after, transaction_type, reference_type, notes, created_at, created_by_email').eq('item_id', itemId).order('created_at', { ascending: false }).limit(50).then((r) => r.data || []).catch(() => []),
+    // Movement history now comes from the perpetual ledger (inv_ledger) — the legacy
+    // ppc_stock_transactions audit stopped gaining rows when ppc_stock became a view.
+    supabase.from('inv_ledger').select('qty_delta, qty_after, movement_type, ref_type, reason, posted_by, posted_at').eq('item_id', itemId).order('id', { ascending: false }).limit(50)
+      .then((r) => (r.data || []).map((m) => ({ quantity_delta: m.qty_delta, on_hand_after: m.qty_after, transaction_type: m.movement_type, reference_type: m.ref_type, notes: m.reason, created_by_email: m.posted_by, created_at: m.posted_at }))).catch(() => []),
     supabase.from('ppc_item_vendors').select('vendor_code, vendor_name, is_preferred, lead_time_days, unit_cost, moq, last_quote_date').eq('item_id', itemId).then((r) => r.data || []).catch(() => []),
   ]);
   return { transactions: tx, vendors: vn };
