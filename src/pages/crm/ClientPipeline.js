@@ -28,6 +28,7 @@ import { supabase } from '../../lib/supabaseClient';
 import {
   clientCards, listClientStageDefs, listAssignableUsers, moveClientPipelineStage, addActivity,
   assignOwner, setClientNextAction, getCompany, listContacts,
+  listAllCollaborators, addCollaborator, removeCollaborator,
 } from '../../services/crmPipelineService';
 import Client360 from '../../components/crm/Client360';
 
@@ -131,10 +132,17 @@ function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, on
   const [contacts, setContacts] = useState([]);
   const [actType, setActType] = useState('note');
   const [actText, setActText] = useState('');
+  const [collabEmails, setCollabEmails] = useState([]);
+  const [savingCollab, setSavingCollab] = useState(false);
   const load = useCallback(async () => {
     if (!card) return;
-    const [d, c] = await Promise.all([getCompany(card.id).catch(() => null), listContacts(card.id).catch(() => [])]);
+    const [d, c, collabs] = await Promise.all([
+      getCompany(card.id).catch(() => null),
+      listContacts(card.id).catch(() => []),
+      listAllCollaborators().catch(() => []),
+    ]);
     setData(d); setContacts(c || []);
+    setCollabEmails((collabs || []).filter((r) => r.pipeline_id === card.id).map((r) => String(r.email || '').toLowerCase()).filter(Boolean));
   }, [card]);
   useEffect(() => { load(); }, [load]);
   const primary = contacts.find((c) => c.is_primary) || contacts[0] || {};
@@ -153,6 +161,19 @@ function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, on
   };
   const submitActivity = async () => { if (!actText.trim()) return; await log(actType, actText.trim()); setActText(''); };
   const reassign = async (email) => { try { await assignOwner(card.id, email); notify('Owner updated'); onChanged(); } catch (e) { notify(e.message, 'error'); } };
+  const onChangeCollaborators = async (nextRaw) => {
+    const next = (nextRaw || []).map((e) => String(e).toLowerCase()).filter(Boolean);
+    const prevSet = new Set(collabEmails); const nextSet = new Set(next);
+    const toAdd = next.filter((e) => !prevSet.has(e));
+    const toRemove = collabEmails.filter((e) => !nextSet.has(e));
+    if (!toAdd.length && !toRemove.length) return;
+    setSavingCollab(true); setCollabEmails(next);
+    try {
+      await Promise.all([...toAdd.map((e) => addCollaborator(card.id, e)), ...toRemove.map((e) => removeCollaborator(card.id, e))]);
+      notify('Collaborators updated'); onChanged();
+    } catch (e) { notify(e.message || 'Failed to update collaborators', 'error'); load(); }
+    finally { setSavingCollab(false); }
+  };
 
   return (
     <Drawer anchor="right" open={!!card} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 460 } } }}>
@@ -193,6 +214,15 @@ function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, on
           <Autocomplete size="small" options={users.map((u) => u.email)} value={card.owner_email || null} onChange={(e, v) => v && reassign(v)}
             getOptionLabel={(o) => nm(names, o)} sx={{ mb: 1.5 }}
             renderInput={(p) => <TextField {...p} label="Account owner" InputProps={{ ...p.InputProps, startAdornment: <InputAdornment position="start"><PersonRounded fontSize="small" /></InputAdornment> }} />} />
+
+          {/* collaborators (co-working) — multiple people on this account */}
+          <Autocomplete multiple size="small" disabled={savingCollab}
+            options={users.map((u) => u.email).filter((e) => e !== (card.owner_email || ''))}
+            value={collabEmails} onChange={(e, v) => onChangeCollaborators(v)}
+            getOptionLabel={(o) => nm(names, o)}
+            isOptionEqualToValue={(o, v) => String(o).toLowerCase() === String(v).toLowerCase()}
+            sx={{ mb: 1.5 }}
+            renderInput={(p) => <TextField {...p} label="Collaborators (co-working)" placeholder="Add co-workers" InputProps={{ ...p.InputProps, startAdornment: (<><InputAdornment position="start"><GroupsRounded fontSize="small" /></InputAdornment>{p.InputProps.startAdornment}</>) }} />} />
 
           {/* activity composer */}
           <Divider sx={{ mb: 1 }}><Typography variant="caption" color="text.secondary">TIMELINE</Typography></Divider>
