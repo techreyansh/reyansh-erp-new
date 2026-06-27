@@ -104,5 +104,25 @@ export async function getDashboard(opts) {
   return { rows: rows.length, ...computeIntelligence(rows) };
 }
 
-const productionIntelligenceService = { getRows, computeIntelligence, getDashboard };
+/**
+ * Ask the Production AI (chat over the captured data). `tool` is a preset
+ * (daily_summary / line_performance / anomalies / material_impact /
+ * machine_utilization / shift_comparison) or 'ask' for a free-form question.
+ * `context` is the dashboard object (kpis/trend/downtime/byLine/anomalies);
+ * pass what getDashboard already returned so we don't re-query. Returns
+ * { sections:[{heading,body}], provider } or { error }. Never throws.
+ */
+export async function askProduction(tool, input, context) {
+  try {
+    const { data, error } = await supabase.functions.invoke('production-ai-chat', {
+      body: { tool: tool || 'ask', input: input || '', context: context || {} },
+    });
+    if (error) return { error: error.message || 'AI request failed' };
+    return data || {};
+  } catch (e) {
+    return { error: e?.message || 'AI request failed' };
+  }
+}
+
+const productionIntelligenceService = { getRows, computeIntelligence, getDashboard, askProduction };
 export default productionIntelligenceService;
