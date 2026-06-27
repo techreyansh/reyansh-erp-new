@@ -431,7 +431,7 @@ export default function ClientPipeline() {
       <NextActionDialog open={!!naDialog} card={naDialog} stageDef={naDialog ? stageDefOf(naDialog.pipeline_stage) : null}
         users={users} names={names} onClose={() => setNaDialog(null)} onSave={saveNextAction} />
 
-      {full && <Client360 account={{ id: full.id, customer_code: full.customer_code, company_name: full.company_name, account_id: full.id }} onClose={() => setFull(null)} notify={notify} />}
+      {full && <Client360 account={{ id: full.id, customer_code: full.customer_code, company_name: full.company_name, account_id: full.id }} onClose={() => setFull(null)} onChanged={load} notify={notify} />}
 
       <AddCompanyDialog open={addOpen} defaultKind="client" currentEmail={me}
         onClose={() => setAddOpen(false)} onSubmit={handleAddClient} onClaimed={() => { notify('Claimed'); load(); }} />
