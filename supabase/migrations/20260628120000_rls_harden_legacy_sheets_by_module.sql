@@ -10,15 +10,25 @@
 -- READS   → "Hybrid": broad (USING(true)) for operational/cross-cutting tables,
 --           gated to owner 'view' only for sensitive HR / finance / audit tables.
 -- Policy names follow the convention: <table>_read (SELECT) + <table>_write (ALL).
--- Idempotent (DROP IF EXISTS, re-runnable). Each table is existence-guarded via
--- to_regclass so logical/physical name drift (e.g. send_quotation vs
--- send_quotation_data) silently skips absent tables instead of erroring.
--- Anon grants were already revoked in Slice 5, so no REVOKE is repeated here.
+-- Idempotent (DROP IF EXISTS, re-runnable). Each relation is guarded by relkind:
+-- only ordinary/partitioned TABLES ('r'/'p') can carry RLS policies, so VIEWS and
+-- other relation types in SHEET_TABLE_NAMES (e.g. employees_data is a view) are
+-- skipped and reported via RAISE NOTICE for separate follow-up. Anon grants were
+-- already revoked in Slice 5, so no REVOKE is repeated here.
+
+-- Session-local helper: returns relkind of a public relation, or NULL if absent.
+CREATE OR REPLACE FUNCTION pg_temp._s6_relkind(rel text) RETURNS text
+LANGUAGE sql STABLE AS $$
+  SELECT c.relkind::text FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public' AND c.relname = rel;
+$$;
 
 DO $$
 DECLARE
   rec text[];
-  t text; owner text; rmode text;
+  t text; owner text; rmode text; rk text;
+  skipped text[] := '{}';
   -- [physical_table, owner_module, read_mode]  read_mode ∈ broad | gated
   -- Uniform single-owner tables only. Dual-owner / special-clause tables
   -- (users, clients2, prospects_clients, audit_log, whatsapp_logs,
@@ -96,7 +106,12 @@ DECLARE
 BEGIN
   FOREACH rec SLICE 1 IN ARRAY tabs LOOP
     t := rec[1]; owner := rec[2]; rmode := rec[3];
-    CONTINUE WHEN to_regclass('public.'||quote_ident(t)) IS NULL;
+    rk := pg_temp._s6_relkind(t);
+    CONTINUE WHEN rk IS NULL;                       -- relation absent
+    IF rk NOT IN ('r','p') THEN                     -- view/matview/etc: can't hold RLS
+      skipped := array_append(skipped, t || ' (relkind=' || rk || ')');
+      CONTINUE;
+    END IF;
 
     EXECUTE format('DROP POLICY IF EXISTS "Allow all authenticated" ON public.%I', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_read', t);
@@ -116,17 +131,24 @@ BEGIN
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can(%L,'edit'))$f$,
       t||'_write', t, owner, owner);
   END LOOP;
+
+  IF array_length(skipped, 1) > 0 THEN
+    RAISE NOTICE 'Slice6: skipped non-table relations (NOT gated — need separate handling on their base tables): %',
+      array_to_string(skipped, ', ');
+  END IF;
 END $$;
 
 -- ---------------------------------------------------------------------------
 -- Special-clause tables (kept OUT of the array; dual-owner / carve-out writes).
--- Each is existence-guarded so a missing relation skips cleanly.
+-- Each is guarded to only act on a real TABLE; views are reported, not gated.
 -- ---------------------------------------------------------------------------
 DO $$
+DECLARE rk text; skipped text[] := '{}';
 BEGIN
   -- users: read MUST stay broad — AuthContext role enrichment reads users on
   -- every login (src/context/AuthContext.js). Write → employees.edit.
-  IF to_regclass('public.users') IS NOT NULL THEN
+  rk := pg_temp._s6_relkind('users');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.users;
     DROP POLICY IF EXISTS users_read  ON public.users;
     DROP POLICY IF EXISTS users_write ON public.users;
@@ -134,11 +156,12 @@ BEGIN
     CREATE POLICY users_write ON public.users FOR ALL TO authenticated
       USING (public.is_super_admin() OR public.rbac_employee_can('employees','edit'))
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can('employees','edit'));
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'users ('||rk||')'); END IF;
 
   -- clients2 (logical "clients"): created/edited by both Sales pages and CRM
   -- pipeline. Read broad (CRM-360 reads it). Write → sales OR crm.
-  IF to_regclass('public.clients2') IS NOT NULL THEN
+  rk := pg_temp._s6_relkind('clients2');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.clients2;
     DROP POLICY IF EXISTS clients2_read  ON public.clients2;
     DROP POLICY IF EXISTS clients2_write ON public.clients2;
@@ -146,11 +169,11 @@ BEGIN
     CREATE POLICY clients2_write ON public.clients2 FOR ALL TO authenticated
       USING (public.is_super_admin() OR public.rbac_employee_can('sales','edit') OR public.rbac_employee_can('crm','edit'))
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can('sales','edit') OR public.rbac_employee_can('crm','edit'));
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'clients2 ('||rk||')'); END IF;
 
-  -- prospects_clients: written by /prospects-clients (sales) AND CRM pipeline
-  -- conversion. Read broad. Write → sales OR crm.
-  IF to_regclass('public.prospects_clients') IS NOT NULL THEN
+  -- prospects_clients: written by /prospects-clients (sales) AND CRM pipeline.
+  rk := pg_temp._s6_relkind('prospects_clients');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.prospects_clients;
     DROP POLICY IF EXISTS prospects_clients_read  ON public.prospects_clients;
     DROP POLICY IF EXISTS prospects_clients_write ON public.prospects_clients;
@@ -158,12 +181,12 @@ BEGIN
     CREATE POLICY prospects_clients_write ON public.prospects_clients FOR ALL TO authenticated
       USING (public.is_super_admin() OR public.rbac_employee_can('sales','edit') OR public.rbac_employee_can('crm','edit'))
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can('sales','edit') OR public.rbac_employee_can('crm','edit'));
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'prospects_clients ('||rk||')'); END IF;
 
-  -- schedule_payment / release_payment: finance data, but written inside the
-  -- purchase flow (purchaseFlow/steps/SchedulePayment|ReleasePayment). Read
-  -- gated to accounts OR purchase 'view'; write → accounts OR purchase 'edit'.
-  IF to_regclass('public.schedule_payment') IS NOT NULL THEN
+  -- schedule_payment / release_payment: finance data written inside the purchase
+  -- flow. Read gated to accounts OR purchase 'view'; write → accounts OR purchase.
+  rk := pg_temp._s6_relkind('schedule_payment');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.schedule_payment;
     DROP POLICY IF EXISTS schedule_payment_read  ON public.schedule_payment;
     DROP POLICY IF EXISTS schedule_payment_write ON public.schedule_payment;
@@ -172,9 +195,10 @@ BEGIN
     CREATE POLICY schedule_payment_write ON public.schedule_payment FOR ALL TO authenticated
       USING (public.is_super_admin() OR public.rbac_employee_can('accounts','edit') OR public.rbac_employee_can('purchase','edit'))
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can('accounts','edit') OR public.rbac_employee_can('purchase','edit'));
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'schedule_payment ('||rk||')'); END IF;
 
-  IF to_regclass('public.release_payment') IS NOT NULL THEN
+  rk := pg_temp._s6_relkind('release_payment');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.release_payment;
     DROP POLICY IF EXISTS release_payment_read  ON public.release_payment;
     DROP POLICY IF EXISTS release_payment_write ON public.release_payment;
@@ -183,11 +207,11 @@ BEGIN
     CREATE POLICY release_payment_write ON public.release_payment FOR ALL TO authenticated
       USING (public.is_super_admin() OR public.rbac_employee_can('accounts','edit') OR public.rbac_employee_can('purchase','edit'))
       WITH CHECK (public.is_super_admin() OR public.rbac_employee_can('accounts','edit') OR public.rbac_employee_can('purchase','edit'));
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'release_payment ('||rk||')'); END IF;
 
-  -- audit_log: app-unused (demo component only); writes happen via SECURITY
-  -- DEFINER paths. Read gated to settings; write locked to super-admin.
-  IF to_regclass('public.audit_log') IS NOT NULL THEN
+  -- audit_log: app-unused (demo only). Read gated to settings; write super-admin.
+  rk := pg_temp._s6_relkind('audit_log');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.audit_log;
     DROP POLICY IF EXISTS audit_log_read  ON public.audit_log;
     DROP POLICY IF EXISTS audit_log_write ON public.audit_log;
@@ -196,18 +220,24 @@ BEGIN
     CREATE POLICY audit_log_write ON public.audit_log FOR ALL TO authenticated
       USING (public.is_super_admin())
       WITH CHECK (public.is_super_admin());
-  END IF;
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'audit_log ('||rk||')'); END IF;
 
   -- whatsapp_logs: operational append-log written directly by ~13 components
-  -- across modules (src/services/whatsappLogService.js), NOT trigger-written.
-  -- Keep read+write broad-authenticated to avoid breaking logging everywhere;
-  -- renamed to the _read/_write convention. (Anon already revoked in Slice 5.)
-  IF to_regclass('public.whatsapp_logs') IS NOT NULL THEN
+  -- (src/services/whatsappLogService.js), NOT trigger-written. Keep read+write
+  -- broad-authenticated to avoid breaking logging; renamed to _read/_write.
+  rk := pg_temp._s6_relkind('whatsapp_logs');
+  IF rk IN ('r','p') THEN
     DROP POLICY IF EXISTS "Allow all authenticated" ON public.whatsapp_logs;
     DROP POLICY IF EXISTS whatsapp_logs_read  ON public.whatsapp_logs;
     DROP POLICY IF EXISTS whatsapp_logs_write ON public.whatsapp_logs;
     CREATE POLICY whatsapp_logs_read ON public.whatsapp_logs FOR SELECT TO authenticated USING (true);
     CREATE POLICY whatsapp_logs_write ON public.whatsapp_logs FOR ALL TO authenticated
       USING (true) WITH CHECK (true);
+  ELSIF rk IS NOT NULL THEN skipped := array_append(skipped, 'whatsapp_logs ('||rk||')'); END IF;
+
+  IF array_length(skipped, 1) > 0 THEN
+    RAISE NOTICE 'Slice6 (special blocks): skipped non-table relations: %', array_to_string(skipped, ', ');
   END IF;
 END $$;
+
+DROP FUNCTION IF EXISTS pg_temp._s6_relkind(text);
