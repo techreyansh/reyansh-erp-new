@@ -136,28 +136,30 @@ async function deleteBomLine(id) {
 // Stock
 // ---------------------------------------------------------------------------
 async function listStock() {
-  const [data, bal] = await Promise.all([
+  // Stock list now reads the item master directly (config + ABC/XYZ all live on
+  // ppc_items) + on_hand from the inv_balance ledger — no ppc_stock dependency.
+  const [items, bal] = await Promise.all([
     unwrap(
       await supabase
-        .from('ppc_stock')
-        .select(
-          'id, item_id, abc_class, xyz_class, item:ppc_items!ppc_stock_item_id_fkey(id, code, name, uom, item_type, unit_cost, reorder_point, safety_stock, lead_time_days, location)'
-        ),
+        .from('ppc_items')
+        .select('id, code, name, uom, item_type, unit_cost, reorder_point, safety_stock, lead_time_days, location, abc_class, xyz_class'),
       'List stock'
     ),
     unwrap(await supabase.from('inv_balance').select('item_id, on_hand'), 'Balances'),
   ]);
-  // on_hand now comes from the inv_balance ledger (summed across locations);
-  // config (reorder/safety/lead/location) from ppc_items.
   const onHand = new Map();
   (bal || []).forEach((b) => onHand.set(b.item_id, (onHand.get(b.item_id) || 0) + (Number(b.on_hand) || 0)));
-  return (data || []).map((r) => ({
-    ...r,
-    on_hand: onHand.get(r.item_id) || 0,
-    reorder_point: r.item?.reorder_point ?? 0,
-    safety_stock: r.item?.safety_stock ?? 0,
-    lead_time_days: r.item?.lead_time_days ?? 0,
-    location: r.item?.location ?? null,
+  return (items || []).map((it) => ({
+    id: it.id,
+    item_id: it.id,
+    abc_class: it.abc_class,
+    xyz_class: it.xyz_class,
+    item: it, // preserve the nested shape callers read (r.item.code/name/…)
+    on_hand: onHand.get(it.id) || 0,
+    reorder_point: it.reorder_point ?? 0,
+    safety_stock: it.safety_stock ?? 0,
+    lead_time_days: it.lead_time_days ?? 0,
+    location: it.location ?? null,
   }));
 }
 
