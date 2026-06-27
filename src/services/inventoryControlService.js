@@ -17,7 +17,7 @@ export async function listStock() {
   // Config (reorder/safety/max/location) lives on ppc_items; on_hand/reserved come
   // from the inv_balance ledger (single source of truth), summed across locations.
   const [{ data, error }, balRes] = await Promise.all([
-    supabase.from('ppc_stock').select('ppc_items(id, code, name, item_type, uom, unit_cost, reorder_point, safety_stock, max_qty, location)'),
+    supabase.from('ppc_items').select('id, code, name, item_type, uom, unit_cost, reorder_point, safety_stock, max_qty, location'),
     supabase.from('inv_balance').select('item_id, on_hand, reserved'),
   ]);
   if (error) throw error;
@@ -26,8 +26,7 @@ export async function listStock() {
     onHand.set(b.item_id, (onHand.get(b.item_id) || 0) + num(b.on_hand));
     reserved.set(b.item_id, (reserved.get(b.item_id) || 0) + num(b.reserved));
   });
-  return (data || []).map((r) => {
-    const it = r.ppc_items || {};
+  return (data || []).map((it) => {
     const on = onHand.get(it.id) || 0; const res = reserved.get(it.id) || 0; const ro = num(it.reorder_point); const safety = num(it.safety_stock);
     return {
       item_id: it.id, code: it.code, name: it.name, type: it.item_type, group: TYPE_GROUP(it.item_type), uom: it.uom,
