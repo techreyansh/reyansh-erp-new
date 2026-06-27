@@ -28,9 +28,10 @@ import { supabase } from '../../lib/supabaseClient';
 import {
   clientCards, listClientStageDefs, listAssignableUsers, moveClientPipelineStage, addActivity,
   assignOwner, setClientNextAction, getCompany, listContacts,
-  listAllCollaborators, addCollaborator, removeCollaborator,
+  listAllCollaborators, addCollaborator, removeCollaborator, addCompany,
 } from '../../services/crmPipelineService';
 import Client360 from '../../components/crm/Client360';
+import { AddCompanyDialog } from './CRMPipelineBoard';
 
 const BAND = { green: 'success', yellow: 'warning', red: 'error' };
 const PRIORITIES = ['high', 'normal', 'low'];
@@ -268,9 +269,14 @@ export default function ClientPipeline() {
   const [drawer, setDrawer] = useState(null);   // card for management drawer
   const [full, setFull] = useState(null);       // card for Client360
   const [naDialog, setNaDialog] = useState(null); // card for next-action dialog
+  const [addOpen, setAddOpen] = useState(false);  // add-client dialog
   const [snack, setSnack] = useState(null);
 
   const notify = (message, severity = 'success') => setSnack({ message, severity });
+
+  // Add a client directly (defaultKind='client' in the dialog). Lets the dialog
+  // catch/show errors (duplicate name → Claim, etc.), so don't swallow here.
+  const handleAddClient = async (payload) => { await addCompany(payload); notify('Client added'); load(); };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -348,6 +354,7 @@ export default function ClientPipeline() {
           <ToggleButton value="all">All clients</ToggleButton>
           <ToggleButton value="mine">My clients</ToggleButton>
         </ToggleButtonGroup>
+        <Button size="small" variant="contained" startIcon={<PersonRounded />} onClick={() => setAddOpen(true)} sx={{ borderRadius: 2 }}>Add client</Button>
         <Button size="small" variant={showTeam ? 'contained' : 'outlined'} startIcon={<GroupsRounded />} onClick={() => setShowTeam((v) => !v)} sx={{ borderRadius: 2 }}>Team</Button>
         <Badge badgeContent={unmanagedCount} color="error">
           <Button size="small" variant={onlyUnmanaged ? 'contained' : 'outlined'} color="error" startIcon={<WarningAmberRounded />} onClick={() => setOnlyUnmanaged((v) => !v)} sx={{ borderRadius: 2 }}>Unmanaged</Button>
@@ -425,6 +432,9 @@ export default function ClientPipeline() {
         users={users} names={names} onClose={() => setNaDialog(null)} onSave={saveNextAction} />
 
       {full && <Client360 account={{ id: full.id, customer_code: full.customer_code, company_name: full.company_name, account_id: full.id }} onClose={() => setFull(null)} notify={notify} />}
+
+      <AddCompanyDialog open={addOpen} defaultKind="client" currentEmail={me}
+        onClose={() => setAddOpen(false)} onSubmit={handleAddClient} onClaimed={() => { notify('Claimed'); load(); }} />
 
       <Snackbar open={!!snack} autoHideDuration={3500} onClose={() => setSnack(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         {snack ? <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(null)}>{snack.message}</Alert> : undefined}
