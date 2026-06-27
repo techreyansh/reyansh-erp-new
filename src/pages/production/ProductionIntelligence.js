@@ -21,6 +21,14 @@ import { analyzeRows } from '../../services/productionLogService';
 const iso = (d) => d.toISOString().slice(0, 10);
 const SEV_ICON = { critical: <CritIcon color="error" />, warning: <WarnIcon color="warning" />, info: <InfoIcon color="info" /> };
 const SEV_COLOR = { critical: 'error', warning: 'warning', info: 'info' };
+const AI_PRESETS = [
+  { tool: 'daily_summary', label: 'Summarise this period' },
+  { tool: 'line_performance', label: 'Underperforming lines?' },
+  { tool: 'anomalies', label: 'Explain the anomalies' },
+  { tool: 'material_impact', label: 'Material-shortage impact' },
+  { tool: 'machine_utilization', label: 'Bottlenecks & utilisation' },
+  { tool: 'shift_comparison', label: 'Compare time-slots' },
+];
 
 const ProductionIntelligence = () => {
   const theme = useTheme();
@@ -33,6 +41,24 @@ const ProductionIntelligence = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ai, setAi] = useState({ loading: false, result: null, error: null });
+  const [chat, setChat] = useState([]); // {role:'user'|'ai', text?, sections?, error?}
+  const [q, setQ] = useState('');
+  const [chatBusy, setChatBusy] = useState(false);
+
+  // Send a question (free-form) or a preset tool to the production AI, using the
+  // already-loaded dashboard as context (no re-query).
+  const sendChat = useCallback(async (tool, label) => {
+    if (chatBusy || !data || !data.rows) return;
+    const userText = label || q.trim();
+    if (!userText) return;
+    const ctx = { from, to, department, kpis: data.kpis, trendByDate: data.trendByDate, downtimeByReason: data.downtimeByReason, byLine: data.byLine, anomalies: data.anomalies };
+    setChat((c) => [...c, { role: 'user', text: userText }]);
+    if (!tool) setQ('');
+    setChatBusy(true);
+    const res = await productionIntelligenceService.askProduction(tool || 'ask', tool ? '' : userText, ctx);
+    setChat((c) => [...c, { role: 'ai', sections: res.sections, error: res.error }]);
+    setChatBusy(false);
+  }, [chatBusy, data, q, from, to, department]);
 
   const runAI = useCallback(async () => {
     setAi({ loading: true, result: null, error: null });
@@ -147,6 +173,44 @@ const ProductionIntelligence = () => {
                 )}
               </Box>
             )}
+          </CardContent></Card>
+
+          {/* Ask the production AI (chat over this period's data) */}
+          <Card sx={{ borderRadius: 2, border: '1px solid', borderColor: alpha(theme.palette.secondary.main, 0.35) }}><CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+              <AiIcon color="secondary" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Ask the production AI</Typography>
+              <Typography variant="caption" color="text.secondary">Questions answered over this period's data.</Typography>
+            </Stack>
+            <Stack direction="row" spacing={0.75} sx={{ mb: 1.5, flexWrap: 'wrap' }} useFlexGap>
+              {AI_PRESETS.map((p) => (
+                <Chip key={p.tool} label={p.label} size="small" variant="outlined" disabled={chatBusy} onClick={() => sendChat(p.tool, p.label)} sx={{ cursor: 'pointer' }} />
+              ))}
+            </Stack>
+            {chat.length > 0 && (
+              <Stack spacing={1.5} sx={{ mb: 1.5, maxHeight: 440, overflow: 'auto' }}>
+                {chat.map((m, i) => (m.role === 'user' ? (
+                  <Box key={i} sx={{ alignSelf: 'flex-end', maxWidth: '85%', bgcolor: alpha(theme.palette.primary.main, 0.1), px: 1.5, py: 0.75, borderRadius: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{m.text}</Typography>
+                  </Box>
+                ) : (
+                  <Box key={i} sx={{ alignSelf: 'flex-start', maxWidth: '92%' }}>
+                    {m.error ? <Alert severity="info">{m.error}</Alert> : (m.sections || []).map((s, j) => (
+                      <Box key={j} sx={{ mb: 1 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>{s.heading}</Typography>
+                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{s.body}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )))}
+                {chatBusy && <Stack direction="row" spacing={1} alignItems="center"><CircularProgress size={16} /><Typography variant="caption" color="text.secondary">Thinking…</Typography></Stack>}
+              </Stack>
+            )}
+            <Stack direction="row" spacing={1}>
+              <TextField size="small" fullWidth placeholder="Ask e.g. “Why did Assembly miss target last week?”" value={q}
+                onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && q.trim() && !chatBusy) sendChat(); }} disabled={chatBusy} />
+              <Button variant="contained" onClick={() => sendChat()} disabled={chatBusy || !q.trim()}>Ask</Button>
+            </Stack>
           </CardContent></Card>
 
           {/* Charts */}
