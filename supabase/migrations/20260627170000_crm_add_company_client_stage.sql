@@ -16,6 +16,9 @@ DECLARE
   v_client_stage text := CASE WHEN v_kind = 'client'
                               THEN COALESCE(NULLIF(p_payload->>'client_stage',''), 'active')
                               ELSE NULL END;
+  -- legacy `kind` column only allows 'prospect' | 'recurring' (clients = 'recurring').
+  -- Derive it from account_type so an 'client' payload can't violate the CHECK.
+  v_kindcol      text := CASE WHEN v_kind = 'client' THEN 'recurring' ELSE 'prospect' END;
   v_row          public.crm_pipeline;
 BEGIN
   IF COALESCE(trim(p_payload->>'company_name'),'') = '' THEN
@@ -38,7 +41,7 @@ BEGIN
     NULLIF(p_payload->>'prospect_stage',''),
     v_client_stage,
     v_kind,
-    COALESCE(NULLIF(p_payload->>'kind',''), v_kind),
+    v_kindcol,
     v_email,
     COALESCE((p_payload->>'is_active')::boolean, true),
     v_code)

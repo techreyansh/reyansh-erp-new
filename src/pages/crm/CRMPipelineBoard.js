@@ -633,7 +633,7 @@ export function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEm
         prospect_stage: kind === "client" ? null : form.stage,
         client_stage: kind === "client" ? form.stage : null,
         account_type: kind,
-        kind,
+        kind: kind === "client" ? "recurring" : "prospect",
         owner_email: currentEmail || null,
         is_active: true,
         customer_code: overrideCode && codeValue.trim() ? codeValue.trim().toUpperCase() : null,
