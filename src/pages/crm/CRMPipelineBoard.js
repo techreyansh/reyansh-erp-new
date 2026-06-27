@@ -536,7 +536,8 @@ function BoardSkeleton() {
 /* Add company dialog                                                       */
 /* ----------------------------------------------------------------------- */
 
-function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) {
+export function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail, defaultKind = "prospect" }) {
+  const stagesFor = (k) => (k === "client" ? CLIENT_STAGES : PROSPECT_STAGES);
   const empty = {
     company_name: "",
     contact_person: "",
@@ -546,6 +547,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
     value: "",
     stage: PROSPECT_STAGES[0].key,
   };
+  const [kind, setKind] = useState(defaultKind);
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
@@ -557,12 +559,24 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
 
   useEffect(() => {
     if (!open) return;
+    const k = defaultKind || "prospect";
+    setKind(k);
+    setForm({ ...empty, stage: stagesFor(k)[0].key });
     setOverrideCode(false);
     setCodeValue("");
     setCanClaim(false);
     setErr(null);
-    peekNextCode("prospect").then((c) => setCodePreview(c || "")).catch(() => setCodePreview(""));
-  }, [open]);
+    peekNextCode(k).then((c) => setCodePreview(c || "")).catch(() => setCodePreview(""));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, defaultKind]);
+
+  // Switching prospect↔client resets the stage to that lifecycle's first stage
+  // and re-peeks the code (C##### for client, PC##### for prospect).
+  const changeKind = (k) => {
+    setKind(k);
+    setForm((f) => ({ ...f, stage: stagesFor(k)[0].key }));
+    peekNextCode(k).then((c) => setCodePreview(c || "")).catch(() => setCodePreview(""));
+  };
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -616,9 +630,10 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
         email: form.email.trim() || null,
         source: form.source || null,
         value: form.value === "" ? null : Number(form.value),
-        prospect_stage: form.stage,
-        account_type: "prospect",
-        kind: "prospect",
+        prospect_stage: kind === "client" ? null : form.stage,
+        client_stage: kind === "client" ? form.stage : null,
+        account_type: kind,
+        kind: kind === "client" ? "recurring" : "prospect",
         owner_email: currentEmail || null,
         is_active: true,
         customer_code: overrideCode && codeValue.trim() ? codeValue.trim().toUpperCase() : null,
@@ -647,7 +662,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
 
   return (
     <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 700 }}>Add company</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>{kind === "client" ? "Add client" : "Add company"}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 0.5 }}>
           {err && (
@@ -670,6 +685,10 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
               {err}
             </Alert>
           )}
+          <TextField select label="Type" value={kind} onChange={(e) => changeKind(e.target.value)} fullWidth>
+            <MenuItem value="prospect">Prospect (lead)</MenuItem>
+            <MenuItem value="client">Client (existing customer)</MenuItem>
+          </TextField>
           <TextField
             label="Company name"
             value={form.company_name}
@@ -685,7 +704,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
               value={overrideCode ? codeValue : (codePreview || "auto")}
               onChange={overrideCode ? (e) => setCodeValue(e.target.value) : undefined}
               InputProps={{ readOnly: !overrideCode }}
-              helperText={overrideCode ? "Custom code — must start with PC" : "Auto-assigned on save"}
+              helperText={overrideCode ? `Custom code — must start with ${kind === "client" ? "C" : "PC"}` : "Auto-assigned on save"}
               sx={{ maxWidth: 240 }}
             />
             <Button
@@ -718,8 +737,8 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
               fullWidth
             />
           </Stack>
-          <TextField select label="Stage" value={form.stage} onChange={set("stage")} fullWidth>
-            {PROSPECT_STAGES.map((s) => (
+          <TextField select label={kind === "client" ? "Client stage" : "Stage"} value={form.stage} onChange={set("stage")} fullWidth>
+            {stagesFor(kind).map((s) => (
               <MenuItem key={s.key} value={s.key}>
                 {s.label}
               </MenuItem>
@@ -732,7 +751,7 @@ function AddCompanyDialog({ open, onClose, onSubmit, onClaimed, currentEmail }) 
           Cancel
         </Button>
         <Button variant="contained" onClick={submit} disabled={saving}>
-          {saving ? "Saving…" : "Add company"}
+          {saving ? "Saving…" : (kind === "client" ? "Add client" : "Add company")}
         </Button>
       </DialogActions>
     </Dialog>
