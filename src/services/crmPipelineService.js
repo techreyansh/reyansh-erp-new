@@ -1220,6 +1220,11 @@ export async function setClientNextAction(id, { action = null, date = null, owne
     updated_at: new Date().toISOString(),
   };
   if (status !== null) patch.current_status = status;
-  const { error } = await supabase.from("crm_pipeline").update(patch).eq("id", id);
+  // .select() so an RLS-rejected update (0 rows matched) surfaces as a clear
+  // error instead of a silent no-op (e.g. editing an account you don't own).
+  const { data, error } = await supabase.from("crm_pipeline").update(patch).eq("id", id).select("id");
   if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error("Couldn't save the next action — you may not have permission to edit this account (it may be owned by someone else).");
+  }
 }
