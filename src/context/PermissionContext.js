@@ -42,7 +42,18 @@ export function PermissionProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_my_rbac_access');
+      // Resilient load: a single transient failure (a briefly-expired access token,
+      // or a Supabase/PostgREST hiccup) must NOT lock a valid user out. Retry up to
+      // 3 times, refreshing the auth session between attempts so an expired token is
+      // renewed before we declare access "unverified".
+      let data = null;
+      let rpcError = null;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        ({ data, error: rpcError } = await supabase.rpc('get_my_rbac_access'));
+        if (!rpcError) break;
+        try { await supabase.auth.refreshSession(); } catch { /* ignore — retry anyway */ }
+        await new Promise((resolve) => setTimeout(resolve, 600 * (attempt + 1)));
+      }
       if (rpcError) throw rpcError;
       const normalized = normalizeAccess(data);
       if (process.env.NODE_ENV === 'development') {
