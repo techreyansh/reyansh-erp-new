@@ -118,6 +118,7 @@ export const NAV_GROUPS = [
     label: "Power Cord — Assembly · Molding · Packing",
     icon: ic(PrecisionManufacturingOutlined),
     items: [
+      { label: "Line Planner", path: "/line-planner", icon: ic(PrecisionManufacturingOutlined) },
       { label: "Capacity & Overtime", path: "/capacity-planner", icon: ic(FactoryOutlined) },
       { label: "Line Balancing", path: "/line-balancing", icon: ic(InsightsOutlined) },
       { label: "Assembly Planner", path: "/assembly-planner", icon: ic(InsightsOutlined) },

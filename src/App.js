@@ -122,6 +122,7 @@ const MESDashboard = lazy(() => import("./pages/mes/MESDashboard"));
 const DailyPlan = lazy(() => import("./pages/mes/DailyPlan"));
 const CapacityPlanner = lazy(() => import("./pages/mes/CapacityPlanner"));
 const LineBalancing = lazy(() => import("./pages/mes/LineBalancing"));
+const LinePlanner = lazy(() => import("./pages/mes/LinePlanner"));
 const AssemblyPlanner = lazy(() => import("./pages/mes/AssemblyPlanner"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
@@ -332,6 +333,11 @@ function AppContent() {
                   <Route path="/capacity-planner" element={
                     <ProtectedRouteGate>
                       <CapacityPlanner />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/line-planner" element={
+                    <ProtectedRouteGate>
+                      <LinePlanner />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/line-balancing" element={
