@@ -23,6 +23,7 @@ import {
   RefreshRounded,
   TaskAltRounded,
   PlaylistAddCheckRounded,
+  AssignmentIndRounded,
   ReceiptLong,
   Replay,
   Schedule,
@@ -338,6 +339,10 @@ export default function RepWorklist() {
   const { roleCode, hasFullAccess } = usePermissions();
 
   const [rows, setRows] = useState([]);
+  // Personal-scoped worklist (rows where I'm owner/action-owner/collaborator).
+  // For reps this equals `rows`; for managers (who load the global pool) it's a
+  // separate fetch so they still see what's assigned to THEM.
+  const [assignedSource, setAssignedSource] = useState([]);
   const [nameMap, setNameMap] = useState({});
   const [myEmail, setMyEmail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -362,12 +367,16 @@ export default function RepWorklist() {
         if (!alive) return;
         setMyEmail(email || null);
 
-        const [list, users] = await Promise.all([
+        const [list, personal, users] = await Promise.all([
           repWorklist(seesAll ? null : email),
+          // managers load the global pool above, so fetch their personal slice
+          // separately; reps' `list` is already personal-scoped.
+          seesAll ? repWorklist(email) : Promise.resolve(null),
           listAssignableUsers(),
         ]);
         if (!alive) return;
         setRows(Array.isArray(list) ? list : []);
+        setAssignedSource(seesAll ? (Array.isArray(personal) ? personal : []) : (Array.isArray(list) ? list : []));
         const map = {};
         (Array.isArray(users) ? users : []).forEach((u) => {
           if (u && u.email) map[String(u.email).toLowerCase()] = u.full_name || null;
@@ -418,6 +427,16 @@ export default function RepWorklist() {
       (r) => String(r.owner_email || '').toLowerCase() === String(ownerFilter).toLowerCase(),
     );
   }, [rows, seesAll, ownerFilter]);
+
+  // Accounts assigned to me (action owner) or shared with me (collaborator) —
+  // the accountability surface. De-duped, assigned first.
+  const assignedToMe = useMemo(() => {
+    return (assignedSource || [])
+      .filter((r) => r.assignment_reason === 'action_owner' || r.assignment_reason === 'collaborator')
+      .sort((a, b) =>
+        (a.assignment_reason === 'action_owner' ? 0 : 1) - (b.assignment_reason === 'action_owner' ? 0 : 1)
+        || (Number(b.priority_score) || 0) - (Number(a.priority_score) || 0));
+  }, [assignedSource]);
 
   const summary = useMemo(() => {
     let paymentCount = 0;
@@ -551,6 +570,49 @@ export default function RepWorklist() {
           loading={loading}
         />
       </Box>
+
+      {/* Assigned to me — the accountability surface (actions someone gave me,
+          or accounts I'm collaborating on), even if their priority score is 0. */}
+      {!loading && assignedToMe.length > 0 && (
+        <Paper
+          variant="outlined"
+          sx={{
+            borderRadius: 2.5,
+            p: { xs: 1.5, sm: 2 },
+            mb: 3,
+            borderColor: alpha(theme.palette.primary.main, 0.4),
+            bgcolor: alpha(theme.palette.primary.main, 0.04),
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+            <AssignmentIndRounded sx={{ color: theme.palette.primary.main }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+              Assigned to me
+            </Typography>
+            <Chip size="small" label={assignedToMe.length} sx={{ fontWeight: 700, height: 20 }} />
+            <Typography variant="caption" color="text.secondary">
+              actions someone gave you, or accounts you co-work
+            </Typography>
+          </Stack>
+          <Stack spacing={1.5}>
+            {assignedToMe.map((row) => (
+              <Box key={`am-${row.id || row.customer_code}`} sx={{ position: 'relative' }}>
+                <Chip
+                  size="small"
+                  label={row.assignment_reason === 'action_owner' ? 'Assigned' : 'Collaborating'}
+                  color={row.assignment_reason === 'action_owner' ? 'primary' : 'default'}
+                  sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1, height: 20, fontWeight: 700 }}
+                />
+                <WorklistCard
+                  row={row}
+                  nameMap={nameMap}
+                  onOpen={() => navigate('/crm-pipeline?view=clients')}
+                />
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+      )}
 
       {/* Segment strip */}
       {!loading && scoped.length > 0 && (
