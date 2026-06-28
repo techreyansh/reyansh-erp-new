@@ -12,6 +12,7 @@ import WhatsApp from '@mui/icons-material/WhatsApp';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import crmPipelineService from '../../services/crmPipelineService';
 import client360Service from '../../services/client360Service';
+import CoachingCard from './CoachingCard';
 import aiCopilot from '../../services/aiCopilotService';
 import { listAccountTasks, createTask } from '../../services/taskService';
 import { usePermissions } from '../../context/PermissionContext';
@@ -358,6 +359,12 @@ export default function Client360({ account, onClose, onChanged, notify }) {
         <Box sx={{ p: 2, overflowY: 'auto' }}>
           {tab === 'overview' && (
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <CoachingCard
+                  scope={isProspect ? 'prospect' : 'client'}
+                  stageKey={isProspect ? (c.prospect_stage || account.prospect_stage) : (c.client_stage || account.client_stage)}
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="overline" color="text.secondary">Company</Typography>
                 {[['GSTIN', c.gstin], ['Payment terms', c.payment_terms], ['Credit limit', c.credit_limit ? inr(c.credit_limit) : null], ['Annual potential', c.annual_potential ? inr(c.annual_potential) : null], ['Industry', c.industry], ['City', c.city], ['Lead source', c.lead_source], ['Rating', c.rating], ['Owner', c.owner_email]].filter(([, v]) => v).map(([k, v]) => (

@@ -15,6 +15,7 @@ import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
 import PrintRounded from '@mui/icons-material/PrintRounded';
 import cablePlan from '../../services/temp/cablePlanService';
 import { buildDaySchedule } from '../../services/temp/cableScheduleService';
+import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
 import CableJobCards from '../../components/temp/CableJobCards';
 import CableDaySchedule from '../../components/temp/CableDaySchedule';
 import { LANGS } from '../../services/temp/cablePlanLabels';
@@ -126,6 +127,7 @@ export default function CablePlanningWorkbench() {
         <Typography variant="h5" sx={{ fontWeight: 800 }}>Cable Planning Workbench</Typography>
         <Chip size="small" label="Temporary" color="warning" variant="outlined" />
         <Box sx={{ flexGrow: 1 }} />
+        <BulkImportButton dataset="cable_plans" onApplied={loadSaved} />
         {tab === 0 && <Button variant="outlined" size="small" onClick={newPlan} sx={{ borderRadius: 2 }}>New plan</Button>}
       </Stack>
       <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
