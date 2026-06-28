@@ -120,10 +120,7 @@ const JobCard = lazy(() => import("./pages/mes/JobCard"));
 const MESSetup = lazy(() => import("./pages/mes/MESSetup"));
 const MESDashboard = lazy(() => import("./pages/mes/MESDashboard"));
 const DailyPlan = lazy(() => import("./pages/mes/DailyPlan"));
-const CapacityPlanner = lazy(() => import("./pages/mes/CapacityPlanner"));
-const LineBalancing = lazy(() => import("./pages/mes/LineBalancing"));
 const LinePlanner = lazy(() => import("./pages/mes/LinePlanner"));
-const AssemblyPlanner = lazy(() => import("./pages/mes/AssemblyPlanner"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
@@ -330,24 +327,9 @@ function AppContent() {
                       <DailyPlan />
                     </ProtectedRouteGate>
                   } />
-                  <Route path="/capacity-planner" element={
-                    <ProtectedRouteGate>
-                      <CapacityPlanner />
-                    </ProtectedRouteGate>
-                  } />
                   <Route path="/line-planner" element={
                     <ProtectedRouteGate>
                       <LinePlanner />
-                    </ProtectedRouteGate>
-                  } />
-                  <Route path="/line-balancing" element={
-                    <ProtectedRouteGate>
-                      <LineBalancing />
-                    </ProtectedRouteGate>
-                  } />
-                  <Route path="/assembly-planner" element={
-                    <ProtectedRouteGate>
-                      <AssemblyPlanner />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/crm-import" element={

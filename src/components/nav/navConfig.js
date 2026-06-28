@@ -119,9 +119,6 @@ export const NAV_GROUPS = [
     icon: ic(PrecisionManufacturingOutlined),
     items: [
       { label: "Line Planner", path: "/line-planner", icon: ic(PrecisionManufacturingOutlined) },
-      { label: "Capacity & Overtime", path: "/capacity-planner", icon: ic(FactoryOutlined) },
-      { label: "Line Balancing", path: "/line-balancing", icon: ic(InsightsOutlined) },
-      { label: "Assembly Planner", path: "/assembly-planner", icon: ic(InsightsOutlined) },
       { label: "Daily Plan", path: "/daily-plan", icon: ic(AssignmentOutlined) },
       { label: "Job Cards (shop floor)", path: "/job-cards", icon: ic(AssignmentOutlined) },
       { label: "Production Board", path: "/mes-dashboard", icon: ic(InsightsOutlined) },
