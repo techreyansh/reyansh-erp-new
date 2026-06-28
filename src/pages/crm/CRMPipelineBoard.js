@@ -67,6 +67,7 @@ import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CrmReportDialog from "../../components/crm/CrmReportDialog";
+import BulkImportButton from "../../components/common/BulkImport/BulkImportButton";
 import Client360 from "../../components/crm/Client360";
 import NPDDevelopmentPanel from "../../components/crm/NPDDevelopmentPanel";
 
@@ -3501,6 +3502,14 @@ export default function CRMPipelineBoard() {
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
             Add company
           </Button>
+
+          <BulkImportButton
+            dataset={view === "clients" ? "crm_clients" : "crm_prospects"}
+            label="Import Excel"
+            variant="outlined"
+            size="medium"
+            onApplied={loadAll}
+          />
         </Stack>
       </Stack>
 

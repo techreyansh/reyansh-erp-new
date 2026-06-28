@@ -11,6 +11,7 @@ import {
   Drawer, Divider, ToggleButtonGroup, ToggleButton, Autocomplete, InputAdornment, ListItemIcon, Badge,
   Table, TableHead, TableRow, TableCell, TableBody, Collapse,
 } from '@mui/material';
+import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
 import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import AccountTreeOutlined from '@mui/icons-material/AccountTreeOutlined';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
@@ -355,6 +356,7 @@ export default function ClientPipeline() {
           <ToggleButton value="mine">My clients</ToggleButton>
         </ToggleButtonGroup>
         <Button size="small" variant="contained" startIcon={<PersonRounded />} onClick={() => setAddOpen(true)} sx={{ borderRadius: 2 }}>Add client</Button>
+        <BulkImportButton dataset="crm_clients" label="Import Excel" onApplied={load} sx={{ borderRadius: 2 }} />
         <Button size="small" variant={showTeam ? 'contained' : 'outlined'} startIcon={<GroupsRounded />} onClick={() => setShowTeam((v) => !v)} sx={{ borderRadius: 2 }}>Team</Button>
         <Badge badgeContent={unmanagedCount} color="error">
           <Button size="small" variant={onlyUnmanaged ? 'contained' : 'outlined'} color="error" startIcon={<WarningAmberRounded />} onClick={() => setOnlyUnmanaged((v) => !v)} sx={{ borderRadius: 2 }}>Unmanaged</Button>
