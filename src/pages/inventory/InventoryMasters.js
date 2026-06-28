@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { AddRounded, DeleteOutlineRounded, SaveRounded } from '@mui/icons-material';
 import svc from '../../services/inventoryUomBinService';
+import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
 
 export default function InventoryMasters() {
   const [tab, setTab] = useState(0);
@@ -16,9 +17,13 @@ export default function InventoryMasters() {
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>Inventory masters — Bins & UoM</Typography>
+      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800 }}>Inventory masters — Bins & UoM</Typography>
+        <Box sx={{ flexGrow: 1 }} />
+        <BulkImportButton dataset="inventory_items" label="Import items (Excel)" />
+      </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Storage bins per location, and per-item alternate units (receive/read in rolls/bags while stock stays in the base unit).
+        Storage bins per location, and per-item alternate units (receive/read in rolls/bags while stock stays in the base unit). Use <b>Import items</b> to bulk-add the item master + opening stock.
       </Typography>
       <Tabs value={tab} onChange={(_e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Tab label="Bins" />
