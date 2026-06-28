@@ -49,7 +49,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/ceo-command' || path === '/access-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/employee-dashboard' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/profile' || path === '/help', moduleKey: MODULE_KEYS.DASHBOARD },
-  { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug', moduleKey: MODULE_KEYS.SETTINGS },
+  { test: (path) => path === '/settings' || path === '/setup-sheets' || path === '/troubleshoot-sheets' || path === '/storage-debug' || path === '/data-import', moduleKey: MODULE_KEYS.SETTINGS },
   { test: (path) => path.split('?')[0].startsWith('/crm-pipeline'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/crm'), moduleKey: MODULE_KEYS.CRM },
   { test: (path) => path.startsWith('/kit'), moduleKey: MODULE_KEYS.CRM },

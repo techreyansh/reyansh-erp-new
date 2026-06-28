@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloudUpload from '@mui/icons-material/CloudUpload';
 import CloudDownload from '@mui/icons-material/CloudDownload';
@@ -76,6 +77,7 @@ export default function ProductMaster() {
         <Typography variant="h5" sx={{ fontWeight: 800 }}>Product Master</Typography>
         <Chip size="small" label="PLM" variant="outlined" color="primary" />
         <Box sx={{ flexGrow: 1 }} />
+        <BulkImportButton dataset="products" label="Import Excel" onApplied={load} />
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>New product</Button>
       </Stack>
 

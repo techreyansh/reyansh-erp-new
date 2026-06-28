@@ -20,6 +20,7 @@ import ieService from '../../services/ieService';
 import plmCostingService from '../../services/plmCostingService';
 import { planForTarget, planScenarios } from '../../services/ie/ieScenario';
 import { seedSampleRoutings } from '../../services/linePlannerSeed';
+import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
 import {
   resolveStandard, standardRatePerHour, machineThroughput, lineCapacity, forwardLine, operatorsFor,
 } from '../../services/routingCapacity';
@@ -335,6 +336,7 @@ const LinePlanner = () => {
                 </Button>
               </span>
             </Tooltip>
+            <BulkImportButton dataset="routings" label="Import routings" variant="contained" size="medium" onApplied={() => loadRouting(productId)} sx={{ whiteSpace: 'nowrap', bgcolor: 'rgba(255,255,255,0.18)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.28)' } }} />
             <Tooltip title="Reload"><IconButton onClick={load} sx={{ color: 'white' }}><RefreshIcon /></IconButton></Tooltip>
           </Stack>
         </CardContent>
