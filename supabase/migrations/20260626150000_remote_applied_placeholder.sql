@@ -1,0 +1,13 @@
+-- PLACEHOLDER for an out-of-band migration that was applied directly to the
+-- prod database (azwdxgahmdgccfimhtmm) but never committed to this repo.
+--
+-- `supabase migration list --linked` shows version 20260626150000 present in the
+-- remote schema_migrations history with NO corresponding local file, which makes
+-- `supabase db push` refuse to run ("Remote migration versions not found in local
+-- migrations directory"). This stub restores parity: because 20260626150000 is
+-- already recorded as applied on remote, `db push` SKIPS it — this file's body
+-- never executes against prod. It exists only to satisfy the local⊇remote check.
+--
+-- The true contents of 20260626150000 are unknown (not in git history on any
+-- branch). If they are ever recovered, replace this stub with the real SQL.
+SELECT 1;  -- intentional no-op
