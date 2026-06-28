@@ -95,6 +95,33 @@ export function lineCapacity(resolvedOps = []) {
   return { achievableUph, bottleneck, ops: resolvedOps };
 }
 
+/**
+ * FORWARD line-balance: given the resources actually deployed at each station
+ * (operators on a labour op, machines/stations on a machine op), compute the
+ * achievable line UPH and which station gates it. The inverse of operatorsFor:
+ * "I have this crew — what can the line do?" rather than "what crew do I need?".
+ *
+ * `resourcesByKey` maps a resolved op's `key` to the count deployed there.
+ * Missing/zero counts default to 1 station so an unfilled field never zeroes the
+ * whole line silently. Line UPH = the slowest station's throughput.
+ */
+export function forwardLine(resolvedOps = [], resourcesByKey = {}) {
+  const usable = (resolvedOps || []).filter((r) => r && r.valid);
+  const rows = usable.map((r) => {
+    const perUnit = standardRatePerHour(r); // one operator (labour) or one machine
+    const raw = firstNum(resourcesByKey?.[r.key]);
+    const count = Math.max(1, raw == null ? 1 : Math.floor(raw));
+    return { r, key: r.key, label: r.label, type: r.constraintType, count, perUnit, throughput: perUnit * count };
+  });
+  if (!rows.length) return { achievableUph: 0, bottleneck: null, rows: [] };
+  const slowest = rows.reduce((m, row) => (row.throughput < m.throughput ? row : m));
+  return {
+    achievableUph: slowest.throughput,
+    bottleneck: slowest.r,
+    rows: rows.map((row) => ({ ...row, bottleneck: row.key === slowest.key })),
+  };
+}
+
 /** Operators a labour station needs to hold the given line rate, clamped to [min,max]. */
 export function operatorsFor(r, lineUph) {
   if (!r || !r.valid) return 0;
@@ -106,5 +133,5 @@ export function operatorsFor(r, lineUph) {
   return clamp(Math.ceil(lineUph / rate), minOps, maxOps);
 }
 
-const routingCapacity = { resolveStandard, standardRatePerHour, machineThroughput, lineCapacity, operatorsFor };
+const routingCapacity = { resolveStandard, standardRatePerHour, machineThroughput, lineCapacity, forwardLine, operatorsFor };
 export default routingCapacity;

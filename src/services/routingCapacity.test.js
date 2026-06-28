@@ -1,4 +1,4 @@
-import { resolveStandard, standardRatePerHour, lineCapacity, operatorsFor } from './routingCapacity';
+import { resolveStandard, standardRatePerHour, lineCapacity, forwardLine, operatorsFor } from './routingCapacity';
 
 const DEFAULT = { default_cycle_sec: 60, default_oee: 1, constraint_type: 'labour' };
 
@@ -157,6 +157,49 @@ describe('lineCapacity — mixed labour/machine bottleneck (bug fix)', () => {
     const ops = [{ constraint_type: 'labour', cycle_time_sec: 0 }, { constraint_type: 'machine', cycle_time_sec: null }]
       .map((o) => resolveStandard(o, null, { default_cycle_sec: null }));
     const r = lineCapacity(ops);
+    expect(r.achievableUph).toBe(0);
+    expect(r.bottleneck).toBeNull();
+  });
+});
+
+describe('forwardLine — resources deployed -> achievable line UPH + bottleneck', () => {
+  const DEF = { default_cycle_sec: 60, default_oee: 1, constraint_type: 'labour' };
+  // The sheet's C10041 assembly bottleneck: fiberglass sleeve 30s/pc = 120/hr at OEE 1.
+  const sleeve = (over = {}) => resolveStandard({ key: 'sleeve', constraint_type: 'labour', cycle_time_sec: 30, oee: 1, max_operators: 9, ...over }, null, DEF);
+  const strip = resolveStandard({ key: 'strip', constraint_type: 'labour', cycle_time_sec: 3.75, oee: 1, max_operators: 9 }, null, DEF); // 960/op
+
+  test('one station each → line gated by the slowest single station', () => {
+    const ops = [strip, sleeve()];
+    const r = forwardLine(ops, { strip: 1, sleeve: 1 });
+    expect(r.bottleneck.key).toBe('sleeve');
+    expect(r.achievableUph).toBe(120);
+    expect(r.rows.find((x) => x.key === 'sleeve').bottleneck).toBe(true);
+  });
+
+  test('3 parallel sleeve stations lift the line off the sleeve (120 → 360)', () => {
+    const r = forwardLine([strip, sleeve()], { strip: 1, sleeve: 3 });
+    expect(r.achievableUph).toBe(360); // 120 × 3; strip (960) no longer slowest
+    expect(r.bottleneck.key).toBe('sleeve');
+  });
+
+  test('missing/zero resource defaults to 1 station (never silently zeroes the line)', () => {
+    const r = forwardLine([strip, sleeve()], { strip: 5 }); // sleeve unspecified
+    expect(r.rows.find((x) => x.key === 'sleeve').count).toBe(1);
+    expect(r.achievableUph).toBe(120);
+  });
+
+  test('machine op scales by machines deployed (cavity-aware single rate × count)', () => {
+    // C10052 outer: 30s shot, 2-cavity = 240/hr per machine at OEE 1.
+    const outer = resolveStandard({ key: 'outer', constraint_type: 'machine', cycle_time_sec: 30, cavities: 2, oee: 1 }, null, DEF);
+    const r = forwardLine([outer], { outer: 2 });
+    expect(r.rows[0].perUnit).toBe(240);
+    expect(r.achievableUph).toBe(480); // two machines
+  });
+
+  test('invalid ops are skipped; empty/all-invalid line → 0 UPH, null bottleneck', () => {
+    expect(forwardLine([], {})).toEqual({ achievableUph: 0, bottleneck: null, rows: [] });
+    const bad = resolveStandard({ key: 'x', cycle_time_sec: 0 }, null, { default_cycle_sec: 0 });
+    const r = forwardLine([bad], { x: 3 });
     expect(r.achievableUph).toBe(0);
     expect(r.bottleneck).toBeNull();
   });
