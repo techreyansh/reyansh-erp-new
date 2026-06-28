@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import BulkImportButton from '../../components/common/BulkImport/BulkImportButton';
+import CoachingCard from '../../components/crm/CoachingCard';
+import { listPlaybook } from '../../services/crmCoachingService';
 import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import AccountTreeOutlined from '@mui/icons-material/AccountTreeOutlined';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
@@ -50,6 +52,7 @@ function NextActionDialog({ open, card, stageDef, users, names, onClose, onSave 
   const [owner, setOwner] = useState('');
   const [priority, setPriority] = useState('normal');
   const [status, setStatus] = useState('');
+  const [coach, setCoach] = useState(null);
   useEffect(() => {
     if (open && card) {
       setAction(card.next_action || ''); setDate(card.next_action_date || today());
@@ -57,7 +60,25 @@ function NextActionDialog({ open, card, stageDef, users, names, onClose, onSave 
       setPriority(card.next_action_priority || 'normal'); setStatus(card.current_status || '');
     }
   }, [open, card]);
-  const picks = [...(stageDef?.action_set || []).map((a) => a.label), ...QUICK_NEXT].filter((v, i, a) => a.indexOf(v) === i).slice(0, 9);
+  // Pull the stage playbook → prefill the SLA due-date on an unmanaged account
+  // and surface the recommended action as the first quick-pick.
+  useEffect(() => {
+    if (!open || !card) { setCoach(null); return; }
+    const scope = card.account_type === 'prospect' ? 'prospect' : 'client';
+    const key = card.client_stage || card.pipeline_stage || card.prospect_stage;
+    let alive = true;
+    listPlaybook().then((rows) => {
+      if (!alive) return;
+      const r = (rows || []).find((x) => x.scope === scope && x.stage_key === key) || null;
+      setCoach(r);
+      if (r && r.sla_days != null && !card.next_action_date) {
+        const d = new Date(); d.setDate(d.getDate() + Number(r.sla_days));
+        setDate(d.toISOString().slice(0, 10));
+      }
+    });
+    return () => { alive = false; };
+  }, [open, card]);
+  const picks = [coach?.recommended_action, ...(stageDef?.action_set || []).map((a) => a.label), ...QUICK_NEXT].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).slice(0, 9);
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ fontWeight: 800 }}>
@@ -195,6 +216,11 @@ function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, on
             {card.band && <Chip size="small" color={BAND[card.band]} label={`Health ${card.health_score ?? '—'}`} />}
             <Tooltip title="Open full Client-360"><IconButton onClick={() => onFull(card)}><OpenInFullRounded /></IconButton></Tooltip>
           </Stack>
+
+          {/* coaching — what to say & when for this stage */}
+          <Box sx={{ mt: 1.5, mb: 1 }}>
+            <CoachingCard scope="client" stageKey={card.client_stage || card.pipeline_stage} dense />
+          </Box>
 
           {/* quick actions for this stage */}
           <Typography variant="overline" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>{stageDef?.label} actions</Typography>

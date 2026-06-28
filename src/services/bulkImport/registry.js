@@ -17,6 +17,10 @@ import ppcService from "../ppcService";
 import { listProducts, createProduct, updateProduct, saveProcess } from "../plmProductService";
 import { listCables, saveCable } from "../cableMasterService";
 import { listOperations } from "../mesService";
+import { savePlan, listPlans } from "../cableProductionService";
+import { listPipeline, listContacts, addContact } from "../crmPipelineService";
+import { listPlaybook, savePlaybook } from "../crmCoachingService";
+import * as db from "../../lib/db";
 import { norm } from "./parse";
 
 // ── small shared helpers ────────────────────────────────────────────────────
@@ -479,13 +483,226 @@ const routings = {
   apply: applyRoutings,
 };
 
+// ── Cable production plans ──────────────────────────────────────────────────
+async function applyCablePlans(items, onProgress) {
+  let created = 0, updated = 0; const errors = [];
+  const [existing, cables] = await Promise.all([listPlans().catch(() => []), listCables().catch(() => [])]);
+  const byCode = new Map(existing.map((p) => [norm(p.plan_code), p]));
+  const cableByCode = new Map(cables.map((c) => [norm(c.cable_code), c]));
+  for (let i = 0; i < items.length; i += 1) {
+    const { rec } = items[i];
+    try {
+      const cable = cableByCode.get(norm(rec.cable_code));
+      const ex = rec.plan_code ? byCode.get(norm(rec.plan_code)) : null;
+      const row = {
+        plan_code: rec.plan_code || null, cable_id: cable?.id || null, cable_code: rec.cable_code,
+        product_name: rec.product_name || cable?.cable_name || null, customer_code: rec.customer_code || null,
+        customer_name: rec.customer_name || null, qty: rec.qty ?? null, length_m: rec.length_m ?? null,
+        due_date: rec.due_date || null, priority: rec.priority || "medium", status: rec.status || "draft",
+      };
+      if (ex) row.id = ex.id;
+      await savePlan(row);
+      if (ex) updated += 1; else created += 1;
+    } catch (e) { errors.push({ label: rec.cable_code || rec.plan_code || `row ${i + 1}`, message: e?.message || String(e) }); }
+    onProgress && onProgress(i + 1, items.length);
+  }
+  return { created, updated, errors };
+}
+const cablePlans = {
+  key: "cable_plans", label: "Cable Production Plans", module: "production", matchKey: "cable_code",
+  columns: [
+    { key: "plan_code", label: "Plan code", type: "text", example: "", help: "Leave blank for new; fill to update an existing plan." },
+    { key: "cable_code", label: "Cable code", required: true, type: "text", example: "CBL-3C-1.5", help: "Must exist in Cable Specs." },
+    { key: "customer_name", label: "Customer", type: "text", example: "ACME" },
+    { key: "customer_code", label: "Customer code", type: "text", example: "C10041" },
+    { key: "qty", label: "Qty", type: "number", example: 1000 },
+    { key: "length_m", label: "Length / piece (m)", type: "number", example: 5 },
+    { key: "due_date", label: "Due date", type: "date", example: "2026-07-15" },
+    { key: "priority", label: "Priority", type: "enum", enum: ["low", "medium", "high"], example: "medium" },
+    { key: "status", label: "Status", type: "text", example: "draft" },
+  ],
+  fetchExisting: () => listPlans(),
+  recordToCell: (row, key) => row[key],
+  rowToRecord: (raw) => ({
+    plan_code: str(raw.plan_code) || null, cable_code: str(raw.cable_code),
+    customer_name: str(raw.customer_name) || null, customer_code: str(raw.customer_code) || null,
+    qty: numOrNull(raw.qty), length_m: numOrNull(raw.length_m), due_date: str(raw.due_date) || null,
+    priority: toEnumKey(raw.priority, [{ key: "low", label: "low" }, { key: "medium", label: "medium" }, { key: "high", label: "high" }]) || "medium",
+    status: str(raw.status) || null,
+  }),
+  validateRow: (rec) => ({ errors: rec.cable_code ? [] : ["Cable code is required"], warnings: [] }),
+  apply: applyCablePlans,
+};
+
+// ── Vendors (legacy vendors_data sheet via db.js) ───────────────────────────
+const VENDOR_COLS = [
+  ["Vendor Name", "Vendor name", true], ["Vendor Code", "Vendor code", false], ["Vendor Contact", "Contact", false],
+  ["Vendor Email", "Email", false], ["GSTIN", "GSTIN", false], ["PAN No.", "PAN", false],
+  ["Payment Terms", "Payment terms", false], ["Lead Time (Days)", "Lead time (days)", false], ["MOQ", "MOQ", false],
+];
+async function applyVendors(items, onProgress) {
+  let created = 0, updated = 0; const errors = [];
+  const existing = await db.getTableRows("Vendor").catch(() => []);
+  const byCode = new Map(existing.filter((v) => v["Vendor Code"]).map((v) => [norm(v["Vendor Code"]), v]));
+  for (let i = 0; i < items.length; i += 1) {
+    const { rec } = items[i];
+    try {
+      const row = {}; VENDOR_COLS.forEach(([k]) => { if (rec[k] != null && rec[k] !== "") row[k] = rec[k]; });
+      const code = rec["Vendor Code"];
+      const ex = code ? byCode.get(norm(code)) : null;
+      if (ex) { await db.updateTableRowByKey("Vendor", "Vendor Code", code, row); updated += 1; }
+      else { await db.insertTableRow("Vendor", row); created += 1; }
+    } catch (e) { errors.push({ label: rec["Vendor Name"] || `row ${i + 1}`, message: e?.message || String(e) }); }
+    onProgress && onProgress(i + 1, items.length);
+  }
+  return { created, updated, errors };
+}
+const vendors = {
+  key: "vendors", label: "Vendors / Suppliers", module: "inventory", matchKey: "Vendor Code",
+  columns: VENDOR_COLS.map(([key, label, required]) => ({ key, label, required, type: "text", example: key === "Vendor Name" ? "Acme Copper Co" : key === "Vendor Code" ? "V001" : "" })),
+  fetchExisting: () => db.getTableRows("Vendor"),
+  recordToCell: (row, key) => row[key],
+  rowToRecord: (raw) => { const o = {}; VENDOR_COLS.forEach(([k]) => { o[k] = str(raw[k]) || null; }); return o; },
+  validateRow: (rec) => ({ errors: rec["Vendor Name"] ? [] : ["Vendor name is required"], warnings: [] }),
+  apply: applyVendors,
+};
+
+// ── Account contacts (child of crm_pipeline; resolve account by company) ─────
+async function applyContacts(items, onProgress) {
+  let created = 0, updated = 0; const errors = [];
+  const accounts = await listPipeline().catch(() => []);
+  const byCompany = new Map(accounts.map((a) => [norm(a.company_name), a]));
+  const byCode = new Map(accounts.filter((a) => a.customer_code).map((a) => [norm(a.customer_code), a]));
+  for (let i = 0; i < items.length; i += 1) {
+    const { rec } = items[i];
+    try {
+      const acct = byCompany.get(norm(rec.company)) || byCode.get(norm(rec.company));
+      if (!acct) { errors.push({ label: rec.company || `row ${i + 1}`, message: "unknown account (company not found)" }); }
+      else {
+        const existing = await listContacts(acct.id).catch(() => []);
+        const dup = rec.email && existing.find((c) => norm(c.email) === norm(rec.email));
+        if (dup) { updated += 1; /* contact already exists — skip re-insert */ }
+        else { await addContact(acct.id, rec); created += 1; }
+      }
+    } catch (e) { errors.push({ label: rec.full_name || rec.company || `row ${i + 1}`, message: e?.message || String(e) }); }
+    onProgress && onProgress(i + 1, items.length);
+  }
+  return { created, updated, errors };
+}
+const contacts = {
+  key: "contacts", label: "Account Contacts", module: "crm", matchKey: "company",
+  columns: [
+    { key: "company", label: "Company", required: true, type: "text", example: "Acme Cables Pvt Ltd", help: "Account this contact belongs to (must already exist)." },
+    { key: "full_name", label: "Contact name", required: true, type: "text", example: "Ravi Sharma" },
+    { key: "designation", label: "Designation", type: "text", example: "Purchase Manager" },
+    { key: "phone", label: "Phone", type: "text", example: "9000000001" },
+    { key: "email", label: "Email", type: "text", example: "ravi@acme.com" },
+    { key: "is_decision_maker", label: "Decision maker?", type: "text", example: "yes", help: "yes/no" },
+    { key: "is_primary", label: "Primary?", type: "text", example: "no", help: "yes/no" },
+  ],
+  fetchExisting: () => Promise.resolve([]),
+  rowToRecord: (raw) => ({
+    company: str(raw.company), full_name: str(raw.full_name), designation: str(raw.designation) || null,
+    phone: str(raw.phone) || null, email: str(raw.email) || null,
+    is_decision_maker: /^(y|yes|true|1)$/i.test(str(raw.is_decision_maker)), is_primary: /^(y|yes|true|1)$/i.test(str(raw.is_primary)),
+  }),
+  validateRow: (rec) => { const e = []; if (!rec.company) e.push("Company is required"); if (!rec.full_name) e.push("Contact name is required"); return { errors: e, warnings: [] }; },
+  apply: applyContacts,
+};
+
+// ── BOM lines (resolve item codes → ppc_bom) ────────────────────────────────
+async function applyBom(items, onProgress) {
+  let created = 0; const errors = [];
+  const allItems = await ppcService.listItems({ includeInactive: true }).catch(() => []);
+  const byCode = new Map(allItems.map((it) => [norm(it.code), it]));
+  for (let i = 0; i < items.length; i += 1) {
+    const { rec } = items[i];
+    try {
+      const parent = byCode.get(norm(rec.parent_code));
+      const comp = byCode.get(norm(rec.component_code));
+      if (!parent || !comp) { errors.push({ label: `${rec.parent_code} → ${rec.component_code}`, message: `unknown item code: ${!parent ? rec.parent_code : rec.component_code}` }); }
+      else {
+        await ppcService.addBomLine({ parent_item_id: parent.id, component_item_id: comp.id, qty_per: rec.qty_per, scrap_pct: rec.scrap_pct, sequence: rec.sequence, notes: rec.notes });
+        created += 1;
+      }
+    } catch (e) {
+      const msg = e?.code === "23505" || /duplicate/i.test(e?.message || "") ? "already in this BOM (skipped)" : e?.message || String(e);
+      errors.push({ label: `${rec.parent_code} → ${rec.component_code}`, message: msg });
+    }
+    onProgress && onProgress(i + 1, items.length);
+  }
+  return { created, updated: 0, errors };
+}
+const bom = {
+  key: "bom", label: "Bill of Materials", module: "production", matchKey: "parent_code",
+  columns: [
+    { key: "parent_code", label: "Parent item code", required: true, type: "text", example: "CBL-3C-1.5", help: "Must exist in Inventory Items." },
+    { key: "component_code", label: "Component item code", required: true, type: "text", example: "CO001" },
+    { key: "qty_per", label: "Qty per", type: "number", example: 1.04 },
+    { key: "scrap_pct", label: "Scrap %", type: "number", example: 2 },
+    { key: "sequence", label: "Sequence", type: "number", example: 10 },
+  ],
+  fetchExisting: () => Promise.resolve([]),
+  rowToRecord: (raw) => ({
+    parent_code: str(raw.parent_code), component_code: str(raw.component_code),
+    qty_per: numOrNull(raw.qty_per), scrap_pct: numOrNull(raw.scrap_pct), sequence: numOrNull(raw.sequence),
+  }),
+  validateRow: (rec) => { const e = []; if (!rec.parent_code) e.push("Parent item code is required"); if (!rec.component_code) e.push("Component item code is required"); return { errors: e, warnings: [] }; },
+  apply: applyBom,
+};
+
+// ── Coaching playbook (tune talk-tracks/SLAs/objections in Excel) ────────────
+async function applyPlaybook(items, onProgress) {
+  let created = 0, updated = 0; const errors = [];
+  const rows = items.map(({ rec }) => ({
+    scope: rec.scope, stage_key: rec.stage_key, recommended_action: rec.recommended_action || null,
+    sla_days: rec.sla_days ?? null, talk_track: rec.talk_track || null, objection_prompt: rec.objection_prompt || null,
+    channel: rec.channel || null,
+  }));
+  try {
+    await savePlaybook(rows);
+    items.forEach((it) => { if (it.match) updated += 1; else created += 1; });
+  } catch (e) { errors.push({ label: "playbook", message: e?.message || String(e) }); }
+  onProgress && onProgress(items.length, items.length);
+  return { created, updated, errors };
+}
+const coachingPlaybook = {
+  key: "coaching_playbook", label: "Coaching Playbook", module: "crm", matchKey: "scope_stage",
+  columns: [
+    { key: "scope", label: "Scope", required: true, type: "enum", enum: ["prospect", "client"], example: "prospect" },
+    { key: "stage_key", label: "Stage key", required: true, type: "text", example: "quotation_sent" },
+    { key: "recommended_action", label: "Recommended action", type: "text", example: "Follow up on the quote and handle price" },
+    { key: "sla_days", label: "Follow-up SLA (days)", type: "number", example: 3 },
+    { key: "talk_track", label: "What to say", type: "text", example: "Confirm receipt, restate value, ask for the decision date." },
+    { key: "objection_prompt", label: "Objection + response", type: "text", example: "“Too expensive” → “Let’s align spec-for-spec…”" },
+    { key: "channel", label: "Channel", type: "enum", enum: ["call", "whatsapp", "email"], example: "call" },
+  ],
+  fetchExisting: () => listPlaybook().then((rows) => rows.map((r) => ({ ...r, scope_stage: `${r.scope}|${r.stage_key}` }))),
+  recordToCell: (row, key) => (key === "scope_stage" ? `${row.scope}|${row.stage_key}` : row[key]),
+  rowToRecord: (raw) => ({
+    scope: toEnumKey(raw.scope, [{ key: "prospect", label: "prospect" }, { key: "client", label: "client" }]) || "__invalid__",
+    stage_key: str(raw.stage_key), recommended_action: str(raw.recommended_action) || null,
+    sla_days: numOrNull(raw.sla_days), talk_track: str(raw.talk_track) || null,
+    objection_prompt: str(raw.objection_prompt) || null,
+    channel: toEnumKey(raw.channel, [{ key: "call", label: "call" }, { key: "whatsapp", label: "whatsapp" }, { key: "email", label: "email" }]),
+    scope_stage: `${norm(raw.scope) === "client" ? "client" : "prospect"}|${str(raw.stage_key)}`,
+  }),
+  validateRow: (rec) => { const e = []; if (rec.scope === "__invalid__") e.push("Scope must be prospect or client"); if (!rec.stage_key) e.push("Stage key is required"); return { errors: e, warnings: [] }; },
+  apply: applyPlaybook,
+};
+
 // ── registry ────────────────────────────────────────────────────────────────
 export const DATASETS = {
   [crmProspects.key]: crmProspects,
   [crmClients.key]: crmClients,
+  [contacts.key]: contacts,
+  [coachingPlaybook.key]: coachingPlaybook,
   [inventoryItems.key]: inventoryItems,
+  [vendors.key]: vendors,
   [products.key]: products,
   [cableMaster.key]: cableMaster,
+  [cablePlans.key]: cablePlans,
+  [bom.key]: bom,
   [routings.key]: routings,
 };
 
