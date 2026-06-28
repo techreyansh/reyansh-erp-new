@@ -11,6 +11,7 @@ import {
   Drawer, Divider, ToggleButtonGroup, ToggleButton, Autocomplete, InputAdornment, ListItemIcon, Badge,
   Table, TableHead, TableRow, TableCell, TableBody, Collapse,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import AccountTreeOutlined from '@mui/icons-material/AccountTreeOutlined';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
@@ -129,6 +130,7 @@ function ClientCard({ card, names, onOpen, onMenu, onDragStart }) {
 
 /* ---- management drawer (timeline + actions + ownership) ---- */
 function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, onFull, notify }) {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [contacts, setContacts] = useState([]);
   const [actType, setActType] = useState('note');
@@ -156,7 +158,11 @@ function ManagementDrawer({ card, stageDef, users, names, onClose, onChanged, on
     if (a.kind === 'call' && primary.phone) window.open(`tel:${primary.phone}`);
     else if (a.kind === 'whatsapp' && primary.phone) window.open(`https://wa.me/${String(primary.phone).replace(/[^0-9]/g, '')}`, '_blank');
     else if (a.kind === 'email' && primary.email) window.open(`mailto:${primary.email}`);
-    else if (a.kind === 'navigate' && a.to) { window.location.href = a.to; return; }
+    else if (a.kind === 'navigate' && a.to) {
+      if (/^https?:\/\//i.test(a.to)) window.open(a.to, '_blank');
+      else navigate(a.to); // SPA navigation — no full-page reload
+      return;
+    }
     const typeMap = { call: 'call', whatsapp: 'whatsapp', email: 'email', meeting: 'meeting', note: 'note' };
     await log(typeMap[a.kind] || 'note', a.label, a.kind === 'escalate' ? 'Payment escalated.' : null);
   };

@@ -80,6 +80,7 @@ import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
 import TaskBell from "./TaskBell";
+import CrmBell from "./CrmBell";
 
 const Header = ({ onMenuClick } = {}) => {
   const theme = useTheme();
@@ -690,6 +691,8 @@ const Header = ({ onMenuClick } = {}) => {
 
             {/* Task Notification Bell */}
             {user && <TaskBell />}
+            {/* CRM assignment / accountability bell */}
+            {user && <CrmBell />}
 
             {/* User Profile */}
             {user ? (
