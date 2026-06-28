@@ -1031,19 +1031,19 @@ export async function listAllCollaborators() {
  * (the collaborator is already there). Other errors are thrown.
  */
 export async function addCollaborator(pipelineId, email) {
-  let addedBy = null;
-  try {
-    addedBy = await getCurrentUserEmail();
-  } catch {
-    addedBy = null;
-  }
-  const { error } = await supabase.from("crm_pipeline_collaborators").insert({
-    pipeline_id: pipelineId,
-    email: String(email || "").toLowerCase(),
-    added_by_email: addedBy,
+  // Goes through a SECURITY DEFINER RPC so the collaborator add AND the in-app
+  // notification to that person happen atomically — a client can't insert a
+  // crm_notification addressed to another user under the scoped RLS.
+  const { error } = await supabase.rpc("crm_add_collaborator", {
+    p_id: pipelineId,
+    p_email: String(email || "").toLowerCase(),
   });
-  // 23505 = unique_violation: collaborator already present, treat as success.
-  if (error && error.code !== "23505") throw error;
+  if (error) {
+    if (/not_authorized/i.test(error.message)) {
+      throw new Error("You don't have permission to add a collaborator on this account.");
+    }
+    throw error;
+  }
   return true;
 }
 
@@ -1213,18 +1213,43 @@ export async function updateCollection(invoiceId, { commitment = null, status = 
 }
 
 // Set/clear a client's mandatory next action (Status/Action/Owner/Due/Priority).
+// Atomic via crm_set_next_action: saves the action, auto-adds the action owner
+// as a collaborator (so it surfaces on THEIR pipeline + worklist), and notifies
+// them — all server-side so accountability can't half-apply.
 export async function setClientNextAction(id, { action = null, date = null, owner = null, priority = "normal", status = null } = {}) {
-  const patch = {
-    next_action: action, next_action_date: date || null,
-    next_action_owner_email: owner || null, next_action_priority: priority || "normal",
-    updated_at: new Date().toISOString(),
-  };
-  if (status !== null) patch.current_status = status;
-  // .select() so an RLS-rejected update (0 rows matched) surfaces as a clear
-  // error instead of a silent no-op (e.g. editing an account you don't own).
-  const { data, error } = await supabase.from("crm_pipeline").update(patch).eq("id", id).select("id");
-  if (error) throw error;
-  if (!data || data.length === 0) {
-    throw new Error("Couldn't save the next action — you may not have permission to edit this account (it may be owned by someone else).");
+  const { error } = await supabase.rpc("crm_set_next_action", {
+    p_id: id,
+    p_action: action,
+    p_date: date || null,
+    p_owner: owner || null,
+    p_priority: priority || "normal",
+    p_status: status,
+  });
+  if (error) {
+    if (/not_authorized|not_found_or_forbidden/i.test(error.message)) {
+      throw new Error("Couldn't save the next action — you may not have permission to edit this account (it may be owned by someone else).");
+    }
+    throw error;
   }
+}
+
+// ── CRM in-app notifications (the accountability bell) ──────────────────────
+/** Newest 50 CRM notifications for the current user. Never throws (returns []). */
+export async function listMyCrmNotifications() {
+  try {
+    const { data, error } = await supabase.rpc("my_crm_notifications");
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Mark notifications read (all unread if ids omitted). */
+export async function markCrmNotificationsRead(ids = null) {
+  const { error } = await supabase.rpc("crm_notification_mark_read", {
+    p_ids: ids && ids.length ? ids : null,
+  });
+  if (error) throw error;
+  return true;
 }
