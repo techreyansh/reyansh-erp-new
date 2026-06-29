@@ -10,7 +10,9 @@ import {
   FactCheck as AdjustIcon, Refresh as RefreshIcon, Search as SearchIcon, Close as CloseIcon,
 } from '@mui/icons-material';
 import inventoryLedgerService from '../../services/inventoryLedgerService';
+import inventoryUomBinService from '../../services/inventoryUomBinService';
 
+const BASE_UNIT = '__base__';
 const fmtQty = (n) => (Number(n) || 0).toLocaleString('en-IN');
 const fmtInr = (n) => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
@@ -28,6 +30,7 @@ const InventoryLedger = () => {
   const theme = useTheme();
   const [rows, setRows] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [convByCode, setConvByCode] = useState({}); // itemCode -> [{ alt_uom, factor, is_default }]
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -42,9 +45,21 @@ const InventoryLedger = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { rows: r, locations: l } = await inventoryLedgerService.getInventoryView();
+      const [{ rows: r, locations: l }, allConv] = await Promise.all([
+        inventoryLedgerService.getInventoryView(),
+        inventoryUomBinService.listAllConversions(),
+      ]);
       setRows(r);
       setLocations(l);
+      // Build itemCode -> conversions (rows carry both itemId and code).
+      const codeByItem = new Map(r.map((row) => [row.itemId, row.code]));
+      const map = {};
+      (allConv || []).forEach((c) => {
+        const code = codeByItem.get(c.item_id);
+        if (!code) return;
+        (map[code] = map[code] || []).push({ alt_uom: c.alt_uom, factor: Number(c.factor_to_base) || 0, is_default: !!c.is_default });
+      });
+      setConvByCode(map);
     } catch (e) {
       setSnackbar({ open: true, message: 'Failed to load inventory: ' + e.message, severity: 'error' });
     }
@@ -79,7 +94,7 @@ const InventoryLedger = () => {
 
   const openDialog = (action) => setDialog({
     action,
-    form: { itemCode: '', locationCode: 'STORE', toCode: 'WIP', qty: '', rate: '', reason: '' },
+    form: { itemCode: '', locationCode: 'STORE', toCode: 'WIP', qty: '', rate: '', reason: '', unit: BASE_UNIT },
   });
 
   const submit = async () => {
@@ -91,9 +106,14 @@ const InventoryLedger = () => {
     }
     setSubmitting(true);
     try {
-      const qty = Number(form.qty);
+      // The ledger stays in base UoM. If the user transacted in an alt unit,
+      // convert qty (and the receive rate) to base before posting.
+      const convs = convByCode[form.itemCode] || [];
+      const sel = form.unit && form.unit !== BASE_UNIT ? convs.find((c) => c.alt_uom === form.unit) : null;
+      const factor = sel && sel.factor > 0 ? sel.factor : 1;
+      const qty = inventoryUomBinService.toBase(Number(form.qty), factor);
       if (action === 'receive') {
-        await inventoryLedgerService.receive({ itemCode: form.itemCode, locationCode: form.locationCode, qty, rate: form.rate !== '' ? Number(form.rate) : null, grnRef: 'manual' });
+        await inventoryLedgerService.receive({ itemCode: form.itemCode, locationCode: form.locationCode, qty, rate: form.rate !== '' ? Number(form.rate) / factor : null, grnRef: 'manual' });
       } else if (action === 'issue') {
         await inventoryLedgerService.issue({ itemCode: form.itemCode, locationCode: form.locationCode, qty, refType: 'manual' });
       } else if (action === 'adjust') {
@@ -130,6 +150,15 @@ const InventoryLedger = () => {
   );
 
   const cfg = dialog && ACTIONS[dialog.action];
+
+  // Dialog UoM context: the selected item's base unit + alt-unit conversions.
+  const dlgConvs = dialog ? (convByCode[dialog.form.itemCode] || []) : [];
+  const dlgItem = dialog ? itemOptions.find((o) => o.code === dialog.form.itemCode) : null;
+  const dlgBaseUom = dlgItem?.uom || 'base';
+  const dlgSel = dialog && dialog.form.unit !== BASE_UNIT ? dlgConvs.find((c) => c.alt_uom === dialog.form.unit) : null;
+  const dlgFactor = dlgSel && dlgSel.factor > 0 ? dlgSel.factor : 1;
+  const dlgUnitLabel = dlgSel ? dialog.form.unit : dlgBaseUom;
+  const dlgBaseQty = dialog && dialog.form.qty !== '' ? Number(dialog.form.qty) * dlgFactor : null;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -188,7 +217,9 @@ const InventoryLedger = () => {
                 <TableCell>Code</TableCell>
                 <TableCell>Material</TableCell>
                 <TableCell>Location</TableCell>
+                <TableCell>Bin</TableCell>
                 <TableCell align="right">On hand</TableCell>
+                <TableCell align="right">Alt stock</TableCell>
                 <TableCell align="right">Rate</TableCell>
                 <TableCell align="right">Value</TableCell>
                 <TableCell align="right">Reorder</TableCell>
@@ -197,13 +228,15 @@ const InventoryLedger = () => {
             </TableHead>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>No inventory rows match.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>No inventory rows match.</TableCell></TableRow>
               ) : filtered.map((r) => (
                 <TableRow key={r.itemId + r.locationCode} hover sx={{ cursor: 'pointer' }} onClick={() => openDetail(r)}>
                   <TableCell sx={{ fontWeight: 600 }}>{r.code}</TableCell>
                   <TableCell>{r.name}</TableCell>
                   <TableCell><Chip size="small" label={r.locationName} variant="outlined" /></TableCell>
+                  <TableCell>{r.binCode ? <Chip size="small" label={r.binCode} variant="outlined" /> : <Typography component="span" variant="caption" color="text.disabled">—</Typography>}</TableCell>
                   <TableCell align="right">{fmtQty(r.onHand)} <Typography component="span" variant="caption" color="text.secondary">{r.uom}</Typography></TableCell>
+                  <TableCell align="right">{r.altUom ? <>{fmtQty(r.altOnHand)} <Typography component="span" variant="caption" color="text.secondary">{r.altUom}</Typography></> : <Typography component="span" variant="caption" color="text.disabled">—</Typography>}</TableCell>
                   <TableCell align="right">{r.rate ? fmtInr(r.rate) : '—'}</TableCell>
                   <TableCell align="right">{r.value ? fmtInr(r.value) : '—'}</TableCell>
                   <TableCell align="right">{r.reorder ? fmtQty(r.reorder) : '—'}</TableCell>
@@ -222,7 +255,7 @@ const InventoryLedger = () => {
             <DialogTitle>{cfg.title}</DialogTitle>
             <DialogContent>
               <Stack spacing={2} sx={{ mt: 1 }}>
-                <TextField select label="Item" value={dialog.form.itemCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, itemCode: e.target.value } })} fullWidth>
+                <TextField select label="Item" value={dialog.form.itemCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, itemCode: e.target.value, unit: BASE_UNIT } })} fullWidth>
                   {itemOptions.map((o) => <MenuItem key={o.code} value={o.code}>{o.code} — {o.name}</MenuItem>)}
                 </TextField>
                 <TextField select label={cfg.isTransfer ? 'From location' : 'Location'} value={dialog.form.locationCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, locationCode: e.target.value } })} fullWidth>
@@ -233,9 +266,22 @@ const InventoryLedger = () => {
                     {locations.map((l) => <MenuItem key={l.code} value={l.code}>{l.name}</MenuItem>)}
                   </TextField>
                 )}
-                <TextField type="number" label={cfg.absolute ? 'Counted quantity' : 'Quantity'} value={dialog.form.qty} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, qty: e.target.value } })} fullWidth />
+                {dlgConvs.length > 0 && (
+                  <TextField select label="Unit" value={dialog.form.unit} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, unit: e.target.value } })} fullWidth helperText="Transact in an alternate unit — converted to the base unit when posted.">
+                    <MenuItem value={BASE_UNIT}>{dlgBaseUom} (base)</MenuItem>
+                    {dlgConvs.map((c) => <MenuItem key={c.alt_uom} value={c.alt_uom}>{c.alt_uom} — 1 = {fmtQty(c.factor)} {dlgBaseUom}</MenuItem>)}
+                  </TextField>
+                )}
+                <TextField
+                  type="number"
+                  label={`${cfg.absolute ? 'Counted quantity' : 'Quantity'}${dlgSel ? ` (${dlgUnitLabel})` : ''}`}
+                  value={dialog.form.qty}
+                  onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, qty: e.target.value } })}
+                  fullWidth
+                  helperText={dlgSel && dlgBaseQty != null ? `= ${fmtQty(dlgBaseQty)} ${dlgBaseUom} (base)` : undefined}
+                />
                 {cfg.needsRate && (
-                  <TextField type="number" label="Unit rate (₹, optional)" value={dialog.form.rate} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, rate: e.target.value } })} fullWidth helperText="Landed cost per unit — drives weighted-average value." />
+                  <TextField type="number" label={`Rate per ${dlgUnitLabel} (₹, optional)`} value={dialog.form.rate} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, rate: e.target.value } })} fullWidth helperText="Landed cost — drives weighted-average value." />
                 )}
                 {cfg.needsReason && (
                   <TextField label="Reason" value={dialog.form.reason} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, reason: e.target.value } })} fullWidth />

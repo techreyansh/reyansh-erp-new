@@ -123,18 +123,29 @@ const inventoryLedgerService = {
    * Returns { rows, locations }.
    */
   async getInventoryView() {
-    const [balRes, itemRes, locRes, reorderRes] = await Promise.all([
+    const [balRes, itemRes, locRes, reorderRes, binRes, convRes] = await Promise.all([
       supabase.from('inv_balance').select('item_id, location_id, on_hand, reserved, valuation_rate, stock_value, updated_at'),
-      supabase.from('ppc_items').select('id, code, name, item_type, uom, is_active'),
+      supabase.from('ppc_items').select('id, code, name, item_type, uom, is_active, bin_id'),
       supabase.from('inv_location').select('id, code, name, kind'),
       supabase.from('ppc_items').select('id, reorder_point'),
+      supabase.from('inv_bin').select('id, bin_code'),
+      supabase.from('inv_uom_conversion').select('item_id, alt_uom, factor_to_base, is_default'),
     ]);
+    // Core reads must succeed; bin/alt-unit reads are best-effort decoration —
+    // a missing grant must not break the stock register.
     for (const r of [balRes, itemRes, locRes, reorderRes]) {
       if (r.error) throw new Error(r.error.message);
     }
     const items = new Map((itemRes.data || []).map((i) => [i.id, i]));
     const locs = new Map((locRes.data || []).map((l) => [l.id, l]));
     const reorder = new Map((reorderRes.data || []).map((i) => [i.id, Number(i.reorder_point) || 0]));
+    const bins = new Map((binRes.data || []).map((b) => [b.id, b.bin_code]));
+    // One display conversion per item: the default, else the first available.
+    const convByItem = new Map();
+    (convRes.data || []).forEach((c) => {
+      const cur = convByItem.get(c.item_id);
+      if (!cur || (c.is_default && !cur.is_default)) convByItem.set(c.item_id, c);
+    });
 
     const rows = (balRes.data || []).map((b) => {
       const item = items.get(b.item_id) || {};
@@ -145,12 +156,18 @@ const inventoryLedgerService = {
       let status = 'OK';
       if (onHand <= 0) status = 'Stock-out';
       else if (rp > 0 && onHand < rp) status = 'Reorder';
+      const conv = convByItem.get(b.item_id);
+      const altFactor = conv ? Number(conv.factor_to_base) || 0 : 0;
       return {
         itemId: b.item_id,
         code: item.code || '',
         name: item.name || '',
         type: item.item_type || '',
         uom: item.uom || '',
+        binCode: bins.get(item.bin_id) || '',
+        altUom: conv ? conv.alt_uom : '',
+        altFactor,
+        altOnHand: altFactor > 0 ? onHand / altFactor : 0,
         locationCode: loc.code || '',
         locationName: loc.name || '',
         onHand,
