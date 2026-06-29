@@ -8,6 +8,7 @@ import {
   AddRounded, PlayArrowRounded, PauseRounded, EditOutlined, DeleteOutline, RefreshRounded,
 } from '@mui/icons-material';
 import campaignsService from '../../../services/campaignsService';
+import emailAccountsService from '../../../services/emailAccountsService';
 
 const STATUS_COLOR = {
   draft: 'default', active: 'success', paused: 'warning', completed: 'info', archived: 'default',
@@ -16,6 +17,7 @@ const STATUS_COLOR = {
 export default function CampaignsList({ onOpen, notify }) {
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [stats, setStats] = useState({});
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', ai_tone: 'professional, warm, concise' });
@@ -24,8 +26,12 @@ export default function CampaignsList({ onOpen, notify }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const list = await campaignsService.listCampaigns();
+      const [list, accs] = await Promise.all([
+        campaignsService.listCampaigns(),
+        emailAccountsService.listAccounts().catch(() => []),
+      ]);
       setCampaigns(list);
+      setAccounts(accs || []);
       const entries = await Promise.all(list.map(async (c) => [c.id, await campaignsService.getCampaignStats(c.id)]));
       setStats(Object.fromEntries(entries));
     } catch (e) {
@@ -90,6 +96,11 @@ export default function CampaignsList({ onOpen, notify }) {
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+      ) : accounts.length === 0 ? (
+        <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: 2.5 }}>
+          <Typography sx={{ fontWeight: 700, mb: 0.5 }}>Connect a Gmail sender first</Typography>
+          <Typography color="text.secondary">Campaigns send from a connected Gmail account. Open the <b>Senders</b> tab and connect one, then come back to create a campaign.</Typography>
+        </Paper>
       ) : campaigns.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: 2.5 }}>
           <Typography color="text.secondary">No campaigns yet. Create one to start sending AI-personalized sequences.</Typography>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import BulkImportButton from '../../common/BulkImport/BulkImportButton';
 import {
   Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert, Card, CardContent, Grid, Divider, CircularProgress, Container, Chip, FormControl, InputLabel, Select, MenuItem, Stepper, Step, StepLabel, Fade, Zoom, Tooltip, Pagination, InputAdornment, Tabs, Tab, Badge, Avatar, Stack, useTheme, useMediaQuery, Collapse, List, ListItem, ListItemText, ListItemIcon, Accordion, AccordionSummary, AccordionDetails, Switch, FormControlLabel
 } from '@mui/material';
@@ -1041,8 +1042,9 @@ const VendorManagement = () => {
                 >
                   Add New Vendor
               </Button>
-              <Button 
-                variant="outlined" 
+              <BulkImportButton dataset="vendors" label="Import Excel" onApplied={fetchVendors} />
+              <Button
+                variant="outlined"
                 startIcon={<Refresh />}
                 onClick={fetchVendors}
                 disabled={loading}
