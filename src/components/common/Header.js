@@ -79,8 +79,7 @@ import { usePermissions } from "../../context/PermissionContext";
 import { getModuleKeyForPath } from "../../config/moduleAccess";
 import { useThemeMode } from "../../context/ThemeModeContext";
 import config from "../../config/config";
-import TaskBell from "./TaskBell";
-import CrmBell from "./CrmBell";
+import NotificationBell from "./NotificationBell";
 
 const Header = ({ onMenuClick } = {}) => {
   const theme = useTheme();
@@ -689,10 +688,8 @@ const Header = ({ onMenuClick } = {}) => {
               </Tooltip>
             )}
 
-            {/* Task Notification Bell */}
-            {user && <TaskBell />}
-            {/* CRM assignment / accountability bell */}
-            {user && <CrmBell />}
+            {/* Unified notifications: tasks + CRM assignments */}
+            {user && <NotificationBell />}
 
             {/* User Profile */}
             {user ? (

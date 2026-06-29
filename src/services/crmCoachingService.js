@@ -21,6 +21,13 @@ export async function playbookMap() {
   return m;
 }
 
+/** The playbook row for a scope+stage, or null. */
+export async function getPlaybook(scope, stageKey) {
+  if (!scope || !stageKey) return null;
+  const m = await playbookMap();
+  return m.get(`${scope}|${stageKey}`) || null;
+}
+
 /** Upsert playbook rows (CEO/super only, via definer RPC). */
 export async function savePlaybook(rows) {
   const { error } = await supabase.rpc("crm_save_playbook", { p_rows: rows });

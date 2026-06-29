@@ -5,6 +5,7 @@
 import { supabase } from '../lib/supabaseClient';
 import client360Service from './client360Service';
 import { getCompany, teamPerformance, clientHealth } from './crmPipelineService';
+import { getPlaybook } from './crmCoachingService';
 
 // Tool catalogue. scope: 'account' = needs a selected account; 'base' = whole
 // pipeline; 'input' = free-form text. needsInput adds a text box.
@@ -41,8 +42,12 @@ export async function gatherContext(account) {
       getCompany(account.id).catch(() => ({})),
     ]);
     const c = company?.company || account;
+    const pbScope = c?.account_type === 'prospect' ? 'prospect' : 'client';
+    const pb = await getPlaybook(pbScope, c?.prospect_stage || c?.client_stage).catch(() => null);
     return {
       account: compactAccount(c),
+      // Stage playbook so AI drafts align with the team's talk-track + objections.
+      playbook: pb ? { recommended_action: pb.recommended_action, sla_days: pb.sla_days, talk_track: pb.talk_track, objection_prompt: pb.objection_prompt, channel: pb.channel } : null,
       contacts: (company?.contacts || []).map((x) => ({ name: x.contact_person, designation: x.designation, phone: x.phone })),
       products: (bundle.products || []).map((p) => p.product_name),
       quotations: (bundle.quotations || []).map((q) => ({ no: q.quote_number, total: q.total, status: q.status, date: q.quote_date })),

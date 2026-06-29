@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container, Box, Stack, Typography, Grid, Card, CardContent, Chip, Table, TableHead, TableRow,
-  TableCell, TableBody, CircularProgress, Alert, Avatar, Tabs, Tab,
+  TableCell, TableBody, CircularProgress, Alert, Avatar, Tabs, Tab, Tooltip,
 } from '@mui/material';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 import crmPipelineService from '../../services/crmPipelineService';
@@ -28,7 +28,7 @@ function TeamTab({ rows, names }) {
         ))}
       </Grid>
       <Card variant="outlined" sx={{ borderRadius: 2 }}><Box sx={{ overflowX: 'auto' }}><Table size="small">
-        <TableHead><TableRow>{['Salesperson', 'Clients', 'Key a/c', 'Dormant', 'Pipeline', 'Follow-ups due', 'Prospects', 'Conversion'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }} align={h === 'Salesperson' ? 'left' : 'right'}>{h}</TableCell>)}</TableRow></TableHead>
+        <TableHead><TableRow>{['Salesperson', 'Clients', 'Key a/c', 'Dormant', 'Pipeline', 'Follow-ups due', 'Actions', 'Prospects', 'Conversion'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }} align={h === 'Salesperson' ? 'left' : 'right'}>{h}</TableCell>)}</TableRow></TableHead>
         <TableBody>{rows.map((r, i) => (
           <TableRow key={i} hover>
             <TableCell><Stack direction="row" spacing={1} alignItems="center"><Avatar sx={{ width: 26, height: 26, fontSize: 12 }}>{label(r.owner_email)[0]}</Avatar><Typography variant="body2" sx={{ fontWeight: 600 }}>{label(r.owner_email)}</Typography></Stack></TableCell>
@@ -36,6 +36,7 @@ function TeamTab({ rows, names }) {
             <TableCell align="right" sx={{ color: r.dormant ? 'error.main' : 'text.secondary' }}>{r.dormant}</TableCell>
             <TableCell align="right" sx={{ fontWeight: 600 }}>{inrK(r.pipeline_value)}</TableCell>
             <TableCell align="right"><Chip size="small" label={r.followups_due} color={r.followups_due ? 'warning' : 'default'} variant={r.followups_due ? 'filled' : 'outlined'} /></TableCell>
+            <TableCell align="right"><Tooltip title="Open actions assigned to this rep on accounts they don't own"><span>{r.actions_assigned || 0}</span></Tooltip></TableCell>
             <TableCell align="right">{r.prospects}</TableCell><TableCell align="right">{r.conversion_rate}%</TableCell>
           </TableRow>
         ))}</TableBody>
