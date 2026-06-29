@@ -471,16 +471,16 @@ const LinePlanner = () => {
                   </CardContent></Card>
                 )}
 
-                <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} alignItems="stretch">
+                <Stack direction={{ xs: 'column', xl: 'row' }} spacing={2} alignItems="stretch">
                   {/* LEFT — target -> resources */}
-                  <Box sx={{ flex: 1 }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                       <BalanceIcon fontSize="small" color="action" />
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Target → resources</Typography>
                     </Stack>
                     <TextField type="number" label="Target line rate (pcs/hr)" value={targetRate} onChange={(e) => setTargetRate(num(e.target.value, 0))} size="small" sx={{ width: 220, mb: 1 }} />
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Operators to balance assembly + packing: <b>{targetView.operators}</b></Typography>
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1, overflowX: 'auto' }}>
                       <Table size="small">
                         <TableHead><TableRow>{['Operation', 'Src', 'Type', 'Single/hr', 'Need', 'At rate'].map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}</TableRow></TableHead>
                         <TableBody>
@@ -507,10 +507,10 @@ const LinePlanner = () => {
                     </TableContainer>
                   </Box>
 
-                  <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', lg: 'block' } }} />
+                  <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', xl: 'block' } }} />
 
                   {/* RIGHT — resources -> output */}
-                  <Box sx={{ flex: 1 }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                       <BalanceIcon fontSize="small" color="action" />
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Resources → output</Typography>
@@ -519,7 +519,7 @@ const LinePlanner = () => {
                       Achievable line output: <b style={{ color: theme.palette.success.main }}>{fmt(forwardView.achievableUph)}/hr</b>
                       {forwardView.bottleneck && <> — gated by <b>{forwardView.bottleneck.label}</b></>}
                     </Typography>
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1, overflowX: 'auto' }}>
                       <Table size="small">
                         <TableHead><TableRow>{['Operation', 'Type', 'You have', 'Per unit/hr', 'Station/hr'].map((h) => <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>)}</TableRow></TableHead>
                         <TableBody>
