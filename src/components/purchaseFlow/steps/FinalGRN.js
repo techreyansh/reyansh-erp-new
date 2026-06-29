@@ -3,7 +3,6 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { Business as BusinessIcon, Person as PersonIcon, Visibility as ViewIcon, VisibilityOff as VisibilityOffIcon, Receipt as ReceiptIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import purchaseFlowService from '../../../services/purchaseFlowService';
 import sheetService from '../../../services/sheetService';
-import inventoryLedgerService from '../../../services/inventoryLedgerService';
 import { useAuth } from '../../../context/AuthContext';
 
 // Ensure "Material Inward" sheet exists before we try to write GRN-based entries
@@ -119,23 +118,6 @@ const createMaterialInwardEntries = async (po, grnId = null) => {
       
       // Update stock levels (since status is Completed)
       await updateStockLevels(itemCode, quantity, "inward");
-
-      // Also post the receipt to the perpetual inventory ledger (inv_balance) so
-      // the new inventory views reflect this GRN. This is a DIFFERENT table from
-      // the legacy "Stock" sheet above — purely additive, never double-counts
-      // (the GRN flow has never posted to the ledger before). Failures here don't
-      // break the GRN: the legacy stock + Material Inward records are already saved.
-      try {
-        const rate = item.rate ?? item.Rate ?? item.price ?? item.Price ?? item.unitPrice ?? null;
-        await inventoryLedgerService.receive({
-          itemCode,
-          qty: parseFloat(quantity) || 0,
-          rate: rate != null && rate !== '' ? Number(rate) : null,
-          grnRef: grnId || po.GRNId || po.POId || null,
-        });
-      } catch (ledgerErr) {
-        console.warn(`inv_receive ledger post failed for ${itemCode} (legacy stock still updated):`, ledgerErr?.message || ledgerErr);
-      }
 
     } catch (error) {
       console.error(`Error creating material inward entry for item ${item.itemCode || 'unknown'}:`, error);
