@@ -117,6 +117,7 @@ import {
   removeCollaborator,
 } from "../../services/crmPipelineService";
 import ppcService from "../../services/ppcService";
+import { useAuth } from "../../context/AuthContext";
 
 /* ----------------------------------------------------------------------- */
 /* Helpers                                                                  */
@@ -3207,6 +3208,9 @@ export default function CRMPipelineBoard() {
   const [clientStageFilter, setClientStageFilter] = useState("");
 
   const [currentEmail, setCurrentEmail] = useState(null);
+  const { user } = useAuth();
+  // CEO/super-admin only — mirrors the is_super_admin() gate on crm_delete_account.
+  const isAdmin = user?.roleCode === "CEO";
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
@@ -3616,7 +3620,7 @@ export default function CRMPipelineBoard() {
             userMap={userMap}
             collabMap={collabMap}
             onAssign={handleAssignOwner}
-            onDelete={(company) => setPendingDelete(company)}
+            onDelete={isAdmin ? (company) => setPendingDelete(company) : undefined}
             assignableUsers={assignableUsers}
           />
         ) : clientTab === "cycles" ? (
