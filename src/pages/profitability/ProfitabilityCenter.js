@@ -8,6 +8,8 @@ import {
 import {
   InsightsOutlined, RefreshOutlined, ScienceOutlined, WarningAmberOutlined, AddOutlined,
   DeleteOutline, CloudDownloadOutlined, DeleteSweepOutlined,
+  PaymentsOutlined, Inventory2Outlined, PrecisionManufacturingOutlined,
+  SavingsOutlined, PercentOutlined, ReceiptLongOutlined,
 } from "@mui/icons-material";
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -174,12 +176,12 @@ export default function ProfitabilityCenter() {
 
       {/* KPI row */}
       <Box sx={{ px: 3, pt: 2, display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(3,1fr)", lg: "repeat(6,1fr)" } }}>
-        <KPICard title="Revenue" value={money(k.revenue)} variant="gradient" color="primary" />
-        <KPICard title="Material" value={money(k.material)} variant="gradient" color="warning" />
-        <KPICard title="Conversion" value={money(k.conversion)} variant="gradient" color="info" />
-        <KPICard title="Gross Profit" value={money(k.gross_profit)} variant="gradient" color={k.gross_profit < 0 ? "error" : "success"} />
-        <KPICard title="Gross Margin" value={pct(k.gm_pct)} variant="gradient" color="success" />
-        <KPICard title="Orders" value={k.orders || 0} subtitle={`${k.lines || 0} lines`} variant="gradient" color="secondary" />
+        <KPICard title="Revenue" value={money(k.revenue)} icon={<PaymentsOutlined />} variant="gradient" color="primary" />
+        <KPICard title="Material" value={money(k.material)} icon={<Inventory2Outlined />} variant="gradient" color="warning" />
+        <KPICard title="Conversion" value={money(k.conversion)} icon={<PrecisionManufacturingOutlined />} variant="gradient" color="info" />
+        <KPICard title="Gross Profit" value={money(k.gross_profit)} icon={<SavingsOutlined />} variant="gradient" color={k.gross_profit < 0 ? "error" : "success"} />
+        <KPICard title="Gross Margin" value={pct(k.gm_pct)} icon={<PercentOutlined />} variant="gradient" color="success" />
+        <KPICard title="Orders" value={k.orders || 0} subtitle={`${k.lines || 0} lines`} icon={<ReceiptLongOutlined />} variant="gradient" color="secondary" />
       </Box>
 
       <Box sx={{ px: 3, mt: 2, borderBottom: 1, borderColor: "divider" }}>
@@ -351,10 +353,10 @@ function WhatIfTab({ data, levers, setLevers }) {
         </Stack>
       </CardContent></Card>
       <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4,1fr)" } }}>
-        <KPICard title="Revenue" value={money(res.revenue)} variant="minimal" color="primary" />
-        <KPICard title="Material" value={money(res.material)} variant="minimal" color="warning" />
-        <KPICard title="Conversion" value={money(res.conversion)} variant="minimal" color="info" />
-        <KPICard title="Gross Profit" value={money(res.gross_profit)} subtitle={`${res.delta_gp >= 0 ? "+" : ""}${money(res.delta_gp)} vs actual · GM ${res.gm_pct}%`} variant="minimal" color={res.gross_profit < 0 ? "error" : "success"} />
+        <KPICard title="Revenue" value={money(res.revenue)} icon={<PaymentsOutlined />} variant="minimal" color="primary" />
+        <KPICard title="Material" value={money(res.material)} icon={<Inventory2Outlined />} variant="minimal" color="warning" />
+        <KPICard title="Conversion" value={money(res.conversion)} icon={<PrecisionManufacturingOutlined />} variant="minimal" color="info" />
+        <KPICard title="Gross Profit" value={money(res.gross_profit)} icon={<SavingsOutlined />} subtitle={`${res.delta_gp >= 0 ? "+" : ""}${money(res.delta_gp)} vs actual · GM ${res.gm_pct}%`} variant="minimal" color={res.gross_profit < 0 ? "error" : "success"} />
       </Box>
     </Stack>
   );
