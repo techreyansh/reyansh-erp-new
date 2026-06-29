@@ -186,7 +186,7 @@ export default function ProfitabilityCenter() {
 
       <Box sx={{ px: 3, mt: 2, borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
-          {["Dashboard", "Customers", "Products", "Orders", "Sales execs", "Cost heads", "Expenses", "What-if"].map((t) => <Tab key={t} label={t} />)}
+          {["Dashboard", "Customers", "Products", "Orders", "Sales execs", "Cost heads", "Expenses", "What-if", "Expected vs Actual"].map((t) => <Tab key={t} label={t} />)}
         </Tabs>
       </Box>
 
@@ -229,6 +229,7 @@ export default function ProfitabilityCenter() {
             {tab === 5 && <CostHeadsTab heads={heads} setHeads={setHeads} overrides={overrides} setOverrides={setOverrides} needsCosting={data?.needs_costing || []} notify={notify} onChanged={load} />}
             {tab === 6 && <ExpensesTab notify={notify} />}
             {tab === 7 && <WhatIfTab data={data} levers={levers} setLevers={setLevers} />}
+            {tab === 8 && <ExpectedVsActualTab from={from} to={to} notify={notify} />}
           </>
         )}
       </Box>
@@ -358,6 +359,71 @@ function WhatIfTab({ data, levers, setLevers }) {
         <KPICard title="Conversion" value={money(res.conversion)} icon={<PrecisionManufacturingOutlined />} variant="minimal" color="info" />
         <KPICard title="Gross Profit" value={money(res.gross_profit)} icon={<SavingsOutlined />} subtitle={`${res.delta_gp >= 0 ? "+" : ""}${money(res.delta_gp)} vs actual · GM ${res.gm_pct}%`} variant="minimal" color={res.gross_profit < 0 ? "error" : "success"} />
       </Box>
+    </Stack>
+  );
+}
+
+// ---- Expected vs Actual (dual GP) ----
+const LIGHT = { green: "🟢", yellow: "🟡", red: "🔴", na: "⚪" };
+function ExpectedVsActualTab({ from, to, notify }) {
+  const theme = useTheme();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setData(await profitabilityService.actualSummary({ from, to })); }
+    catch (e) { notify(e.message || "Load failed", "error"); setData(null); }
+    finally { setLoading(false); }
+  }, [from, to, notify]);
+  useEffect(() => { load(); }, [load]);
+
+  const k = data?.kpis || {};
+  const rows = data?.by_product || [];
+  const withActual = rows.filter((r) => r.has_actual);
+  const seedActual = async () => { setBusy(true); try { await profitabilityService.seedActualDemo(); notify("Actual demo loaded.", "success"); await load(); } catch (e) { notify(e.message || "Failed", "error"); } finally { setBusy(false); } };
+
+  const cols = [
+    { k: "name", h: "Product", bold: true, fmt: (v, r) => `${LIGHT[r.light] || ""} ${v || r.code}` },
+    { k: "exp_gp", h: "Expected GP", align: "right", fmt: money }, { k: "act_gp", h: "Actual GP", align: "right", bold: true, fmt: (v, r) => r.has_actual ? money(v) : "—" },
+    { k: "gp_var", h: "GP variance", align: "right", bold: true, fmt: (v, r) => r.has_actual ? `${v >= 0 ? "+" : ""}${money(v)}` : "—" },
+    { k: "mat_var", h: "Material Δ", align: "right", fmt: (v, r) => r.has_actual ? `${v >= 0 ? "+" : ""}${money(v)}` : "—" },
+    { k: "exp_gm", h: "Exp GM", align: "right", fmt: pct }, { k: "act_gm", h: "Act GM", align: "right", fmt: (v, r) => r.has_actual ? pct(v) : "—" },
+  ];
+
+  if (loading) return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress /></Box>;
+  return (
+    <Stack spacing={2}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+        <Alert severity="info" sx={{ flex: 1 }}>
+          <b>Actual</b> = actual revenue (invoiced) − actual material (real consumption from the inventory ledger) − <b>standard</b> conversion (the floor isn't metered for labour/machine rupees yet). The headline signal is <b>material variance</b> — did we burn more than the costing assumed. Per-order actuals appear only for work orders booked against a sales-order line going forward.
+        </Alert>
+        <Button size="small" variant="outlined" startIcon={<CloudDownloadOutlined />} disabled={busy} onClick={seedActual}>Load actual demo</Button>
+      </Stack>
+
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4,1fr)" } }}>
+        <KPICard title="Expected GP" value={money(k.exp_gp)} icon={<SavingsOutlined />} variant="gradient" color="info" subtitle={`${k.products_total || 0} products`} />
+        <KPICard title="Actual GP" value={money(k.act_gp)} icon={<SavingsOutlined />} variant="gradient" color="success" subtitle={`${k.products_with_actual || 0} with actuals`} />
+        <KPICard title="GP variance" value={`${(k.gp_var || 0) >= 0 ? "+" : ""}${money(k.gp_var)}`} icon={<ScienceOutlined />} variant="gradient" color={(k.gp_var || 0) < 0 ? "error" : "success"} />
+        <KPICard title="Material variance" value={`${(k.mat_var || 0) >= 0 ? "+" : ""}${money(k.mat_var)}`} icon={<WarningAmberOutlined />} variant="gradient" color={(k.mat_var || 0) > 0 ? "error" : "success"} subtitle="actual vs costed" />
+      </Box>
+
+      {withActual.length > 0 && (
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Expected vs Actual GP — by product</Typography>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={withActual}><CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} /><XAxis dataKey="code" fontSize={11} /><YAxis fontSize={11} /><RTooltip formatter={(v) => money(v)} />
+              <Bar dataKey="exp_gp" name="Expected" fill={theme.palette.info.main} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="act_gp" name="Actual" fill={theme.palette.success.main} radius={[4, 4, 0, 0]} /></BarChart>
+          </ResponsiveContainer>
+        </CardContent></Card>
+      )}
+
+      <ProfitTable rows={rows} cols={cols} exportTitle="Expected vs Actual GP" />
+
+      {(data?.needs_actual || []).length > 0 && (
+        <Alert severity="warning">{data.needs_actual.length} product(s) were sold but have no production/consumption captured yet — Actual GP can't be computed for them. They populate as the floor kits material + finishes work orders.</Alert>
+      )}
     </Stack>
   );
 }

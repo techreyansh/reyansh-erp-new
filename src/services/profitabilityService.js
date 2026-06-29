@@ -11,6 +11,20 @@ export async function summary({ from, to, basis = "ordered", filters = {} }) {
   return data || {};
 }
 
+// ---- Dual GP: Expected vs Actual ----
+export async function actualSummary({ from, to, filters = {} }) {
+  const { data, error } = await supabase.rpc("profit_actual_summary", {
+    p_from: from, p_to: to, p_filters: filters,
+  });
+  if (error) throw error;
+  return data || {};
+}
+export async function seedActualDemo() {
+  const { data, error } = await supabase.rpc("profit_seed_actual_demo");
+  if (error) throw error;
+  return data;
+}
+
 // ---- Cost-head master ----
 export async function costHeads() {
   const { data, error } = await supabase.from("cost_head").select("*").order("sort_order");
@@ -96,7 +110,7 @@ export function whatIf(sum, levers = {}) {
 }
 
 const profitabilityService = {
-  summary, costHeads, saveCostHead, deleteCostHead, overrides, saveOverride,
-  expenses, saveExpense, deleteExpense, seedDemo, clearDemo, whatIf,
+  summary, actualSummary, seedActualDemo, costHeads, saveCostHead, deleteCostHead,
+  overrides, saveOverride, expenses, saveExpense, deleteExpense, seedDemo, clearDemo, whatIf,
 };
 export default profitabilityService;
