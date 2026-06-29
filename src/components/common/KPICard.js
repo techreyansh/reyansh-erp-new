@@ -123,9 +123,9 @@ const KPICard = ({
               height: 48,
             }}
           >
-            {React.cloneElement(icon, { 
-              sx: { fontSize: 24 } 
-            })}
+            {React.isValidElement(icon) ? React.cloneElement(icon, {
+              sx: { fontSize: 24 }
+            }) : null}
           </Box>
           
           {trend && (
