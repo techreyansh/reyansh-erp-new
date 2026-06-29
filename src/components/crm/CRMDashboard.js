@@ -61,6 +61,7 @@ import {
   listAssignableUsers,
   rfmDashboard,
   repScorecard,
+  teamPerformance,
   setRepTarget,
   walletDashboard,
   PROSPECT_STAGES,
@@ -1150,9 +1151,19 @@ function TargetsTab({ seesAll, myEmail }) {
   const theme = useTheme();
   const [month, setMonth] = useState(currentMonthStr);
   const [rows, setRows] = useState([]);
+  const [actionsMap, setActionsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editRow, setEditRow] = useState(null);
+
+  // Open actions assigned to each rep (on accounts they don't own) — from
+  // crm_team_performance.actions_assigned, joined by email.
+  const loadActions = async () => {
+    const tp = await teamPerformance().catch(() => []);
+    const m = {};
+    (Array.isArray(tp) ? tp : []).forEach((t) => { m[String(t.owner_email || '').toLowerCase()] = t.actions_assigned || 0; });
+    setActionsMap(m);
+  };
 
   const load = async (mStr) => {
     setLoading(true);
@@ -1160,6 +1171,7 @@ function TargetsTab({ seesAll, myEmail }) {
     try {
       const data = await repScorecard(mStr);
       setRows(Array.isArray(data) ? data : []);
+      loadActions();
     } catch (e) {
       setError(e?.message || 'Could not load the scorecard.');
       setRows([]);
@@ -1177,6 +1189,7 @@ function TargetsTab({ seesAll, myEmail }) {
         const data = await repScorecard(month);
         if (!alive) return;
         setRows(Array.isArray(data) ? data : []);
+        loadActions();
       } catch (e) {
         if (alive) {
           setError(e?.message || 'Could not load the scorecard.');
@@ -1314,6 +1327,7 @@ function TargetsTab({ seesAll, myEmail }) {
                   <TableCell sx={{ fontWeight: 700 }} align="center">Achievement</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="center">New clients</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="center">Orders</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="center">Actions</TableCell>
                   {seesAll && <TableCell sx={{ fontWeight: 700 }} align="right">Target</TableCell>}
                 </TableRow>
               </TableHead>
@@ -1379,6 +1393,11 @@ function TargetsTab({ seesAll, myEmail }) {
                           {Number(r.actual_orders) || 0}
                           <Box component="span" sx={{ color: 'text.secondary' }}> / {Number(r.target_orders) || 0}</Box>
                         </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Open actions assigned to this rep on accounts they don't own" arrow>
+                          <Typography variant="body2">{actionsMap[String(r.email || '').toLowerCase()] || 0}</Typography>
+                        </Tooltip>
                       </TableCell>
                       {seesAll && (
                         <TableCell align="right">

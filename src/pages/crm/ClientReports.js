@@ -9,8 +9,9 @@ import {
 } from '@mui/material';
 import AssessmentRounded from '@mui/icons-material/AssessmentRounded';
 import DownloadRounded from '@mui/icons-material/DownloadRounded';
-import { clientCards, paymentDashboard, listAssignableUsers } from '../../services/crmPipelineService';
+import { clientCards, paymentDashboard, listAssignableUsers, getCurrentUserEmail } from '../../services/crmPipelineService';
 import { listClientStageDefs } from '../../services/crmPipelineService';
+import { usePermissions } from '../../context/PermissionContext';
 import CompanyLink from '../../components/crm/CompanyLink';
 
 // Tag a customer cell so the table can render it as a clickable 360 link while
@@ -44,15 +45,20 @@ export default function ClientReports() {
   const [report, setReport] = useState('pipeline');
   const [loading, setLoading] = useState(true);
   const [snack, setSnack] = useState(null);
+  const { roleCode, hasFullAccess } = usePermissions();
+  // Managers/CEO see every client; reps see only their own book (crm_client_cards
+  // is SECURITY DEFINER, so it must be owner-scoped here, not by RLS).
+  const seesAll = hasFullAccess || ['CEO', 'SUPER_ADMIN', 'SUPERADMIN'].includes(String(roleCode || '').toUpperCase());
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [cd, pd, us, df] = await Promise.all([clientCards(), paymentDashboard().catch(() => ({})), listAssignableUsers().catch(() => []), listClientStageDefs().catch(() => [])]);
+      const myEmail = seesAll ? null : await getCurrentUserEmail().catch(() => null);
+      const [cd, pd, us, df] = await Promise.all([clientCards(myEmail), paymentDashboard().catch(() => ({})), listAssignableUsers().catch(() => []), listClientStageDefs().catch(() => [])]);
       const nm = {}; (us || []).forEach((u) => { nm[(u.email || '').toLowerCase()] = u.full_name || u.name || u.email; });
       setCards(cd || []); setPay(pd || {}); setNames(nm); setDefs(df || []);
     } catch (e) { setSnack({ message: e.message || 'Load failed', severity: 'error' }); } finally { setLoading(false); }
-  }, []);
+  }, [seesAll]);
   useEffect(() => { load(); }, [load]);
 
   const nmOf = (e) => names[(e || '').toLowerCase()] || (e ? e.split('@')[0] : 'Unassigned');
