@@ -208,6 +208,7 @@ export const NAV_GROUPS = [
       { label: "Master Data Hub", path: "/master-data", icon: ic(GridViewOutlined), moduleKey: "employees", requireEdit: true },
       { label: "Data Import (Excel)", path: "/data-import", icon: ic(InputOutlined) },
       { label: "View as User", path: "/access-preview", icon: ic(GroupsOutlined), moduleKey: "employees", requireEdit: true },
+      { label: "Access Audit", path: "/access-audit", icon: ic(GroupsOutlined), moduleKey: "employees", requireEdit: true },
       { label: "Document Library", path: "/document-library", icon: ic(FolderOutlined) },
       { label: "Setup Sheets", path: "/setup-sheets", icon: ic(SettingsOutlined) },
       { label: "Troubleshoot", path: "/troubleshoot-sheets", icon: ic(BuildOutlined) },

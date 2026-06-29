@@ -20,10 +20,6 @@ export default function AccessPreview() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
 
-  useEffect(() => { (async () => {
-    try { setEmployees(await accessPreview.listEmployees()); } catch (e) { setErr(e.message); } finally { setLoading(false); }
-  })(); }, []);
-
   const load = useCallback(async (email) => {
     setBusy(true); setAccess(null);
     try {
@@ -31,6 +27,19 @@ export default function AccessPreview() {
       if (a?.error) setErr('Only admins can preview access.'); else { setErr(null); setAccess(a); }
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   }, []);
+
+  useEffect(() => { (async () => {
+    try {
+      const list = await accessPreview.listEmployees();
+      setEmployees(list);
+      // Deep-link from Access Audit: /access-preview?email=… preselects the user.
+      const wanted = new URLSearchParams(window.location.search).get('email');
+      if (wanted) {
+        const match = list.find((e) => (e.email || '').toLowerCase() === wanted.toLowerCase());
+        if (match) { setSel(match); load(match.email); }
+      }
+    } catch (e) { setErr(e.message); } finally { setLoading(false); }
+  })(); }, [load]);
 
   // module_key -> permission object the previewed user has
   const permByModule = useMemo(() => {
