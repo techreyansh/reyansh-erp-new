@@ -34,6 +34,14 @@ export async function listConversions(itemId) {
   const { data } = await supabase.from('inv_uom_conversion').select('*').eq('item_id', itemId).order('alt_uom', { ascending: true });
   return data || [];
 }
+/** All conversions across every item — for screens that transact in alt units. */
+export async function listAllConversions() {
+  const { data } = await supabase
+    .from('inv_uom_conversion')
+    .select('item_id, alt_uom, factor_to_base, is_default')
+    .order('alt_uom', { ascending: true });
+  return data || [];
+}
 export async function saveConversion(c) {
   const row = { item_id: c.item_id, alt_uom: c.alt_uom, factor_to_base: num(c.factor_to_base), is_default: !!c.is_default };
   if (c.id) { const { error } = await supabase.from('inv_uom_conversion').update(row).eq('id', c.id); if (error) throw error; }
@@ -55,6 +63,6 @@ export async function setItemBin(itemId, binId) {
 
 const inventoryUomBinService = {
   toBase, fromBase, listLocations, listBins, saveBin, deleteBin,
-  listConversions, saveConversion, deleteConversion, listItems, setItemBin,
+  listConversions, listAllConversions, saveConversion, deleteConversion, listItems, setItemBin,
 };
 export default inventoryUomBinService;
