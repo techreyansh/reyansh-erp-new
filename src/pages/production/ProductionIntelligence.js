@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Stack, Card, CardContent, Typography, Button, IconButton, Chip, TextField, MenuItem,
   CircularProgress, Tooltip, Divider, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, useTheme, alpha,
+  TableRow, Paper, useTheme, alpha, Tabs, Tab, Autocomplete,
 } from '@mui/material';
 import {
   Insights as IntelIcon, Refresh as RefreshIcon, UploadFile as UploadIcon,
@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import productionIntelligenceService from '../../services/productionIntelligenceService';
 import { analyzeRows } from '../../services/productionLogService';
+import productionMetricsService from '../../services/productionMetricsService';
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const SEV_ICON = { critical: <CritIcon color="error" />, warning: <WarnIcon color="warning" />, info: <InfoIcon color="info" /> };
@@ -30,7 +31,7 @@ const AI_PRESETS = [
   { tool: 'shift_comparison', label: 'Compare time-slots' },
 ];
 
-const ProductionIntelligence = () => {
+const UploadedLogsTab = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const today = new Date();
@@ -292,4 +293,190 @@ const ProductionIntelligence = () => {
   );
 };
 
-export default ProductionIntelligence;
+// ---------------------------------------------------------------------------
+// Operations tab — analytics over the REAL captured job-card data (prod_intel_summary)
+// ---------------------------------------------------------------------------
+const PRESETS = [{ d: 7, l: '7d' }, { d: 30, l: '30d' }, { d: 90, l: '90d' }];
+const num = (v) => Number(v || 0).toLocaleString('en-IN');
+
+function OpsKpi({ label, value, color, sub }) {
+  const theme = useTheme();
+  const c = theme.palette[color] || theme.palette.primary;
+  return (
+    <Card variant="outlined" sx={{ borderRadius: 2.5, flex: 1, minWidth: 130 }}>
+      <CardContent sx={{ py: 1.5 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{label}</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: c.main, lineHeight: 1.2 }}>{value}</Typography>
+        {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
+      </CardContent>
+    </Card>
+  );
+}
+
+const OperationsTab = () => {
+  const theme = useTheme();
+  const today = new Date();
+  const [from, setFrom] = useState(iso(new Date(Date.now() - 30 * 86400000)));
+  const [to, setTo] = useState(iso(today));
+  const [lineId, setLineId] = useState('all');
+  const [product, setProduct] = useState(null);
+  const [opts, setOpts] = useState({ lines: [], products: [] });
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => { productionMetricsService.filterOptions().then(setOpts).catch(() => {}); }, []);
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const res = await productionMetricsService.summary({
+        from, to, lineId: lineId === 'all' ? null : lineId, productId: product?.id || null,
+      });
+      setData(res);
+    } catch (e) {
+      setError(e?.message || 'Failed to load production metrics.');
+      setData(null);
+    } finally { setLoading(false); }
+  }, [from, to, lineId, product]);
+  useEffect(() => { load(); }, [load]);
+
+  const setPreset = (days) => { setFrom(iso(new Date(Date.now() - days * 86400000))); setTo(iso(new Date())); };
+  const k = data?.kpis || {};
+  const empty = !loading && (k.entries || 0) === 0;
+  const palette = useMemo(() => [theme.palette.primary.main, theme.palette.success.main, theme.palette.warning.main, theme.palette.error.main, theme.palette.info.main, theme.palette.secondary.main], [theme]);
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'center' }} sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={0.5}>
+          {PRESETS.map((p) => <Button key={p.l} size="small" variant="outlined" onClick={() => setPreset(p.d)}>{p.l}</Button>)}
+        </Stack>
+        <TextField type="date" size="small" label="From" InputLabelProps={{ shrink: true }} value={from} onChange={(e) => setFrom(e.target.value)} />
+        <TextField type="date" size="small" label="To" InputLabelProps={{ shrink: true }} value={to} onChange={(e) => setTo(e.target.value)} />
+        <TextField select size="small" label="Line" value={lineId} onChange={(e) => setLineId(e.target.value)} sx={{ minWidth: 140 }}>
+          <MenuItem value="all">All lines</MenuItem>
+          {opts.lines.map((l) => <MenuItem key={l.id} value={l.id}>{l.name}</MenuItem>)}
+        </TextField>
+        <Autocomplete
+          options={opts.products} value={product} onChange={(_, v) => setProduct(v)}
+          getOptionLabel={(o) => o?.label || ''} isOptionEqualToValue={(o, v) => o.id === v.id}
+          sx={{ minWidth: 220 }}
+          renderInput={(p) => <TextField {...p} size="small" label="Product (all)" />}
+        />
+        <Tooltip title="Refresh"><span><IconButton onClick={load} disabled={loading}><RefreshIcon /></IconButton></span></Tooltip>
+      </Stack>
+
+      <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 2 }}>
+        OEE, machine utilization and operator efficiency aren't shown — machine-status and attendance aren't instrumented yet. These KPIs come from captured job cards (output, reject, downtime, defects).
+      </Alert>
+
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : empty ? (
+        <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: 2.5 }}>
+          <Typography color="text.secondary">No job-card activity in this range. Post job cards on the floor (MES) or widen the dates.</Typography>
+        </Paper>
+      ) : (
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+            <OpsKpi label="Units produced" value={num(k.units)} color="primary" sub={`${num(k.entries)} job-card entries`} />
+            <OpsKpi label="Open WOs (WIP)" value={num(k.wip)} color="info" />
+            <OpsKpi label="Scrap rate" value={`${k.scrap_rate ?? 0}%`} color={k.scrap_rate > 5 ? 'error' : 'success'} sub={`${num(k.scrap)} rejected`} />
+            <OpsKpi label="On-time" value={k.on_time_pct == null ? '—' : `${k.on_time_pct}%`} color={(k.on_time_pct ?? 100) < 80 ? 'warning' : 'success'} sub={`${num(k.completed_wos)} completed`} />
+            <OpsKpi label="Downtime" value={`${k.downtime_hrs ?? 0} h`} color="warning" />
+            <OpsKpi label="Mold alerts" value={num(k.mold_alerts)} color={k.mold_alerts > 0 ? 'error' : 'success'} sub="≥85% tool life" />
+          </Stack>
+
+          <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
+            <CardContent>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Production trend</Typography>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={data.trend || []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} />
+                  <XAxis dataKey="date" fontSize={11} /><YAxis fontSize={11} /><RTooltip />
+                  <Line type="monotone" dataKey="output" name="Output" stroke={theme.palette.primary.main} strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="reject" name="Reject" stroke={theme.palette.error.main} strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
+            <ChartCard title="Output by product" data={data.output_by_product} x="code" y="units" color={theme.palette.primary.main} theme={theme} />
+            <ChartCard title="Stage throughput (bottlenecks)" data={data.stage_throughput} x="stage" y="output" color={theme.palette.info.main} theme={theme} />
+            <ChartCard title="Defects (Pareto)" data={data.defect_pareto} x="name" y="qty" color={theme.palette.error.main} theme={theme} />
+            <ChartCard title="Downtime by reason (min)" data={data.downtime_pareto} x="name" y="minutes" color={theme.palette.warning.main} theme={theme} />
+          </Box>
+
+          <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
+            <CardContent>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Overdue / late work orders</Typography>
+              {(data.late_wos || []).length === 0 ? (
+                <Typography variant="caption" color="text.secondary">None overdue in this range.</Typography>
+              ) : (
+                <TableContainer><Table size="small">
+                  <TableHead><TableRow>{['WO', 'Product', 'Due', 'Status', 'Completed'].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem' }}>{h}</TableCell>)}</TableRow></TableHead>
+                  <TableBody>
+                    {data.late_wos.map((w, i) => (
+                      <TableRow key={i} hover>
+                        <TableCell sx={{ fontWeight: 600 }}>{w.wo_number}</TableCell>
+                        <TableCell>{w.product}</TableCell>
+                        <TableCell>{w.due_date}</TableCell>
+                        <TableCell><Chip size="small" label={w.status} color={w.status === 'done' ? 'default' : 'warning'} variant="outlined" /></TableCell>
+                        <TableCell>{w.completed_at ? String(w.completed_at).slice(0, 10) : '—'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table></TableContainer>
+              )}
+            </CardContent>
+          </Card>
+        </Stack>
+      )}
+    </Box>
+  );
+};
+
+function ChartCard({ title, data, x, y, color, theme }) {
+  return (
+    <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
+      <CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>{title}</Typography>
+        {(!data || data.length === 0) ? (
+          <Typography variant="caption" color="text.secondary">No data in range.</Typography>
+        ) : (
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} />
+              <XAxis dataKey={x} fontSize={11} interval={0} angle={-20} textAnchor="end" height={50} /><YAxis fontSize={11} /><RTooltip />
+              <Bar dataKey={y} fill={color} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function ProductionIntelligence() {
+  const theme = useTheme();
+  const [tab, setTab] = useState(0);
+  return (
+    <Box>
+      <Box sx={{ px: 3, pt: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <IntelIcon sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+        <Typography variant="h5" sx={{ fontWeight: 800 }}>Production Intelligence Center</Typography>
+      </Box>
+      <Box sx={{ px: 3, borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)}>
+          <Tab label="Operations" />
+          <Tab label="Uploaded logs" />
+        </Tabs>
+      </Box>
+      {tab === 0 ? <OperationsTab /> : <UploadedLogsTab />}
+    </Box>
+  );
+}
