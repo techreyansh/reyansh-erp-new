@@ -50,6 +50,8 @@ const ROUTINE = [
   { when: 'New enquiry', what: 'Add the Lead first, then anything else.' },
   { when: 'Deal won', what: 'Mark Won → the account moves to Customers.' },
   { when: 'Weekly', what: 'Review the CRM Dashboard with the team — pipeline, conversion, leaderboard.' },
+  { when: 'Assigned to you', what: 'When someone makes you the action owner (or a collaborator) on an account, it lands in your Daily Worklist under "Assigned to me" and rings the notification bell — so nothing handed to you slips.' },
+  { when: 'Before every call', what: 'Read the Coaching Card on the account (360 / pipeline drawer / KIT): what to say for the current stage, the follow-up SLA, and the response to the common objection.' },
 ];
 
 const LEGEND = [

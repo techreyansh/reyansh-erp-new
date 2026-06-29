@@ -73,6 +73,7 @@ import {
 import kitService, { CHANNELS, CHANNEL_LABELS } from '../../services/kitService';
 import kitWorkflowService from '../../services/kitWorkflowService';
 import { rankForOutreach } from '../../services/kitCadence';
+import CoachingCard from '../../components/crm/CoachingCard';
 import { scoreByCategory } from '../../services/kitEngagement';
 import { supabase } from '../../lib/supabaseClient';
 import { listAssignableUsers, getCurrentUserEmail } from '../../services/crmPipelineService';
@@ -346,6 +347,12 @@ function SendDialog({ open, onClose, contact, channel, currentUser, onSent }) {
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2}>
+          {/* Coaching: what to say for this contact's stage (cadence = when, playbook = what). */}
+          <CoachingCard
+            scope={contact?.account_type === 'client' ? 'client' : 'prospect'}
+            stageKey={contact?.prospect_stage || contact?.client_stage}
+            dense
+          />
           <FormControl fullWidth size="small">
             <InputLabel>Template</InputLabel>
             <Select label="Template" value={templateId} onChange={(e) => applyTemplate(e.target.value)}>
