@@ -73,6 +73,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/performance' || path.startsWith('/performance/'), moduleKey: MODULE_KEYS.REPORTS },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path === '/access-preview', moduleKey: MODULE_KEYS.EMPLOYEES },
+  { test: (path) => path === '/access-audit', moduleKey: MODULE_KEYS.EMPLOYEES },
   { test: (path) => path.startsWith('/npd'), moduleKey: MODULE_KEYS.NPD },
 ];
 
@@ -94,6 +95,7 @@ const ROUTE_ACTION_RULES = [
   { test: (path) => path === '/access-management' || path === '/employee-management', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/ceo-command', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/master-data', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
+  { test: (path) => path === '/access-audit', moduleKey: MODULE_KEYS.EMPLOYEES, action: 'edit' },
   { test: (path) => path === '/task-compliance-admin', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
   { test: (path) => path === '/checklist-templates', moduleKey: MODULE_KEYS.TASKS, action: 'edit' },
 ];
