@@ -123,6 +123,7 @@ const DailyPlan = lazy(() => import("./pages/mes/DailyPlan"));
 const LinePlanner = lazy(() => import("./pages/mes/LinePlanner"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const DataImportCenter = lazy(() => import("./pages/DataImportCenter"));
+const MergeItems = lazy(() => import("./pages/inventory/MergeItems"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
@@ -341,6 +342,11 @@ function AppContent() {
                   <Route path="/data-import" element={
                     <ProtectedRouteGate>
                       <DataImportCenter />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/inventory/merge-items" element={
+                    <ProtectedRouteGate>
+                      <MergeItems />
                     </ProtectedRouteGate>
                   } />
                   <Route path="/crm-pipeline" element={
