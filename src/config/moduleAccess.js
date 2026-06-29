@@ -13,6 +13,7 @@ export const MODULE_KEYS = {
   REPORTS: 'reports',
   SETTINGS: 'settings',
   NPD: 'npd',
+  PROFITABILITY: 'profitability',
 };
 
 /**
@@ -37,6 +38,7 @@ export const MODULE_UNLOCKS = {
   [MODULE_KEYS.REPORTS]: ['MIS', 'Performance Review', 'Document Library'],
   [MODULE_KEYS.SETTINGS]: ['Settings'],
   [MODULE_KEYS.NPD]: ['NPD Projects', 'Product Development Workspace', 'Stage Gates', 'Approvals'],
+  [MODULE_KEYS.PROFITABILITY]: ['Profitability Intelligence (CEO)'],
 };
 
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
@@ -59,6 +61,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/demand-forecast' || path === '/portal-admin', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path.startsWith('/temp/'), moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management', moduleKey: MODULE_KEYS.DISPATCH },
+  { test: (path) => path.startsWith('/profitability'), moduleKey: MODULE_KEYS.PROFITABILITY },
   { test: (path) => path === '/costing' || path === '/invoicing' || path === '/cost-control', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow') || path === '/purchase-requisitions', moduleKey: MODULE_KEYS.PURCHASE },
   { test: (path) => path === '/quality' || path.startsWith('/quality/'), moduleKey: MODULE_KEYS.QUALITY },

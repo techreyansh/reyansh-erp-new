@@ -189,6 +189,7 @@ export const NAV_GROUPS = [
       { label: "Cost Control", path: "/cost-control", icon: ic(CalculateOutlined) },
       { label: "Invoicing", path: "/invoicing", icon: ic(ReceiptLongOutlined) },
       { label: "Costing Calculator", path: "/costing", icon: ic(CalculateOutlined) },
+      { label: "Profitability Intelligence", path: "/profitability", icon: ic(InsightsOutlined), moduleKey: "profitability" },
     ],
   },
   {

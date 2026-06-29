@@ -124,6 +124,7 @@ const LinePlanner = lazy(() => import("./pages/mes/LinePlanner"));
 const CRMImport = lazy(() => import("./components/crm/CRMImport"));
 const DataImportCenter = lazy(() => import("./pages/DataImportCenter"));
 const MergeItems = lazy(() => import("./pages/inventory/MergeItems"));
+const ProfitabilityCenter = lazy(() => import("./pages/profitability/ProfitabilityCenter"));
 const MasterDataHub = lazy(() => import("./components/masterData/MasterDataHub"));
 const AdvancedEmployeeDashboard = lazy(() => import("./components/employeeDashboard/AdvancedEmployeeDashboard"));
 const CRMModulePage = lazy(() => import("./pages/crm/CRMModulePage"));
@@ -282,6 +283,11 @@ function AppContent() {
                   <Route path="/ceo-command" element={
                     <CEOOnlyRoute>
                       <CEOExecutiveDashboard />
+                    </CEOOnlyRoute>
+                  } />
+                  <Route path="/profitability" element={
+                    <CEOOnlyRoute>
+                      <ProfitabilityCenter />
                     </CEOOnlyRoute>
                   } />
                   <Route path="/master-data" element={
