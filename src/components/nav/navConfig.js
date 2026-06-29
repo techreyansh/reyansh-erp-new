@@ -134,6 +134,7 @@ export const NAV_GROUPS = [
       { label: "Bins & UoM", path: "/inventory-masters", icon: ic(GridViewOutlined) },
       { label: "Inventory (legacy)", path: "/inventory", icon: ic(Inventory2Outlined) },
       { label: "Material Requirements (MRP)", path: "/mrp", icon: ic(Inventory2Outlined) },
+      { label: "Merge Items", path: "/inventory/merge-items", icon: ic(GridViewOutlined) },
     ],
   },
   {
