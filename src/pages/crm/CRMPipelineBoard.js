@@ -19,6 +19,7 @@ import {
   InputAdornment,
   Menu,
   MenuItem,
+  ListSubheader,
   Paper,
   Select,
   Skeleton,
@@ -255,9 +256,10 @@ const leadScoreForStage = (stageKey) => {
 /* Card component (shared shape for board columns)                          */
 /* ----------------------------------------------------------------------- */
 
-function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages, currentStageKey, userMap, collaborators }) {
+function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages, currentStageKey, userMap, collaborators, onAssign, onDelete, assignableUsers }) {
   const theme = useTheme();
   const [moveAnchor, setMoveAnchor] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
   // Tracks whether a drag just occurred so the trailing click doesn't open the drawer.
   const draggedRef = React.useRef(false);
   const days = daysSince(company.stage_entered_at);
@@ -394,6 +396,17 @@ function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages,
           >
             Move
           </Button>
+          {(onAssign || onDelete) && (
+            <Tooltip title="Assign / delete">
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); }}
+                sx={{ p: 0.25 }}
+              >
+                <MoreVertIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
       </Stack>
 
@@ -407,6 +420,45 @@ function PipelineCard({ company, onOpen, onMove, onDragStart, onDragEnd, stages,
           onMove(company.id, toStage);
         }}
       />
+
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+        onClick={(e) => e.stopPropagation()}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        {onAssign && <ListSubheader sx={{ lineHeight: "32px", fontWeight: 700 }}>Assign to</ListSubheader>}
+        {onAssign && (assignableUsers || []).map((u) => {
+          const email = (u.email || "").toLowerCase();
+          const isOwner = (company.owner_email || "").toLowerCase() === email;
+          return (
+            <MenuItem
+              key={email}
+              selected={isOwner}
+              onClick={() => { setMenuAnchor(null); if (!isOwner) onAssign(company.id, u.email); }}
+              sx={{ fontSize: 13 }}
+            >
+              {u.full_name || u.name || u.email}{isOwner ? " ✓" : ""}
+            </MenuItem>
+          );
+        })}
+        {onAssign && company.owner_email && (
+          <MenuItem onClick={() => { setMenuAnchor(null); onAssign(company.id, null); }} sx={{ fontSize: 13, color: "text.secondary" }}>
+            Unassign
+          </MenuItem>
+        )}
+        {onAssign && onDelete && <Divider />}
+        {onDelete && (
+          <MenuItem
+            onClick={() => { setMenuAnchor(null); onDelete(company); }}
+            sx={{ fontSize: 13, color: "error.main" }}
+          >
+            <DeleteOutlineIcon sx={{ fontSize: 16, mr: 1 }} /> Delete entry
+          </MenuItem>
+        )}
+      </Menu>
     </Paper>
   );
 }
@@ -3169,6 +3221,8 @@ export default function CRMPipelineBoard() {
   const [addOpen, setAddOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [drawerId, setDrawerId] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null); // company pending delete-confirm
+  const [deleting, setDeleting] = useState(false);
   const [snack, setSnack] = useState(null); // { message, severity }
   const [healthMap, setHealthMap] = useState({}); // customer_code(lower) -> health row
 
@@ -3323,6 +3377,31 @@ export default function CRMPipelineBoard() {
 
   // Move a prospect to a new prospect_stage, then prompt to log the move + plan a
   // next action. Uses the direct prospect_stage mover (not the legacy RPC).
+  const handleAssignOwner = async (id, email) => {
+    try {
+      await assignOwner(id, email);
+      await loadAll();
+      notify(email ? "Assigned." : "Unassigned.", "success");
+    } catch (e) {
+      notify(e?.message || "Could not assign.", "error");
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      await deleteCompany(pendingDelete.id);
+      setPendingDelete(null);
+      await loadAll();
+      notify("Entry deleted.", "success");
+    } catch (e) {
+      notify(e?.message || "Could not delete entry.", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleMoveStage = async (id, toStage) => {
     const company = prospects.find((p) => p.id === id);
     if (company && company.prospect_stage === toStage) return; // no-op
@@ -3536,6 +3615,9 @@ export default function CRMPipelineBoard() {
             scope={scope}
             userMap={userMap}
             collabMap={collabMap}
+            onAssign={handleAssignOwner}
+            onDelete={(company) => setPendingDelete(company)}
+            assignableUsers={assignableUsers}
           />
         ) : clientTab === "cycles" ? (
           <RecurringView
@@ -3572,6 +3654,22 @@ export default function CRMPipelineBoard() {
         onClaimed={loadAll}
         currentEmail={currentEmail}
       />
+
+      <Dialog open={Boolean(pendingDelete)} onClose={() => !deleting && setPendingDelete(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete this entry?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            <b>{pendingDelete?.company_name}</b> and all its CRM data (activities, contacts, follow-ups,
+            quotations, history) will be permanently removed. Linked ERP orders/invoices are kept. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingDelete(null)} disabled={deleting}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained" disabled={deleting}>
+            {deleting ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <CrmReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
 
@@ -3629,7 +3727,7 @@ export default function CRMPipelineBoard() {
   );
 }
 
-function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd, onDropCard, empty, scope, userMap, collabMap }) {
+function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd, onDropCard, empty, scope, userMap, collabMap, onAssign, onDelete, assignableUsers }) {
   if (empty) {
     return (
       <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
@@ -3662,6 +3760,9 @@ function ProspectsBoard({ theme, byStage, onOpen, onMove, onDragStart, onDragEnd
               currentStageKey={company.prospect_stage}
               userMap={userMap}
               collaborators={(collabMap && collabMap.get(company.id)) || []}
+              onAssign={onAssign}
+              onDelete={onDelete}
+              assignableUsers={assignableUsers}
             />
           )}
         />
