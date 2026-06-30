@@ -60,6 +60,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/demand-forecast' || path === '/portal-admin', moduleKey: MODULE_KEYS.SALES },
   { test: (path) => path.startsWith('/temp/'), moduleKey: MODULE_KEYS.PRODUCTION },
+  { test: (path) => path === '/workflow/workboard', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management' || path.startsWith('/workflow'), moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path.startsWith('/profitability'), moduleKey: MODULE_KEYS.PROFITABILITY },
   { test: (path) => path === '/costing' || path === '/invoicing' || path === '/cost-control', moduleKey: MODULE_KEYS.ACCOUNTS },

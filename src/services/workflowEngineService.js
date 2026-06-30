@@ -79,7 +79,39 @@ export async function completeStageTask(taskId, instanceId = null) {
   return reconcile(instanceId);
 }
 
+/**
+ * Workflow tasks for a department workboard. Returns engine-spawned tasks
+ * (stage_run_id NOT NULL) with their stage + order context embedded. Filter by
+ * email (a person's queue) or department (a department's queue); omit both for
+ * all (manager/CEO view).
+ */
+export async function listWorkboardTasks({ department = null, email = null } = {}) {
+  let q = supabase
+    .from('tasks')
+    .select(
+      'id,title,description,assigned_email,assigned_name,department,priority,due_date,task_status,completed_at,created_at,stage_run_id,' +
+      'stage:wf_stage_run!stage_run_id(id,stage_key,label,status,instance_id,' +
+      'instance:wf_instance!instance_id(id,so_number,company_name,sales_order_id,order_type,status))'
+    )
+    .not('stage_run_id', 'is', null)
+    .order('due_date', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
+  if (email) q = q.eq('assigned_email', String(email).trim().toLowerCase());
+  else if (department) q = q.eq('department', department);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data || [];
+}
+
+/** Complete a stage task and reconcile its instance atomically (UI action). */
+export async function completeTask(taskId) {
+  const { data, error } = await supabase.rpc('wf_complete_task', { p_task_id: taskId });
+  if (error) throw error;
+  return data;
+}
+
 const workflowEngineService = {
   getInstanceBySo, getWorkflow, createInstance, reconcile, linkWorkOrder, completeStageTask,
+  listWorkboardTasks, completeTask,
 };
 export default workflowEngineService;
