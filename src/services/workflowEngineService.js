@@ -173,8 +173,22 @@ export async function dashboard({ from = null, to = null } = {}) {
   return data || {};
 }
 
+/**
+ * Recent customer milestone messages (Phase 4b outbox). CEO-only via RLS.
+ * Returns the latest rows for the staff comms log on the Control Tower.
+ */
+export async function listCustomerComms({ limit = 100 } = {}) {
+  const { data, error } = await supabase
+    .from('wf_customer_comms')
+    .select('id,so_number,customer_code,milestone,channel,recipient_email,recipient_phone,status,error,sent_at,created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
 const workflowEngineService = {
   getInstanceBySo, getWorkflow, getOrderActivity, createInstance, reconcile, linkWorkOrder, completeStageTask,
-  listWorkboardTasks, completeTask, dashboard,
+  listWorkboardTasks, completeTask, dashboard, listCustomerComms,
 };
 export default workflowEngineService;
