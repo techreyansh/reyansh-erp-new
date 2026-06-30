@@ -1,40 +1,45 @@
-// Order-to-Dispatch — per-order workflow timeline.
-// Read-only view of one sales order's workflow spine (wf_stage_run) + milestone
-// ribbon (wf_event). Phase 1 thin slice: proves the engine end-to-end. Later
-// phases add department workboards and the CEO control tower.
-import React, { useCallback, useEffect, useState } from 'react';
+// Order-to-Dispatch — per-order workflow view.
+// A dependency-aware stage rail (what's done / running / blocked-by-what) plus a
+// unified activity timeline merging engine, order-status and work-order events.
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Box, Paper, Typography, Chip, Stack, Button, Divider, LinearProgress,
-  Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Alert,
+  Box, Paper, Typography, Chip, Stack, Button, Divider, LinearProgress, Alert, Tooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import workflowEngineService from '../../services/workflowEngineService';
+import {
+  STATUS_COLOR, INSTANCE_COLOR, waitingOn, isOverdue, isManualStage,
+  stageBlockers, KIND_COLOR, KIND_LABEL,
+} from './workflowLabels';
 
-const STATUS_COLOR = {
-  blocked: 'default', ready: 'info', in_progress: 'warning',
-  done: 'success', skipped: 'default', cancelled: 'error',
+const DOT = {
+  blocked: 'grey.400', ready: 'info.main', in_progress: 'warning.main',
+  done: 'success.main', skipped: 'grey.300', cancelled: 'error.main',
 };
-const INSTANCE_COLOR = { active: 'warning', blocked: 'error', completed: 'success', cancelled: 'default' };
-
-function fmt(ts) {
-  if (!ts) return '—';
-  try { return new Date(ts).toLocaleString(); } catch { return String(ts); }
-}
+const fmt = (ts) => { if (!ts) return '—'; try { return new Date(ts).toLocaleString(); } catch { return String(ts); } };
 
 export default function OrderWorkflowTimeline() {
   const { soId } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState({ instance: null, stages: [], events: [] });
+  const [data, setData] = useState({ instance: null, stages: [], deps: [] });
+  const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [kind, setKind] = useState('all');
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
-    try { setData(await workflowEngineService.getWorkflow(soId)); }
-    catch (e) { setError(e.message || String(e)); }
+    try {
+      const [wf, act] = await Promise.all([
+        workflowEngineService.getWorkflow(soId),
+        workflowEngineService.getOrderActivity(soId),
+      ]);
+      setData(wf); setActivity(act);
+    } catch (e) { setError(e.message || String(e)); }
     finally { setLoading(false); }
   }, [soId]);
 
@@ -48,20 +53,19 @@ export default function OrderWorkflowTimeline() {
     finally { setBusy(false); }
   };
 
-  const { instance, stages, events } = data;
+  const { instance, stages, deps } = data;
+  const byKey = useMemo(() => Object.fromEntries(stages.map((s) => [s.stage_key, s])), [stages]);
   const doneCount = stages.filter((s) => s.status === 'done').length;
   const pct = stages.length ? Math.round((doneCount / stages.length) * 100) : 0;
+  const kinds = useMemo(() => ['all', ...Array.from(new Set(activity.map((a) => a.kind)))], [activity]);
+  const shownActivity = activity.filter((a) => kind === 'all' || a.kind === kind);
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: 'auto' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/sales-orders')} size="small">
-          Sales Orders
-        </Button>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/sales-orders')} size="small">Sales Orders</Button>
         <Box sx={{ flex: 1 }} />
-        <Button startIcon={<RefreshIcon />} onClick={reconcile} disabled={busy || !instance} variant="outlined" size="small">
-          Reconcile
-        </Button>
+        <Button startIcon={<RefreshIcon />} onClick={reconcile} disabled={busy || !instance} variant="outlined" size="small">Reconcile</Button>
       </Stack>
 
       <Typography variant="h5" fontWeight={700} gutterBottom>Order Execution Workflow</Typography>
@@ -78,8 +82,9 @@ export default function OrderWorkflowTimeline() {
 
       {instance && (
         <>
+          {/* Header */}
           <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <Stack direction="row" flexWrap="wrap" alignItems="center" spacing={2}>
+            <Stack direction="row" flexWrap="wrap" alignItems="center" spacing={2} useFlexGap>
               <Box>
                 <Typography variant="overline" color="text.secondary">Sales Order</Typography>
                 <Typography variant="h6">{instance.so_number || '—'}</Typography>
@@ -108,67 +113,68 @@ export default function OrderWorkflowTimeline() {
             </Box>
           </Paper>
 
-          <Paper variant="outlined" sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ px: 2, pt: 1.5 }}>Stages</Typography>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>#</TableCell>
-                  <TableCell>Stage</TableCell>
-                  <TableCell>Department</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Watch</TableCell>
-                  <TableCell>Due</TableCell>
-                  <TableCell>Completed</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stages.map((s) => (
-                  <TableRow key={s.id} hover>
-                    <TableCell>{s.sequence}</TableCell>
-                    <TableCell>{s.label || s.stage_key}</TableCell>
-                    <TableCell>{s.department || '—'}</TableCell>
-                    <TableCell>
-                      <Chip size="small" label={s.status} color={STATUS_COLOR[s.status] || 'default'} />
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title={JSON.stringify(s.watch_param || {})}>
-                        <span>{s.watch_signal}</span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>{s.due_date || '—'}</TableCell>
-                    <TableCell>{fmt(s.completed_at)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          {/* Dependency-aware stage rail */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Stages</Typography>
+            <Box sx={{ position: 'relative', pl: 3, '&::before': { content: '""', position: 'absolute', left: 10, top: 6, bottom: 6, width: 2, bgcolor: 'divider' } }}>
+              {stages.map((s) => {
+                const overdue = isOverdue(s);
+                const blockers = stageBlockers(s, byKey, deps, instance.order_type);
+                const wait = (s.status === 'in_progress' || s.status === 'ready') && !isManualStage(s) ? waitingOn(s) : null;
+                return (
+                  <Box key={s.id} sx={{ position: 'relative', mb: 1.75 }}>
+                    <Box sx={{ position: 'absolute', left: -20, top: 4, width: 13, height: 13, borderRadius: '50%', bgcolor: DOT[s.status] || 'grey.400', border: '2px solid', borderColor: 'background.paper' }} />
+                    <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{s.label || s.stage_key}</Typography>
+                      <Chip size="small" label={s.status} color={STATUS_COLOR[s.status] || 'default'} variant={s.status === 'done' ? 'filled' : 'outlined'} />
+                      {s.department && <Chip size="small" variant="outlined" label={s.department} />}
+                      {wait && <Chip size="small" color="warning" variant="outlined" icon={<HourglassEmptyIcon sx={{ fontSize: 14 }} />} label={wait} />}
+                      {isManualStage(s) && s.status === 'in_progress' && <Chip size="small" color="info" variant="outlined" label="needs action" />}
+                      <Box sx={{ flex: 1 }} />
+                      {s.due_date && (
+                        <Typography variant="caption" sx={{ color: overdue ? 'error.main' : 'text.secondary', fontWeight: overdue ? 700 : 400 }}>
+                          {overdue ? 'overdue ' : 'due '}{s.due_date}
+                        </Typography>
+                      )}
+                    </Stack>
+                    {!!blockers.length && (
+                      <Typography variant="caption" color="text.secondary">blocked by: {blockers.join(', ')}</Typography>
+                    )}
+                  </Box>
+                );
+              })}
+            </Box>
           </Paper>
 
-          <Paper variant="outlined">
-            <Typography variant="subtitle2" sx={{ px: 2, pt: 1.5 }}>Milestone timeline</Typography>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>When</TableCell>
-                  <TableCell>Stage</TableCell>
-                  <TableCell>Event</TableCell>
-                  <TableCell>By</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {events.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell>{fmt(e.created_at)}</TableCell>
-                    <TableCell>{e.stage_key || '—'}</TableCell>
-                    <TableCell>{e.event_type}</TableCell>
-                    <TableCell>{e.actor_email || '—'}</TableCell>
-                  </TableRow>
-                ))}
-                {!events.length && (
-                  <TableRow><TableCell colSpan={4}><Typography variant="body2" color="text.secondary">No events yet.</Typography></TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
+          {/* Unified activity timeline */}
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+              <Typography variant="subtitle2">Activity timeline</Typography>
+              <Box sx={{ flex: 1 }} />
+              {kinds.map((k) => (
+                <Chip key={k} size="small" label={k === 'all' ? 'All' : (KIND_LABEL[k] || k)}
+                  variant={kind === k ? 'filled' : 'outlined'} onClick={() => setKind(k)}
+                  sx={kind === k && k !== 'all' ? { bgcolor: KIND_COLOR[k], color: '#fff' } : undefined} />
+              ))}
+            </Stack>
+            {!shownActivity.length && <Typography variant="body2" color="text.secondary">No activity yet.</Typography>}
+            <Box sx={{ position: 'relative', pl: 2, '&::before': { content: '""', position: 'absolute', left: 6, top: 6, bottom: 6, width: 2, bgcolor: 'divider' } }}>
+              {shownActivity.map((e, i) => (
+                <Box key={i} sx={{ position: 'relative', mb: 1.75 }}>
+                  <Box sx={{ position: 'absolute', left: -16, top: 4, width: 11, height: 11, borderRadius: '50%', bgcolor: KIND_COLOR[e.kind] || 'grey.500', border: '2px solid', borderColor: 'background.paper' }} />
+                  <Stack direction="row" alignItems="baseline" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Chip size="small" label={KIND_LABEL[e.kind] || e.kind} sx={{ bgcolor: KIND_COLOR[e.kind], color: '#fff', height: 18, '& .MuiChip-label': { px: 0.75, fontSize: 11 } }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, flexGrow: 1, textTransform: 'capitalize' }}>{e.title}</Typography>
+                    <Tooltip title={fmt(e.at)}><Typography variant="caption" color="text.disabled">{fmt(e.at)}</Typography></Tooltip>
+                  </Stack>
+                  {(e.detail || e.owner) && (
+                    <Typography variant="caption" color="text.secondary">
+                      {e.detail ? e.detail + ' · ' : ''}{e.owner ? String(e.owner).split('@')[0] : ''}
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
           </Paper>
         </>
       )}

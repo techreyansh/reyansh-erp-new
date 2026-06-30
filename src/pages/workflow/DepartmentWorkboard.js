@@ -11,8 +11,10 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { usePermissions } from '../../context/PermissionContext';
 import workflowEngineService from '../../services/workflowEngineService';
+import { isManualStage, waitingOn } from './workflowLabels';
 
 const DEPARTMENTS = ['Production', 'Dispatch', 'PPC', 'CRM', 'Store'];
 const PRIORITY_COLOR = { urgent: 'error', high: 'warning', medium: 'default', low: 'default' };
@@ -63,9 +65,17 @@ function TaskCard({ task, onComplete, busy }) {
             </Tooltip>
           )}
           {task.task_status !== 'completed' && (
-            <Button size="small" variant="contained" color="success" disabled={busy}
-              startIcon={<CheckCircleOutlineIcon sx={{ fontSize: 16 }} />}
-              onClick={() => onComplete(task)}>Complete</Button>
+            isManualStage(task.stage) ? (
+              <Button size="small" variant="contained" color="success" disabled={busy}
+                startIcon={<CheckCircleOutlineIcon sx={{ fontSize: 16 }} />}
+                onClick={() => onComplete(task)}>Complete</Button>
+            ) : (
+              <Tooltip title="This stage advances automatically when the real action happens in its module.">
+                <Chip size="small" color="warning" variant="outlined"
+                  icon={<HourglassEmptyIcon sx={{ fontSize: 14 }} />}
+                  label={waitingOn(task.stage) || 'Auto'} />
+              </Tooltip>
+            )
           )}
         </Stack>
       </Stack>
