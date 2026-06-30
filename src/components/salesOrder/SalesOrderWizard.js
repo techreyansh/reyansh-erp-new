@@ -21,7 +21,9 @@ const STEPS = ['Customer', 'PO details', 'Products', 'Validation', 'Review', 'Re
 const inr = (v) => `₹${(Number(v) || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
-export default function SalesOrderWizard({ onClose, onCreated, notify }) {
+const norm = (s) => String(s || '').toLowerCase().trim();
+
+export default function SalesOrderWizard({ onClose, onCreated, notify, initial = null }) {
   const theme = useTheme();
   const [step, setStep] = useState(0);
   const [accounts, setAccounts] = useState([]);
@@ -39,10 +41,36 @@ export default function SalesOrderWizard({ onClose, onCreated, notify }) {
     (async () => {
       try {
         const [cl, pr, pd] = await Promise.all([listClients().catch(() => []), listProspects().catch(() => []), plm.listProducts().catch(() => [])]);
-        setAccounts([...cl, ...pr]); setProducts(pd);
+        const accs = [...cl, ...pr];
+        setAccounts(accs); setProducts(pd);
+        // Prefill from an ingested PO (poToSalesOrder.mapPoToWizardInitial). Human
+        // confirms the matches; matched lines get released costing fetched here.
+        if (initial) {
+          if (initial.po) setPo((p) => ({ ...p, ...initial.po }));
+          const cust = (initial.customerCode && accs.find((a) => a.customer_code === initial.customerCode))
+            || (initial.customerName && accs.find((a) => norm(a.company_name) === norm(initial.customerName)))
+            || null;
+          setCustomer(cust);
+          const built = await Promise.all((initial.lines || []).map(async (l) => {
+            let unit_price = Number(l.unit_price) || 0, costing_version_id = null, hasCosting = false;
+            if (l.product_id) {
+              try {
+                const c = await costing.getLatestReleased(l.product_id);
+                if (c) { unit_price = Number(c.net_selling_price) || unit_price; costing_version_id = c.id; hasCosting = true; }
+              } catch { /* ignore */ }
+            }
+            return {
+              product_id: l.product_id || null, product_code: l.product_code || '', product_name: l.product_name || '',
+              customer_part_no: l.customer_part_no || '', revision: l.revision || '',
+              qty: Number(l.qty) || 1, uom: l.uom || 'pc', unit_price, costing_version_id, hasCosting,
+              required_delivery_date: '', remarks: '', needs_match: !!l.needs_match,
+            };
+          }));
+          setLines(built);
+        }
       } finally { setLoading(false); }
     })();
-  }, []);
+  }, [initial]);
 
   const addLine = async (product) => {
     if (!product) return;
@@ -72,7 +100,8 @@ export default function SalesOrderWizard({ onClose, onCreated, notify }) {
     if (!poFile) out.push({ level: 'warn', msg: 'Customer PO PDF not attached' });
     if (lines.length === 0) out.push({ level: 'error', msg: 'No products added' });
     lines.forEach((l) => {
-      if (!l.hasCosting) out.push({ level: 'warn', msg: `${l.product_name}: no released costing — price entered manually` });
+      if (l.needs_match) out.push({ level: 'warn', msg: `${l.product_name}: not matched to a product master item — re-add it from the picker, or release as-is (no costing link)` });
+      else if (!l.hasCosting) out.push({ level: 'warn', msg: `${l.product_name}: no released costing — price entered manually` });
       if (!(Number(l.qty) > 0)) out.push({ level: 'error', msg: `${l.product_name}: quantity must be > 0` });
       if (!(Number(l.unit_price) > 0)) out.push({ level: 'warn', msg: `${l.product_name}: unit price is 0` });
     });
@@ -192,7 +221,9 @@ export default function SalesOrderWizard({ onClose, onCreated, notify }) {
                     <TableBody>
                       {lines.map((l, i) => (
                         <TableRow key={i}>
-                          <TableCell>{l.product_name}{!l.hasCosting && <Chip size="small" label="no costing" color="warning" sx={{ ml: 0.5, height: 16, fontSize: 9 }} />}</TableCell>
+                          <TableCell>{l.product_name}
+                            {l.needs_match && <Chip size="small" label="unmatched" color="error" sx={{ ml: 0.5, height: 16, fontSize: 9 }} />}
+                            {!l.needs_match && !l.hasCosting && <Chip size="small" label="no costing" color="warning" sx={{ ml: 0.5, height: 16, fontSize: 9 }} />}</TableCell>
                           <TableCell>{l.revision || '—'}</TableCell>
                           <TableCell><TextField size="small" variant="standard" type="number" value={l.qty} onChange={(e) => updLine(i, { qty: e.target.value })} sx={{ width: 64 }} /></TableCell>
                           <TableCell><TextField size="small" variant="standard" value={l.uom} onChange={(e) => updLine(i, { uom: e.target.value })} sx={{ width: 50 }} /></TableCell>
