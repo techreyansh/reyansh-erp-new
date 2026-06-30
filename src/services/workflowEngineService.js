@@ -161,8 +161,34 @@ export async function completeTask(taskId) {
   return data;
 }
 
+/**
+ * CEO control-tower portfolio roll-up across ALL workflows: KPIs, bottleneck by
+ * stage, open work by department, and an aging/stuck-orders list. One jsonb blob
+ * from the wf_dashboard RPC (CEO-gated server-side). `p_from`/`p_to` bound the
+ * "completed in range" KPI only; active counts are always current.
+ */
+export async function dashboard({ from = null, to = null } = {}) {
+  const { data, error } = await supabase.rpc('wf_dashboard', { p_from: from, p_to: to });
+  if (error) throw error;
+  return data || {};
+}
+
+/**
+ * Recent customer milestone messages (Phase 4b outbox). CEO-only via RLS.
+ * Returns the latest rows for the staff comms log on the Control Tower.
+ */
+export async function listCustomerComms({ limit = 100 } = {}) {
+  const { data, error } = await supabase
+    .from('wf_customer_comms')
+    .select('id,so_number,customer_code,milestone,channel,recipient_email,recipient_phone,status,error,sent_at,created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
 const workflowEngineService = {
   getInstanceBySo, getWorkflow, getOrderActivity, createInstance, reconcile, linkWorkOrder, completeStageTask,
-  listWorkboardTasks, completeTask,
+  listWorkboardTasks, completeTask, dashboard, listCustomerComms,
 };
 export default workflowEngineService;

@@ -7,12 +7,36 @@ import {
   TableCell, TableBody, CircularProgress, Grid, Divider,
 } from '@mui/material';
 import StorefrontOutlined from '@mui/icons-material/StorefrontOutlined';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import portalService from '../../services/portalService';
 import { SELLER } from '../../config/company';
 
 const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
 const ORDER_COLOR = { draft: 'default', released: 'info', in_production: 'warning', partially_dispatched: 'warning', dispatched: 'success', completed: 'success', cancelled: 'error' };
 const INV_COLOR = { ISSUED: 'info', PAID: 'success', PARTIAL: 'warning', OVERDUE: 'error', CANCELLED: 'default' };
+const MS_COLOR = { done: 'success', active: 'primary', pending: 'default' };
+
+// Horizontal milestone tracker: Order confirmed › In production › Packed › Dispatched.
+function MilestoneTrack({ milestones = [] }) {
+  if (!milestones.length) return null;
+  return (
+    <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap>
+      {milestones.map((m, i) => (
+        <React.Fragment key={m.label}>
+          <Chip
+            size="small"
+            label={m.label}
+            color={m.state === 'pending' ? 'default' : MS_COLOR[m.state]}
+            variant={m.state === 'done' ? 'filled' : 'outlined'}
+            icon={m.state === 'done' ? <CheckCircleOutline sx={{ fontSize: 14 }} /> : undefined}
+            sx={{ fontWeight: m.state !== 'pending' ? 700 : 400, opacity: m.state === 'pending' ? 0.55 : 1 }}
+          />
+          {i < milestones.length - 1 && <Typography variant="caption" color="text.disabled" sx={{ px: 0.25 }}>›</Typography>}
+        </React.Fragment>
+      ))}
+    </Stack>
+  );
+}
 
 function Section({ title, count, children }) {
   return (
@@ -58,7 +82,7 @@ export default function CustomerPortal() {
     </Box>
   );
 
-  const { customer, orders = [], invoices = [], dispatches = [] } = data;
+  const { customer, orders = [], invoices = [], dispatches = [], workflows = [] } = data;
   const outstanding = invoices.reduce((s, i) => s + (Number(i.balance) || 0), 0);
   const openOrders = orders.filter((o) => !['completed', 'cancelled', 'dispatched'].includes(o.status)).length;
 
@@ -115,6 +139,20 @@ export default function CustomerPortal() {
               </Table></Box>
             )}
           </Section>
+
+          {/* Order progress (workflow milestones) */}
+          {workflows.length > 0 && (
+            <Section title="Order progress" count={workflows.length}>
+              <Stack divider={<Divider />}>
+                {workflows.map((w, i) => (
+                  <Box key={i} sx={{ p: 2 }}>
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700 }}>{w.so_number || '—'}</Typography>
+                    <Box sx={{ mt: 1 }}><MilestoneTrack milestones={w.milestones} /></Box>
+                  </Box>
+                ))}
+              </Stack>
+            </Section>
+          )}
 
           {/* Dispatch status */}
           {dispatches.length > 0 && (
