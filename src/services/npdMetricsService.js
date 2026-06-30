@@ -32,5 +32,27 @@ export async function filterOptions() {
   return { engineers, devTypes: DEV_TYPES };
 }
 
-const npdMetricsService = { summary, filterOptions, DEV_TYPES };
+/**
+ * Ask the NPD AI (npd-ai-chat edge fn) over the already-loaded dashboard context.
+ * Never throws — resolves to { sections } or { error } (with a friendly message
+ * drained from the edge error body, like aiCopilotService.runTool).
+ */
+export async function askNpd(tool, input, context) {
+  try {
+    const { data, error } = await supabase.functions.invoke("npd-ai-chat", {
+      body: { tool: tool || "ask", input: input || "", context: context || {} },
+    });
+    if (error) {
+      let msg = error.message || "AI request failed";
+      try { const ctx = await error.context?.json?.(); if (ctx?.error) msg = ctx.error; } catch { /* ignore */ }
+      return { error: msg };
+    }
+    if (data?.error) return { error: data.error };
+    return { sections: data?.sections || [] };
+  } catch (e) {
+    return { error: e?.message || "AI request failed" };
+  }
+}
+
+const npdMetricsService = { summary, filterOptions, askNpd, DEV_TYPES };
 export default npdMetricsService;

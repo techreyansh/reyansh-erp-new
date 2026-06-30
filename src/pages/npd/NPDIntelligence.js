@@ -9,7 +9,7 @@ import {
   CircularProgress, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, useTheme, alpha, Alert,
 } from '@mui/material';
-import { Insights as IntelIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { Insights as IntelIcon, Refresh as RefreshIcon, AutoAwesome as AiIcon } from '@mui/icons-material';
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, XAxis, YAxis,
   Tooltip as RTooltip, CartesianGrid, Cell, Legend,
@@ -26,7 +26,15 @@ const OUTCOME_LABEL = {
   pending: 'Pending', approved: 'Approved', approved_with_changes: 'Approved w/ changes',
   rejected: 'Rejected', resample: 'Resample',
 };
+const DEV_TYPE_LABEL = Object.fromEntries((npdMetricsService.DEV_TYPES || []).map((t) => [t.v, t.l]));
 const stageLabel = (k) => NPD_STAGE_LABEL[k] || k;
+const AI_PRESETS = [
+  { tool: 'pipeline_summary', label: 'Summarise the pipeline' },
+  { tool: 'bottlenecks', label: 'Where are the bottlenecks?' },
+  { tool: 'overdue_risk', label: "What's at risk / overdue?" },
+  { tool: 'rework_patterns', label: 'Rework & resample patterns' },
+  { tool: 'engineer_load', label: 'Engineer workload' },
+];
 
 function Kpi({ label, value, color, sub }) {
   const theme = useTheme();
@@ -74,6 +82,9 @@ export default function NPDIntelligence() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [chat, setChat] = useState([]); // { role:'user'|'ai', text?, sections?, error? }
+  const [q, setQ] = useState('');
+  const [chatBusy, setChatBusy] = useState(false);
 
   useEffect(() => { npdMetricsService.filterOptions().then(setOpts).catch(() => {}); }, []);
 
@@ -94,10 +105,30 @@ export default function NPDIntelligence() {
   const setPreset = (days) => { setFrom(iso(new Date(Date.now() - days * 86400000))); setTo(iso(new Date())); };
   const k = data?.kpis || {};
 
+  // Ask the NPD AI over the already-loaded dashboard bundle (no re-query).
+  const sendChat = useCallback(async (tool, label) => {
+    if (chatBusy || !data) return;
+    const userText = label || q.trim();
+    if (!userText) return;
+    const ctx = {
+      from, to, engineer, devType, kpis: data.kpis, funnel: data.funnel, stage_aging: data.stage_aging,
+      outcome_mix: data.outcome_mix, throughput_trend: data.throughput_trend, by_engineer: data.by_engineer,
+      dev_type_breakdown: data.dev_type_breakdown, rework: data.rework, delayed_list: data.delayed_list,
+    };
+    setChat((c) => [...c, { role: 'user', text: userText }]);
+    if (!tool) setQ('');
+    setChatBusy(true);
+    const res = await npdMetricsService.askNpd(tool || 'ask', tool ? '' : userText, ctx);
+    setChat((c) => [...c, { role: 'ai', sections: res.sections, error: res.error }]);
+    setChatBusy(false);
+  }, [chatBusy, data, q, from, to, engineer, devType]);
+
   // Map raw stage/outcome keys to display labels for the charts.
   const funnel = useMemo(() => (data?.funnel || []).map((d) => ({ ...d, label: stageLabel(d.stage) })), [data]);
   const aging = useMemo(() => (data?.stage_aging || []).map((d) => ({ ...d, label: stageLabel(d.stage) })), [data]);
   const outcomes = useMemo(() => (data?.outcome_mix || []).map((d) => ({ ...d, label: OUTCOME_LABEL[d.outcome] || d.outcome })), [data]);
+  const devTypes = useMemo(() => (data?.dev_type_breakdown || []).map((d) => ({ ...d, label: DEV_TYPE_LABEL[d.dev_type] || d.dev_type })), [data]);
+  const rework = data?.rework || {};
   const palette = useMemo(() => [theme.palette.success.main, theme.palette.info.main, theme.palette.warning.main, theme.palette.error.main, theme.palette.grey[500]], [theme]);
 
   const empty = !loading && data && (k.active || 0) === 0 && funnel.length === 0
@@ -154,6 +185,8 @@ export default function NPDIntelligence() {
             <Kpi label="Avg turnaround" value={k.avg_turnaround_days == null ? '—' : `${k.avg_turnaround_days} d`} color="secondary" sub="created → approved" />
             <Kpi label="Approval rate" value={k.approval_rate == null ? '—' : `${k.approval_rate}%`} color="success" />
             <Kpi label="Sample pass rate" value={k.sample_pass_rate == null ? '—' : `${k.sample_pass_rate}%`} color={(k.sample_pass_rate ?? 100) < 80 ? 'warning' : 'success'} />
+            <Kpi label="Resample loops" value={num(rework.resample_loops)} color={rework.resample_loops > 0 ? 'warning' : 'success'} sub={`${num(rework.rejected)} rejected`} />
+            <Kpi label="Reworked projects" value={num(rework.reworked_projects)} color={rework.reworked_projects > 0 ? 'warning' : 'success'} sub={rework.avg_revision != null ? `avg rev ${rework.avg_revision}` : undefined} />
           </Stack>
 
           <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
@@ -194,6 +227,7 @@ export default function NPDIntelligence() {
               </CardContent>
             </Card>
             <ChartCard title="Active load by engineer" data={data.by_engineer} x="engineer" y="count" color={theme.palette.info.main} theme={theme} />
+            <ChartCard title="Developments by type (active)" data={devTypes} x="label" y="count" color={theme.palette.secondary.main} theme={theme} />
           </Box>
 
           <Card variant="outlined" sx={{ borderRadius: 2.5 }}>
@@ -219,6 +253,46 @@ export default function NPDIntelligence() {
                   </TableBody>
                 </Table></TableContainer>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Ask the NPD AI — over the already-loaded dashboard context */}
+          <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: alpha(theme.palette.secondary.main, 0.35) }}>
+            <CardContent>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                <AiIcon color="secondary" />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Ask the NPD AI</Typography>
+                <Typography variant="caption" color="text.secondary">Answered over this view's data.</Typography>
+              </Stack>
+              <Stack direction="row" spacing={0.75} sx={{ mb: 1.5, flexWrap: 'wrap' }} useFlexGap>
+                {AI_PRESETS.map((p) => (
+                  <Chip key={p.tool} label={p.label} size="small" variant="outlined" disabled={chatBusy} onClick={() => sendChat(p.tool, p.label)} sx={{ cursor: 'pointer' }} />
+                ))}
+              </Stack>
+              {chat.length > 0 && (
+                <Stack spacing={1.5} sx={{ mb: 1.5, maxHeight: 440, overflow: 'auto' }}>
+                  {chat.map((m, i) => (m.role === 'user' ? (
+                    <Box key={i} sx={{ alignSelf: 'flex-end', maxWidth: '85%', bgcolor: alpha(theme.palette.primary.main, 0.1), px: 1.5, py: 0.75, borderRadius: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{m.text}</Typography>
+                    </Box>
+                  ) : (
+                    <Box key={i} sx={{ alignSelf: 'flex-start', maxWidth: '92%' }}>
+                      {m.error ? <Alert severity="info">{m.error}</Alert> : (m.sections || []).map((s, j) => (
+                        <Box key={j} sx={{ mb: 1 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>{s.heading}</Typography>
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{s.body}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )))}
+                  {chatBusy && <Stack direction="row" spacing={1} alignItems="center"><CircularProgress size={16} /><Typography variant="caption" color="text.secondary">Thinking…</Typography></Stack>}
+                </Stack>
+              )}
+              <Stack direction="row" spacing={1}>
+                <TextField size="small" fullWidth placeholder="Ask e.g. “Which customer drives the most rework?”" value={q}
+                  onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && q.trim() && !chatBusy) sendChat(); }} disabled={chatBusy} />
+                <Button variant="contained" onClick={() => sendChat()} disabled={chatBusy || !q.trim()}>Ask</Button>
+              </Stack>
             </CardContent>
           </Card>
         </Stack>
