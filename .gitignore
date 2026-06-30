@@ -58,3 +58,6 @@ Thumbs.db
 *.tsbuildinfo
 .gstack/
 supabase/.temp/
+
+# Claude Code local config
+.claude/

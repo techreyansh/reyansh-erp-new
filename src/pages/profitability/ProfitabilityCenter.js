@@ -18,6 +18,7 @@ import {
 import KPICard from "../../components/common/KPICard";
 import ReportExportButton from "../../components/common/ReportExportButton";
 import profitabilityService from "../../services/profitabilityService";
+import { buildVarianceSummary, buildMonthlyVariance } from "../../services/reporting/profitabilityReports";
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const money = (v) => "₹" + Number(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -205,7 +206,10 @@ export default function ProfitabilityCenter() {
               <Stack spacing={2}>
                 {/* Net P&L ladder (company) */}
                 <Card variant="outlined" sx={{ borderRadius: 2.5, bgcolor: alpha(theme.palette.success.main, 0.04) }}><CardContent sx={{ py: 1.5 }}>
-                  <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>Company Profit ladder</Typography>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>Company Profit ladder</Typography>
+                    <ReportExportButton buildReport={() => buildMonthlyVariance(data)} label="Monthly report" />
+                  </Box>
                   <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mt: 0.5 }}>
                     {[["Revenue", net.revenue], ["Gross Profit", net.gross_profit], ["Contribution", net.contribution],
                       ["− Fixed conv", net.fixed_conv], ["− Op. expenses", net.operating_expenses], ["Net Profit", net.net_profit]].map(([l, val], i) => (
@@ -316,7 +320,42 @@ function CostHeadsTab({ heads, setHeads, overrides, setOverrides, needsCosting, 
           </Table></TableContainer>
         )}
       </CardContent></Card>
+
+      <MaterialTagPanel notify={notify} />
     </Stack>
+  );
+}
+
+// ---- SKU material-group tagging (keeps the copper/PVC actual variance working) ----
+function MaterialTagPanel({ notify }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const reload = () => { setLoading(true); profitabilityService.untaggedItems().then(setItems).catch(() => {}).finally(() => setLoading(false)); };
+  useEffect(reload, []);
+  const tag = async (id, group) => {
+    try { await profitabilityService.setMaterialGroup(id, group); setItems((xs) => xs.filter((x) => x.id !== id)); notify(`Tagged as ${group}`, "success"); }
+    catch (e) { notify(e.message || "Failed", "error"); }
+  };
+  return (
+    <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>Material tagging — untagged items</Typography>
+      <Typography variant="caption" color="text.secondary">Tag raw materials by type (copper / pvc / component / packing) so the Expected-vs-Actual <b>material factors</b> split stays correct as new items appear. Generic COPPER/PVC are auto-tagged; tag custom SKUs here.</Typography>
+      {loading ? <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">Loading…</Typography>
+        : items.length === 0 ? <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">All consumable items are tagged. 🎉</Typography> : (
+        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1.5, mt: 1.5 }}><Table size="small">
+          <TableHead><TableRow>{["Code", "Name", "Type", "Tag as"].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: "0.72rem" }}>{h}</TableCell>)}</TableRow></TableHead>
+          <TableBody>{items.map((it) => (
+            <TableRow key={it.id} hover>
+              <TableCell sx={{ fontWeight: 600 }}>{it.code}</TableCell><TableCell>{it.name}</TableCell><TableCell>{it.item_type || "—"}</TableCell>
+              <TableCell><TextField select size="small" value="" onChange={(e) => tag(it.id, e.target.value)} sx={{ width: 150 }} SelectProps={{ displayEmpty: true }}>
+                <MenuItem value="" disabled>Choose…</MenuItem>
+                {profitabilityService.MATERIAL_GROUPS.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+              </TextField></TableCell>
+            </TableRow>
+          ))}</TableBody>
+        </Table></TableContainer>
+      )}
+    </CardContent></Card>
   );
 }
 function OverrideRow({ p, existing, onSave }) {
@@ -425,7 +464,10 @@ function ExpectedVsActualTab({ from, to, notify }) {
         <Alert severity="info" sx={{ flex: 1 }}>
           <b>Actual</b> = actual revenue (invoiced) − actual material (real consumption from the inventory ledger) − <b>standard</b> conversion (the floor isn't metered for labour/machine rupees yet). The headline signal is <b>material variance</b> — did we burn more than the costing assumed. Per-order actuals appear only for work orders booked against a sales-order line going forward.
         </Alert>
-        <Button size="small" variant="outlined" startIcon={<CloudDownloadOutlined />} disabled={busy} onClick={seedActual}>Load actual demo</Button>
+        <Stack direction="row" spacing={1}>
+          <ReportExportButton buildReport={() => buildVarianceSummary(data, { from, to })} label="CEO Variance Summary" />
+          <Button size="small" variant="outlined" startIcon={<CloudDownloadOutlined />} disabled={busy} onClick={seedActual}>Load actual demo</Button>
+        </Stack>
       </Stack>
 
       <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4,1fr)" } }}>

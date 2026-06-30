@@ -73,6 +73,37 @@ export async function deleteExpense(id) {
   if (error) throw error;
 }
 
+// ---- SKU material-group tagging (keeps the copper/PVC actual split working) ----
+// material_group on ppc_items drives profit_actual_summary.material_factors.
+export async function untaggedItems() {
+  const { data, error } = await supabase
+    .from("ppc_items")
+    .select("id, code, name, item_type, material_group")
+    .is("material_group", null)
+    .neq("item_type", "finished_good")
+    .order("code")
+    .limit(200);
+  if (error) throw error;
+  return data || [];
+}
+export async function taggedItems() {
+  const { data, error } = await supabase
+    .from("ppc_items")
+    .select("id, code, name, material_group")
+    .not("material_group", "is", null)
+    .order("material_group");
+  if (error) throw error;
+  return data || [];
+}
+export const MATERIAL_GROUPS = ["copper", "pvc", "component", "packing", "other"];
+export async function setMaterialGroup(id, group) {
+  const { error } = await supabase
+    .from("ppc_items")
+    .update({ material_group: group || null })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 // ---- Demo data (CEO) ----
 export async function seedDemo() {
   const { data, error } = await supabase.rpc("profit_seed_demo");
@@ -112,5 +143,6 @@ export function whatIf(sum, levers = {}) {
 const profitabilityService = {
   summary, actualSummary, seedActualDemo, costHeads, saveCostHead, deleteCostHead,
   overrides, saveOverride, expenses, saveExpense, deleteExpense, seedDemo, clearDemo, whatIf,
+  untaggedItems, taggedItems, setMaterialGroup, MATERIAL_GROUPS,
 };
 export default profitabilityService;
