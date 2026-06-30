@@ -153,6 +153,7 @@ const SalesOrders = lazy(() => import("./pages/salesOrder/SalesOrders"));
 const DispatchControlTower = lazy(() => import("./pages/dispatch/DispatchControlTower"));
 const OrderWorkflowTimeline = lazy(() => import("./pages/workflow/OrderWorkflowTimeline"));
 const DepartmentWorkboard = lazy(() => import("./pages/workflow/DepartmentWorkboard"));
+const WorkflowControlTower = lazy(() => import("./pages/workflow/WorkflowControlTower"));
 const ProductionDemand = lazy(() => import("./pages/production/ProductionDemand"));
 const MaterialRequirements = lazy(() => import("./pages/mrp/MaterialRequirements"));
 const PurchaseRequisitions = lazy(() => import("./pages/purchase/PurchaseRequisitions"));
@@ -293,6 +294,11 @@ function AppContent() {
                   <Route path="/ceo-command" element={
                     <CEOOnlyRoute>
                       <CEOExecutiveDashboard />
+                    </CEOOnlyRoute>
+                  } />
+                  <Route path="/workflow-tower" element={
+                    <CEOOnlyRoute>
+                      <WorkflowControlTower />
                     </CEOOnlyRoute>
                   } />
                   <Route path="/profitability" element={
