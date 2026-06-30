@@ -106,12 +106,17 @@ export default function ProfitabilityCenter() {
   const lossMaking = useMemo(() => byProduct.filter((p) => p.gross_profit < 0), [byProduct]);
   const topMargin = useMemo(() => [...byProduct].filter((p) => p.gm_pct != null).sort((a, b) => b.gm_pct - a.gm_pct).slice(0, 8), [byProduct]);
   const lowMargin = useMemo(() => [...byProduct].filter((p) => p.gm_pct != null).sort((a, b) => a.gm_pct - b.gm_pct).slice(0, 8), [byProduct]);
+  const net = data?.net || {};
+  // Full profit ladder: Revenue → −Material → −Variable conv → Contribution → −Fixed conv → −Expenses → Net
   const waterfall = useMemo(() => [
     { name: "Revenue", v: k.revenue || 0, c: theme.palette.primary.main },
     { name: "− Material", v: -(k.material || 0), c: theme.palette.warning.main },
-    { name: "− Conversion", v: -(k.conversion || 0), c: theme.palette.info.main },
-    { name: "Gross Profit", v: k.gross_profit || 0, c: theme.palette.success.main },
-  ], [k, theme]);
+    { name: "− Var. conv", v: -(k.variable_conv || 0), c: theme.palette.info.main },
+    { name: "Contribution", v: k.contribution || 0, c: theme.palette.secondary.main },
+    { name: "− Fixed conv", v: -(k.fixed_conv || 0), c: theme.palette.info.dark || theme.palette.info.main },
+    { name: "− Op. exp", v: -(net.operating_expenses || 0), c: theme.palette.warning.dark || theme.palette.warning.main },
+    { name: "Net Profit", v: net.net_profit || 0, c: (net.net_profit || 0) < 0 ? theme.palette.error.main : theme.palette.success.main },
+  ], [k, net, theme]);
   const wf = data?.whatif;
 
   const runDemo = async (fn, msg) => { setBusy(true); try { await fn(); notify(msg, "success"); await load(); } catch (e) { notify(e.message || "Failed", "error"); } finally { setBusy(false); } };
@@ -121,13 +126,15 @@ export default function ProfitabilityCenter() {
     { k: "name", h: "Customer", bold: true, fmt: (v, r) => v || r.code }, { k: "revenue", h: "Revenue", align: "right", fmt: moneyCol },
     { k: "material", h: "Material", align: "right", fmt: moneyCol }, { k: "conversion", h: "Production", align: "right", fmt: moneyCol },
     { k: "gross_profit", h: "Gross Profit", align: "right", bold: true, fmt: moneyCol }, { k: "gm_pct", h: "GM %", align: "right", fmt: pct },
-    { k: "orders", h: "Orders", align: "right" }, { k: "products", h: "Products", align: "right" },
+    { k: "contribution", h: "Contribution", align: "right", fmt: moneyCol }, { k: "cm_pct", h: "CM %", align: "right", fmt: pct },
+    { k: "orders", h: "Orders", align: "right" },
   ];
   const productCols = [
     { k: "name", h: "Product", bold: true, fmt: (v, r) => v || r.code }, { k: "family", h: "Family" }, { k: "revenue", h: "Revenue", align: "right", fmt: moneyCol },
     { k: "material", h: "Material", align: "right", fmt: moneyCol }, { k: "conversion", h: "Conversion", align: "right", fmt: moneyCol },
     { k: "gross_profit", h: "Gross Profit", align: "right", bold: true, fmt: moneyCol }, { k: "gm_pct", h: "GM %", align: "right", fmt: pct },
-    { k: "qty", h: "Qty", align: "right" }, { k: "customers", h: "Customers", align: "right" },
+    { k: "contribution", h: "Contribution", align: "right", fmt: moneyCol }, { k: "cm_pct", h: "CM %", align: "right", fmt: pct },
+    { k: "qty", h: "Qty", align: "right" },
   ];
   const orderCols = [
     { k: "so_number", h: "Order", bold: true }, { k: "company_name", h: "Customer" }, { k: "revenue", h: "Sales value", align: "right", fmt: moneyCol },
@@ -196,9 +203,29 @@ export default function ProfitabilityCenter() {
             {/* DASHBOARD */}
             {tab === 0 && (
               <Stack spacing={2}>
+                {/* Net P&L ladder (company) */}
+                <Card variant="outlined" sx={{ borderRadius: 2.5, bgcolor: alpha(theme.palette.success.main, 0.04) }}><CardContent sx={{ py: 1.5 }}>
+                  <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>Company Profit ladder</Typography>
+                  <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mt: 0.5 }}>
+                    {[["Revenue", net.revenue], ["Gross Profit", net.gross_profit], ["Contribution", net.contribution],
+                      ["− Fixed conv", net.fixed_conv], ["− Op. expenses", net.operating_expenses], ["Net Profit", net.net_profit]].map(([l, val], i) => (
+                      <Box key={l} sx={{ minWidth: 120 }}>
+                        <Typography variant="caption" color="text.secondary">{l}</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: l === "Net Profit" ? ((net.net_profit || 0) < 0 ? "error.main" : "success.main") : "text.primary" }}>{money(val)}</Typography>
+                      </Box>
+                    ))}
+                    <Box sx={{ minWidth: 90 }}>
+                      <Typography variant="caption" color="text.secondary">Net margin</Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: (net.net_margin || 0) < 0 ? "error.main" : "success.main" }}>{pct(net.net_margin)}</Typography>
+                    </Box>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    Contribution = Revenue − Material − Labour (variable). Net = Contribution − fixed conversion − operating expenses (company-level; expenses from the Expenses tab, not allocated per product).
+                  </Typography>
+                </CardContent></Card>
                 <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
                   <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Profit waterfall</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Profit ladder (Revenue → CM → Net)</Typography>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={waterfall}><CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} /><XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} /><RTooltip formatter={(v) => money(Math.abs(v))} />
                         <Bar dataKey="v" radius={[4, 4, 0, 0]}>{waterfall.map((e, i) => <Cell key={i} fill={e.c} />)}</Bar></BarChart>
