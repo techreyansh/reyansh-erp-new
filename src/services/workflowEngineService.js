@@ -15,16 +15,67 @@ export async function getInstanceBySo(soId) {
   return data || null;
 }
 
-/** Full per-order workflow view: { instance, stages[], events[] }. */
+/** Full per-order workflow view: { instance, stages[], events[], deps[] }. */
 export async function getWorkflow(soId) {
   const instance = await getInstanceBySo(soId);
-  if (!instance) return { instance: null, stages: [], events: [] };
-  const [{ data: stages }, { data: events }] = await Promise.all([
+  if (!instance) return { instance: null, stages: [], events: [], deps: [] };
+  const [{ data: stages }, { data: events }, { data: deps }] = await Promise.all([
     supabase.from('wf_stage_run').select('*').eq('instance_id', instance.id).order('sequence'),
     supabase.from('wf_event').select('*').eq('instance_id', instance.id)
       .order('created_at', { ascending: false }).limit(200),
+    supabase.from('wf_stage_dep').select('stage_key,order_type,depends_on')
+      .in('order_type', ['ALL', instance.order_type]),
   ]);
-  return { instance, stages: stages || [], events: events || [] };
+  return { instance, stages: stages || [], events: events || [], deps: deps || [] };
+}
+
+/**
+ * Unified per-order activity feed — merges engine events, sales-order status
+ * changes, and work-order status changes into one chronological stream.
+ * Each item: { kind, title, detail, owner, at }.
+ */
+export async function getOrderActivity(soId) {
+  const instance = await getInstanceBySo(soId);
+  const items = [];
+
+  // sales_order status changes
+  const { data: soLog } = await supabase.from('sales_order_status_log')
+    .select('from_status,to_status,changed_by_email,changed_at,note')
+    .eq('so_id', soId).order('changed_at', { ascending: false });
+  (soLog || []).forEach((r) => items.push({
+    kind: 'order',
+    title: `Order ${r.from_status || '—'} → ${r.to_status}`,
+    detail: r.note || null, owner: r.changed_by_email, at: r.changed_at,
+  }));
+
+  if (instance) {
+    // engine milestones
+    const { data: events } = await supabase.from('wf_event')
+      .select('stage_key,event_type,detail,actor_email,created_at')
+      .eq('instance_id', instance.id).order('created_at', { ascending: false }).limit(200);
+    (events || []).forEach((e) => items.push({
+      kind: 'workflow',
+      title: `${(e.event_type || '').replace(/_/g, ' ')}${e.stage_key ? ' · ' + e.stage_key : ''}`,
+      detail: null, owner: e.actor_email, at: e.created_at,
+    }));
+
+    // work-order status changes for this order's linked WOs
+    const { data: links } = await supabase.from('wf_wo_link')
+      .select('wo_id').eq('instance_id', instance.id).not('wo_id', 'is', null);
+    const woIds = Array.from(new Set((links || []).map((l) => l.wo_id)));
+    if (woIds.length) {
+      const { data: woLog } = await supabase.from('ppc_wo_status_log')
+        .select('wo_id,old_status,new_status,changed_by_email,changed_at')
+        .in('wo_id', woIds).order('changed_at', { ascending: false });
+      (woLog || []).forEach((r) => items.push({
+        kind: 'production',
+        title: `Work order ${r.old_status || '—'} → ${r.new_status}`,
+        detail: null, owner: r.changed_by_email, at: r.changed_at,
+      }));
+    }
+  }
+
+  return items.sort((a, b) => new Date(b.at) - new Date(a.at));
 }
 
 /** Idempotently create (or fetch) the workflow for a released sales order. */
@@ -90,7 +141,7 @@ export async function listWorkboardTasks({ department = null, email = null } = {
     .from('tasks')
     .select(
       'id,title,description,assigned_email,assigned_name,department,priority,due_date,task_status,completed_at,created_at,stage_run_id,' +
-      'stage:wf_stage_run!stage_run_id(id,stage_key,label,status,instance_id,' +
+      'stage:wf_stage_run!stage_run_id(id,stage_key,label,status,watch_signal,actuator_kind,instance_id,' +
       'instance:wf_instance!instance_id(id,so_number,company_name,sales_order_id,order_type,status))'
     )
     .not('stage_run_id', 'is', null)
@@ -111,7 +162,7 @@ export async function completeTask(taskId) {
 }
 
 const workflowEngineService = {
-  getInstanceBySo, getWorkflow, createInstance, reconcile, linkWorkOrder, completeStageTask,
+  getInstanceBySo, getWorkflow, getOrderActivity, createInstance, reconcile, linkWorkOrder, completeStageTask,
   listWorkboardTasks, completeTask,
 };
 export default workflowEngineService;
