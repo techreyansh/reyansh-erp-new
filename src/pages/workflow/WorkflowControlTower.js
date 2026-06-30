@@ -25,13 +25,20 @@ const num = (v) => Number(v || 0).toLocaleString('en-IN');
 export default function WorkflowControlTower() {
   const theme = useTheme();
   const [data, setData] = useState(null);
+  const [comms, setComms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
-    try { setData(await workflowEngineService.dashboard({})); }
-    catch (e) { setError(e.message || String(e)); setData(null); }
+    try {
+      const [d, c] = await Promise.all([
+        workflowEngineService.dashboard({}),
+        // comms table may not exist on older deploys → tolerate
+        workflowEngineService.listCustomerComms({ limit: 50 }).catch(() => []),
+      ]);
+      setData(d); setComms(c);
+    } catch (e) { setError(e.message || String(e)); setData(null); }
     finally { setLoading(false); }
   }, []);
 
@@ -41,6 +48,7 @@ export default function WorkflowControlTower() {
   const byStage = data?.by_stage || [];
   const byDept = data?.by_department || [];
   const aging = data?.aging || [];
+  const COMMS_COLOR = { sent: 'success', pending: 'info', skipped: 'default', failed: 'error', cancelled: 'default' };
 
   return (
     <Box sx={{ pb: 4 }}>
@@ -151,6 +159,36 @@ export default function WorkflowControlTower() {
                         endIcon={<OpenInNewOutlined sx={{ fontSize: 16 }} />}>Open</Button>
                     </Tooltip>
                   </TableCell>
+                </TableRow>
+              ))}</TableBody>
+            </Table></TableContainer>
+          )}
+        </CardContent></Card>
+      </Box>
+
+      {/* Customer comms log (Phase 4b) */}
+      <Box sx={{ px: 3, pt: 2 }}>
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>Customer comms — recent milestone messages</Typography>
+          {comms.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No customer messages yet.</Typography>
+          ) : (
+            <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1.5, mt: 1, overflowX: 'auto' }}><Table size="small">
+              <TableHead><TableRow>{['Order', 'Milestone', 'Channel', 'Recipient', 'Status', 'When'].map((h) => (
+                <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.72rem', whiteSpace: 'nowrap' }}>{h}</TableCell>
+              ))}</TableRow></TableHead>
+              <TableBody>{comms.map((m) => (
+                <TableRow key={m.id} hover>
+                  <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700, whiteSpace: 'nowrap' }}>{m.so_number || '—'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{String(m.milestone || '').replace(/_/g, ' ')}</TableCell>
+                  <TableCell>{m.channel}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.78rem' }}>{m.recipient_email || m.recipient_phone || '—'}</TableCell>
+                  <TableCell>
+                    <Tooltip title={m.error || ''}>
+                      <Chip size="small" variant="outlined" color={COMMS_COLOR[m.status] || 'default'} label={m.status} />
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.78rem' }}>{(m.sent_at || m.created_at || '').slice(0, 16).replace('T', ' ')}</TableCell>
                 </TableRow>
               ))}</TableBody>
             </Table></TableContainer>
