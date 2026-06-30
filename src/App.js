@@ -150,6 +150,7 @@ const EmployeeManagement = lazy(() => import("./pages/employees/EmployeeManageme
 const ProductMaster = lazy(() => import("./pages/products/ProductMaster"));
 const SalesOrders = lazy(() => import("./pages/salesOrder/SalesOrders"));
 const DispatchControlTower = lazy(() => import("./pages/dispatch/DispatchControlTower"));
+const OrderWorkflowTimeline = lazy(() => import("./pages/workflow/OrderWorkflowTimeline"));
 const ProductionDemand = lazy(() => import("./pages/production/ProductionDemand"));
 const MaterialRequirements = lazy(() => import("./pages/mrp/MaterialRequirements"));
 const PurchaseRequisitions = lazy(() => import("./pages/purchase/PurchaseRequisitions"));
@@ -429,6 +430,12 @@ function AppContent() {
                   <Route path="/dispatch-control" element={
                     <ProtectedRouteGate>
                       <DispatchControlTower />
+                    </ProtectedRouteGate>
+                  } />
+
+                  <Route path="/workflow/:soId" element={
+                    <ProtectedRouteGate>
+                      <OrderWorkflowTimeline />
                     </ProtectedRouteGate>
                   } />
 
