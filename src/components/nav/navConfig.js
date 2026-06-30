@@ -164,6 +164,7 @@ export const NAV_GROUPS = [
     label: "Tasks & Checklists",
     icon: ic(ChecklistOutlined),
     items: [
+      { label: "Department Workboard", path: "/workflow/workboard", icon: ic(AccountTreeOutlined), moduleKey: "tasks" },
       { label: "Task Scheduler", path: "/task-scheduler", icon: ic(AssignmentOutlined), moduleKey: "tasks", requireCreate: true },
       { label: "Team Tasks", path: "/team-tasks", icon: ic(AssignmentOutlined), moduleKey: "tasks", requireEdit: true },
       { label: "My Tasks", path: "/my-tasks", icon: ic(AssignmentOutlined), moduleKey: "tasks" },

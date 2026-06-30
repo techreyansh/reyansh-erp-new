@@ -6,6 +6,8 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloudDownload from '@mui/icons-material/CloudDownload';
+import AccountTreeOutlined from '@mui/icons-material/AccountTreeOutlined';
+import { Link as RouterLink } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import so from '../../services/salesOrderService';
 
@@ -52,6 +54,7 @@ export default function Order360({ orderId, onBack, notify }) {
         <Chip size="small" variant="outlined" label={order.company_name} />
         <Chip size="small" color={STATUS_COLOR[order.status] || 'default'} label={(order.status || '').replace(/_/g, ' ')} sx={{ textTransform: 'capitalize' }} />
         <Box sx={{ flex: 1 }} />
+        <Button component={RouterLink} to={`/workflow/${orderId}`} variant="outlined" size="small" startIcon={<AccountTreeOutlined sx={{ fontSize: 18 }} />}>Workflow</Button>
         {so.nextStatus(order.status) && <Button variant="contained" size="small" onClick={advance}>Advance → {so.nextStatus(order.status).replace(/_/g, ' ')}</Button>}
       </Stack>
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>

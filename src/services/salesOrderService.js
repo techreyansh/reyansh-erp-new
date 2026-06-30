@@ -67,6 +67,7 @@ export async function createOrder({ header, lines = [], status = 'draft' }) {
   if (status === 'released') {
     try { await createProductionDemand(order.id); } catch { /* non-fatal */ }
     try { await supabase.rpc('inv_reserve_for_order', { p_so: order.id }); } catch { /* non-fatal */ }
+    try { await supabase.rpc('wf_create_instance', { p_so: order.id, p_order_type: null }); } catch { /* non-fatal: O2D workflow engine */ }
   }
   return order;
 }
@@ -92,6 +93,7 @@ export async function transitionStatus(orderId, toStatus, note) {
   if (toStatus === 'released') {
     try { await createProductionDemand(orderId); } catch { /* non-fatal */ }
     try { await supabase.rpc('inv_reserve_for_order', { p_so: orderId }); } catch { /* non-fatal */ }
+    try { await supabase.rpc('wf_create_instance', { p_so: orderId, p_order_type: null }); } catch { /* non-fatal: O2D workflow engine */ }
   }
   if (['cancelled', 'completed'].includes(toStatus)) { try { await supabase.rpc('inv_release_order', { p_so: orderId }); } catch { /* non-fatal */ } }
   return toStatus;
