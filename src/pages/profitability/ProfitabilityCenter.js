@@ -330,7 +330,8 @@ function CostHeadsTab({ heads, setHeads, overrides, setOverrides, needsCosting, 
 function MaterialTagPanel({ notify }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const reload = () => { setLoading(true); profitabilityService.untaggedItems().then(setItems).catch(() => {}).finally(() => setLoading(false)); };
+  const [error, setError] = useState(null);
+  const reload = () => { setLoading(true); setError(null); profitabilityService.untaggedItems().then(setItems).catch((e) => setError(e.message || "Couldn't load items")).finally(() => setLoading(false)); };
   useEffect(reload, []);
   const tag = async (id, group) => {
     try { await profitabilityService.setMaterialGroup(id, group); setItems((xs) => xs.filter((x) => x.id !== id)); notify(`Tagged as ${group}`, "success"); }
@@ -341,6 +342,7 @@ function MaterialTagPanel({ notify }) {
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>Material tagging — untagged items</Typography>
       <Typography variant="caption" color="text.secondary">Tag raw materials by type (copper / pvc / component / packing) so the Expected-vs-Actual <b>material factors</b> split stays correct as new items appear. Generic COPPER/PVC are auto-tagged; tag custom SKUs here.</Typography>
       {loading ? <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">Loading…</Typography>
+        : error ? <Alert severity="error" sx={{ mt: 2 }} action={<Button size="small" color="inherit" onClick={reload}>Retry</Button>}>Couldn't load untagged items: {error}</Alert>
         : items.length === 0 ? <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">All consumable items are tagged. 🎉</Typography> : (
         <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1.5, mt: 1.5 }}><Table size="small">
           <TableHead><TableRow>{["Code", "Name", "Type", "Tag as"].map((h) => <TableCell key={h} sx={{ fontWeight: 700, fontSize: "0.72rem" }}>{h}</TableCell>)}</TableRow></TableHead>

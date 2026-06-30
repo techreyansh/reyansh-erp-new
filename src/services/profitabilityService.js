@@ -80,7 +80,9 @@ export async function untaggedItems() {
     .from("ppc_items")
     .select("id, code, name, item_type, material_group")
     .is("material_group", null)
-    .neq("item_type", "finished_good")
+    // include rows where item_type IS NULL — a bare `.neq` drops them (NULL <> x is NULL),
+    // hiding untagged consumables that should still be taggable.
+    .or("item_type.is.null,item_type.neq.finished_good")
     .order("code")
     .limit(200);
   if (error) throw error;
