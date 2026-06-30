@@ -419,10 +419,47 @@ function ExpectedVsActualTab({ from, to, notify }) {
         </CardContent></Card>
       )}
 
-      <ProfitTable rows={rows} cols={cols} exportTitle="Expected vs Actual GP" />
+      {(data?.material_factors || []).length > 0 && (
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Why margin moved — material factors (expected vs actual)</Typography>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data.material_factors}><CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.08)} /><XAxis dataKey="group" fontSize={11} /><YAxis fontSize={11} /><RTooltip formatter={(v) => money(v)} />
+              <Bar dataKey="expected" name="Expected" fill={theme.palette.info.main} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="actual" name="Actual" fill={theme.palette.warning.main} radius={[4, 4, 0, 0]} /></BarChart>
+          </ResponsiveContainer>
+          <ProfitTable rows={data.material_factors} cols={[
+            { k: "group", h: "Material", bold: true }, { k: "expected", h: "Expected", align: "right", fmt: money },
+            { k: "actual", h: "Actual", align: "right", fmt: money },
+            { k: "variance", h: "Variance", align: "right", bold: true, fmt: (v) => `${v >= 0 ? "+" : ""}${money(v)}` }]} />
+        </CardContent></Card>
+      )}
+
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" } }}>
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>By product</Typography>
+          <ProfitTable rows={rows} cols={cols} exportTitle="Expected vs Actual — Product" /></CardContent></Card>
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>By customer</Typography>
+          <ProfitTable rows={data?.by_customer || []} cols={[
+            { k: "name", h: "Customer", bold: true, fmt: (v, r) => `${LIGHT[r.light] || ""} ${v || r.code}` },
+            { k: "exp_gp", h: "Expected GP", align: "right", fmt: money },
+            { k: "act_gp", h: "Actual GP", align: "right", bold: true, fmt: (v, r) => r.has_actual ? money(v) : "—" },
+            { k: "gp_var", h: "Variance", align: "right", bold: true, fmt: (v, r) => r.has_actual ? `${v >= 0 ? "+" : ""}${money(v)}` : "—" },
+          ]} exportTitle="Expected vs Actual — Customer" /></CardContent></Card>
+      </Box>
+
+      {(data?.by_order || []).some((o) => o.has_actual) && (
+        <Card variant="outlined" sx={{ borderRadius: 2.5 }}><CardContent>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>By order (per-order actuals)</Typography>
+          <ProfitTable rows={(data?.by_order || []).filter((o) => o.has_actual)} cols={[
+            { k: "so_number", h: "Order", bold: true }, { k: "company", h: "Customer" },
+            { k: "exp_gp", h: "Expected GP", align: "right", fmt: money }, { k: "act_gp", h: "Actual GP", align: "right", bold: true, fmt: money },
+            { k: "gp_var", h: "Variance", align: "right", bold: true, fmt: (v) => `${v >= 0 ? "+" : ""}${money(v)}` },
+          ]} exportTitle="Expected vs Actual — Order" /></CardContent></Card>
+      )}
 
       {(data?.needs_actual || []).length > 0 && (
-        <Alert severity="warning">{data.needs_actual.length} product(s) were sold but have no production/consumption captured yet — Actual GP can't be computed for them. They populate as the floor kits material + finishes work orders.</Alert>
+        <Alert severity="warning">{data.needs_actual.length} product(s) were sold but have no production/consumption captured yet — Actual GP can't be computed for them. They populate as the floor kits material + finishes work orders. Conversion is shown at <b>standard</b> cost (the floor isn't metered for labour/machine rupees).</Alert>
       )}
     </Stack>
   );
