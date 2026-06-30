@@ -2333,9 +2333,9 @@ const CableProductionPlanning = () => {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Tooltip title="Back to Flow Management">
+            <Tooltip title="Back to Department Workboard">
               <IconButton
-                onClick={() => navigate('/flow-management')}
+                onClick={() => navigate('/workflow/workboard')}
                 sx={{
                   color: 'primary.main',
                   backgroundColor: 'rgba(25, 118, 210, 0.1)',
@@ -2555,11 +2555,11 @@ const CableProductionPlanning = () => {
                             size="small"
                             variant="icon"
                           />
-                          <Tooltip title="Move to Flow Management">
+                          <Tooltip title="Move to Department Workboard">
                             <IconButton
                               size="small"
                               color="success"
-                              onClick={() => navigate('/flow-management')}
+                              onClick={() => navigate('/workflow/workboard')}
                               sx={{
                                 '&:hover': {
                                   backgroundColor: 'rgba(46, 125, 50, 0.1)'

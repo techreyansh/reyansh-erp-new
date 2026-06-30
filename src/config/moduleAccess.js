@@ -62,7 +62,7 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path.startsWith('/temp/'), moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path === '/workflow/workboard', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/workflow-tower', moduleKey: MODULE_KEYS.EMPLOYEES },
-  { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path === '/flow-management' || path.startsWith('/workflow'), moduleKey: MODULE_KEYS.DISPATCH },
+  { test: (path) => path === '/dispatch' || path === '/dispatch-management' || path === '/dispatch-test' || path === '/dispatch-control' || path.startsWith('/workflow'), moduleKey: MODULE_KEYS.DISPATCH },
   { test: (path) => path.startsWith('/profitability'), moduleKey: MODULE_KEYS.PROFITABILITY },
   { test: (path) => path === '/costing' || path === '/invoicing' || path === '/cost-control', moduleKey: MODULE_KEYS.ACCOUNTS },
   { test: (path) => path === '/vendor-management' || path.startsWith('/purchase-flow') || path === '/purchase-requisitions', moduleKey: MODULE_KEYS.PURCHASE },

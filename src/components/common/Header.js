@@ -296,7 +296,6 @@ const Header = ({ onMenuClick } = {}) => {
         { subheader: "Inventory", label: "Inventory", path: "/inventory", icon: <InventoryIcon />, roles: ["Store Manager", "CEO"] },
         { subheader: "Dispatch", label: "Dispatch Planning", path: "/dispatch", icon: <Assignment />, roles: ["Customer Relations Manager", "CEO"] },
         { subheader: "Dispatch", label: "Dispatch Management", path: "/dispatch-management", icon: <LocalShipping />, roles: ["Customer Relations Manager", "CEO"] },
-        { subheader: "Dispatch", label: "Order to Dispatch System", path: "/flow-management", icon: <Assignment />, roles: ["Store Manager", "Cable Production Supervisor", "Moulding Production Supervisor", "QC Manager", "Process Coordinator", "Customer Relations Manager", "CEO"] },
       ],
     },
     {

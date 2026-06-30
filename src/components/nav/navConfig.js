@@ -147,7 +147,6 @@ export const NAV_GROUPS = [
       { label: "Dispatch Planning", path: "/dispatch", icon: ic(AssignmentOutlined) },
       { label: "Dispatch Control Tower", path: "/dispatch-control", icon: ic(LocalShippingOutlined) },
       { label: "Dispatch Management", path: "/dispatch-management", icon: ic(LocalShippingOutlined) },
-      { label: "Order to Dispatch System", path: "/flow-management", icon: ic(AssignmentOutlined) },
     ],
   },
   {
