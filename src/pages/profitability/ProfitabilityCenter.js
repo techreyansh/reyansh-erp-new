@@ -123,11 +123,13 @@ export default function ProfitabilityCenter() {
   const runDemo = async (fn, msg) => { setBusy(true); try { await fn(); notify(msg, "success"); await load(); } catch (e) { notify(e.message || "Failed", "error"); } finally { setBusy(false); } };
 
   const moneyCol = (v) => money(v);
+  const netCol = (v) => (v == null ? "—" : money(v));
   const customerCols = [
     { k: "name", h: "Customer", bold: true, fmt: (v, r) => v || r.code }, { k: "revenue", h: "Revenue", align: "right", fmt: moneyCol },
     { k: "material", h: "Material", align: "right", fmt: moneyCol }, { k: "conversion", h: "Production", align: "right", fmt: moneyCol },
     { k: "gross_profit", h: "Gross Profit", align: "right", bold: true, fmt: moneyCol }, { k: "gm_pct", h: "GM %", align: "right", fmt: pct },
     { k: "contribution", h: "Contribution", align: "right", fmt: moneyCol }, { k: "cm_pct", h: "CM %", align: "right", fmt: pct },
+    { k: "allocated_opex", h: "Overhead", align: "right", fmt: moneyCol }, { k: "net_profit", h: "Net Profit", align: "right", bold: true, fmt: netCol }, { k: "net_margin", h: "Net %", align: "right", fmt: pct },
     { k: "orders", h: "Orders", align: "right" },
   ];
   const productCols = [
@@ -135,12 +137,14 @@ export default function ProfitabilityCenter() {
     { k: "material", h: "Material", align: "right", fmt: moneyCol }, { k: "conversion", h: "Conversion", align: "right", fmt: moneyCol },
     { k: "gross_profit", h: "Gross Profit", align: "right", bold: true, fmt: moneyCol }, { k: "gm_pct", h: "GM %", align: "right", fmt: pct },
     { k: "contribution", h: "Contribution", align: "right", fmt: moneyCol }, { k: "cm_pct", h: "CM %", align: "right", fmt: pct },
+    { k: "allocated_opex", h: "Overhead", align: "right", fmt: moneyCol }, { k: "net_profit", h: "Net Profit", align: "right", bold: true, fmt: netCol }, { k: "net_margin", h: "Net %", align: "right", fmt: pct },
     { k: "qty", h: "Qty", align: "right" },
   ];
   const orderCols = [
     { k: "so_number", h: "Order", bold: true }, { k: "company_name", h: "Customer" }, { k: "revenue", h: "Sales value", align: "right", fmt: moneyCol },
     { k: "material", h: "Material", align: "right", fmt: moneyCol }, { k: "conversion", h: "Mfg", align: "right", fmt: moneyCol },
     { k: "gross_profit", h: "Gross Profit", align: "right", bold: true, fmt: moneyCol }, { k: "gm_pct", h: "GM %", align: "right", fmt: pct },
+    { k: "allocated_opex", h: "Overhead", align: "right", fmt: moneyCol }, { k: "net_profit", h: "Net Profit", align: "right", bold: true, fmt: netCol }, { k: "net_margin", h: "Net %", align: "right", fmt: pct },
   ];
   const execCols = [
     { k: "name", h: "Sales exec", bold: true }, { k: "revenue", h: "Revenue", align: "right", fmt: moneyCol },
