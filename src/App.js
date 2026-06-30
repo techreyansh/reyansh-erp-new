@@ -140,6 +140,7 @@ const InventoryControl = lazy(() => import("./pages/inventory/InventoryControl")
 const InventoryMasters = lazy(() => import("./pages/inventory/InventoryMasters"));
 const InventoryLedger = lazy(() => import("./pages/inventory/InventoryLedger"));
 const NPDDashboard = lazy(() => import("./pages/npd/NPDDashboard"));
+const NPDIntelligence = lazy(() => import("./pages/npd/NPDIntelligence"));
 const NPDProject = lazy(() => import("./pages/npd/NPDProject"));
 const KitModule = lazy(() => import("./pages/kit/KitModule"));
 const EmployeeTaskChecklist = lazy(() => import("./components/taskCompliance/EmployeeTaskChecklist"));
@@ -463,6 +464,11 @@ function AppContent() {
                   <Route path="/npd/:id" element={
                     <ProtectedRouteGate>
                       <NPDProject />
+                    </ProtectedRouteGate>
+                  } />
+                  <Route path="/npd-intelligence" element={
+                    <ProtectedRouteGate>
+                      <NPDIntelligence />
                     </ProtectedRouteGate>
                   } />
 

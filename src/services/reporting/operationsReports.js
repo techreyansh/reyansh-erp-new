@@ -97,3 +97,64 @@ export function buildProductionDemandReport(rows = []) {
     }],
   };
 }
+
+export function buildNpdReport(data = {}, range = {}) {
+  const k = data.kpis || {};
+  return {
+    key: 'npd-intelligence',
+    title: 'NPD Intelligence',
+    subtitle: 'Reyansh International — New Product Development',
+    generatedAt: new Date(),
+    dateRange: range.from ? { label: `${range.from} → ${range.to}`, from: range.from, to: range.to } : undefined,
+    kpis: [
+      { label: 'Active', value: k.active ?? 0 },
+      { label: 'Approved (range)', value: k.approved_in_range ?? 0 },
+      { label: 'Delayed', value: k.delayed ?? 0 },
+      { label: 'Awaiting feedback', value: k.awaiting_feedback ?? 0 },
+      { label: 'Overdue feedback', value: k.overdue_feedback ?? 0 },
+      { label: 'Avg turnaround', value: k.avg_turnaround_days == null ? '—' : `${k.avg_turnaround_days} d` },
+      { label: 'Approval rate', value: k.approval_rate == null ? '—' : `${k.approval_rate}%` },
+      { label: 'Sample pass rate', value: k.sample_pass_rate == null ? '—' : `${k.sample_pass_rate}%` },
+    ],
+    sections: [
+      {
+        key: 'funnel', title: 'Pipeline by stage (active)',
+        columns: [{ key: 'stage', label: 'Stage' }, { key: 'count', label: 'Projects' }],
+        rows: (data.funnel || []).map((d) => ({ stage: cap(d.stage), count: d.count })),
+        emptyText: 'No active projects.',
+      },
+      {
+        key: 'aging', title: 'Average days in stage',
+        columns: [{ key: 'stage', label: 'Stage' }, { key: 'avg_days', label: 'Avg days' }],
+        rows: (data.stage_aging || []).map((d) => ({ stage: cap(d.stage), avg_days: d.avg_days })),
+        emptyText: 'No stage history.',
+      },
+      {
+        key: 'outcomes', title: 'Feedback outcomes',
+        columns: [{ key: 'outcome', label: 'Outcome' }, { key: 'count', label: 'Count' }],
+        rows: (data.outcome_mix || []).map((d) => ({ outcome: cap(d.outcome), count: d.count })),
+        emptyText: 'No feedback recorded.',
+      },
+      {
+        key: 'engineers', title: 'Active load by engineer',
+        columns: [{ key: 'engineer', label: 'Engineer' }, { key: 'count', label: 'Active' }],
+        rows: (data.by_engineer || []).map((d) => ({ engineer: d.engineer, count: d.count })),
+        emptyText: 'No active projects.',
+      },
+      {
+        key: 'delayed', title: 'Delayed developments',
+        columns: [
+          { key: 'project_no', label: 'Project' }, { key: 'product', label: 'Product' },
+          { key: 'customer', label: 'Customer' }, { key: 'stage', label: 'Stage' },
+          { key: 'engineer', label: 'Engineer' }, { key: 'target_date', label: 'Target' },
+          { key: 'days_overdue', label: 'Overdue (d)' },
+        ],
+        rows: (data.delayed_list || []).map((p) => ({
+          project_no: p.project_no, product: p.product, customer: p.customer,
+          stage: cap(p.stage), engineer: p.engineer || '', target_date: p.target_date, days_overdue: p.days_overdue,
+        })),
+        emptyText: 'Nothing past target.',
+      },
+    ],
+  };
+}
