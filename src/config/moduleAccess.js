@@ -14,6 +14,7 @@ export const MODULE_KEYS = {
   SETTINGS: 'settings',
   NPD: 'npd',
   PROFITABILITY: 'profitability',
+  MARKETING: 'marketing',
 };
 
 /**
@@ -39,6 +40,7 @@ export const MODULE_UNLOCKS = {
   [MODULE_KEYS.SETTINGS]: ['Settings'],
   [MODULE_KEYS.NPD]: ['NPD Projects', 'Product Development Workspace', 'Stage Gates', 'Approvals'],
   [MODULE_KEYS.PROFITABILITY]: ['Profitability Intelligence (CEO)'],
+  [MODULE_KEYS.MARKETING]: ['WhatsApp Marketing'],
 };
 
 export const PUBLIC_PATHS = ['/', '/login', '/access-denied'];
@@ -59,6 +61,10 @@ const ROUTE_MODULE_RULES = [
   { test: (path) => path === '/plant-command' || path === '/production-log' || path === '/production-intelligence' || path === '/assembly-operations' || path === '/job-cards' || path === '/mes-setup' || path === '/mes-dashboard' || path === '/daily-plan' || path === '/line-planner' || path === '/production-demand' || path.startsWith('/ppc') || path.startsWith('/cable-production') || path === '/cable-floor' || path.startsWith('/molding') || path === '/molding-production', moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path.startsWith('/inventory') || path === '/mrp', moduleKey: MODULE_KEYS.INVENTORY },
   { test: (path) => path === '/demand-forecast' || path === '/portal-admin', moduleKey: MODULE_KEYS.SALES },
+  // Must precede the generic '/temp/' catch-all below (ROUTE_MODULE_RULES.find()
+  // is first-match-wins) — otherwise /temp/whatsapp-marketing would incorrectly
+  // resolve to PRODUCTION instead of the dedicated `marketing` module key.
+  { test: (path) => path.startsWith('/temp/whatsapp-marketing'), moduleKey: MODULE_KEYS.MARKETING },
   { test: (path) => path.startsWith('/temp/'), moduleKey: MODULE_KEYS.PRODUCTION },
   { test: (path) => path === '/workflow/workboard', moduleKey: MODULE_KEYS.TASKS },
   { test: (path) => path === '/workflow-tower', moduleKey: MODULE_KEYS.EMPLOYEES },

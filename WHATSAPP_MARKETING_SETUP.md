@@ -1,4 +1,4 @@
-# WhatsApp Marketing — Setup & Activation (Task 5: wa-scheduler + cron)
+# WhatsApp Marketing — Setup & Activation
 
 Outbound WhatsApp drip campaigns, modeled on the Email Campaigns module (see
 `EMAIL_CAMPAIGNS_SETUP.md`) but sent through a WhatsApp BSP (Meta Cloud API in
@@ -23,6 +23,27 @@ Sequence progression is driven by a DB trigger (`trg_wa_message_sent` /
 recovery sweep — the enrollment advances to the next active step (or
 completes). Neither `wa-send` nor `wa-scheduler` reimplements this.
 
+The module is wired into the app shell (Task 12): nav item "WhatsApp Marketing"
+under the **Temporary** sidebar group → `/temp/whatsapp-marketing` (plain
+`ProtectedRouteGate`, gated by the `marketing` module key — see
+`src/config/moduleAccess.js`), rendering `src/pages/temp/WhatsAppMarketing.js`
+(tab shell: Dashboard · Campaigns · Audience · Monitor · Analytics · Settings).
+
+## Activation checklist (do these in order, on a fresh environment)
+
+1. Apply both migrations (§1 below) — schema, then RBAC/RLS.
+2. Deploy all **three** Edge Functions (§2) — `wa-send`, `wa-scheduler`,
+   `wa-webhook --no-verify-jwt`.
+3. Set the `SCHEDULER_SECRET` secret and schedule the cron tick (§3-4).
+4. Log in as CEO/super-admin, open **WhatsApp Marketing → Settings** (Provider
+   Settings is CEO/true-admin-only, gated on `canEdit('employees')`, not just
+   `marketing`-edit — see §8) and fill in the Meta Cloud API credentials, then
+   toggle "Set as active provider" and Save.
+5. Configure the Meta App Dashboard webhook subscription against the deployed
+   `wa-webhook` URL (§7).
+6. Note the `documents` storage-bucket caveat (§9) if campaign steps will
+   attach media.
+
 ## 1. Apply the database migrations
 
 ```bash
@@ -35,10 +56,20 @@ Confirms: 9 `wa_*` tables, RLS + `marketing` module registration, and the
 
 ## 2. Deploy the Edge Functions
 
+All three functions must be deployed — `wa-webhook` is public (no user JWT,
+since Meta calls it directly) and needs `--no-verify-jwt`; the other two are
+called with the service-role key (scheduler, via cron) or from the
+authenticated app (`wa-send`, if ever invoked directly instead of solely by
+the scheduler):
+
 ```bash
 supabase functions deploy wa-send
 supabase functions deploy wa-scheduler
+supabase functions deploy wa-webhook --no-verify-jwt
 ```
+
+See §7 below for `wa-webhook`'s webhook-subscription setup in the Meta App
+Dashboard, which is required in addition to the deploy itself.
 
 ## 3. Set Edge Function secrets
 
@@ -293,3 +324,56 @@ the actually-deployed function and confirming the `wa_messages`/`wa_events`
 side effects, and completing the real Meta Dashboard handshake in step 1
 above, both require the user's own Supabase project + Meta App Dashboard
 access and have not been executed from this environment.
+
+## 8. `wa_provider_settings` — fields to fill in via the UI (Task 12)
+
+Open **WhatsApp Marketing → Settings** (`ProviderSettings.js`) while logged in
+as CEO/super-admin — this screen is gated on `usePermissions().canEdit('employees')`,
+*not* the plain `marketing` module permission, matching the RLS on
+`wa_provider_settings` (single `is_super_admin()`-only policy — a
+`marketing`-edit-only role literally cannot read/write this table). Fields on
+the form and the **exact** `wa_provider_settings.credentials` jsonb keys they
+write (confirmed by reading `supabase/functions/_shared/wa/meta.ts`, the only
+real adapter in V1 — do **not** rename any of these, the edge functions read
+these precise keys):
+
+| UI field | `credentials` key | Read by |
+|---|---|---|
+| Access Token | `access_token` | `MetaCloudApiAdapter.post()` (send) |
+| Phone Number ID | `phone_number_id` | `MetaCloudApiAdapter.post()` (send) |
+| Webhook Verify Token | `verify_token` | `MetaCloudApiAdapter.verifyWebhookGet()` (webhook GET handshake) |
+| Business Account ID (WABA ID) | `waba_id` | captured for completeness; not read by any send/webhook path today |
+
+Non-credentials fields (plain columns, not inside `credentials`): **Label**
+(`label`), **Sender number** (`sender_number`), **Mode** — Sandbox vs Live
+(`mode`), **Rate limit / minute** (`rate_limit_per_minute`), and the
+**"Set as active provider"** switch (`is_active` — enforced single-active via
+`waProviderService.setActive()`, which clears every other row before flipping
+one on). "Test connection" is a readiness check only (required fields
+present) — it does not call Meta's API; real delivery only happens through
+the `wa-send` function / scheduler tick.
+
+## 9. `documents` storage-bucket caveat (campaign media attachments)
+
+Campaign step media (images/video/documents attached via `wa_campaign_media`)
+is stored in the same `documents` Supabase Storage bucket the rest of the app
+uses (CRM attachments, NPD documents, etc). Task 3 could not confirm whether
+this bucket is flagged **public** or **private** in this environment (no way
+to run `select public from storage.buckets where id='documents'` from here).
+Both `waMediaService.mediaUrl()` (frontend) and `freshMediaLink()` in
+`supabase/functions/_shared/wa/send.ts` (server-side, immediately before every
+`adapter.sendMedia` call) therefore default to `createSignedUrl(...)` with a
+short TTL rather than `getPublicUrl()` — this works correctly regardless of
+the bucket's actual flag, at the cost of a signed URL that expires (6h
+server-side; the scheduler always mints a fresh one right before sending, so
+this is not a live concern for scheduled sends). **Before going live**, verify
+the actual bucket flag once against the target project:
+
+```sql
+select id, public from storage.buckets where id = 'documents';
+```
+
+If it turns out to be `public = true`, switching either call site to
+`getPublicUrl()` is a safe, optional simplification (not required — the
+signed-URL path already works either way) — see the one-line comment at
+`freshMediaLink()` for how.
