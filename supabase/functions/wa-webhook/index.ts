@@ -63,6 +63,21 @@ function textResponse(body: string, status: number): Response {
   return new Response(body, { status, headers: { ...CORS, "Content-Type": "text/plain" } });
 }
 
+// Meta stamps every status object with its own `timestamp` field (UNIX epoch
+// seconds, as a string — see meta.ts parseWebhookEvents, which passes the raw
+// status object through unchanged as `event.raw`). Prefer that as the actual
+// event time over `now()` (the webhook's processing time, which can lag the
+// real event by retries/queueing). Falls back to `now()` only when the field
+// is missing or unparseable.
+function eventTimestamp(event: NormalizedWaEvent): string {
+  const raw = (event.raw as any)?.timestamp;
+  const epochSeconds = Number(raw);
+  if (raw !== undefined && raw !== null && Number.isFinite(epochSeconds)) {
+    return new Date(epochSeconds * 1000).toISOString();
+  }
+  return new Date().toISOString();
+}
+
 // ---------------------------------------------------------------------------
 // GET — Meta's webhook subscription verification handshake
 // ---------------------------------------------------------------------------
@@ -131,8 +146,8 @@ async function handleStatusEvent(db: any, event: NormalizedWaEvent): Promise<voi
   if (message && timestampCol) {
     const currentRank = STATUS_RANK[message.status] ?? 0;
     const incomingRank = STATUS_RANK[event.type] ?? 0;
-    if (incomingRank >= currentRank) {
-      const updates: Record<string, any> = { status: event.type, [timestampCol]: new Date().toISOString() };
+    if (incomingRank > currentRank) {
+      const updates: Record<string, any> = { status: event.type, [timestampCol]: eventTimestamp(event) };
       if (event.type === "failed") {
         const errMsg = extractErrorMessage(event.raw);
         if (errMsg) updates.error = errMsg;
