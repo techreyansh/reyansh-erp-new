@@ -60,6 +60,7 @@ import { listMyTasks, isTaskOverdue } from "../services/taskService";
 import { StatCard, Panel, EmptyChart, CHART_COLORS, inrCompact } from "../components/common/kit";
 import MyFollowups from "../components/dashboard/MyFollowups";
 import MyDayDashboard from "../components/dashboard/MyDayDashboard";
+import HomeWaWidget from "../components/whatsappMarketing/HomeWaWidget";
 
 // Modules most relevant to each department — used to surface a person's own
 // workspace first on the role-aware home.
@@ -510,6 +511,16 @@ function WelcomePage() {
             </Grid>
           )}
         </Grid>
+
+        {/* WhatsApp Marketing at-a-glance — marketing-view roles only (CEO,
+            MARKETING_SCOPED, Admin). Gated directly by the `marketing` module
+            permission rather than the accessBucket heuristic above, since
+            marketing is its own RBAC module key independent of CRM/sales. */}
+        {permissions.canView?.('marketing') && (
+          <Box sx={{ mb: 3 }}>
+            <HomeWaWidget />
+          </Box>
+        )}
 
         {/* Executive analytics — revenue + department health (CEO only) */}
         {showExecAnalytics && (
