@@ -79,11 +79,31 @@ export async function mediaUrl(storagePath, { expiresIn = 3600 } = {}) {
   return data?.signedUrl;
 }
 
+/**
+ * Reassign (or clear, when stepId is null) which step a previously-uploaded
+ * media row is attached to. Added for Task 8 (Campaign Wizard's
+ * MediaLibraryPicker) — Task 3 only wrote step_id at upload time via
+ * uploadMedia, with no way to re-attach existing campaign media to a
+ * different step afterwards, which the wizard's "multi-select for attaching
+ * to the currently-edited step" requirement needs.
+ */
+export async function attachMediaToStep(mediaId, stepId) {
+  const { data, error } = await supabase
+    .from('wa_campaign_media')
+    .update({ step_id: stepId ?? null })
+    .eq('id', mediaId)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 const waMediaService = {
   inferMediaCategory,
   uploadMedia,
   listMedia,
   mediaUrl,
+  attachMediaToStep,
 };
 
 export default waMediaService;

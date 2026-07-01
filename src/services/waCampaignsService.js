@@ -173,6 +173,23 @@ export async function duplicateStep(stepId) {
   });
 }
 
+/**
+ * List a campaign's enrollments with their contact joined in. Added for Task 8
+ * (Campaign Wizard) — StepAudience needs to know which contacts are already
+ * enrolled (to pre-check them when resuming a draft) and StepReview needs an
+ * enrolled count for its summary; Task 3 exposed enrollContacts (write) but no
+ * read-back. Mirrors the email module's campaignsService.listEnrollments.
+ */
+export async function listEnrollments(campaignId) {
+  const { data, error } = await supabase
+    .from('wa_enrollments')
+    .select('*, wa_contacts(id, contact_name, whatsapp_number, company)')
+    .eq('campaign_id', campaignId)
+    .order('enrolled_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
 /** Enroll contacts into a campaign via the SECURITY DEFINER RPC. Returns the count actually inserted (dupes/opted-out skipped server-side). */
 export async function enrollContacts(campaignId, contactIds) {
   const { data, error } = await supabase.rpc('wa_enroll_contacts', {
@@ -212,6 +229,7 @@ const waCampaignsService = {
   deleteStep,
   reorderSteps,
   duplicateStep,
+  listEnrollments,
   enrollContacts,
   setStatus,
 };
