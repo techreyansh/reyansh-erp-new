@@ -21,6 +21,7 @@ import { savePlan, listPlans } from "../cableProductionService";
 import { listPipeline, listContacts, addContact } from "../crmPipelineService";
 import { listPlaybook, savePlaybook } from "../crmCoachingService";
 import * as db from "../../lib/db";
+import waContactsService from "../waContactsService";
 import { norm } from "./parse";
 
 // ── small shared helpers ────────────────────────────────────────────────────
@@ -38,6 +39,12 @@ const toEnumKey = (v, options) => {
   return hit ? hit.key : null;
 };
 const enumKeys = (options) => options.map((o) => o.key);
+/** "vip, geyser" or "vip|geyser" → ["vip","geyser"]. */
+const splitTags = (v) => {
+  const s = str(v);
+  if (!s) return [];
+  return s.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+};
 
 // Extra crm_pipeline columns the crm_add_company RPC does NOT set — applied as a
 // follow-up update once the record exists.
@@ -691,6 +698,106 @@ const coachingPlaybook = {
   apply: applyPlaybook,
 };
 
+// ── WhatsApp Marketing audience (wa_contacts) ───────────────────────────────
+// apply(items, onProgress) contract (see bulkImport/runner.js analyzeRows +
+// BulkImportDialog.apply()): `items` are the ANALYZED rows —
+// { i, rec, match, status, errors, warnings, valid } — the record itself lives
+// under `.rec`. waContactsService.bulkImport() has a different (rows, meta)
+// signature with no onProgress, so it is NOT used here directly; instead we
+// upsert per-row via waContactsService.upsertContact and drive onProgress
+// ourselves, matching the applyCrm/applyInventory pattern above.
+async function applyWaContacts(items, onProgress) {
+  let created = 0;
+  let updated = 0;
+  const errors = [];
+
+  // Best-effort provenance row (wa_import_batches) — mirrors what
+  // waContactsService.bulkImport() does for its own paste/manual-adjacent
+  // callers. Never blocks the import if it fails.
+  let batchId = null;
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    const { data: batch, error: bErr } = await supabase
+      .from("wa_import_batches")
+      .insert({ name: "Bulk import", source: "excel", total_rows: items.length, created_by: userData?.user?.id || null })
+      .select("id")
+      .single();
+    if (!bErr) batchId = batch?.id || null;
+  } catch (_e) {
+    // provenance only — proceed without a batch id
+  }
+
+  for (let i = 0; i < items.length; i += 1) {
+    const { rec, match } = items[i];
+    try {
+      await waContactsService.upsertContact({
+        company: rec.company || null,
+        contactName: rec.contact_name,
+        whatsappNumber: rec.whatsapp_number,
+        email: rec.email || null,
+        ownerEmail: rec.owner_email || null,
+        tags: rec.tags || [],
+        source: "excel",
+        importBatchId: batchId,
+      });
+      if (match) updated += 1;
+      else created += 1;
+    } catch (e) {
+      errors.push({ label: rec.contact_name || rec.whatsapp_number || `row ${i + 1}`, message: e?.message || String(e) });
+    }
+    onProgress && onProgress(i + 1, items.length);
+  }
+
+  if (batchId) {
+    try {
+      await supabase.from("wa_import_batches").update({ imported_rows: created + updated, skipped_rows: errors.length }).eq("id", batchId);
+    } catch (_e) {
+      // provenance only
+    }
+  }
+
+  return { created, updated, errors };
+}
+
+const waContacts = {
+  key: "wa_contacts",
+  label: "WhatsApp Contacts",
+  module: "marketing",
+  matchKey: "whatsapp_number",
+  columns: [
+    { key: "company", label: "Company", type: "text", example: "Acme Traders" },
+    { key: "contact_name", label: "Contact name", required: true, type: "text", example: "Ravi Sharma" },
+    { key: "whatsapp_number", label: "WhatsApp number", required: true, type: "text", example: "9876543210", help: "Used to match existing — a match updates it. Bare 10-digit numbers are assumed Indian mobiles (+91 auto-added)." },
+    { key: "email", label: "Email", type: "text", example: "ravi@acme.com" },
+    { key: "owner_email", label: "Owner email", type: "text", example: "", help: "Leave blank to keep unassigned." },
+    { key: "tags", label: "Tags", type: "text", example: "vip, geyser", help: "Comma or | separated." },
+  ],
+  fetchExisting: () => waContactsService.listContacts(),
+  recordToCell: (row, key) => (key === "tags" ? (row.tags || []).join(", ") : row[key]),
+  rowToRecord: (raw) => ({
+    company: str(raw.company) || null,
+    contact_name: str(raw.contact_name),
+    whatsapp_number: waContactsService.normalizePhoneNumber(raw.whatsapp_number),
+    email: str(raw.email) || null,
+    owner_email: str(raw.owner_email).toLowerCase() || null,
+    tags: splitTags(raw.tags),
+  }),
+  validateRow: (rec) => {
+    const errors = [];
+    const warnings = [];
+    if (!rec.contact_name) errors.push("Contact name is required");
+    if (!rec.whatsapp_number) {
+      errors.push("WhatsApp number is required");
+    } else {
+      const digits = rec.whatsapp_number.replace(/\D/g, "");
+      if (digits.length < 8 || digits.length > 15) errors.push("WhatsApp number looks invalid (expected ~10-15 digits)");
+    }
+    if (rec.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rec.email)) warnings.push("Email looks malformed");
+    return { errors, warnings };
+  },
+  apply: applyWaContacts,
+};
+
 // ── registry ────────────────────────────────────────────────────────────────
 export const DATASETS = {
   [crmProspects.key]: crmProspects,
@@ -704,6 +811,7 @@ export const DATASETS = {
   [cablePlans.key]: cablePlans,
   [bom.key]: bom,
   [routings.key]: routings,
+  [waContacts.key]: waContacts,
 };
 
 export const getDataset = (key) => DATASETS[key] || null;
