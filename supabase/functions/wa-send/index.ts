@@ -187,9 +187,16 @@ export async function sendOneWaMessage(db: any, messageId: string): Promise<{ ok
       // Regenerate the link fresh, right here, right before the call — see
       // the MEDIA FRESHNESS CONTRACT comment on freshMediaLink above.
       const link = await freshMediaLink(db, message.media);
+      // wa_campaign_media.category also allows 'other' (schema check constraint),
+      // but Meta's Graph API only accepts image/video/document/audio message
+      // types. Coerce 'other' (and any unrecognized category) to 'document'.
+      const validMediaTypes = ["image", "video", "document", "audio"];
+      const mediaType = validMediaTypes.includes(message.media.category)
+        ? message.media.category
+        : "document";
       result = await adapter.sendMedia({
         to,
-        mediaType: message.media.category || "document",
+        mediaType,
         link,
         caption: message.body_text || undefined,
         credentials: settings.credentials,
