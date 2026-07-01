@@ -134,7 +134,15 @@ export default function WaAudienceImport({ notify, dense = false }) {
   const applyPaste = async () => {
     setPasteBusy(true); setPasteError(null);
     try {
-      const res = await waContactsService.pasteImport(pasteText);
+      // Apply exactly the rows the preview showed as valid, via the SAME
+      // dataset.apply() the CSV/Excel path uses (BulkImportDialog.apply()
+      // calls this identically). Do NOT re-parse pasteText through
+      // waContactsService.pasteImport()/bulkImport() here — that path has its
+      // own weaker validation (only skips a truly empty number) and would
+      // write rows the preview promised were skipped, making the "Import (N)"
+      // count and the actual writes diverge.
+      const validItems = (pastePreview || []).filter((a) => a.valid);
+      const res = await dataset.apply(validItems);
       say(`Imported ${res.created} new, ${res.updated} updated${res.errors?.length ? `, ${res.errors.length} failed` : ''}.`, res.errors?.length ? 'warning' : 'success');
       setPasteText(''); setPastePreview(null); setPasteOpen(false);
       load();

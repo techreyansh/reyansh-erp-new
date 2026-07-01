@@ -23,7 +23,17 @@ jest.mock('../../services/waContactsService', () => {
 });
 
 import waContactsService from '../../services/waContactsService';
+import { getDataset } from '../../services/bulkImport/registry';
 import WaAudienceImport from './WaAudienceImport';
+
+// The component's paste-apply path calls the wa_contacts dataset's apply()
+// directly (the same function BulkImportDialog.apply() uses for CSV/Excel) so
+// preview and apply always agree. `dataset` is a singleton object, so
+// getDataset() here returns the exact same reference the component imports —
+// spying on it lets us assert what the component hands to apply() without
+// hitting Supabase.
+const dataset = getDataset('wa_contacts');
+jest.spyOn(dataset, 'apply');
 
 describe('WaAudienceImport', () => {
   // NOTE: react-scripts' Jest config sets `resetMocks: true`, which strips any
@@ -37,6 +47,7 @@ describe('WaAudienceImport', () => {
     waContactsService.pasteImport.mockResolvedValue({ batchId: 'b1', created: 1, updated: 0, errors: [] });
     waContactsService.parsePasteRows.mockImplementation((text) => (text || '').split('\n').filter(Boolean).map((line) => ({ contactName: line, whatsappNumber: line })));
     waContactsService.normalizePhoneNumber.mockImplementation((v) => (v ? `+91${String(v).replace(/\D/g, '')}` : ''));
+    dataset.apply.mockResolvedValue({ created: 1, updated: 0, errors: [] });
   });
 
   test('renders without crashing and loads the contact list', async () => {
@@ -73,7 +84,7 @@ describe('WaAudienceImport', () => {
     })));
   });
 
-  test('paste import: preview shows a row, then apply calls pasteImport', async () => {
+  test('paste import: preview shows a row, then apply calls the dataset apply() (not pasteImport)', async () => {
     render(<WaAudienceImport />);
     await waitFor(() => expect(waContactsService.listContacts).toHaveBeenCalled());
 
@@ -85,6 +96,37 @@ describe('WaAudienceImport', () => {
     await waitFor(() => expect(screen.getByText(/^Import \(1\)$/i)).toBeInTheDocument());
     fireEvent.click(screen.getByText(/^Import \(1\)$/i));
 
-    await waitFor(() => expect(waContactsService.pasteImport).toHaveBeenCalledWith('9876543210'));
+    await waitFor(() => expect(dataset.apply).toHaveBeenCalled());
+    expect(waContactsService.pasteImport).not.toHaveBeenCalled();
+    expect(dataset.apply.mock.calls[0][0]).toHaveLength(1);
+  });
+
+  test('paste import: Import applies ONLY the previewed-valid rows — a malformed-but-non-empty number is never written (regression for preview/apply validation mismatch)', async () => {
+    render(<WaAudienceImport />);
+    await waitFor(() => expect(waContactsService.listContacts).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByRole('button', { name: /paste import/i }));
+    const textarea = screen.getByPlaceholderText(/Ravi Sharma, 9876543210/i);
+    // One good 10-digit number (valid) + one malformed-but-non-empty number
+    // ("12345" — normalizes to a non-empty string but fails the 8-15 digit
+    // sanity check, so the preview must flag it "Skip").
+    fireEvent.change(textarea, { target: { value: '9876543210\n12345' } });
+    fireEvent.click(screen.getByRole('button', { name: /^preview$/i }));
+
+    // Preview: 1 new + 1 skipped, and the Import button only counts the valid one.
+    await waitFor(() => expect(screen.getByText(/^Import \(1\)$/i)).toBeInTheDocument());
+    expect(screen.getByText(/1 skipped/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/^Import \(1\)$/i));
+
+    await waitFor(() => expect(dataset.apply).toHaveBeenCalled());
+    // The old code called waContactsService.pasteImport(pasteText) with the
+    // FULL raw text, which would have written the malformed "12345" row too.
+    expect(waContactsService.pasteImport).not.toHaveBeenCalled();
+
+    const itemsPassedToApply = dataset.apply.mock.calls[0][0];
+    expect(itemsPassedToApply).toHaveLength(1);
+    expect(itemsPassedToApply.every((a) => a.valid)).toBe(true);
+    expect(itemsPassedToApply.some((a) => a.rec.whatsapp_number === '+9112345')).toBe(false);
   });
 });
