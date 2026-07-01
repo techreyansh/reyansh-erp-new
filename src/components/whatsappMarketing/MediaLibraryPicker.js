@@ -127,10 +127,24 @@ export default function MediaLibraryPicker({ open, campaignId, stepId, onClose, 
   };
 
   const attach = async () => {
-    setSaving(true);
     setError(null);
+    const { toAttach, toDetach } = computeMediaAttachDiff(items, selected, stepId);
+    // toAttach also includes previously-unattached media (item.step_id is
+    // null) — only the subset that's *currently on a different step* is a
+    // steal that deserves a confirmation before silently moving it.
+    const reassignedCount = toAttach.filter((id) => {
+      const item = items.find((m) => m.id === id);
+      return item?.step_id && item.step_id !== stepId;
+    }).length;
+    if (reassignedCount > 0) {
+      const ok = window.confirm(
+        `${reassignedCount} file${reassignedCount === 1 ? ' is' : 's are'} currently attached to another step. `
+        + `Attaching ${reassignedCount === 1 ? 'it' : 'them'} here will remove ${reassignedCount === 1 ? 'it' : 'them'} from the other step. Continue?`,
+      );
+      if (!ok) return;
+    }
+    setSaving(true);
     try {
-      const { toAttach, toDetach } = computeMediaAttachDiff(items, selected, stepId);
       // eslint-disable-next-line no-restricted-syntax
       for (const id of toAttach) {
         // eslint-disable-next-line no-await-in-loop
