@@ -157,3 +157,139 @@ tagged and cleaned up in a `finally` block otherwise.
 | Messages stuck at `sending` | Should self-heal within ~1-2 ticks via the stale-`sending` sweep (5 min threshold); check the target provider (`meta_cloud`) isn't erroring/timing out on every attempt. |
 | Sandbox messages never reach `read` | Confirm `wa-scheduler` is actually being ticked by cron (`select * from cron.job;` / `cron.job_run_details`) — progression only happens on a tick, there's no background timer. |
 | 401 from `wa-scheduler` | `SCHEDULER_SECRET` is set on the function but the caller (cron SQL or curl) isn't sending the matching `x-scheduler-secret` header. |
+
+## 7. `wa-webhook` (Task 6): inbound messages + delivery-status callbacks
+
+`supabase/functions/wa-webhook/index.ts` is the receiver Meta calls for both the
+one-time webhook subscription handshake (`GET`) and every inbound message /
+delivery-status event afterward (`POST`). It never hand-parses Meta's payload
+shape — it calls `PROVIDERS['meta_cloud'].verifyWebhookGet()` /
+`.parseWebhookEvents()` from `_shared/wa/meta.ts` (Task 4), same as `wa-send`
+only ever calls the adapter, never `graph.facebook.com` directly.
+
+### Deploy (public — Meta can't hold a Supabase JWT)
+
+```bash
+supabase functions deploy wa-webhook --no-verify-jwt
+```
+
+This mirrors `email-track-open`, this repo's other public/unauthenticated
+Edge Function.
+
+### Store the verify token
+
+Meta's webhook handshake checks `hub.verify_token` against a secret you pick.
+The already-committed `meta_cloud` adapter (`_shared/wa/meta.ts`,
+`verifyWebhookGet`) reads it from `credentials.verify_token` — **not**
+`webhook_verify_token` — so set it on the active `meta_cloud`
+`wa_provider_settings` row accordingly, e.g.:
+
+```sql
+update public.wa_provider_settings
+set credentials = credentials || jsonb_build_object('verify_token', '<a-secret-you-choose>')
+where provider_key = 'meta_cloud' and is_active = true;
+```
+
+### Meta App Dashboard webhook subscription steps
+
+1. Go to your Meta App Dashboard → your app → **WhatsApp → Configuration**.
+2. Under **Webhook**, click **Edit** and set:
+   - **Callback URL**: `https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-webhook`
+   - **Verify token**: the same value you stored in `credentials.verify_token` above.
+3. Click **Verify and save** — Meta issues a `GET` to the callback URL with
+   `hub.mode=subscribe&hub.verify_token=...&hub.challenge=...`; the function
+   must echo back the raw `hub.challenge` value with a `200` for Meta to
+   accept the subscription.
+4. Under **Webhook fields**, subscribe to **`messages`** (this single field
+   covers both inbound message payloads and outbound delivery-status
+   callbacks — Meta multiplexes both through `entry[].changes[].value`, one
+   with a `messages[]` array, the other with a `statuses[]` array). No other
+   field is needed for this module.
+
+### What one event does
+
+- **Status callback** (`sent`/`delivered`/`read`/`failed`, matched by
+  `provider_message_id`): updates the matching `wa_messages` row's `status`
+  and the corresponding timestamp column (`sent_at`/`delivered_at`/`read_at`/
+  `failed_at`), guarded so a late/duplicate/out-of-order webhook never
+  regresses an already-more-advanced status. Always inserts a `wa_events`
+  row (`direction='outbound'`) regardless of whether a matching message was found.
+- **Inbound message** (`reply`): inserts a `wa_events` row
+  (`direction='inbound', type='reply'`) with a best-effort `contact_id` match
+  against `wa_contacts.whatsapp_number` (case-insensitive). This is raw event
+  logging only — no inbox/conversation UI in V1 (that's V1.5).
+- The handler **always responds `200`**, even on a malformed body or a
+  per-event processing failure (logged, not thrown) — Meta retries
+  aggressively on non-200/timeout.
+
+### Manual verification recipe (needs a live deploy to actually run)
+
+```bash
+FN_URL='https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-webhook'
+
+# 1. GET handshake (replace <verify_token> with the value stored in
+#    credentials.verify_token on the active meta_cloud row)
+curl -s "$FN_URL?hub.mode=subscribe&hub.verify_token=<verify_token>&hub.challenge=12345"
+# expected: HTTP 200, body exactly "12345" (no quotes, no JSON wrapper)
+
+# 2. POST a status callback (pick a provider_message_id that exists on a
+#    wa_messages row, e.g. one produced by scripts/wa_scheduler_smoke.js)
+curl -s -X POST "$FN_URL" -H 'Content-Type: application/json' -d '{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "15551234567", "phone_number_id": "PHONE_NUMBER_ID" },
+        "statuses": [{
+          "id": "wamid.EXAMPLE_PROVIDER_MESSAGE_ID",
+          "status": "delivered",
+          "timestamp": "1751500000",
+          "recipient_id": "919876543210"
+        }]
+      },
+      "field": "messages"
+    }]
+  }]
+}'
+# expected: HTTP 200, body "EVENT_RECEIVED"; wa_messages row with that
+# provider_message_id flips to status='delivered' + delivered_at set; a new
+# wa_events row (direction='outbound', type='delivered') is inserted.
+
+# 3. POST an inbound message
+curl -s -X POST "$FN_URL" -H 'Content-Type: application/json' -d '{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "15551234567", "phone_number_id": "PHONE_NUMBER_ID" },
+        "contacts": [{ "profile": { "name": "Test Contact" }, "wa_id": "919876543210" }],
+        "messages": [{
+          "from": "919876543210",
+          "id": "wamid.EXAMPLE_INBOUND_ID",
+          "timestamp": "1751500100",
+          "text": { "body": "Sounds good, thanks!" },
+          "type": "text"
+        }]
+      },
+      "field": "messages"
+    }]
+  }]
+}'
+# expected: HTTP 200, body "EVENT_RECEIVED"; a new wa_events row
+# (direction='inbound', type='reply', from_number='919876543210') is
+# inserted, with contact_id populated if a wa_contacts row's
+# whatsapp_number matches "919876543210" case-insensitively.
+```
+
+These payloads were hand-crafted to match the shape `_shared/wa/meta.ts`'s
+`parseWebhookEvents` already expects (`entry[].changes[].value.statuses[]` /
+`.messages[]`) — they were not captured from a live Meta send, since this
+environment has no Meta Business/App Dashboard access. Running them against
+the actually-deployed function and confirming the `wa_messages`/`wa_events`
+side effects, and completing the real Meta Dashboard handshake in step 1
+above, both require the user's own Supabase project + Meta App Dashboard
+access and have not been executed from this environment.
