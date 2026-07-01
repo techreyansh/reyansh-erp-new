@@ -200,7 +200,41 @@ export async function enrollContacts(campaignId, contactIds) {
   return data;
 }
 
-/** Change a campaign's status, validated client-side (belt-and-suspenders — RLS/DB don't enforce the state machine). */
+/**
+ * wa_messages statuses that `wa_dashboard_counts`'s `pending_messages` counts
+ * as still outstanding (see the RPC in
+ * 20260701140000_whatsapp_marketing_schema.sql). Cancellation below moves rows
+ * out of this set so a stopped campaign's un-sent messages stop being counted
+ * as pending everywhere (dashboard + campaignAnalytics) the moment Stop lands.
+ */
+export const PENDING_MESSAGE_STATUSES = ['scheduled', 'queued', 'sending', 'retry_pending'];
+
+/**
+ * Cancel a campaign's not-yet-sent messages (called by setStatus when moving
+ * to 'stopped'). Terminal state chosen: status='failed', error='cancelled',
+ * failed_at=now(). Rationale: 'failed' is already the one terminal/non-sent
+ * status wa_dashboard_counts and campaignAnalytics both understand — reusing
+ * it (rather than inventing e.g. a 'cancelled' status not in the DB check
+ * constraint) means cancelled rows automatically fall out of "pending"
+ * everywhere without any new bucket the UI would need to special-case, while
+ * still being distinguishable from real send failures via `error='cancelled'`.
+ */
+export async function cancelPendingMessages(campaignId) {
+  const { data, error } = await supabase
+    .from('wa_messages')
+    .update({ status: 'failed', error: 'cancelled', failed_at: new Date().toISOString() })
+    .eq('campaign_id', campaignId)
+    .in('status', PENDING_MESSAGE_STATUSES)
+    .select('id');
+  if (error) throw error;
+  return (data || []).length;
+}
+
+/**
+ * Change a campaign's status, validated client-side (belt-and-suspenders —
+ * RLS/DB don't enforce the state machine). Moving to 'stopped' additionally
+ * cancels the campaign's not-yet-sent wa_messages (see cancelPendingMessages).
+ */
 export async function setStatus(campaignId, status) {
   const { data: current, error: curErr } = await supabase
     .from('wa_campaigns')
@@ -213,6 +247,9 @@ export async function setStatus(campaignId, status) {
   }
   const { data, error } = await supabase.from('wa_campaigns').update({ status }).eq('id', campaignId).select('*').single();
   if (error) throw error;
+  if (status === 'stopped') {
+    await cancelPendingMessages(campaignId);
+  }
   return data;
 }
 
@@ -232,6 +269,8 @@ const waCampaignsService = {
   listEnrollments,
   enrollContacts,
   setStatus,
+  PENDING_MESSAGE_STATUSES,
+  cancelPendingMessages,
 };
 
 export default waCampaignsService;
