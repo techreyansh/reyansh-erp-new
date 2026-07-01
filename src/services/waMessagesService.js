@@ -34,6 +34,18 @@ export async function providerStatus() {
  * Reduce a flat list of wa_messages rows into campaign analytics. Pure —
  * unit-tested. `replies` is always 0 here (messages carry no reply info);
  * campaignAnalytics() below fills it in from wa_events.
+ *
+ * `failed` vs `cancelled`: waCampaignsService.cancelPendingMessages marks a
+ * stopped campaign's not-yet-sent messages as status='failed',
+ * error='cancelled' (see that function's docstring for why it reuses
+ * 'failed' rather than a new status). Those rows are an administrative stop,
+ * not a genuine delivery/provider failure, so they must not inflate the
+ * "Failures" analytics tile. `failed` here therefore counts only genuine
+ * failures (status='failed' with error !== 'cancelled'); cancelled rows are
+ * reported separately via `cancelled`. CampaignAnalytics.js is the only
+ * current reader of this `failed` field, so redefining it to exclude
+ * cancellations (rather than leaving it as-is and having the component
+ * subtract `cancelled`) doesn't change any other consumer's numbers.
  */
 export function reduceCampaignAnalytics(messages) {
   const list = messages || [];
@@ -43,7 +55,8 @@ export function reduceCampaignAnalytics(messages) {
   const sent = list.filter((m) => !!m.sent_at).length;
   const delivered = list.filter((m) => !!m.delivered_at).length;
   const read = list.filter((m) => !!m.read_at).length;
-  const failed = list.filter((m) => m.status === 'failed').length;
+  const cancelled = list.filter((m) => m.error === 'cancelled').length;
+  const failed = list.filter((m) => m.status === 'failed' && m.error !== 'cancelled').length;
   const completed = list.filter((m) => ['sent', 'delivered', 'read'].includes(m.status)).length;
 
   return {
@@ -53,6 +66,7 @@ export function reduceCampaignAnalytics(messages) {
     delivered,
     read,
     failed,
+    cancelled,
     replies: 0,
     deliveryRate: pct(delivered, sent),
     readRate: pct(read, sent),

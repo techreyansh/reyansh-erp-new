@@ -85,6 +85,14 @@ describe('CampaignAnalytics', () => {
     expect(screen.getByText(/response time is not shown/i)).toBeInTheDocument();
   });
 
+  test('shows a cancelled-excluded caption on the Failures tile when analytics.cancelled > 0', async () => {
+    waMessagesService.campaignAnalytics.mockResolvedValue({ ...ANALYTICS, failed: 1, cancelled: 3 });
+    render(<CampaignAnalytics />);
+    await screen.findByText('Messages Sent');
+    expect(tile('Failures')).toHaveTextContent('1');
+    expect(tile('Failures')).toHaveTextContent('3 cancelled (excluded)');
+  });
+
   test('switching the campaign selector reloads analytics for the newly picked campaign', async () => {
     waCampaignsService.listCampaigns.mockResolvedValue([...CAMPAIGNS, { id: 'camp-2', name: 'Follow-up' }]);
     render(<CampaignAnalytics />);

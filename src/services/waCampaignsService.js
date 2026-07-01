@@ -220,6 +220,21 @@ export const PENDING_MESSAGE_STATUSES = ['scheduled', 'queued', 'sending', 'retr
  * still being distinguishable from real send failures via `error='cancelled'`.
  */
 export async function cancelPendingMessages(campaignId) {
+  // Documented V1 tradeoff: PENDING_MESSAGE_STATUSES includes 'sending',
+  // meaning a message the provider has already accepted (and may deliver a
+  // moment later) can still be marked cancelled here — there's no
+  // reconciliation step. 'sending' is treated as "not yet confirmed sent" by
+  // this UI-facing Stop action, on the assumption the wa-webhook function's
+  // forward-progression guard (STATUS_RANK in supabase/functions/wa-webhook)
+  // would let a subsequent real status webhook advance the row past this.
+  // That assumption does NOT hold as written: STATUS_RANK ranks 'failed'
+  // highest (sent:1, delivered:2, read:3, failed:4), so once cancelPending
+  // Messages sets status='failed' here, a later genuine 'sent'/'delivered'/
+  // 'read' webhook for the same message has a lower rank and is silently
+  // dropped by that guard — the row stays stuck showing cancelled/failed
+  // even if the provider actually delivered it. Left as-is for V1 (not fixed
+  // in this pass); a real fix needs either a dedicated 'cancelled' status
+  // outside the STATUS_RANK ladder or a reconciliation job.
   const { data, error } = await supabase
     .from('wa_messages')
     .update({ status: 'failed', error: 'cancelled', failed_at: new Date().toISOString() })

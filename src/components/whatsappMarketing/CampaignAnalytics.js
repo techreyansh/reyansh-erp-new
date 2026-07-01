@@ -93,7 +93,14 @@ export default function CampaignAnalytics({ initialCampaignId = '' }) {
           <KPICard title="Delivery Rate" value={`${analytics.deliveryRate}%`} subtitle={`${analytics.delivered} delivered`} icon={<DoneAllOutlined />} variant="gradient" color="success" />
           <KPICard title="Read Rate" value={`${analytics.readRate}%`} subtitle={`${analytics.read} read`} icon={<VisibilityOutlined />} variant="gradient" color="success" />
           <KPICard title="Replies" value={analytics.replies} subtitle="Inbound events (count only — see note)" icon={<ReplyOutlined />} variant="gradient" color="secondary" />
-          <KPICard title="Failures" value={analytics.failed} icon={<ErrorOutlineOutlined />} variant="gradient" color={analytics.failed > 0 ? 'error' : 'success'} />
+          <KPICard
+            title="Failures"
+            value={analytics.failed}
+            subtitle={analytics.cancelled > 0 ? `${analytics.cancelled} cancelled (excluded)` : undefined}
+            icon={<ErrorOutlineOutlined />}
+            variant="gradient"
+            color={analytics.failed > 0 ? 'error' : 'success'}
+          />
           <KPICard title="Completion %" value={`${completionPct}%`} subtitle={`${completedEnrollments} of ${totalEnrolled} enrollments completed`} icon={<FlagCircleOutlined />} variant="gradient" color="primary" />
         </Box>
       )}

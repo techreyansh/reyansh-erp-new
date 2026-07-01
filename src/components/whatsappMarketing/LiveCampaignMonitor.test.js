@@ -91,4 +91,24 @@ describe('LiveCampaignMonitor', () => {
       jest.useRealTimers();
     }
   });
+
+  test('does not warn about setState on an unmounted component when load() resolves after unmount', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    let resolveMessages;
+    waMessagesService.listMessages.mockImplementation(
+      () => new Promise((resolve) => { resolveMessages = resolve; })
+    );
+
+    const { unmount } = render(<LiveCampaignMonitor />);
+    await screen.findByLabelText('Campaign'); // rendered; the message fetch is still pending (unresolved)
+    unmount();
+    resolveMessages([MESSAGE]); // resolves the in-flight load() after unmount
+    await act(async () => { await Promise.resolve(); });
+
+    const unmountWarnings = consoleError.mock.calls.filter((args) =>
+      String(args[0]).includes("Can't perform a React state update on an unmounted component")
+    );
+    expect(unmountWarnings).toHaveLength(0);
+    consoleError.mockRestore();
+  });
 });

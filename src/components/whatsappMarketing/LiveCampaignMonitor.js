@@ -47,24 +47,33 @@ export default function LiveCampaignMonitor({ initialCampaignId = '' }) {
   const [error, setError] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const intervalRef = useRef(null);
+  // Guards against setState-after-unmount: the polling load() below is async
+  // and can still resolve after the component has unmounted (e.g. the user
+  // navigates away mid-poll). Without this, React logs an unmount warning
+  // (and, worse, could touch stale closures).
+  const isMountedRef = useRef(true);
+  useEffect(() => () => { isMountedRef.current = false; }, []);
 
   useEffect(() => {
     waCampaignsService.listCampaigns().then(setCampaigns).catch(() => {});
   }, []);
 
   const load = useCallback(async () => {
+    if (!isMountedRef.current) return;
     setError(null);
     try {
       const rows = await waMessagesService.listMessages({
         campaignId: campaignId || null,
         status: status || null,
       });
+      if (!isMountedRef.current) return;
       setMessages(rows);
       setLastRefreshed(new Date());
     } catch (e) {
+      if (!isMountedRef.current) return;
       setError(e.message || 'Failed to load messages');
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) setLoading(false);
     }
   }, [campaignId, status]);
 
