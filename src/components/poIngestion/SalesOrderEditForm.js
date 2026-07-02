@@ -111,7 +111,7 @@ const SalesOrderEditForm = ({ open, onClose, salesOrder, onSave }) => {
           setFormData({
             poNumber: poId || '',
             clientCode: salesOrder.ClientCode || '',
-            assignedTo: salesOrder.AssignedTo || 'mock.customer relations manager@reyanshelectronics.com'
+            assignedTo: salesOrder.AssignedTo || user?.email || ''
           });
           
           // Fetch ALL items for this sales order (all rows with the same POId)
