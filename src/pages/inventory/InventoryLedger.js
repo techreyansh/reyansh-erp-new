@@ -30,6 +30,7 @@ const InventoryLedger = () => {
   const theme = useTheme();
   const [rows, setRows] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [binsByLoc, setBinsByLoc] = useState({}); // locationCode -> [{ bin_code }]
   const [convByCode, setConvByCode] = useState({}); // itemCode -> [{ alt_uom, factor, is_default }]
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -45,12 +46,21 @@ const InventoryLedger = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [{ rows: r, locations: l }, allConv] = await Promise.all([
+      const [{ rows: r, locations: l }, allConv, allBins] = await Promise.all([
         inventoryLedgerService.getInventoryView(),
         inventoryUomBinService.listAllConversions(),
+        inventoryUomBinService.listBins().catch(() => []),
       ]);
       setRows(r);
       setLocations(l);
+      // Build locationCode -> bins (each bin carries its location's code).
+      const binMap = {};
+      (allBins || []).forEach((b) => {
+        const code = b.location?.code;
+        if (!code) return;
+        (binMap[code] = binMap[code] || []).push({ bin_code: b.bin_code });
+      });
+      setBinsByLoc(binMap);
       // Build itemCode -> conversions (rows carry both itemId and code).
       const codeByItem = new Map(r.map((row) => [row.itemId, row.code]));
       const map = {};
@@ -94,7 +104,7 @@ const InventoryLedger = () => {
 
   const openDialog = (action) => setDialog({
     action,
-    form: { itemCode: '', locationCode: 'STORE', toCode: 'WIP', qty: '', rate: '', reason: '', unit: BASE_UNIT },
+    form: { itemCode: '', locationCode: 'STORE', toCode: 'WIP', qty: '', rate: '', reason: '', unit: BASE_UNIT, bin: '', toBin: '' },
   });
 
   const submit = async () => {
@@ -112,14 +122,15 @@ const InventoryLedger = () => {
       const sel = form.unit && form.unit !== BASE_UNIT ? convs.find((c) => c.alt_uom === form.unit) : null;
       const factor = sel && sel.factor > 0 ? sel.factor : 1;
       const qty = inventoryUomBinService.toBase(Number(form.qty), factor);
+      const bin = form.bin || null; // null → RPC resolves the item's default bin
       if (action === 'receive') {
-        await inventoryLedgerService.receive({ itemCode: form.itemCode, locationCode: form.locationCode, qty, rate: form.rate !== '' ? Number(form.rate) / factor : null, grnRef: 'manual' });
+        await inventoryLedgerService.receive({ itemCode: form.itemCode, locationCode: form.locationCode, qty, rate: form.rate !== '' ? Number(form.rate) / factor : null, grnRef: 'manual', binCode: bin });
       } else if (action === 'issue') {
-        await inventoryLedgerService.issue({ itemCode: form.itemCode, locationCode: form.locationCode, qty, refType: 'manual' });
+        await inventoryLedgerService.issue({ itemCode: form.itemCode, locationCode: form.locationCode, qty, refType: 'manual', binCode: bin });
       } else if (action === 'adjust') {
-        await inventoryLedgerService.adjust({ itemCode: form.itemCode, locationCode: form.locationCode, newQty: qty, reason: form.reason || 'cycle count' });
+        await inventoryLedgerService.adjust({ itemCode: form.itemCode, locationCode: form.locationCode, newQty: qty, reason: form.reason || 'cycle count', binCode: bin });
       } else if (action === 'transfer') {
-        await inventoryLedgerService.transfer({ itemCode: form.itemCode, fromCode: form.locationCode, toCode: form.toCode, qty });
+        await inventoryLedgerService.transfer({ itemCode: form.itemCode, fromCode: form.locationCode, toCode: form.toCode, qty, fromBinCode: bin, toBinCode: form.toBin || null });
       }
       setSnackbar({ open: true, message: `${cfg.verb} posted to the ledger`, severity: 'success' });
       setDialog(null);
@@ -230,7 +241,7 @@ const InventoryLedger = () => {
               {filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>No inventory rows match.</TableCell></TableRow>
               ) : filtered.map((r) => (
-                <TableRow key={r.itemId + r.locationCode} hover sx={{ cursor: 'pointer' }} onClick={() => openDetail(r)}>
+                <TableRow key={r.itemId + r.locationCode + r.binId} hover sx={{ cursor: 'pointer' }} onClick={() => openDetail(r)}>
                   <TableCell sx={{ fontWeight: 600 }}>{r.code}</TableCell>
                   <TableCell>{r.name}</TableCell>
                   <TableCell><Chip size="small" label={r.locationName} variant="outlined" /></TableCell>
@@ -258,12 +269,22 @@ const InventoryLedger = () => {
                 <TextField select label="Item" value={dialog.form.itemCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, itemCode: e.target.value, unit: BASE_UNIT } })} fullWidth>
                   {itemOptions.map((o) => <MenuItem key={o.code} value={o.code}>{o.code} — {o.name}</MenuItem>)}
                 </TextField>
-                <TextField select label={cfg.isTransfer ? 'From location' : 'Location'} value={dialog.form.locationCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, locationCode: e.target.value } })} fullWidth>
+                <TextField select label={cfg.isTransfer ? 'From location' : 'Location'} value={dialog.form.locationCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, locationCode: e.target.value, bin: '' } })} fullWidth>
                   {locations.map((l) => <MenuItem key={l.code} value={l.code}>{l.name}</MenuItem>)}
                 </TextField>
+                <TextField select label={cfg.isTransfer ? 'From bin' : 'Bin'} value={dialog.form.bin} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, bin: e.target.value } })} fullWidth helperText="Leave as Default to use the item's home bin.">
+                  <MenuItem value="">(Default)</MenuItem>
+                  {(binsByLoc[dialog.form.locationCode] || []).map((b) => <MenuItem key={b.bin_code} value={b.bin_code}>{b.bin_code}</MenuItem>)}
+                </TextField>
                 {cfg.isTransfer && (
-                  <TextField select label="To location" value={dialog.form.toCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, toCode: e.target.value } })} fullWidth>
+                  <TextField select label="To location" value={dialog.form.toCode} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, toCode: e.target.value, toBin: '' } })} fullWidth>
                     {locations.map((l) => <MenuItem key={l.code} value={l.code}>{l.name}</MenuItem>)}
+                  </TextField>
+                )}
+                {cfg.isTransfer && (
+                  <TextField select label="To bin" value={dialog.form.toBin} onChange={(e) => setDialog({ ...dialog, form: { ...dialog.form, toBin: e.target.value } })} fullWidth helperText="Leave as Default for the destination's home bin.">
+                    <MenuItem value="">(Default)</MenuItem>
+                    {(binsByLoc[dialog.form.toCode] || []).map((b) => <MenuItem key={b.bin_code} value={b.bin_code}>{b.bin_code}</MenuItem>)}
                   </TextField>
                 )}
                 {dlgConvs.length > 0 && (

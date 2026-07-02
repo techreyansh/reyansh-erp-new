@@ -29,8 +29,12 @@ async function rpc(fn, params) {
 const inventoryLedgerService = {
   resolveLocationCode,
 
+  // Bin is OPTIONAL on every wrapper — omit `binCode` and the RPC resolves the
+  // item's default bin (home bin, else the location DEFAULT), preserving the
+  // pre-bin behavior for every caller that doesn't pass one.
+
   /** Goods receipt — add stock at landed rate (weighted-average valuation). */
-  receive({ itemCode, qty, rate = null, locationCode, grnRef = null }) {
+  receive({ itemCode, qty, rate = null, locationCode, grnRef = null, binCode = null }) {
     return rpc('inv_receive', {
       p_item_code: itemCode,
       p_location_code: locationCode || resolveLocationCode(itemCode),
@@ -38,48 +42,54 @@ const inventoryLedgerService = {
       p_rate: rate,
       p_ref_id: grnRef,
       p_ref_type: 'grn',
+      p_bin_code: binCode,
     });
   },
 
   /** Issue stock to production / kitting (decrement). */
-  issue({ itemCode, qty, locationCode, ref = null, refType = 'work_order' }) {
+  issue({ itemCode, qty, locationCode, ref = null, refType = 'work_order', binCode = null }) {
     return rpc('inv_issue', {
       p_item_code: itemCode,
       p_location_code: locationCode || resolveLocationCode(itemCode),
       p_qty: qty,
       p_ref_id: ref,
       p_ref_type: refType,
+      p_bin_code: binCode,
     });
   },
 
   /** Dispatch finished goods (decrement). */
-  dispatch({ itemCode, qty, locationCode, ref = null }) {
+  dispatch({ itemCode, qty, locationCode, ref = null, binCode = null }) {
     return rpc('inv_dispatch', {
       p_item_code: itemCode,
       p_location_code: locationCode || resolveLocationCode(itemCode),
       p_qty: qty,
       p_ref_id: ref,
+      p_bin_code: binCode,
     });
   },
 
-  /** Cycle-count correction — set on-hand to an absolute counted value. */
-  adjust({ itemCode, newQty, locationCode, reason = 'cycle count' }) {
+  /** Cycle-count correction — set on-hand at a bin to an absolute counted value. */
+  adjust({ itemCode, newQty, locationCode, reason = 'cycle count', binCode = null }) {
     return rpc('inv_adjust', {
       p_item_code: itemCode,
       p_location_code: locationCode || resolveLocationCode(itemCode),
       p_new_qty: newQty,
       p_reason: reason,
+      p_bin_code: binCode,
     });
   },
 
-  /** Move stock between two locations (value carried). */
-  transfer({ itemCode, fromCode, toCode, qty, ref = null }) {
+  /** Move stock between two locations and/or bins (value carried). */
+  transfer({ itemCode, fromCode, toCode, qty, ref = null, fromBinCode = null, toBinCode = null }) {
     return rpc('inv_transfer', {
       p_item_code: itemCode,
       p_from_code: fromCode,
       p_to_code: toCode,
       p_qty: qty,
       p_ref_id: ref,
+      p_from_bin_code: fromBinCode,
+      p_to_bin_code: toBinCode,
     });
   },
 
@@ -119,12 +129,13 @@ const inventoryLedgerService = {
   /**
    * Unified inventory view for the desktop screen: merges balances with the
    * item master, locations, and the reorder threshold (now on ppc_items).
-   * One row per item x location with on-hand + value + status.
-   * Returns { rows, locations }.
+   * One row per item x location x BIN with on-hand + value + status. Reorder
+   * status is computed from the item's TOTAL on-hand (across bins/locations),
+   * not the single bin row. Returns { rows, locations }.
    */
   async getInventoryView() {
     const [balRes, itemRes, locRes, reorderRes, binRes, convRes] = await Promise.all([
-      supabase.from('inv_balance').select('item_id, location_id, on_hand, reserved, valuation_rate, stock_value, updated_at'),
+      supabase.from('inv_balance').select('item_id, location_id, bin_id, on_hand, reserved, valuation_rate, stock_value, updated_at'),
       supabase.from('ppc_items').select('id, code, name, item_type, uom, is_active, bin_id'),
       supabase.from('inv_location').select('id, code, name, kind'),
       supabase.from('ppc_items').select('id, reorder_point'),
@@ -146,6 +157,11 @@ const inventoryLedgerService = {
       const cur = convByItem.get(c.item_id);
       if (!cur || (c.is_default && !cur.is_default)) convByItem.set(c.item_id, c);
     });
+    // Item-total on-hand (across all bins/locations) for a correct reorder status.
+    const itemTotal = new Map();
+    (balRes.data || []).forEach((b) => {
+      itemTotal.set(b.item_id, (itemTotal.get(b.item_id) || 0) + (Number(b.on_hand) || 0));
+    });
 
     const rows = (balRes.data || []).map((b) => {
       const item = items.get(b.item_id) || {};
@@ -153,9 +169,10 @@ const inventoryLedgerService = {
       const onHand = Number(b.on_hand) || 0;
       const reservedQty = Number(b.reserved) || 0;
       const rp = reorder.get(b.item_id) || 0;
+      const total = itemTotal.get(b.item_id) || 0;
       let status = 'OK';
-      if (onHand <= 0) status = 'Stock-out';
-      else if (rp > 0 && onHand < rp) status = 'Reorder';
+      if (total <= 0) status = 'Stock-out';
+      else if (rp > 0 && total < rp) status = 'Reorder';
       const conv = convByItem.get(b.item_id);
       const altFactor = conv ? Number(conv.factor_to_base) || 0 : 0;
       return {
@@ -164,7 +181,8 @@ const inventoryLedgerService = {
         name: item.name || '',
         type: item.item_type || '',
         uom: item.uom || '',
-        binCode: bins.get(item.bin_id) || '',
+        binId: b.bin_id || '',
+        binCode: bins.get(b.bin_id) || '',
         altUom: conv ? conv.alt_uom : '',
         altFactor,
         altOnHand: altFactor > 0 ? onHand / altFactor : 0,
@@ -180,7 +198,9 @@ const inventoryLedgerService = {
         updatedAt: b.updated_at,
       };
     });
-    rows.sort((a, b) => (a.locationCode || '').localeCompare(b.locationCode) || (a.code || '').localeCompare(b.code));
+    rows.sort((a, b) => (a.locationCode || '').localeCompare(b.locationCode)
+      || (a.code || '').localeCompare(b.code)
+      || (a.binCode || '').localeCompare(b.binCode));
     return { rows, locations: (locRes.data || []) };
   },
 };
