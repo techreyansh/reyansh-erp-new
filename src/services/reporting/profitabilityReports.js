@@ -43,13 +43,15 @@ export function buildMonthlyVariance(summary) {
   const rows = (summary?.by_month || []).map((m) => ({
     month: m.month, revenue: inr(m.revenue), gross_profit: inr(m.gross_profit),
     contribution: m.contribution != null ? inr(m.contribution) : "—", gm: pct(m.gm_pct),
+    net_profit: m.net_profit != null ? inr(m.net_profit) : "—",
+    net_margin: pct(m.net_margin),
   }));
   return {
     title: "Monthly Profit — Revenue / GP / Contribution",
     subtitle: `Reyansh International · ${rangeLine(summary?.range)}`,
     sections: [
       { key: "by_month", title: "By month",
-        columns: [{ key: "month", label: "Month" }, { key: "revenue", label: "Revenue", align: "right" }, { key: "gross_profit", label: "Gross Profit", align: "right" }, { key: "contribution", label: "Contribution", align: "right" }, { key: "gm", label: "GM %", align: "right" }],
+        columns: [{ key: "month", label: "Month" }, { key: "revenue", label: "Revenue", align: "right" }, { key: "gross_profit", label: "Gross Profit", align: "right" }, { key: "contribution", label: "Contribution", align: "right" }, { key: "gm", label: "GM %", align: "right" }, { key: "net_profit", label: "Net Profit", align: "right" }, { key: "net_margin", label: "Net %", align: "right" }],
         rows },
     ],
   };
