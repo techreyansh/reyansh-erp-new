@@ -6,6 +6,8 @@ import {
   Paper,
   Chip,
   Stack,
+  Snackbar,
+  Alert,
   useTheme,
 } from '@mui/material';
 import {
@@ -18,6 +20,10 @@ import {
 import SalesOrderForm from './POForm';
 import SalesOrderList from './POList';
 import AIPurchaseOrderUpload from './AIPurchaseOrderUpload';
+import SalesOrderWizard from '../salesOrder/SalesOrderWizard';
+import { mapPoToWizardInitial } from '../../services/poToSalesOrder';
+import plm from '../../services/plmProductService';
+import { listClients, listProspects } from '../../services/crmPipelineService';
 
 const HOW_IT_WORKS = [
   {
@@ -50,29 +56,27 @@ const SalesOrderIngestion = () => {
   const theme = useTheme();
   const [salesFlowData, setSalesFlowData] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [formKey, setFormKey] = useState(0);
+  const [wizardInitial, setWizardInitial] = useState(null);
+  const [snack, setSnack] = useState(null);
+  const notify = (message, severity = 'success') => setSnack({ message, severity });
 
   const handleSalesOrderCreated = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  // AI extracted a PO → feed it into the form's existing prefill path and remount.
-  const handleAIApply = (po) => {
+  // AI extracted a PO → map it to the new Sales Order wizard (best-effort customer
+  // + product matching) and open it for human confirmation. Releasing the order
+  // spawns the O2D workflow (wf_create_instance) via salesOrderService.
+  const handleAIApply = async (po) => {
     if (!po) return;
-    const payload = {
-      salesFlowData: { LogId: po.po_number || 'AI-PO', CompanyName: po.buyer_name || '', leadDetails: {} },
-      newClient: {
-        clientCode: po.buyer_name || '',
-        products: (po.line_items || []).map((li) => ({
-          productCode: li.product_code || '',
-          productName: li.description || '',
-          quantity: Number(li.quantity) || 1,
-          price: Number(li.unit_price) || 0,
-        })),
-      },
-    };
-    try { sessionStorage.setItem('salesFlowForSO', JSON.stringify(payload)); } catch (e) { /* ignore */ }
-    setFormKey((k) => k + 1);
+    try {
+      const [cl, pr, pd] = await Promise.all([
+        listClients().catch(() => []), listProspects().catch(() => []), plm.listProducts().catch(() => []),
+      ]);
+      setWizardInitial(mapPoToWizardInitial(po, { products: pd, accounts: [...cl, ...pr] }));
+    } catch {
+      setWizardInitial(mapPoToWizardInitial(po, {}));
+    }
   };
 
   // Refresh the list when returning from a dispatch operation.
@@ -179,9 +183,19 @@ const SalesOrderIngestion = () => {
       {/* AI PO capture */}
       <AIPurchaseOrderUpload onApply={handleAIApply} />
 
+      {/* AI-extracted PO → new Sales Order wizard (prefilled, human confirms) */}
+      {wizardInitial && (
+        <SalesOrderWizard
+          initial={wizardInitial}
+          notify={notify}
+          onClose={() => setWizardInitial(null)}
+          onCreated={() => { setWizardInitial(null); setRefreshTrigger((p) => p + 1); }}
+        />
+      )}
+
       {/* Form */}
       <Box sx={{ mb: 3 }}>
-        <SalesOrderForm key={formKey} onSalesOrderCreated={handleSalesOrderCreated} />
+        <SalesOrderForm onSalesOrderCreated={handleSalesOrderCreated} />
       </Box>
 
       {/* List */}
@@ -243,6 +257,10 @@ const SalesOrderIngestion = () => {
           ))}
         </Box>
       </Paper>
+
+      <Snackbar open={!!snack} autoHideDuration={5000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        {snack ? <Alert severity={snack.severity} onClose={() => setSnack(null)} sx={{ width: '100%' }}>{snack.message}</Alert> : undefined}
+      </Snackbar>
     </Container>
   );
 };
