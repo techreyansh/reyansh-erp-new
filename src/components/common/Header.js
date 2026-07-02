@@ -713,7 +713,7 @@ const Header = ({ onMenuClick } = {}) => {
                     >
                       <Avatar
                         alt={user.name}
-                        src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
+                        src={profilePhoto || user.imageUrl || undefined}
                         sx={{
                           width: 32,
                           height: 32,
@@ -874,9 +874,11 @@ const Header = ({ onMenuClick } = {}) => {
                   >
                     <Avatar
                       alt={user.name}
-                      src={profilePhoto || user.imageUrl || "/static/images/avatar/2.jpg"}
+                      src={profilePhoto || user.imageUrl || undefined}
                       sx={{ width: 64, height: 64, mb: 1 }}
-                    />
+                    >
+                      {user.name?.charAt(0) || "U"}
+                    </Avatar>
                     <Typography variant="subtitle1">{user.name}</Typography>
                     <Typography variant="body2" color="textSecondary">
                       {userRole}
