@@ -19,6 +19,8 @@ import {
 } from 'recharts';
 import KPICard from '../../components/common/KPICard';
 import workflowEngineService from '../../services/workflowEngineService';
+import WorkflowAiChat from '../../components/workflow/WorkflowAiChat';
+import { WORKFLOW_AI_PRESETS } from '../../services/workflowAiService';
 
 const num = (v) => Number(v || 0).toLocaleString('en-IN');
 
@@ -194,6 +196,17 @@ export default function WorkflowControlTower() {
             </Table></TableContainer>
           )}
         </CardContent></Card>
+      </Box>
+
+      {/* AI assistant over the whole workflow portfolio */}
+      <Box sx={{ px: 3, pt: 2 }}>
+        <WorkflowAiChat
+          presets={WORKFLOW_AI_PRESETS}
+          getContext={() => data || {}}
+          title="Ask the workflow AI"
+          hint="Answered over every active order in the tower."
+          placeholder="Ask e.g. “Which orders are most at risk and why?”"
+        />
       </Box>
     </Box>
   );

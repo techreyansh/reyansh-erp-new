@@ -10,6 +10,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import workflowEngineService from '../../services/workflowEngineService';
+import WorkflowAiChat from '../../components/workflow/WorkflowAiChat';
+import { ORDER_AI_PRESETS } from '../../services/workflowAiService';
 import {
   STATUS_COLOR, INSTANCE_COLOR, waitingOn, isOverdue, isManualStage,
   stageBlockers, KIND_COLOR, KIND_LABEL,
@@ -176,6 +178,16 @@ export default function OrderWorkflowTimeline() {
               ))}
             </Box>
           </Paper>
+
+          <Box sx={{ mt: 2 }}>
+            <WorkflowAiChat
+              presets={ORDER_AI_PRESETS}
+              getContext={() => ({ instance: data.instance, stages: data.stages, deps: data.deps, activity })}
+              title="Ask about this order"
+              hint="Answered over this order's stages and activity."
+              placeholder="Ask e.g. “Why is this order stuck and what would unblock it?”"
+            />
+          </Box>
         </>
       )}
     </Box>
