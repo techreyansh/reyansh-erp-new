@@ -722,7 +722,7 @@ const DispatchForm = ({ onSuccess, onClose }) => {
         
         // Force a complete page refresh to ensure data is updated
         // Use window.location for a hard refresh instead of navigate
-        window.location.href = "/flow-management";
+        window.location.href = "/workflow/workboard";
         
         setBatches(batches.map((b) => ({ ...b, date: "" })));
         if (onSuccess) onSuccess();

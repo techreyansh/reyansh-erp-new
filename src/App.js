@@ -33,7 +33,6 @@ import ProfilePage from "./components/common/ProfilePage";
 import SettingsPage from "./components/common/SettingsPage";
 import HelpPage from "./components/common/HelpPage";
 import SalesOrderIngestion from "./components/poIngestion/POIngestion";
-import FlowManagement from "./components/flowManagement/FlowManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RootRedirect from "./components/auth/RootRedirect";
 import AccessDenied from "./components/auth/AccessDenied";
@@ -525,12 +524,6 @@ function AppContent() {
                   <Route path="/po-ingestion" element={
                     <ProtectedRouteGate>
                       <SalesOrderIngestion />
-                    </ProtectedRouteGate>
-                  } />
-                  
-                  <Route path="/flow-management" element={
-                    <ProtectedRouteGate>
-                      <FlowManagement />
                     </ProtectedRouteGate>
                   } />
                   
