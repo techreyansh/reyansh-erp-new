@@ -1,0 +1,379 @@
+# WhatsApp Marketing — Setup & Activation
+
+Outbound WhatsApp drip campaigns, modeled on the Email Campaigns module (see
+`EMAIL_CAMPAIGNS_SETUP.md`) but sent through a WhatsApp BSP (Meta Cloud API in
+V1) instead of Gmail.
+
+## Architecture at a glance
+
+| Piece | Where |
+|---|---|
+| Schema (9 tables + triggers + RPCs) | `supabase/migrations/20260701140000_whatsapp_marketing_schema.sql` |
+| RBAC module + RLS | `supabase/migrations/20260701150000_whatsapp_marketing_rbac.sql` |
+| Provider adapters | `supabase/functions/_shared/wa/registry.ts`, `meta.ts`, `types.ts` |
+| Personalization | `supabase/functions/_shared/wa/personalize.ts` |
+| Core send logic (shared) | `supabase/functions/_shared/wa/send.ts` — `sendOneWaMessage`, `composeMessagesForStep`, `recordEvent` |
+| Business-hours/working-days window | `supabase/functions/_shared/wa/schedule.ts` — `evaluateWaWindow` (IST, fixed +05:30) |
+| Send one message / step (HTTP) | `supabase/functions/wa-send` — thin wrapper around `_shared/wa/send.ts` |
+| Scheduler (cron tick) | `supabase/functions/wa-scheduler` — the heartbeat; see its header comment for the full tick algorithm |
+
+Sequence progression is driven by a DB trigger (`trg_wa_message_sent` /
+`wa_advance_enrollment_on_send`): whenever a `wa_messages` row flips to `sent`
+— by the scheduler's auto-send, a manual `wa-send` call, or the stale-`sending`
+recovery sweep — the enrollment advances to the next active step (or
+completes). Neither `wa-send` nor `wa-scheduler` reimplements this.
+
+The module is wired into the app shell (Task 12): nav item "WhatsApp Marketing"
+under the **Temporary** sidebar group → `/temp/whatsapp-marketing` (plain
+`ProtectedRouteGate`, gated by the `marketing` module key — see
+`src/config/moduleAccess.js`), rendering `src/pages/temp/WhatsAppMarketing.js`
+(tab shell: Dashboard · Campaigns · Audience · Monitor · Analytics · Settings).
+
+## Activation checklist (do these in order, on a fresh environment)
+
+1. Apply both migrations (§1 below) — schema, then RBAC/RLS.
+2. Deploy all **three** Edge Functions (§2) — `wa-send`, `wa-scheduler`,
+   `wa-webhook --no-verify-jwt`.
+3. Set the `SCHEDULER_SECRET` secret and schedule the cron tick (§3-4).
+4. Log in as CEO/super-admin, open **WhatsApp Marketing → Settings** (Provider
+   Settings is CEO/true-admin-only, gated on `canEdit('employees')`, not just
+   `marketing`-edit — see §8) and fill in the Meta Cloud API credentials, then
+   toggle "Set as active provider" and Save.
+5. Configure the Meta App Dashboard webhook subscription against the deployed
+   `wa-webhook` URL (§7).
+6. Note the `documents` storage-bucket caveat (§9) if campaign steps will
+   attach media.
+
+## 1. Apply the database migrations
+
+```bash
+cd ~/Desktop/reyansh-erp-new
+supabase db push        # or run the two migration files' SQL against your linked project
+```
+
+Confirms: 9 `wa_*` tables, RLS + `marketing` module registration, and the
+`trg_wa_message_sent` trigger.
+
+## 2. Deploy the Edge Functions
+
+All three functions must be deployed — `wa-webhook` is public (no user JWT,
+since Meta calls it directly) and needs `--no-verify-jwt`; the other two are
+called with the service-role key (scheduler, via cron) or from the
+authenticated app (`wa-send`, if ever invoked directly instead of solely by
+the scheduler):
+
+```bash
+supabase functions deploy wa-send
+supabase functions deploy wa-scheduler
+supabase functions deploy wa-webhook --no-verify-jwt
+```
+
+See §7 below for `wa-webhook`'s webhook-subscription setup in the Meta App
+Dashboard, which is required in addition to the deploy itself.
+
+## 3. Set Edge Function secrets
+
+```bash
+# Meta WhatsApp Cloud API credentials live per-row in wa_provider_settings.credentials
+# (set via the WhatsApp Marketing UI's Provider Settings screen, not an env var) —
+# nothing WhatsApp-specific needs a secret here.
+
+# Optional: lock the scheduler endpoint (recommended — same pattern as
+# email-scheduler / task-notify)
+supabase secrets set SCHEDULER_SECRET=$(openssl rand -hex 16)
+```
+
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected into Edge Functions
+automatically — no need to set them.
+
+## 4. Schedule the scheduler (pg_cron + pg_net)
+
+Following this repo's established convention (see `EMAIL_CAMPAIGNS_SETUP.md`
+§5 and `O2D_CUSTOMER_COMMS_SETUP.md` §3): cron scheduling is **not** committed
+as a migration because the `cron.schedule(...)` call embeds the service-role
+key in plaintext SQL. Run this once in the Supabase SQL editor, substituting
+your project ref, service-role key, and the `SCHEDULER_SECRET` from step 3:
+
+```sql
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- tick every 5 minutes
+select cron.schedule(
+  'wa-scheduler-tick',
+  '*/5 * * * *',
+  $$
+  select net.http_post(
+    url     := 'https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-scheduler',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer <SUPABASE_SERVICE_ROLE_KEY>',
+      'x-scheduler-secret', '<SCHEDULER_SECRET or remove this line>'
+    ),
+    body    := '{}'::jsonb
+  );
+  $$
+);
+```
+
+To change cadence or stop it: `select cron.unschedule('wa-scheduler-tick');`
+then re-create if needed. You can also invoke it manually to force a tick:
+
+```bash
+curl -s -X POST 'https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-scheduler' \
+  -H 'Content-Type: application/json' \
+  -H 'x-scheduler-secret: <SCHEDULER_SECRET>'
+```
+
+## 5. What one tick does
+
+See the header comment in `supabase/functions/wa-scheduler/index.ts` for the
+full algorithm; summary:
+
+1. Loads up to 50 `wa_enrollments` where `status='active' and next_send_at <= now()`,
+   joined to `campaign` and `contact`.
+2. Skips enrollments whose campaign isn't `status='running'`; flips the
+   enrollment to `opted_out` if the contact has `opt_out=true`.
+3. Evaluates the campaign's business-hours/working-days window
+   (`_shared/wa/schedule.ts`, IST). If outside the window, pushes
+   `next_send_at` forward to the next open instant and does **not** send.
+4. Resolves the next active step (smallest `step_order > current_step` with
+   `is_active=true` — the same rule the DB trigger uses) and, if found,
+   composes + sends via the shared `_shared/wa/send.ts` functions in-process
+   (no HTTP hop). If no next step exists, marks the enrollment `completed`.
+5. **Stale-`sending` sweep**: any `wa_messages` row stuck at `status='sending'`
+   for more than 5 minutes (a crashed mid-flight send) is re-driven through
+   `sendOneWaMessage`, which reloads the row fresh and is a no-op if it
+   already reached a terminal sent/delivered/read state.
+6. **Sandbox progression**: `wa_provider_settings.mode='sandbox'` sends are
+   synthesized as `sent` synchronously (with a `sandbox-<uuid>`
+   `provider_message_id`) but never reach `delivered`/`read` on their own.
+   This tick progresses them `sent -> delivered -> read` with a small
+   per-message randomized delay (15-90s then +30-240s) so the Live Monitor
+   demo looks realistic across ticks instead of jumping to a terminal state.
+
+Enrollment advancement after a real send success is handled entirely by the
+`wa_advance_enrollment_on_send` DB trigger — the scheduler does not set
+`current_step`/`next_send_at` on a successful send itself.
+
+## 6. Manual verification recipe (no live deploy required to read; needs one to run)
+
+`scripts/wa_scheduler_smoke.js` builds a disposable sandbox provider +
+contact + 2-step campaign + enrollment with `next_send_at` in the past,
+invokes the deployed `wa-scheduler` function once, and asserts:
+
+- the first step's message sends (sandbox mode, so synchronously `sent`)
+- the enrollment's `current_step`/`next_send_at` advance to the second step
+  (proving the trigger + scheduler interplay works)
+- a campaign with a business-hours window that excludes "now" gets its
+  `next_send_at` pushed forward instead of sending
+
+Run it (requires the functions to be deployed and env vars set):
+
+```bash
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+WA_SCHEDULER_URL=https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-scheduler \
+SCHEDULER_SECRET=... \
+node scripts/wa_scheduler_smoke.js
+```
+
+Add `--keep` to leave the dummy rows in place for inspection. All rows are
+tagged and cleaned up in a `finally` block otherwise.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Enrollments never advance | Campaign must be `status='running'`, contact must not be `opt_out`, and "now" (IST) must be inside `business_hours_start`/`end` and (if `working_days_only`) a weekday. |
+| Messages stuck at `sending` | Should self-heal within ~1-2 ticks via the stale-`sending` sweep (5 min threshold); check the target provider (`meta_cloud`) isn't erroring/timing out on every attempt. |
+| Sandbox messages never reach `read` | Confirm `wa-scheduler` is actually being ticked by cron (`select * from cron.job;` / `cron.job_run_details`) — progression only happens on a tick, there's no background timer. |
+| 401 from `wa-scheduler` | `SCHEDULER_SECRET` is set on the function but the caller (cron SQL or curl) isn't sending the matching `x-scheduler-secret` header. |
+
+## 7. `wa-webhook` (Task 6): inbound messages + delivery-status callbacks
+
+`supabase/functions/wa-webhook/index.ts` is the receiver Meta calls for both the
+one-time webhook subscription handshake (`GET`) and every inbound message /
+delivery-status event afterward (`POST`). It never hand-parses Meta's payload
+shape — it calls `PROVIDERS['meta_cloud'].verifyWebhookGet()` /
+`.parseWebhookEvents()` from `_shared/wa/meta.ts` (Task 4), same as `wa-send`
+only ever calls the adapter, never `graph.facebook.com` directly.
+
+### Deploy (public — Meta can't hold a Supabase JWT)
+
+```bash
+supabase functions deploy wa-webhook --no-verify-jwt
+```
+
+This mirrors `email-track-open`, this repo's other public/unauthenticated
+Edge Function.
+
+### Store the verify token
+
+Meta's webhook handshake checks `hub.verify_token` against a secret you pick.
+The already-committed `meta_cloud` adapter (`_shared/wa/meta.ts`,
+`verifyWebhookGet`) reads it from `credentials.verify_token` — **not**
+`webhook_verify_token` — so set it on the active `meta_cloud`
+`wa_provider_settings` row accordingly, e.g.:
+
+```sql
+update public.wa_provider_settings
+set credentials = credentials || jsonb_build_object('verify_token', '<a-secret-you-choose>')
+where provider_key = 'meta_cloud' and is_active = true;
+```
+
+### Meta App Dashboard webhook subscription steps
+
+1. Go to your Meta App Dashboard → your app → **WhatsApp → Configuration**.
+2. Under **Webhook**, click **Edit** and set:
+   - **Callback URL**: `https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-webhook`
+   - **Verify token**: the same value you stored in `credentials.verify_token` above.
+3. Click **Verify and save** — Meta issues a `GET` to the callback URL with
+   `hub.mode=subscribe&hub.verify_token=...&hub.challenge=...`; the function
+   must echo back the raw `hub.challenge` value with a `200` for Meta to
+   accept the subscription.
+4. Under **Webhook fields**, subscribe to **`messages`** (this single field
+   covers both inbound message payloads and outbound delivery-status
+   callbacks — Meta multiplexes both through `entry[].changes[].value`, one
+   with a `messages[]` array, the other with a `statuses[]` array). No other
+   field is needed for this module.
+
+### What one event does
+
+- **Status callback** (`sent`/`delivered`/`read`/`failed`, matched by
+  `provider_message_id`): updates the matching `wa_messages` row's `status`
+  and the corresponding timestamp column (`sent_at`/`delivered_at`/`read_at`/
+  `failed_at`), guarded so a late/duplicate/out-of-order webhook never
+  regresses an already-more-advanced status. Always inserts a `wa_events`
+  row (`direction='outbound'`) regardless of whether a matching message was found.
+- **Inbound message** (`reply`): inserts a `wa_events` row
+  (`direction='inbound', type='reply'`) with a best-effort `contact_id` match
+  against `wa_contacts.whatsapp_number` (case-insensitive). This is raw event
+  logging only — no inbox/conversation UI in V1 (that's V1.5).
+- The handler **always responds `200`**, even on a malformed body or a
+  per-event processing failure (logged, not thrown) — Meta retries
+  aggressively on non-200/timeout.
+
+### Manual verification recipe (needs a live deploy to actually run)
+
+```bash
+FN_URL='https://azwdxgahmdgccfimhtmm.supabase.co/functions/v1/wa-webhook'
+
+# 1. GET handshake (replace <verify_token> with the value stored in
+#    credentials.verify_token on the active meta_cloud row)
+curl -s "$FN_URL?hub.mode=subscribe&hub.verify_token=<verify_token>&hub.challenge=12345"
+# expected: HTTP 200, body exactly "12345" (no quotes, no JSON wrapper)
+
+# 2. POST a status callback (pick a provider_message_id that exists on a
+#    wa_messages row, e.g. one produced by scripts/wa_scheduler_smoke.js)
+curl -s -X POST "$FN_URL" -H 'Content-Type: application/json' -d '{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "15551234567", "phone_number_id": "PHONE_NUMBER_ID" },
+        "statuses": [{
+          "id": "wamid.EXAMPLE_PROVIDER_MESSAGE_ID",
+          "status": "delivered",
+          "timestamp": "1751500000",
+          "recipient_id": "919876543210"
+        }]
+      },
+      "field": "messages"
+    }]
+  }]
+}'
+# expected: HTTP 200, body "EVENT_RECEIVED"; wa_messages row with that
+# provider_message_id flips to status='delivered' + delivered_at set; a new
+# wa_events row (direction='outbound', type='delivered') is inserted.
+
+# 3. POST an inbound message
+curl -s -X POST "$FN_URL" -H 'Content-Type: application/json' -d '{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "15551234567", "phone_number_id": "PHONE_NUMBER_ID" },
+        "contacts": [{ "profile": { "name": "Test Contact" }, "wa_id": "919876543210" }],
+        "messages": [{
+          "from": "919876543210",
+          "id": "wamid.EXAMPLE_INBOUND_ID",
+          "timestamp": "1751500100",
+          "text": { "body": "Sounds good, thanks!" },
+          "type": "text"
+        }]
+      },
+      "field": "messages"
+    }]
+  }]
+}'
+# expected: HTTP 200, body "EVENT_RECEIVED"; a new wa_events row
+# (direction='inbound', type='reply', from_number='919876543210') is
+# inserted, with contact_id populated if a wa_contacts row's
+# whatsapp_number matches "919876543210" case-insensitively.
+```
+
+These payloads were hand-crafted to match the shape `_shared/wa/meta.ts`'s
+`parseWebhookEvents` already expects (`entry[].changes[].value.statuses[]` /
+`.messages[]`) — they were not captured from a live Meta send, since this
+environment has no Meta Business/App Dashboard access. Running them against
+the actually-deployed function and confirming the `wa_messages`/`wa_events`
+side effects, and completing the real Meta Dashboard handshake in step 1
+above, both require the user's own Supabase project + Meta App Dashboard
+access and have not been executed from this environment.
+
+## 8. `wa_provider_settings` — fields to fill in via the UI (Task 12)
+
+Open **WhatsApp Marketing → Settings** (`ProviderSettings.js`) while logged in
+as CEO/super-admin — this screen is gated on `usePermissions().canEdit('employees')`,
+*not* the plain `marketing` module permission, matching the RLS on
+`wa_provider_settings` (single `is_super_admin()`-only policy — a
+`marketing`-edit-only role literally cannot read/write this table). Fields on
+the form and the **exact** `wa_provider_settings.credentials` jsonb keys they
+write (confirmed by reading `supabase/functions/_shared/wa/meta.ts`, the only
+real adapter in V1 — do **not** rename any of these, the edge functions read
+these precise keys):
+
+| UI field | `credentials` key | Read by |
+|---|---|---|
+| Access Token | `access_token` | `MetaCloudApiAdapter.post()` (send) |
+| Phone Number ID | `phone_number_id` | `MetaCloudApiAdapter.post()` (send) |
+| Webhook Verify Token | `verify_token` | `MetaCloudApiAdapter.verifyWebhookGet()` (webhook GET handshake) |
+| Business Account ID (WABA ID) | `waba_id` | captured for completeness; not read by any send/webhook path today |
+
+Non-credentials fields (plain columns, not inside `credentials`): **Label**
+(`label`), **Sender number** (`sender_number`), **Mode** — Sandbox vs Live
+(`mode`), **Rate limit / minute** (`rate_limit_per_minute`), and the
+**"Set as active provider"** switch (`is_active` — enforced single-active via
+`waProviderService.setActive()`, which clears every other row before flipping
+one on). "Test connection" is a readiness check only (required fields
+present) — it does not call Meta's API; real delivery only happens through
+the `wa-send` function / scheduler tick.
+
+## 9. `documents` storage-bucket caveat (campaign media attachments)
+
+Campaign step media (images/video/documents attached via `wa_campaign_media`)
+is stored in the same `documents` Supabase Storage bucket the rest of the app
+uses (CRM attachments, NPD documents, etc). Task 3 could not confirm whether
+this bucket is flagged **public** or **private** in this environment (no way
+to run `select public from storage.buckets where id='documents'` from here).
+Both `waMediaService.mediaUrl()` (frontend) and `freshMediaLink()` in
+`supabase/functions/_shared/wa/send.ts` (server-side, immediately before every
+`adapter.sendMedia` call) therefore default to `createSignedUrl(...)` with a
+short TTL rather than `getPublicUrl()` — this works correctly regardless of
+the bucket's actual flag, at the cost of a signed URL that expires (6h
+server-side; the scheduler always mints a fresh one right before sending, so
+this is not a live concern for scheduled sends). **Before going live**, verify
+the actual bucket flag once against the target project:
+
+```sql
+select id, public from storage.buckets where id = 'documents';
+```
+
+If it turns out to be `public = true`, switching either call site to
+`getPublicUrl()` is a safe, optional simplification (not required — the
+signed-URL path already works either way) — see the one-line comment at
+`freshMediaLink()` for how.

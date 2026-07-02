@@ -38,6 +38,7 @@ import {
   InsightsOutlined,
   AutoAwesomeOutlined,
   AccountTreeOutlined,
+  WhatsApp,
 } from "@mui/icons-material";
 
 const ic = (Comp) => <Comp sx={{ fontSize: 20 }} />;
@@ -200,6 +201,7 @@ export const NAV_GROUPS = [
     icon: ic(BuildOutlined),
     items: [
       { label: "Cable Planning Workbench", path: "/temp/cable-planning", icon: ic(CableOutlined) },
+      { label: "WhatsApp Marketing", path: "/temp/whatsapp-marketing", icon: ic(WhatsApp) },
     ],
   },
   {

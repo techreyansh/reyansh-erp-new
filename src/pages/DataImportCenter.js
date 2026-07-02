@@ -10,6 +10,7 @@ const MODULE_LABELS = {
   crm: "CRM",
   inventory: "Inventory",
   production: "Production",
+  marketing: "WhatsApp Marketing",
 };
 
 /**
