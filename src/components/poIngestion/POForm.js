@@ -37,10 +37,10 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
     return uniqueId;
   };
   
-  const initialFormState = { 
-    salesOrderNumber: '', 
+  const initialFormState = {
+    salesOrderNumber: '',
     clientCode: '',
-    assignedTo: 'mock.customer relations manager@reyanshelectronics.com'
+    assignedTo: user?.email || ''
   };
   const initialItemState = {
     itemName: '', productDesc: '', productCode: '',
@@ -84,7 +84,7 @@ const SalesOrderForm = ({ onSalesOrderCreated }) => {
                 ...prev,
                 poNumber: `SO-${flowData.LogId}-${Date.now()}`,
                 clientCode: newClient?.clientCode || leadDetails?.CompanyName || flowData.CompanyName || '',
-                assignedTo: 'mock.customer relations manager@reyanshelectronics.com'
+                assignedTo: user?.email || ''
               }));
               
               // If there's a new client, set it as selected client
